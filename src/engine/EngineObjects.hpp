@@ -2,13 +2,19 @@
 
 #include <vector>
 #include <memory>
-#include "engine/ecs/ecs.hpp"
+#include "ecs/ecs.hpp"
+
+namespace ecs { class ECSEngine; }
 
 namespace engine
 {
 
 class EngineObject
 {
+	friend class Engine;
+
+protected:
+	ecs::ECSEngine *_ecs;
 private:
 	std::vector<EngineObject*> _subobjects;
 
@@ -34,6 +40,20 @@ public:
 		_subobjects.push_back(std::move(obj));
 
 		return ret;
+	}
+
+	template <typename T, typename ... ArgTypes>
+	ecs::IEntity<T, ArgTypes...> *CreateEntity()
+	{
+		return _ecs->GetEntityManager()->CreateEntity<T, ArgTypes...>();
+	}
+
+	template <typename ... ArgTypes>
+	std::vector<ecs::IEntity<ArgTypes...>*> GetEntities()
+	{
+		if (_ecs == nullptr)
+			abort();
+		return _ecs->GetEntityManager()->GetEntities<ArgTypes...>();
 	}
 };
 

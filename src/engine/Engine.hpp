@@ -55,8 +55,13 @@ public:
 	template <typename T, typename ... ArgTypes>
 	[[nodiscard]] T *CreateEngineObject(ArgTypes... args)
 	{
+		static_assert(std::is_base_of<EngineObject, T>::value && !std::is_same<EngineObject, T>::value,
+			"T must be derived from EngineObject");
+
 		auto object = std::make_unique<T>(std::forward<ArgTypes>(args)...);
 		auto ret = object.get();
+
+		object->_ecs = &_ecs;
 
 		_engineObjects.push_back(std::move(object));
 

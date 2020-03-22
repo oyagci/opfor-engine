@@ -1,9 +1,11 @@
 #include "Engine.hpp"
 #include "WorldObject.hpp"
 
+using namespace engine;
+
 int main()
 {
-	auto worldObject = engine::Engine::Instance().CreateEngineObject<WorldObject>();
+	auto worldObject = Engine::Instance().CreateEngineObject<WorldObject>();
 	(void)worldObject;
 	return engine::Engine::Instance().Run();
 }
