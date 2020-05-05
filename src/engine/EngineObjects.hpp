@@ -11,10 +11,9 @@ namespace engine
 
 class EngineObject
 {
-	friend class Engine;
-
 protected:
 	ecs::ECSEngine *_ecs;
+
 private:
 	std::vector<EngineObject*> _subobjects;
 
