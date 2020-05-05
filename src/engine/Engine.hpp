@@ -65,6 +65,15 @@ public:
 
 		return ret;
 	}
+
+	template <typename T, typename ... ArgTypes>
+	void CreateComponentSystem(ArgTypes... args)
+	{
+		static_assert(std::is_base_of<ecs::ComponentSystem, T>::value && !std::is_same<ecs::ComponentSystem, T>::value,
+			"T must be derived from EngineObject");
+
+		_ecs.GetSystemManager()->InstantiateSystem<T>(std::forward(args)...);
+	}
 };
 
 }

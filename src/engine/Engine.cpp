@@ -43,14 +43,14 @@ int Engine::Run()
 
 		float deltaTime = Time::instance().getDeltaTime();
 
-		_display->update();
-		_display->updateInputs();
 		_camera->update();
 		_ecs.Update(deltaTime);
 
+		_display->update();
+		_display->updateInputs();
+
 		_ui->update();
 		_ui->render();
-
 	}
 
 	return 0;
