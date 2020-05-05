@@ -19,6 +19,7 @@ private:
 	std::vector<EngineObject*> _subobjects;
 
 public:
+	EngineObject(ecs::ECSEngine *engine) : _ecs(engine) {}
 	virtual ~EngineObject() {}
 
 	virtual void Update() {}
@@ -51,8 +52,6 @@ public:
 	template <typename ... ArgTypes>
 	std::vector<ecs::IEntity<ArgTypes...>*> GetEntities()
 	{
-		if (_ecs == nullptr)
-			abort();
 		return _ecs->GetEntityManager()->GetEntities<ArgTypes...>();
 	}
 };

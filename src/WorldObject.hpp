@@ -9,7 +9,7 @@ private:
 	ecs::IEntity<MeshComponent> *TestMesh;
 
 public:
-	WorldObject()
+	WorldObject(ecs::ECSEngine *engine) : engine::EngineObject(engine)
 	{
 		TestMesh = CreateEntity<MeshComponent>();
 
@@ -31,7 +31,7 @@ public:
 		}
 		meshComponent.mesh.build();
 
-		TestMesh->SetComponentData<MeshComponent>(meshComponent);
+		TestMesh->SetComponentData<MeshComponent>(std::move(meshComponent));
 	}
 
 	void Update() override

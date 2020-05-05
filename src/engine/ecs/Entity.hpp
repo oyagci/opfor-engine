@@ -86,6 +86,13 @@ public:
 	}
 
 	template <typename U>
+	void SetComponentData(U &&data)
+	{
+		static_assert(std::is_base_of<IComponentBase, U>::value, "typename U must de derived from IComponentBase");
+		GetComponent<U>() = std::move(data);
+	}
+
+	template <typename U>
 	U const &GetComponentData() const
 	{
 		static_assert(std::is_base_of<IComponentBase, U>::value, "typename U must de derived from IComponentBase");
