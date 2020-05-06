@@ -79,16 +79,22 @@ public:
 	{
 	}
 
-	/* An EntityManager's should be unique */
+	/* An EntityManager should be unique */
 	EntityManager(EntityManager const &) = delete;
 	void operator=(EntityManager const &) = delete;
 
+	///
+	/// Create an entity with the components given in parameter
+	///
 	template <typename ... Types>
 	IEntity<Types...> *CreateEntity()
 	{
 		return Manager.CreateEntity<Types...>();
 	}
 
+	///
+	/// Get a vector of entities that contains the list of components given in parameter
+	///
 	template <typename ... Types>
 	std::vector<IEntity<Types...>*> GetEntities()
 	{

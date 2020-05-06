@@ -24,6 +24,9 @@ public:
 	virtual ~ISystemBase() {}
 	virtual void OnUpdate(float deltaTime) = 0;
 
+	///
+	/// Wrapper to call EntityManager::GetEntities
+	///
 	template <typename ... Components>
 	std::vector<IEntity<Components...>*> GetEntities()
 	{

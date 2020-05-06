@@ -22,6 +22,9 @@ TypeIndex const GetTypeIndex()
 class IEntityBase
 {
 protected:
+	///
+	/// Check if the class U is an interface of IComponentBase
+	///
 	template <typename U>
 	static bool constexpr is_component_base()
 	{
@@ -34,6 +37,9 @@ protected:
 		return std::is_base_of<IComponentBase, U>::value && is_component_base<V, UTypes...>();
 	}
 
+	///
+	/// Create a component of type U and add it to the list of components for that make up the entity
+	///
 	template <typename U>
 	void RegisterComponents()
 	{
@@ -47,6 +53,9 @@ protected:
 		RegisterComponents<V, UTypes...>();
 	}
 
+	///
+	/// Get a reference to the component of type U
+	///
 	template <typename U>
 	U &GetComponent()
 	{
@@ -58,11 +67,15 @@ protected:
 	}
 
 protected:
+	/// The entity's components
 	std::unordered_map<TypeIndex, std::unique_ptr<IComponentBase>> Components;
 
 public:
 	virtual ~IEntityBase() = default;
 
+	///
+	/// Check if the entity has the component U
+	///
 	template <typename U>
 	bool HasComponents() const
 	{
@@ -78,6 +91,9 @@ public:
 			HasComponents<V, UTypes...>();
 	}
 
+	///
+	/// Modify the data of the component U
+	///
 	template <typename U>
 	void SetComponentData(U &data)
 	{
@@ -85,6 +101,9 @@ public:
 		GetComponent<U>() = data;
 	}
 
+	///
+	/// Modify the data of the component U
+	///
 	template <typename U>
 	void SetComponentData(U &&data)
 	{
@@ -92,6 +111,9 @@ public:
 		GetComponent<U>() = std::move(data);
 	}
 
+	///
+	/// Get a const reference to the data of component U
+	///
 	template <typename U>
 	U const &GetComponentData() const
 	{
