@@ -43,7 +43,7 @@ public:
 
 		_shader.bind();
 
-		for (auto &m : meshes) {
+		for (auto m : meshes) {
 			auto &data = m->GetComponentData<MeshComponent>();
 
 			data.mesh.draw();

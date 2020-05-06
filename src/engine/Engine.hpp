@@ -74,6 +74,12 @@ public:
 
 		_ecs.GetSystemManager()->InstantiateSystem<T>(std::forward(args)...);
 	}
+
+	template <typename ... ArgTypes>
+	[[nodiscard]] ecs::IEntity<ArgTypes...> *CreateEntity()
+	{
+		return _ecs.GetEntityManager()->CreateEntity<ArgTypes...>();
+	}
 };
 
 }

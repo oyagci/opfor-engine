@@ -23,13 +23,13 @@ class EntityManager_Impl
 private:
 	/* Container of managed components */
 	std::vector<std::shared_ptr<IComponentBase>> Components;
-	std::map<TypeIndex, std::shared_ptr<IEntityBase>> Entities;
+	std::vector<std::shared_ptr<IEntityBase>> Entities;
 
 	EntityManager_Impl()
 	{
 	};
 
-	/* EntityManager's should be unique */
+	/* EntityManager should be unique */
 	EntityManager_Impl(EntityManager_Impl const &) = delete;
 	void operator=(EntityManager_Impl const &) = delete;
 
@@ -41,20 +41,28 @@ private:
 
 		auto entity = std::make_shared<IEntity<T, Types...>>();
 
-		Entities[GetTypeIndex<IEntity<T, Types...>>()] = entity;
+		Entities.push_back(entity);
 
 		return entity.get();
 	}
 
+	///
+	/// Get a vector of non-owned pointers matching the specified list of components
+	/// there should be in each element
+	///
 	template <typename... Types>
 	std::vector<IEntity<Types...>*> GetEntities()
 	{
 		std::vector<IEntity<Types...>*> entities;
 
-		for (auto &pair : Entities) {
-			auto e = pair.second.get();
+		// Extract matching entities and put them in the vector
+		for (auto &e : Entities) {
 			if (e->HasComponents<Types...>()) {
-				entities.push_back(dynamic_cast<IEntity<Types...>*>(e));
+				// We can reinterpret_cast the pointer to any IEntity<...> because
+				// the type information is only relevant on the object's construction
+				// so there should be no problem as long as the components are present
+				auto ptr = reinterpret_cast<IEntity<Types...>*>(e.get());
+				entities.push_back(ptr);
 			}
 		}
 

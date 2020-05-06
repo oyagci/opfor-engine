@@ -33,8 +33,4 @@ public:
 
 		TestMesh->SetComponentData<MeshComponent>(std::move(meshComponent));
 	}
-
-	void Update() override
-	{
-	}
 };
