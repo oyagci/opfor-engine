@@ -6,8 +6,15 @@
 class Texture
 {
 public:
+	enum TextureType {
+		Tex_Diffuse,
+		Tex_Specular,
+		Tex_Normal,
+		Tex_Bump,
+	};
+public:
 	Texture() = delete;
-	Texture(std::string const &name);
+	Texture(std::string const &name, TextureType type);
 	Texture(Texture &&);
 	~Texture();
 
@@ -28,4 +35,5 @@ private:
 	int _nChannel;
 
 	GLuint _glId;
+	TextureType _type;
 };

@@ -37,6 +37,7 @@ srcs = [
   'src/engine/ui/UI.cpp',
   'src/engine/ui/SceneComponent.cpp',
   'src/engine/ui/UIScene.cpp',
+  'src/engine/assimp/Model.cpp',
 ]
 
 cmake = import('cmake')
@@ -49,6 +50,7 @@ deps = [
   dependency('threads', required : true),
   dependency('GL', required : true),
   dependency('openal', required : true),
+  dependency('assimp', required: true),
   meson.get_compiler('cpp').find_library('dl'),
   meson.get_compiler('cpp').find_library('m'),
 ]

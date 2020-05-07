@@ -1,7 +1,7 @@
 #include "Texture.hpp"
 #include "stb_image.h"
 
-Texture::Texture(std::string const &name) : _name(name)
+Texture::Texture(std::string const &name, TextureType type) : _name(name)
 {
 	glGenTextures(1, &_glId);
 }

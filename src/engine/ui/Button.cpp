@@ -15,13 +15,13 @@ void Button::setup(glm::vec2 size, Anchor anchorPoint)
 		{ GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE },
 		{ GL_TEXTURE_MIN_FILTER, GL_NEAREST },
 		{ GL_TEXTURE_MAG_FILTER, GL_NEAREST }
-	});
+	}, Texture::TextureType::Tex_Diffuse);
 	TextureManager::instance().createTexture("ButtonHovering", "img/button_hover.png", {
 		{ GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE },
 		{ GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE },
 		{ GL_TEXTURE_MIN_FILTER, GL_NEAREST },
 		{ GL_TEXTURE_MAG_FILTER, GL_NEAREST }
-	});
+	}, Texture::TextureType::Tex_Diffuse);
 
 	setAnchor(anchorPoint);
 	setOrigin(Origin::Center);
