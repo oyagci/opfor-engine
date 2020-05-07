@@ -48,6 +48,7 @@ lazy::graphics::Mesh Model::processMesh(aiMesh *mesh, const aiScene *scene)
 			glm::vec2 tex;
 			tex.x = mesh->mTextureCoords[0][i].x;
 			tex.y = mesh->mTextureCoords[0][i].y;
+			engineMesh.addUv(tex);
 		}
 	}
 
@@ -60,9 +61,12 @@ lazy::graphics::Mesh Model::processMesh(aiMesh *mesh, const aiScene *scene)
 		}
 	}
 
-	if (mesh->mMaterialIndex >= 0) {
+	// Textures
+	if (mesh->mMaterialIndex > 0) {
 		aiMaterial *material = scene->mMaterials[mesh->mMaterialIndex];
 		auto textures = loadMaterialTextures(material, aiTextureType_DIFFUSE, Texture::TextureType::Tex_Diffuse);
+
+		_textures.insert(_textures.end(), textures.begin(), textures.end());
 	}
 
 	engineMesh.build();

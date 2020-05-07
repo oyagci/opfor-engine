@@ -3,6 +3,7 @@
 #include "ecs/System.hpp"
 #include "MeshComponent.hpp"
 #include "lazy.hpp"
+#include "TextureManager.hpp"
 
 class MeshRendererSystem : public ecs::ComponentSystem
 {
@@ -44,8 +45,18 @@ public:
 
 		_shader.bind();
 
+		model = glm::rotate(model, glm::radians(0.3f), glm::vec3(0.0f, 1.0f, 0.0f));
+		_shader.setUniform4x4f("modelMatrix", model);
+
 		for (auto m : meshes) {
 			auto &data = m->GetComponentData<MeshComponent>();
+
+			// Bind each texture
+			size_t currentTexture = 0;
+			for (auto &t : data.textures) {
+				TextureManager::instance().bind(t, currentTexture);
+				currentTexture++;
+			}
 
 			data.mesh.draw();
 		}

@@ -18,16 +18,20 @@ int main()
 
 	using BackpackMesh = ecs::IEntity<MeshComponent>;
 
-	std::vector<BackpackMesh*> meshes;
+	std::vector<BackpackMesh*> backpackMeshes;
 
-	for (auto &m : backpack.getMeshes()) {
+	std::vector<lazy::graphics::Mesh> &meshes = backpack.getMeshes();
+	std::vector<std::string> textures = backpack.getTextures();
+
+	for (auto &m : meshes) {
 		BackpackMesh *b = engine.CreateEntity<MeshComponent>();
 
 		MeshComponent comp;
 		comp.mesh = std::move(m);
+		comp.textures = std::vector<std::string>(textures);
 		b->SetComponentData<MeshComponent>(std::move(comp));
 
-		meshes.push_back(b);
+		backpackMeshes.push_back(b);
 	}
 
 	return engine::Engine::Instance().Run();

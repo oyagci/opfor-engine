@@ -21,6 +21,10 @@ public:
 		return _meshes;
 	}
 
+	std::vector<std::string> &getTextures() {
+		return _textures;
+	}
+
 private:
 	void loadModel(std::string path);
 	void processNode(aiNode *node, const aiScene *scene);
@@ -31,6 +35,7 @@ private:
 		Texture::TextureType type);
 
 	std::vector<lazy::graphics::Mesh> _meshes;
+	std::vector<std::string> _textures;
 };
 
 }
