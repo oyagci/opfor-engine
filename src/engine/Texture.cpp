@@ -13,7 +13,7 @@ Texture::~Texture()
 
 bool Texture::load(std::string const &path)
 {
-	stbi_set_flip_vertically_on_load(1);
+	stbi_set_flip_vertically_on_load(0);
 	unsigned char *data = stbi_load(path.c_str(), &_width, &_height, &_nChannel, 0);
 
 	if (data) {
