@@ -31,9 +31,9 @@ void Model::processNode(aiNode *node, const aiScene *scene)
 	}
 }
 
-lazy::graphics::Mesh Model::processMesh(aiMesh *mesh, const aiScene *scene)
+Mesh Model::processMesh(aiMesh *mesh, const aiScene *scene)
 {
-	lazy::graphics::Mesh engineMesh;
+	Mesh engineMesh;
 
 	for (unsigned int i = 0; i < mesh->mNumVertices; i++) {
 		// Vertex Position
@@ -65,8 +65,9 @@ lazy::graphics::Mesh Model::processMesh(aiMesh *mesh, const aiScene *scene)
 	if (mesh->mMaterialIndex > 0) {
 		aiMaterial *material = scene->mMaterials[mesh->mMaterialIndex];
 		auto textures = loadMaterialTextures(material, aiTextureType_DIFFUSE, Texture::TextureType::Tex_Diffuse);
-
-		_textures.insert(_textures.end(), textures.begin(), textures.end());
+		for (auto &t : textures) {
+			engineMesh.addTexture(t);
+		}
 	}
 
 	engineMesh.build();
@@ -82,7 +83,7 @@ std::vector<std::string> Model::loadMaterialTextures(aiMaterial *material, aiTex
 	for (unsigned int i = 0; i < material->GetTextureCount(aitype); i++) {
 		aiString str;
 		material->GetTexture(aitype, i, &str);
-		std::string path = _directory.append("/").append(str.C_Str());
+		std::string path = _directory + "/" + str.C_Str();
 		textureNames.push_back(str.C_Str());
 
 		TextureManager::instance().createTexture(str.C_Str(), path, {
