@@ -1,9 +1,9 @@
 #include "Engine.hpp"
-#include "MeshRendererSystem.hpp"
 #include "engine/assimp/Model.hpp"
-#include "PlayerCameraComponent.hpp"
-#include "CameraMovementSystem.hpp"
-#include "TransformComponent.hpp"
+#include "systems/CameraMovementSystem.hpp"
+#include "systems/MeshRendererSystem.hpp"
+#include "components/PlayerCameraComponent.hpp"
+#include "components/TransformComponent.hpp"
 
 using namespace engine;
 

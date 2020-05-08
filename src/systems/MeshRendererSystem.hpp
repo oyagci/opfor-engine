@@ -1,10 +1,10 @@
 #pragma once
 
-#include "ecs/System.hpp"
-#include "MeshComponent.hpp"
 #include "lazy.hpp"
 #include "TextureManager.hpp"
-#include "PlayerCameraComponent.hpp"
+#include "ecs/System.hpp"
+#include "components/PlayerCameraComponent.hpp"
+#include "components/MeshComponent.hpp"
 
 class MeshRendererSystem : public ecs::ComponentSystem
 {

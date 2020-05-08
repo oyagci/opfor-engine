@@ -2,8 +2,8 @@
 
 #include "ecs/System.hpp"
 #include "lazy.hpp"
-#include "PlayerCameraComponent.hpp"
-#include "TransformComponent.hpp"
+#include "components/PlayerCameraComponent.hpp"
+#include "components/TransformComponent.hpp"
 
 class CameraMovementSystem : public ecs::ComponentSystem
 {
