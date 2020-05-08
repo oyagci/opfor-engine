@@ -24,35 +24,18 @@ int main()
 
 	TransformComponent t;
 		t.direction = glm::vec3(0.0f, 0.0f, 1.0f);
-		t.position = glm::vec3(0.0f, 0.0f, -10.0f);
+		t.position = glm::vec3(0.0f, 180.0f, -10.0f);
 	player->SetComponentData<TransformComponent>(t);
 
-	using BackpackMesh = ecs::IEntity<MeshComponent>;
-
-	auto backpack = assimp::Model("./backpack/backpack.obj");
-	std::vector<BackpackMesh*> backpackMeshes;
-	{
-		std::vector<assimp::Mesh> &meshes = backpack.getMeshes();
-
-		for (auto &m : meshes) {
-			BackpackMesh *b = engine.CreateEntity<MeshComponent>();
-
-			MeshComponent comp;
-			comp.textures = std::vector<std::string>(m.getTextures());
-			comp.mesh = std::move(m);
-			b->SetComponentData<MeshComponent>(std::move(comp));
-
-			backpackMeshes.push_back(b);
-		}
-	}
+	using MeshEntity = ecs::IEntity<MeshComponent>;
 
 	auto sponza = assimp::Model("./Sponza/sponza.obj");
-	std::vector<BackpackMesh*> sponzaMeshes;
+	std::vector<MeshEntity*> sponzaMeshes;
 	{
 		std::vector<assimp::Mesh> &meshes = sponza.getMeshes();
 
 		for (auto &m : meshes) {
-			BackpackMesh *b = engine.CreateEntity<MeshComponent>();
+			MeshEntity *b = engine.CreateEntity<MeshComponent>();
 
 			MeshComponent comp;
 			comp.textures = std::vector<std::string>(m.getTextures());
