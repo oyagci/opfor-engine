@@ -60,7 +60,7 @@ public:
 		TransformComponent transform = playerCamera[0]->GetComponentData<TransformComponent>();
 
 		glm::vec3 front(glm::normalize(transform.direction));
-		glm::vec3 right(glm::cross(front, glm::vec3(0.0f, 1.0f, 0.0f)));
+		glm::vec3 right(glm::normalize(glm::cross(front, glm::vec3(0.0f, 1.0f, 0.0f))));
 
 		bool fwd = lazy::inputs::input::getKeyboard().getKey(GLFW_KEY_W);
 		bool bck = lazy::inputs::input::getKeyboard().getKey(GLFW_KEY_S);
