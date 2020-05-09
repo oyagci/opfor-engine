@@ -52,6 +52,8 @@ public:
 	void UpdateObjects();
 	void UpdateSubobjects(std::vector<EngineObject*> subobjects);
 
+	lazy::graphics::Display *GetDisplay() { return _display.get(); }
+
 	template <typename T, typename ... ArgTypes>
 	[[nodiscard]] T *CreateEngineObject(ArgTypes... args)
 	{

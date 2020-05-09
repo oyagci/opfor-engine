@@ -3,6 +3,7 @@
 #include "systems/CameraMovementSystem.hpp"
 #include "systems/MeshRendererSystem.hpp"
 #include "systems/SkyboxRendererSystem.hpp"
+#include "systems/ImguiSystem.hpp"
 #include "components/PlayerCameraComponent.hpp"
 #include "components/TransformComponent.hpp"
 #include "components/SkyboxComponent.hpp"
@@ -110,6 +111,7 @@ int main()
 	engine.CreateComponentSystem<MeshRendererSystem>();
 	engine.CreateComponentSystem<CameraMovementSystem>();
 	engine.CreateComponentSystem<SkyboxRendererSystem>();
+	engine.CreateComponentSystem<ImguiSystem>();
 
 	auto player = engine.CreateEntity<PlayerCameraComponent, TransformComponent>();
 
@@ -147,6 +149,11 @@ int main()
 	auto skybox = engine.CreateEntity<SkyboxComponent>();
 	SkyboxComponent s = initSkybox();
 	skybox->SetComponentData<SkyboxComponent>(s);
+
+	auto display = engine.CreateEntity<DisplayComponent>();
+	DisplayComponent d;
+	d.display = engine.GetDisplay();
+	display->SetComponentData<DisplayComponent>(d);
 
 	return engine::Engine::Instance().Run();
 }

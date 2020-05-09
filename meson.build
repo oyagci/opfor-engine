@@ -21,6 +21,8 @@ incdirs = []
 incdirs += include_directories(configure_inc)
 incdirs += include_directories('src')
 incdirs += include_directories('src/engine')
+incdirs += include_directories('thirdparty')
+incdirs += include_directories('thirdparty/imgui')
 
 srcs = [
   'src/main.cpp',
@@ -39,6 +41,17 @@ srcs = [
   'src/engine/ui/UIScene.cpp',
   'src/engine/assimp/Model.cpp',
 ]
+
+imgui = [
+  'thirdparty/imgui/imgui.cpp',
+  'thirdparty/imgui/imgui_demo.cpp',
+  'thirdparty/imgui/imgui_impl_glfw.cpp',
+  'thirdparty/imgui/imgui_widgets.cpp',
+  'thirdparty/imgui/imgui_impl_opengl3.cpp',
+  'thirdparty/imgui/imgui_draw.cpp'
+]
+
+srcs += imgui
 
 cmake = import('cmake')
 lazyGL = cmake.subproject('LazyGL')

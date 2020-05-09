@@ -25,6 +25,9 @@ public:
 		PlayerCameraComponent camera = playerCamera[0]->GetComponentData<PlayerCameraComponent>();
 		TransformComponent transform = playerCamera[0]->GetComponentData<TransformComponent>();
 
+		if (camera.useInput == false)
+			return ;
+
 		glm::vec2 vel = lazy::inputs::input::getMouse().getVelocity() / 10.0f;
 
 		glm::vec3 up(0.0f, 1.0f, 0.0f);
@@ -58,6 +61,9 @@ public:
 
 		PlayerCameraComponent camera = playerCamera[0]->GetComponentData<PlayerCameraComponent>();
 		TransformComponent transform = playerCamera[0]->GetComponentData<TransformComponent>();
+
+		if (camera.useInput == false)
+			return ;
 
 		glm::vec3 front(glm::normalize(transform.direction));
 		glm::vec3 right(glm::normalize(glm::cross(front, glm::vec3(0.0f, 1.0f, 0.0f))));
