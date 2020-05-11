@@ -23,6 +23,7 @@ incdirs += include_directories('src')
 incdirs += include_directories('src/engine')
 incdirs += include_directories('thirdparty')
 incdirs += include_directories('thirdparty/imgui')
+incdirs += include_directories('thirdparty/ImGuizmo')
 
 srcs = [
   'src/main.cpp',
@@ -51,7 +52,15 @@ imgui = [
   'thirdparty/imgui/imgui_draw.cpp'
 ]
 
+imgui_guizmo = [
+  'thirdparty/ImGuizmo/ImGradient.cpp',
+  'thirdparty/ImGuizmo/ImGuizmo.cpp',
+  'thirdparty/ImGuizmo/ImSequencer.cpp',
+  'thirdparty/ImGuizmo/ImCurveEdit.cpp',
+]
+
 srcs += imgui
+srcs += imgui_guizmo
 
 cmake = import('cmake')
 lazyGL = cmake.subproject('LazyGL')
