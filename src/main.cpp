@@ -7,6 +7,7 @@
 #include "components/PlayerCameraComponent.hpp"
 #include "components/TransformComponent.hpp"
 #include "components/SkyboxComponent.hpp"
+#include "components/SelectedComponent.hpp"
 #include "stb_image.h"
 #include "lazy.hpp"
 
@@ -118,16 +119,31 @@ int main()
 	PlayerCameraComponent p;
 		p.projection = glm::perspective(glm::radians(90.0f), 16.0f / 9.0f, 0.1f, 10000.0f);
 		p.model = glm::mat4(1.0f);
-		p.view = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, -10.0f));
+		p.view = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, 0.0f));
 		p.viewProjection = p.projection * p.view;
 	player->SetComponentData<PlayerCameraComponent>(p);
 
 	TransformComponent t;
 		t.direction = glm::vec3(0.0f, 0.0f, 1.0f);
-		t.position = glm::vec3(0.0f, 180.0f, -10.0f);
+		t.position = glm::vec3(0.0f, 180.0f, -5.0f);
 	player->SetComponentData<TransformComponent>(t);
 
-	using MeshEntity = ecs::IEntity<MeshComponent>;
+	using MeshEntity = ecs::IEntity<MeshComponent, TransformComponent>;
+
+	auto cube = assimp::Model("./Cube.fbx");
+	{
+		assimp::Mesh mesh = std::move(cube.getMeshes()[0]);
+		ecs::IEntityBase *c = engine.CreateEntity<MeshComponent, TransformComponent, SelectedComponent>();
+
+		MeshComponent comp;
+		comp.textures = std::vector<std::string>(mesh.getTextures());
+		comp.mesh = std::move(mesh);
+		c->SetComponentData<MeshComponent>(std::move(comp));
+
+		TransformComponent t;
+			t.scale = glm::vec3(100.0f, 100.0f, 100.0f);
+		c->SetComponentData<TransformComponent>(t);
+	}
 
 	auto sponza = assimp::Model("./Sponza/sponza.obj");
 	std::vector<MeshEntity*> sponzaMeshes;
@@ -135,7 +151,7 @@ int main()
 		std::vector<assimp::Mesh> &meshes = sponza.getMeshes();
 
 		for (auto &m : meshes) {
-			MeshEntity *b = engine.CreateEntity<MeshComponent>();
+			MeshEntity *b = engine.CreateEntity<MeshComponent, TransformComponent>();
 
 			MeshComponent comp;
 			comp.textures = std::vector<std::string>(m.getTextures());
