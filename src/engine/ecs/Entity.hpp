@@ -8,6 +8,7 @@
 #include <algorithm>
 #include "Component.hpp"
 #include <iostream>
+#include <tuple>
 
 namespace ecs {
 
@@ -140,9 +141,20 @@ template <typename T, typename ... Types>
 class IEntity : public IEntityBase
 {
 public:
+	typedef std::tuple<const T&, const Types&...> Components;
+
+public:
 	IEntity()
 	{
 		RegisterComponents<T, Types...>();
+	}
+
+	///
+	/// Returns a tuple containing a const reference to every component
+	///
+	Components GetAll()
+	{
+		return std::tie(Get<T>(), Get<Types>()...);
 	}
 
 	static_assert(is_component_base<T, Types...>(),
