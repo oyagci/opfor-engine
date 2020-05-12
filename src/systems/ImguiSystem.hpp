@@ -34,13 +34,13 @@ public:
 	{
 		if (!_display) {
 			auto displays = GetEntities<DisplayComponent>();
-			_display = displays[0]->GetComponentData<DisplayComponent>().display;
+			_display = displays[0]->Get<DisplayComponent>().display;
 			ImGui_ImplGlfw_InitForOpenGL(_display->getWindow(), true);
 			ImGui_ImplOpenGL3_Init("#version 450");
 		}
 
 		auto cameraEnt = GetEntities<PlayerCameraComponent>()[0];
-		auto camera = cameraEnt->GetComponentData<PlayerCameraComponent>();
+		auto camera = cameraEnt->Get<PlayerCameraComponent>();
 
 		glm::mat4 guizmo(1.0f);
 
@@ -51,7 +51,7 @@ public:
 		auto selectedEnt = GetEntities<TransformComponent, SelectedComponent>();
 		if (selectedEnt.size() > 0) {
 
-			auto selected = selectedEnt[0]->GetComponentData<TransformComponent>();
+			auto selected = selectedEnt[0]->Get<TransformComponent>();
 
 			glm::mat4 model(1.0f);
 			model = glm::scale(model, selected.scale);
@@ -105,9 +105,9 @@ public:
 		if (kbd.getKeyDown(GLFW_KEY_ESCAPE)) {
 			auto playerEnts = GetEntities<PlayerCameraComponent>();
 			if (playerEnts.size() > 0) {
-				auto camera = playerEnts[0]->GetComponentData<PlayerCameraComponent>();
+				auto camera = playerEnts[0]->Get<PlayerCameraComponent>();
 				auto displayEnt = GetEntities<DisplayComponent>()[0];
-				auto display = displayEnt->GetComponentData<DisplayComponent>();
+				auto display = displayEnt->Get<DisplayComponent>();
 
 				// Enable/Disable input for camera
 				camera.useInput = !camera.useInput;

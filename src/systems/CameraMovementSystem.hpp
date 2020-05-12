@@ -22,8 +22,8 @@ public:
 			return ;
 		}
 
-		PlayerCameraComponent camera = playerCamera[0]->GetComponentData<PlayerCameraComponent>();
-		TransformComponent transform = playerCamera[0]->GetComponentData<TransformComponent>();
+		PlayerCameraComponent camera = playerCamera[0]->Get<PlayerCameraComponent>();
+		TransformComponent transform = playerCamera[0]->Get<TransformComponent>();
 
 		if (camera.useInput == false)
 			return ;
@@ -59,8 +59,8 @@ public:
 			return ;
 		}
 
-		PlayerCameraComponent camera = playerCamera[0]->GetComponentData<PlayerCameraComponent>();
-		TransformComponent transform = playerCamera[0]->GetComponentData<TransformComponent>();
+		PlayerCameraComponent camera = playerCamera[0]->Get<PlayerCameraComponent>();
+		TransformComponent transform = playerCamera[0]->Get<TransformComponent>();
 
 		if (camera.useInput == false)
 			return ;

@@ -33,7 +33,7 @@ public:
 			return ;
 		}
 
-		auto playerCamera = player[0]->GetComponentData<PlayerCameraComponent>();
+		auto playerCamera = player[0]->Get<PlayerCameraComponent>();
 
 		_shader.bind();
 		_shader.setUniform4x4f("viewProjectionMatrix", playerCamera.viewProjection);
@@ -41,8 +41,8 @@ public:
 		_shader.setUniform4x4f("projectionMatrix", playerCamera.projection);
 
 		for (auto m : meshes) {
-			auto &data = m->GetComponentData<MeshComponent>();
-			auto &transform = m->GetComponentData<TransformComponent>();
+			auto &data = m->Get<MeshComponent>();
+			auto &transform = m->Get<TransformComponent>();
 
 			glm::mat4 model(1.0f);
 			model = glm::scale(model, transform.scale);

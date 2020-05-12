@@ -28,8 +28,8 @@ public:
 		if (skybox.size() == 0) { return ; }
 		if (camera.size() == 0) { return ; }
 
-		auto cameraData = camera[0]->GetComponentData<PlayerCameraComponent>();
-		auto skyData = skybox[0]->GetComponentData<SkyboxComponent>();
+		auto cameraData = camera[0]->Get<PlayerCameraComponent>();
+		auto skyData = skybox[0]->Get<SkyboxComponent>();
 
 		_shader.bind();
 		_shader.setUniform4x4f("viewMatrix", glm::mat4(glm::mat3(cameraData.view)));
