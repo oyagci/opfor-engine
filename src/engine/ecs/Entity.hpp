@@ -95,7 +95,7 @@ public:
 	/// Modify the data of the component U
 	///
 	template <typename U>
-	void SetComponentData(U &data)
+	void Set(U &data)
 	{
 		static_assert(std::is_base_of<IComponentBase, U>::value, "typename U must de derived from IComponentBase");
 		GetComponent<U>() = data;
@@ -105,7 +105,7 @@ public:
 	/// Modify the data of the component U
 	///
 	template <typename U>
-	void SetComponentData(U &&data)
+	void Set(U &&data)
 	{
 		static_assert(std::is_base_of<IComponentBase, U>::value, "typename U must de derived from IComponentBase");
 		GetComponent<U>() = std::move(data);

@@ -56,7 +56,7 @@ TEST_F(EntityTest, Entity_Can_Set_Data)
 	TestComponentA a;
 	a.Value = 10;
 
-	Entity->SetComponentData<TestComponentA>(a);
+	Entity->Set<TestComponentA>(a);
 	EXPECT_EQ(10, Entity->Get<TestComponentA>().Value);
 }
 

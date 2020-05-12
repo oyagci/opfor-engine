@@ -47,8 +47,8 @@ public:
 
 		camera.view = view;
 		camera.viewProjection = camera.projection * camera.view;
-		playerCamera[0]->SetComponentData<PlayerCameraComponent>(camera);
-		playerCamera[0]->SetComponentData<TransformComponent>(transform);
+		playerCamera[0]->Set<PlayerCameraComponent>(camera);
+		playerCamera[0]->Set<TransformComponent>(transform);
 	}
 
 	void UpdateMovement()
@@ -77,6 +77,6 @@ public:
 		transform.position += bck * 10.0f * -front;
 		transform.position += rgt * 10.0f * right;
 		transform.position += lft * 10.0f * -right;
-		playerCamera[0]->SetComponentData<TransformComponent>(transform);
+		playerCamera[0]->Set<TransformComponent>(transform);
 	}
 };

@@ -93,7 +93,7 @@ public:
 //			ImGuizmo::DecomposeMatrixToComponents(&model[0][0], &selected.position[0], &rotation[0], &selected.scale[0]);
 
 			glm::decompose(model, selected.scale, rotation, selected.position, skew, persp);
-//			selectedEnt[0]->SetComponentData<TransformComponent>(selected);
+//			selectedEnt[0]->Set<TransformComponent>(selected);
 
 			ImGui::Render();
 			ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
@@ -111,11 +111,11 @@ public:
 
 				// Enable/Disable input for camera
 				camera.useInput = !camera.useInput;
-				playerEnts[0]->SetComponentData<PlayerCameraComponent>(camera);
+				playerEnts[0]->Set<PlayerCameraComponent>(camera);
 
 				// Enable/Switch cursor
 				display.display->showCursor(!camera.useInput);
-				displayEnt->SetComponentData<DisplayComponent>(display);
+				displayEnt->Set<DisplayComponent>(display);
 			}
 		}
 	}
