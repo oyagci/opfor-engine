@@ -4,7 +4,7 @@
 #include "lazy.hpp"
 #include "ui/UI.hpp"
 #include "ecs/ecs.hpp"
-#include "EngineObjects.hpp"
+#include "EngineObject.hpp"
 
 using namespace lazy;
 using namespace graphics;
