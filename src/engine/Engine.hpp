@@ -5,6 +5,8 @@
 #include "ui/UI.hpp"
 #include "ecs/ecs.hpp"
 #include "EngineObject.hpp"
+#include "assimp/Model.hpp"
+#include <unordered_map>
 
 using namespace lazy;
 using namespace graphics;
@@ -33,6 +35,10 @@ private:
 	ecs::SystemManager *_systemManager;
 
 	std::vector<std::unique_ptr<EngineObject>> _engineObjects;
+
+	std::unordered_map<unsigned int, std::unique_ptr<assimp::Mesh>> _meshes;
+
+	static unsigned int _nextId;
 
 private:
 	Engine();
@@ -81,6 +87,35 @@ public:
 	[[nodiscard]] ecs::IEntity<ArgTypes...> *CreateEntity()
 	{
 		return _ecs.GetEntityManager()->CreateEntity<ArgTypes...>();
+	}
+
+	std::vector<unsigned int> LoadMeshes(std::string const &path)
+	{
+		assimp::Model model(path);
+		std::vector<unsigned int> ids;
+
+		ids.reserve(model.getMeshes().size());
+		for (auto &m : model.getMeshes()) {
+			auto to_ptr = std::make_unique<assimp::Mesh>(std::move(m));
+
+			_meshes[_nextId] = std::move(to_ptr);
+			ids.push_back(_nextId);
+
+			_nextId++;
+		}
+
+		return ids;
+	}
+
+	assimp::Mesh *GetMesh(unsigned int id)
+	{
+		auto mesh = _meshes.find(id);
+
+		if (mesh != _meshes.end()) {
+			return mesh->second.get();
+		}
+
+		return nullptr;
 	}
 };
 

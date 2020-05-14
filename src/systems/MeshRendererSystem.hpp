@@ -6,6 +6,7 @@
 #include "components/PlayerCameraComponent.hpp"
 #include "components/MeshComponent.hpp"
 #include "components/TransformComponent.hpp"
+#include "Engine.hpp"
 
 class MeshRendererSystem : public ecs::ComponentSystem
 {
@@ -41,7 +42,7 @@ public:
 		_shader.setUniform4x4f("projectionMatrix", playerCamera.projection);
 
 		for (auto m : meshes) {
-			auto &data = m->Get<MeshComponent>();
+			auto data = engine::Engine::Instance().GetMesh(m->Get<MeshComponent>().Id);
 			auto &transform = m->Get<TransformComponent>();
 
 			glm::mat4 model(1.0f);
@@ -51,12 +52,12 @@ public:
 
 			// Bind each texture
 			size_t currentTexture = 0;
-			for (auto &t : data.textures) {
+			for (auto &t : data->getTextures()) {
 				TextureManager::instance().bind(t, currentTexture);
 				currentTexture++;
 			}
 
-			data.mesh.draw();
+			data->draw();
 		}
 
 		_shader.unbind();

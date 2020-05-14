@@ -109,9 +109,9 @@ SkyboxComponent initSkybox()
 int main()
 {
 	auto &engine = Engine::Instance();
-	engine.CreateComponentSystem<MeshRendererSystem>();
 	engine.CreateComponentSystem<CameraMovementSystem>();
 	engine.CreateComponentSystem<SkyboxRendererSystem>();
+	engine.CreateComponentSystem<MeshRendererSystem>();
 	engine.CreateComponentSystem<ImguiSystem>();
 
 	auto player = engine.CreateEntity<PlayerCameraComponent, TransformComponent>();
@@ -130,33 +130,30 @@ int main()
 
 	using MeshEntity = ecs::IEntity<MeshComponent, TransformComponent>;
 
-	auto cube = assimp::Model("./Cube.fbx");
-	{
-		assimp::Mesh mesh = std::move(cube.getMeshes()[0]);
-		ecs::IEntityBase *c = engine.CreateEntity<MeshComponent, TransformComponent, SelectedComponent>();
-
-		MeshComponent comp;
-		comp.textures = std::vector<std::string>(mesh.getTextures());
-		comp.mesh = std::move(mesh);
-		c->Set<MeshComponent>(std::move(comp));
+	auto cubeMeshes = engine.LoadMeshes("./Cube.fbx");
+	for (auto m : cubeMeshes) {
+		ecs::IEntityBase *c = engine.CreateEntity<MeshComponent,
+												  TransformComponent,
+												  SelectedComponent>();
+		MeshComponent mesh;
+		mesh.Id = m;
+		c->Set<MeshComponent>(mesh);
 
 		TransformComponent t;
 			t.scale = glm::vec3(100.0f, 100.0f, 100.0f);
 		c->Set<TransformComponent>(t);
 	}
 
-	auto sponza = assimp::Model("./Sponza/sponza.obj");
+	auto sponza = engine.LoadMeshes("./Sponza/sponza.obj");
 	std::vector<MeshEntity*> sponzaMeshes;
 	{
-		std::vector<assimp::Mesh> &meshes = sponza.getMeshes();
+		for (auto &m : sponza) {
+			MeshEntity *b = engine.CreateEntity<MeshComponent,
+											    TransformComponent>();
 
-		for (auto &m : meshes) {
-			MeshEntity *b = engine.CreateEntity<MeshComponent, TransformComponent>();
-
-			MeshComponent comp;
-			comp.textures = std::vector<std::string>(m.getTextures());
-			comp.mesh = std::move(m);
-			b->Set<MeshComponent>(std::move(comp));
+			MeshComponent mesh;
+			mesh.Id = m;
+			b->Set<MeshComponent>(mesh);
 
 			sponzaMeshes.push_back(b);
 		}

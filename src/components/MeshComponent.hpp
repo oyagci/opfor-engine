@@ -9,6 +9,5 @@
 ///
 struct MeshComponent : ecs::IComponent
 {
-	lazy::graphics::Mesh mesh;
-	std::vector<std::string> textures;
+	unsigned int Id;
 };

@@ -6,6 +6,8 @@
 namespace engine
 {
 
+unsigned int Engine::_nextId = 0;
+
 Engine::Engine()
 {
 	_display = std::make_unique<Display>("ft_vox", 1920, 1080);
