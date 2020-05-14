@@ -121,12 +121,12 @@ int main()
 		p.model = glm::mat4(1.0f);
 		p.view = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, 0.0f));
 		p.viewProjection = p.projection * p.view;
-	player->Set<PlayerCameraComponent>(p);
+	player->Set(p);
 
 	TransformComponent t;
 		t.direction = glm::vec3(0.0f, 0.0f, 1.0f);
 		t.position = glm::vec3(0.0f, 180.0f, -5.0f);
-	player->Set<TransformComponent>(t);
+	player->Set(t);
 
 	using MeshEntity = ecs::IEntity<MeshComponent, TransformComponent>;
 
@@ -137,11 +137,11 @@ int main()
 												  SelectedComponent>();
 		MeshComponent mesh;
 		mesh.Id = m;
-		c->Set<MeshComponent>(mesh);
+		c->Set(mesh);
 
 		TransformComponent t;
 			t.scale = glm::vec3(100.0f, 100.0f, 100.0f);
-		c->Set<TransformComponent>(t);
+		c->Set(t);
 	}
 
 	auto sponza = engine.LoadMeshes("./Sponza/sponza.obj");
@@ -153,7 +153,7 @@ int main()
 
 			MeshComponent mesh;
 			mesh.Id = m;
-			b->Set<MeshComponent>(mesh);
+			b->Set(mesh);
 
 			sponzaMeshes.push_back(b);
 		}
@@ -161,12 +161,12 @@ int main()
 
 	auto skybox = engine.CreateEntity<SkyboxComponent>();
 	SkyboxComponent s = initSkybox();
-	skybox->Set<SkyboxComponent>(s);
+	skybox->Set(s);
 
 	auto display = engine.CreateEntity<DisplayComponent>();
 	DisplayComponent d;
 	d.display = engine.GetDisplay();
-	display->Set<DisplayComponent>(d);
+	display->Set(d);
 
 	return engine::Engine::Instance().Run();
 }

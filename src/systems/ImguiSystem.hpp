@@ -111,11 +111,11 @@ public:
 
 				// Enable/Disable input for camera
 				camera.useInput = !camera.useInput;
-				playerEnts[0]->Set<PlayerCameraComponent>(camera);
+				playerEnts[0]->Set(camera);
 
 				// Enable/Switch cursor
 				display.display->showCursor(!camera.useInput);
-				displayEnt->Set<DisplayComponent>(display);
+				displayEnt->Set(display);
 			}
 		}
 	}
