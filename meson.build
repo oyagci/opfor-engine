@@ -41,6 +41,7 @@ srcs = [
   'src/engine/ui/SceneComponent.cpp',
   'src/engine/ui/UIScene.cpp',
   'src/engine/assimp/Model.cpp',
+  'src/engine/Framebuffer.cpp'
 ]
 
 imgui = [
