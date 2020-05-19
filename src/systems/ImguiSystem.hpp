@@ -95,10 +95,10 @@ public:
 			glm::decompose(model, selected.scale, rotation, selected.position, skew, persp);
 //			selectedEnt[0]->Set<TransformComponent>(selected);
 
-			ImGui::Render();
-			ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-
 		}
+
+		ImGui::Render();
+		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
 		auto &kbd = lazy::inputs::input::getKeyboard();
 
