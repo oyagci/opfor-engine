@@ -16,8 +16,9 @@ public:
 	void operator=(TextureManager const &) = delete;
 
 	void createTexture(std::string const &name, std::string const &path,
-		std::vector<std::pair<GLenum, GLenum>>, Texture::TextureType type);
+		std::vector<std::pair<GLenum, GLenum>>, GLenum target);
 	void bind(std::string const &name, GLuint textureNumber);
+	void add(std::string const &name, Texture t);
 
 private:
 	std::map<std::string, std::unique_ptr<Texture>> _textures;

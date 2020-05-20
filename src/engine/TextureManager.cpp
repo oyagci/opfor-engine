@@ -1,11 +1,12 @@
 #include "TextureManager.hpp"
+#include <fmt/format.h>
 
 void TextureManager::createTexture(std::string const &name, std::string const &path,
-	std::vector<std::pair<GLenum, GLenum>> parameters, Texture::TextureType type)
+	std::vector<std::pair<GLenum, GLenum>> parameters, GLenum target)
 {
 	if (_textures.find(name) != _textures.end()) { return ; }
 
-	_textures[name] = std::make_unique<Texture>(name, type);
+	_textures[name] = std::make_unique<Texture>(name, target);
 
 	_textures[name]->bind(GL_TEXTURE0);
 	for (auto const &p : parameters) {
@@ -17,4 +18,10 @@ void TextureManager::createTexture(std::string const &name, std::string const &p
 void TextureManager::bind(std::string const &name, GLuint textureNumber)
 {
 	_textures[name]->bind(textureNumber);
+}
+
+void TextureManager::add(std::string const &name, Texture t)
+{
+	auto pTexture = std::make_unique<Texture>(std::move(t));
+	_textures[name] = std::move(pTexture);
 }

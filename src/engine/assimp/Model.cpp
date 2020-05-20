@@ -64,7 +64,7 @@ Mesh Model::processMesh(aiMesh *mesh, const aiScene *scene)
 	// Textures
 	if (mesh->mMaterialIndex > 0) {
 		aiMaterial *material = scene->mMaterials[mesh->mMaterialIndex];
-		auto textures = loadMaterialTextures(material, aiTextureType_DIFFUSE, Texture::TextureType::Tex_Diffuse);
+		auto textures = loadMaterialTextures(material, aiTextureType_DIFFUSE, GL_TEXTURE_2D);
 		for (auto &t : textures) {
 			engineMesh.addTexture(t);
 		}
@@ -76,7 +76,7 @@ Mesh Model::processMesh(aiMesh *mesh, const aiScene *scene)
 }
 
 std::vector<std::string> Model::loadMaterialTextures(aiMaterial *material, aiTextureType aitype,
-	Texture::TextureType type)
+	GLenum target)
 {
 	std::vector<std::string> textureNames;
 
@@ -91,7 +91,7 @@ std::vector<std::string> Model::loadMaterialTextures(aiMaterial *material, aiTex
 			{ GL_TEXTURE_WRAP_T, GL_REPEAT },
 			{ GL_TEXTURE_MIN_FILTER, GL_LINEAR },
 			{ GL_TEXTURE_MAG_FILTER, GL_LINEAR },
-		}, type);
+		}, target);
 	}
 
 	return textureNames;

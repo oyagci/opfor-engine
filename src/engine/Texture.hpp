@@ -6,17 +6,23 @@
 class Texture
 {
 public:
-	enum TextureType {
-		Tex_Diffuse,
-		Tex_Specular,
-		Tex_Normal,
-		Tex_Bump,
+	enum class Target {
+		T_2D = GL_TEXTURE_2D,
+		T_3D = GL_TEXTURE_3D,
+		T_Cubemap = GL_TEXTURE_CUBE_MAP,
 	};
+
+private:
+	Texture() {};
+
 public:
-	Texture() = delete;
-	Texture(std::string const &name, TextureType type);
+	Texture(std::string const &name, GLenum target);
 	Texture(Texture &&);
 	~Texture();
+
+	Texture(GLuint id, std::string const &name, int width, int height, int nchannel, GLenum target)
+		: _name(name), _width(width), _height(height), _nChannel(nchannel), _glId(id), _target(target)
+	{}
 
 	bool load(std::string const &path);
 	void bind(GLuint textureNumber);
@@ -33,7 +39,6 @@ private:
 	int _width;
 	int _height;
 	int _nChannel;
-
 	GLuint _glId;
-	TextureType _type;
+	GLenum _target;
 };

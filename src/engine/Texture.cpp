@@ -1,9 +1,22 @@
 #include "Texture.hpp"
 #include "stb_image.h"
+#include <fmt/format.h>
 
-Texture::Texture(std::string const &name, TextureType type) : _name(name)
+Texture::Texture(std::string const &name, GLenum target) : _name(name), _target(target)
 {
 	glGenTextures(1, &_glId);
+}
+
+Texture::Texture(Texture &&rhs)
+{
+	_name = rhs._name;
+	_width = rhs._width;
+	_height = rhs._height;
+	_nChannel = rhs._nChannel;
+	_glId = rhs._glId;
+	_target = rhs._target;
+
+	rhs._glId = 0;
 }
 
 Texture::~Texture()
@@ -45,5 +58,5 @@ void Texture::setParameter(GLenum target, GLenum param, GLenum value)
 void Texture::bind(GLuint textureNumber)
 {
 	glActiveTexture(textureNumber);
-	glBindTexture(GL_TEXTURE_2D, _glId);
+	glBindTexture(_target, _glId);
 }

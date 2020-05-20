@@ -10,14 +10,20 @@
 #include "components/SelectedComponent.hpp"
 #include "stb_image.h"
 #include "lazy.hpp"
+#include "ShaderManager.hpp"
+#include <fmt/format.h>
+#include <utility>
+#include <string>
 
 using namespace engine;
 
-SkyboxComponent initSkybox()
+MeshComponent initSkybox()
 {
-	SkyboxComponent s;
+	MeshComponent meshComponent;
+	assimp::Mesh mesh;
+	GLuint textureId;
 
-	std::array<std::string, 6> paths = {
+	const std::array<std::string, 6> paths = {
 		"./img/right.jpg",
 		"./img/left.jpg",
 		"./img/top.jpg",
@@ -26,15 +32,15 @@ SkyboxComponent initSkybox()
 		"./img/back.jpg",
 	};
 
-	glGenTextures(1, &s.texture);
-	glBindTexture(GL_TEXTURE_CUBE_MAP, s.texture);
+	glGenTextures(1, &textureId);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, textureId);
 
 	stbi_set_flip_vertically_on_load(false);
 	for (size_t i = 0; i < 6; i++) {
 		int w, h, nchannel;
 		unsigned char *data = stbi_load(paths[i].c_str(), &w, &h, &nchannel, 0);
 		if (!data) {
-			std::cerr << "WARNING::CUBEMAP::INIT::IMAGE_NOT_FOUND " << paths[i] << std::endl;
+			fmt::print(stderr, "WARNING::CUBEMAP::INIT::IMAGE_NOT_FOUND {}\n", paths[i]);
 		}
 		glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB,
 			w, h, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
@@ -47,63 +53,50 @@ SkyboxComponent initSkybox()
     glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
 	glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
 
-	GLfloat verts[] = {
-		-1.0f,  1.0f, -1.0f,
-		-1.0f, -1.0f, -1.0f,
-		 1.0f, -1.0f, -1.0f,
-		 1.0f, -1.0f, -1.0f,
-		 1.0f,  1.0f, -1.0f,
-		-1.0f,  1.0f, -1.0f,
+	Texture texture(textureId, "skybox-cubemap", 0, 0, 0, GL_TEXTURE_CUBE_MAP);
+	TextureManager::instance().add("skybox-cubemap", std::move(texture));
 
-		-1.0f, -1.0f,  1.0f,
-		-1.0f, -1.0f, -1.0f,
-		-1.0f,  1.0f, -1.0f,
-		-1.0f,  1.0f, -1.0f,
-		-1.0f,  1.0f,  1.0f,
-		-1.0f, -1.0f,  1.0f,
+	const glm::vec3 verts[] = {
+		glm::vec3(-1.0, -1.0,  1.0),
+		glm::vec3( 1.0, -1.0,  1.0),
+		glm::vec3( 1.0,  1.0,  1.0),
+		glm::vec3(-1.0,  1.0,  1.0),
 
-		 1.0f, -1.0f, -1.0f,
-		 1.0f, -1.0f,  1.0f,
-		 1.0f,  1.0f,  1.0f,
-		 1.0f,  1.0f,  1.0f,
-		 1.0f,  1.0f, -1.0f,
-		 1.0f, -1.0f, -1.0f,
-
-		-1.0f, -1.0f,  1.0f,
-		-1.0f,  1.0f,  1.0f,
-		 1.0f,  1.0f,  1.0f,
-		 1.0f,  1.0f,  1.0f,
-		 1.0f, -1.0f,  1.0f,
-		-1.0f, -1.0f,  1.0f,
-
-		-1.0f,  1.0f, -1.0f,
-		 1.0f,  1.0f, -1.0f,
-		 1.0f,  1.0f,  1.0f,
-		 1.0f,  1.0f,  1.0f,
-		-1.0f,  1.0f,  1.0f,
-		-1.0f,  1.0f, -1.0f,
-
-		-1.0f, -1.0f, -1.0f,
-		-1.0f, -1.0f,  1.0f,
-		 1.0f, -1.0f, -1.0f,
-		 1.0f, -1.0f, -1.0f,
-		-1.0f, -1.0f,  1.0f,
-		 1.0f, -1.0f,  1.0f
+		glm::vec3(-1.0, -1.0, -1.0),
+		glm::vec3( 1.0, -1.0, -1.0),
+		glm::vec3( 1.0,  1.0, -1.0),
+		glm::vec3(-1.0,  1.0, -1.0),
 	};
 
-	glGenVertexArrays(1, &s.vao);
-	glGenBuffers(1, &s.vbo);
+	const glm::uvec3 indices[] = {
+		// front
+		glm::uvec3(0, 3, 1),
+		glm::uvec3(1, 3, 2),
+		// right
+		glm::uvec3(1, 2, 5),
+		glm::uvec3(2, 6, 5),
+		// back
+		glm::uvec3(4, 5, 6),
+		glm::uvec3(4, 6, 7),
+		// left
+		glm::uvec3(0, 4, 7),
+		glm::uvec3(0, 7, 3),
+		// bottom
+		glm::uvec3(0, 1, 4),
+		glm::uvec3(1, 5, 4),
+		// top
+		glm::uvec3(3, 7, 2),
+		glm::uvec3(2, 7, 6)
+	};
 
-	glBindVertexArray(s.vao);
-	glBindBuffer(GL_ARRAY_BUFFER, s.vbo);
+	mesh.addTexture("skybox-cubemap");
+	for (const auto &v : verts) { mesh.addPosition(v); }
+	for (const auto &i : indices) { mesh.addTriangle(i); }
+	mesh.build();
 
-	glBufferData(GL_ARRAY_BUFFER, sizeof(verts), verts, GL_STATIC_DRAW);
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 3, (void*)0);
+	meshComponent.Id = Engine::Instance().AddMesh(std::move(mesh));
 
-	glBindVertexArray(0);
-
-	return s;
+	return meshComponent;
 }
 
 int main()
@@ -130,6 +123,19 @@ int main()
 
 	using MeshEntity = ecs::IEntity<MeshComponent, TransformComponent>;
 
+	auto [ shaderId, meshShader ] = ShaderManager::instance().Create();
+	meshShader.addVertexShader("./shaders/basic.vs.glsl")
+		.addFragmentShader("./shaders/basic.fs.glsl")
+		.link();
+
+	auto [ skyboxShaderId, skyboxShader ] = ShaderManager::instance().Create();
+	skyboxShader.addVertexShader("./shaders/cubemap.vs.glsl")
+		.addFragmentShader("./shaders/cubemap.fs.glsl")
+		.link();
+	skyboxShader.bind();
+	skyboxShader.setUniform1i("cubemap", 0);
+	skyboxShader.unbind();
+
 	auto cubeMeshes = engine.LoadMeshes("./Cube.fbx");
 	for (auto m : cubeMeshes) {
 		ecs::IEntityBase *c = engine.CreateEntity<MeshComponent,
@@ -137,6 +143,7 @@ int main()
 												  SelectedComponent>();
 		MeshComponent mesh;
 		mesh.Id = m;
+		mesh.Shader = shaderId;
 		c->Set(mesh);
 
 		TransformComponent t;
@@ -153,14 +160,17 @@ int main()
 
 			MeshComponent mesh;
 			mesh.Id = m;
+			mesh.Shader = shaderId;
 			b->Set(mesh);
 
 			sponzaMeshes.push_back(b);
 		}
 	}
 
-	auto skybox = engine.CreateEntity<SkyboxComponent>();
-	SkyboxComponent s = initSkybox();
+	auto skybox = engine.CreateEntity<MeshComponent, TransformComponent, SkyboxComponent>();
+
+	MeshComponent s = initSkybox();
+		s.Shader = skyboxShaderId;
 	skybox->Set(s);
 
 	auto display = engine.CreateEntity<DisplayComponent>();

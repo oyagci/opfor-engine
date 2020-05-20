@@ -10,4 +10,5 @@
 struct MeshComponent : ecs::IComponent
 {
 	unsigned int Id;
+	unsigned int Shader;
 };

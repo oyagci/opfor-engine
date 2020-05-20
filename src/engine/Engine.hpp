@@ -107,6 +107,14 @@ public:
 		return ids;
 	}
 
+	unsigned int AddMesh(assimp::Mesh mesh)
+	{
+		auto to_ptr = std::make_unique<assimp::Mesh>(std::move(mesh));
+		_meshes[_nextId] = std::move(to_ptr);
+
+		return _nextId++;
+	}
+
 	assimp::Mesh *GetMesh(unsigned int id)
 	{
 		auto mesh = _meshes.find(id);

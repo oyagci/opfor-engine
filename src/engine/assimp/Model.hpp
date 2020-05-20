@@ -29,7 +29,7 @@ private:
 	std::string _directory;
 
 	std::vector<std::string> loadMaterialTextures(aiMaterial *material, aiTextureType aitype,
-		Texture::TextureType type);
+		GLenum target);
 
 	std::vector<Mesh> _meshes;
 };

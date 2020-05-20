@@ -4,6 +4,11 @@
 #include "components/SkyboxComponent.hpp"
 #include "components/PlayerCameraComponent.hpp"
 #include "lazy.hpp"
+#include "ShaderManager.hpp"
+#include "components/MeshComponent.hpp"
+#include "Engine.hpp"
+#include "TextureManager.hpp"
+#include <fmt/format.h>
 
 using namespace std::placeholders;
 
@@ -23,24 +28,22 @@ public:
 	void OnUpdate(float __unused deltaTime) override
 	{
 		auto camera = GetEntities<PlayerCameraComponent>();
-		auto skybox = GetEntities<SkyboxComponent>();
+		auto skybox = GetEntities<MeshComponent, SkyboxComponent>();
 
 		if (skybox.size() == 0) { return ; }
 		if (camera.size() == 0) { return ; }
 
 		auto cameraData = camera[0]->Get<PlayerCameraComponent>();
-		auto skyData = skybox[0]->Get<SkyboxComponent>();
+		auto [ meshComponent, _ ] = skybox[0]->GetAll();
+		auto mesh = engine::Engine::Instance().GetMesh(meshComponent.Id);
 
 		_shader.bind();
 		_shader.setUniform4x4f("viewMatrix", glm::mat4(glm::mat3(cameraData.view)));
 		_shader.setUniform4x4f("projectionMatrix", cameraData.projection);
 
 		glDepthMask(GL_FALSE);
-		glBindVertexArray(skyData.vao);
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_CUBE_MAP, skyData.texture);
-		glDrawArrays(GL_TRIANGLES, 0, 36);
-		glBindVertexArray(0);
+		TextureManager::instance().bind("skybox-cubemap", 0);
+		mesh->draw();
 		glDepthMask(GL_TRUE);
 
 		_shader.unbind();
