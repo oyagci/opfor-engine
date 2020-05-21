@@ -190,14 +190,14 @@ public:
 
 		auto [ light, transform ] = lights[0]->GetAll();
 
-		TransformComponent t(transform);
+		shader.setUniform3f("pointLight.position", transform.position);
+		shader.setUniform3f("pointLight.ambient", light.Color);
+		shader.setUniform3f("pointLight.diffuse", light.Color);
+		shader.setUniform3f("pointLight.specular", light.Color);
 
-		t.position = glm::vec3(cos(glfwGetTime()) * 1000.0f, 100.0f, 0.0f);
-		lights[0]->Set(t);
-
-		shader.setUniform3f("lightColor", light.Color);
-		shader.setUniform3f("lightDir", light.Dir);
-		shader.setUniform3f("lightPos", transform.position);
+		shader.setUniform1f("pointLight.constant", light.constant);
+		shader.setUniform1f("pointLight.linear", light.linear);
+		shader.setUniform1f("pointLight.quadratic", light.quadratic);
 	}
 
 	void RenderLightBillboard(PlayerCameraComponent &camera)

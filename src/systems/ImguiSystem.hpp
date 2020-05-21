@@ -9,6 +9,7 @@
 #include "components/PlayerCameraComponent.hpp"
 #include "components/SelectedComponent.hpp"
 #include "components/TransformComponent.hpp"
+#include "components/PointLightComponent.hpp"
 #include "ImGuizmo/ImGuizmo.h"
 #include <glm/gtx/matrix_decompose.hpp>
 
@@ -93,9 +94,11 @@ public:
 //			ImGuizmo::DecomposeMatrixToComponents(&model[0][0], &selected.position[0], &rotation[0], &selected.scale[0]);
 
 			glm::decompose(model, selected.scale, rotation, selected.position, skew, persp);
-//			selectedEnt[0]->Set<TransformComponent>(selected);
+			selectedEnt[0]->Set<TransformComponent>(selected);
 
 		}
+
+		LightProperties();
 
 		ImGui::Render();
 		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
@@ -118,6 +121,27 @@ public:
 				displayEnt->Set(display);
 			}
 		}
+	}
+
+	void LightProperties()
+	{
+		auto lights = GetEntities<PointLightComponent, TransformComponent>();
+
+		if (lights.size() == 0) { return ; }
+
+		auto [ light, transform ] = lights[0]->GetAll();
+
+		PointLightComponent newLight(light);
+
+		ImGui::Begin("Light Properties");
+		ImGui::ColorEdit3("Color", &newLight.Color[0]);
+		ImGui::InputFloat("Constant", &newLight.constant);
+		ImGui::InputFloat("Linear", &newLight.linear);
+		ImGui::InputFloat("Quadratic", &newLight.quadratic);
+		ImGui::End();
+
+		lights[0]->Set(newLight);
+
 	}
 
 //	void EditTransform(const glm::mat4 &view, const glm::mat4 &proj)
