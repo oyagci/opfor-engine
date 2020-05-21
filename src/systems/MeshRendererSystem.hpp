@@ -7,15 +7,18 @@
 #include "components/MeshComponent.hpp"
 #include "components/TransformComponent.hpp"
 #include "components/SkyboxComponent.hpp"
+#include "components/PointLightComponent.hpp"
 #include "Engine.hpp"
 #include "Framebuffer.hpp"
 #include "ShaderManager.hpp"
 #include <fmt/format.h>
+#include <glm/gtx/projection.hpp>
 
 class MeshRendererSystem : public ecs::ComponentSystem
 {
 private:
 	lazy::graphics::Shader _fbShader;
+	lazy::graphics::Shader _billboard;
 
 	engine::Framebuffer _framebuffer;
 	lazy::graphics::Mesh _quad;
@@ -65,10 +68,25 @@ private:
 		assert(_fbShader.isValid());
 	}
 
+	void initBillboard()
+	{
+		_billboard.addVertexShader("shaders/billboard.vs.glsl")
+			.addFragmentShader("shaders/billboard.fs.glsl")
+			.link();
+	}
+
 public:
 	MeshRendererSystem() : _framebuffer(engine::Framebuffer_Type::RW)
 	{
 		initFramebuffer();
+		initBillboard();
+
+		TextureManager::instance().createTexture("light_bulb_icon", "./img/light_bulb_icon.png", {
+			{ GL_TEXTURE_WRAP_R, GL_WRAP_BORDER },
+			{ GL_TEXTURE_WRAP_S, GL_WRAP_BORDER },
+			{ GL_TEXTURE_MIN_FILTER, GL_NEAREST },
+			{ GL_TEXTURE_MAG_FILTER, GL_NEAREST },
+		}, GL_TEXTURE_2D);
 
 		assert(_framebuffer.IsComplete());
 	}
@@ -90,6 +108,7 @@ public:
 
 		RenderMeshes(playerCamera, playerTransform);
 		RenderSkybox(playerCamera);
+		RenderLightBillboard(playerCamera);
 
 		_framebuffer.Unbind();
 
@@ -120,6 +139,8 @@ public:
 			shader->setUniform4x4f("viewMatrix", camera.view);
 			shader->setUniform4x4f("projectionMatrix", camera.projection);
 			shader->setUniform3f("viewPos", playerTransform.position);
+
+			UpdateLight(*shader);
 
 			glm::mat4 model(1.0f);
 			model = glm::scale(model, transform.scale);
@@ -159,5 +180,43 @@ public:
 		glDepthMask(GL_TRUE);
 
 		shader->unbind();
+	}
+
+	void UpdateLight(lazy::graphics::Shader &shader)
+	{
+		auto lights = GetEntities<PointLightComponent, TransformComponent>();
+
+		if (lights.size() == 0) { return ; }
+
+		auto [ light, transform ] = lights[0]->GetAll();
+
+		TransformComponent t(transform);
+
+		t.position = glm::vec3(cos(glfwGetTime()) * 1000.0f, 100.0f, 0.0f);
+		lights[0]->Set(t);
+
+		shader.setUniform3f("lightColor", light.Color);
+		shader.setUniform3f("lightDir", light.Dir);
+		shader.setUniform3f("lightPos", transform.position);
+	}
+
+	void RenderLightBillboard(PlayerCameraComponent &camera)
+	{
+		auto lights = GetEntities<PointLightComponent, TransformComponent>();
+
+		if (lights.size() == 0 ) { return ; }
+
+		auto [ light, transform ] = lights[0]->GetAll();
+
+		_billboard.bind();
+		_billboard.setUniform4x4f("viewMatrix", camera.view);
+		_billboard.setUniform4x4f("viewProjectionMatrix", camera.viewProjection);
+		_billboard.setUniform4x4f("projectionMatrix", camera.projection);
+		_billboard.setUniform3f("particlePosition", transform.position);
+
+		TextureManager::instance().bind("light_bulb_icon", 0);
+		_quad.draw();
+
+		_billboard.unbind();
 	}
 };

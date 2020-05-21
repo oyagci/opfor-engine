@@ -144,20 +144,20 @@ int main()
 	skyboxShader.setUniform1i("cubemap", 0);
 	skyboxShader.unbind();
 
-	auto cubeMeshes = engine.LoadMeshes("./Cube.fbx");
-	for (auto m : cubeMeshes) {
-		ecs::IEntityBase *c = engine.CreateEntity<MeshComponent,
-												  TransformComponent,
-												  SelectedComponent>();
-		MeshComponent mesh;
-		mesh.Id = m;
-		mesh.Shader = shaderId;
-		c->Set(mesh);
-
-		TransformComponent t;
-			t.scale = glm::vec3(100.0f, 100.0f, 100.0f);
-		c->Set(t);
-	}
+//	auto cubeMeshes = engine.LoadMeshes("./Cube.fbx");
+//	for (auto m : cubeMeshes) {
+//		ecs::IEntityBase *c = engine.CreateEntity<MeshComponent,
+//												  TransformComponent,
+//												  SelectedComponent>();
+//		MeshComponent mesh;
+//		mesh.Id = m;
+//		mesh.Shader = shaderId;
+//		c->Set(mesh);
+//
+//		TransformComponent t;
+//			t.scale = glm::vec3(100.0f, 100.0f, 100.0f);
+//		c->Set(t);
+//	}
 
 	auto sponza = engine.LoadMeshes("./Sponza/sponza.obj");
 	std::vector<MeshEntity*> sponzaMeshes;
@@ -185,6 +185,16 @@ int main()
 	DisplayComponent d;
 	d.display = engine.GetDisplay();
 	display->Set(d);
+
+	auto pointLight = engine.CreateEntity<PointLightComponent, TransformComponent, SelectedComponent>();
+	PointLightComponent pl;
+	pl.Color = glm::vec3(1.0f, 1.0f, 0.8f);
+	pl.Dir = glm::normalize(glm::vec3(-1.0f, -1.0f, -1.0f));
+	pointLight->Set(pl);
+
+	TransformComponent pt;
+	pt.position = glm::vec3(0.0f, 100.0f, 0.0f);
+	pointLight->Set(pt);
 
 	return engine::Engine::Instance().Run();
 }

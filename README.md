@@ -73,3 +73,5 @@ x11
 xi
 xrandr
 ```
+
+(Light Bulb icon)[https://icons8.com/icons/set/blunt-bulb] icon by (Icons8)[https://icons8.com]
