@@ -75,11 +75,12 @@ public:
 
 	void OnUpdate(float __unused deltaTime) override
 	{
-		auto player = GetEntities<PlayerCameraComponent>();
+		auto player = GetEntities<PlayerCameraComponent, TransformComponent>();
 
 		if (player.size() == 0) { return ; }
 
 		auto playerCamera = player[0]->Get<PlayerCameraComponent>();
+		auto playerTransform = player[0]->Get<TransformComponent>();
 
 		_framebuffer.Bind();
 
@@ -87,7 +88,7 @@ public:
 		glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 		glEnable(GL_DEPTH_TEST);
 
-		RenderMeshes(playerCamera);
+		RenderMeshes(playerCamera, playerTransform);
 		RenderSkybox(playerCamera);
 
 		_framebuffer.Unbind();
@@ -104,7 +105,7 @@ public:
 		_fbShader.unbind();
 	}
 
-	void RenderMeshes(PlayerCameraComponent &camera)
+	void RenderMeshes(PlayerCameraComponent &camera, TransformComponent &playerTransform)
 	{
 		auto meshes = GetEntities<MeshComponent, TransformComponent>();
 
@@ -118,6 +119,7 @@ public:
 			shader->setUniform4x4f("viewProjectionMatrix", camera.viewProjection);
 			shader->setUniform4x4f("viewMatrix", camera.view);
 			shader->setUniform4x4f("projectionMatrix", camera.projection);
+			shader->setUniform3f("viewPos", playerTransform.position);
 
 			glm::mat4 model(1.0f);
 			model = glm::scale(model, transform.scale);
