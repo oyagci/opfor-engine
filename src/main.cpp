@@ -107,6 +107,14 @@ int main()
 	engine.CreateComponentSystem<MeshRendererSystem>();
 	engine.CreateComponentSystem<ImguiSystem>();
 
+
+	TextureManager::instance().createTexture("prototype_tile_8", "./img/prototype_tile_8.png", {
+		{ GL_TEXTURE_MAG_FILTER, GL_LINEAR },
+		{ GL_TEXTURE_MIN_FILTER, GL_LINEAR },
+		{ GL_TEXTURE_WRAP_R, GL_REPEAT },
+		{ GL_TEXTURE_WRAP_S, GL_REPEAT },
+	}, GL_TEXTURE_2D);
+
 	auto player = engine.CreateEntity<PlayerCameraComponent, TransformComponent>();
 
 	PlayerCameraComponent p;

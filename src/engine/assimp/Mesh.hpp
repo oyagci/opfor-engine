@@ -10,6 +10,11 @@ private:
 	std::vector<std::string> _textures;
 
 public:
+	Mesh() : lazy::graphics::Mesh()
+	{
+		addTexture("prototype_tile_8");
+	}
+
 	void addTexture(std::string const &name)
 	{
 		_textures.push_back(name);
