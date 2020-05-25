@@ -3,17 +3,18 @@
 #include <vector>
 #include "Texture.hpp"
 #include "TextureManager.hpp"
+#include <fmt/format.h>
 
 namespace assimp {
 
 Model::Model(std::string const &path)
 {
 	Assimp::Importer import;
-	const aiScene *scene = import.ReadFile(path.c_str(), aiProcess_Triangulate | aiProcess_FlipUVs);
+	const aiScene *scene = import.ReadFile(path.c_str(), aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_CalcTangentSpace);
 
 	if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
 	{
-		std::cout << "Could not load model" << std::endl;
+		fmt::print("Could not load model");
 		return ;
 	}
 	_directory = path.substr(0, path.find_last_of('/'));
@@ -44,6 +45,10 @@ Mesh Model::processMesh(aiMesh *mesh, const aiScene *scene)
 		auto norm = mesh->mNormals[i];
 		engineMesh.addNormal(glm::vec3(norm.x, norm.y, norm.z));
 
+		// Vertex Tangent
+		auto tangent = mesh->mTangents[i];
+		engineMesh.addTangent(glm::vec3(tangent.x, tangent.y, tangent.z));
+
 		if (mesh->mTextureCoords[0]) { // Does the mesh contain texture coordinates?
 			glm::vec2 tex;
 			tex.x = mesh->mTextureCoords[0][i].x;
@@ -64,9 +69,17 @@ Mesh Model::processMesh(aiMesh *mesh, const aiScene *scene)
 	// Textures
 	if (mesh->mMaterialIndex > 0) {
 		aiMaterial *material = scene->mMaterials[mesh->mMaterialIndex];
-		auto textures = loadMaterialTextures(material, aiTextureType_DIFFUSE, GL_TEXTURE_2D);
-		for (auto &t : textures) {
-			engineMesh.addTexture(t);
+		auto diffuse = loadMaterialTextures(material, aiTextureType_DIFFUSE, GL_TEXTURE_2D);
+		for (auto &t : diffuse) {
+			engineMesh.addTexture(t, TextureType::TT_Diffuse);
+		}
+		auto specular = loadMaterialTextures(material, aiTextureType_SPECULAR, GL_TEXTURE_2D);
+		for (auto &s : specular) {
+			engineMesh.addTexture(s, TextureType::TT_Specular);
+		}
+		auto normal = loadMaterialTextures(material, aiTextureType_HEIGHT, GL_TEXTURE_2D);
+		for (auto &n : normal) {
+			engineMesh.addTexture(n, TextureType::TT_Normal);
 		}
 	}
 

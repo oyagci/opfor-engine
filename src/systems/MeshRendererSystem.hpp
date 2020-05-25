@@ -147,14 +147,38 @@ public:
 			model = glm::translate(model, transform.position);
 			shader->setUniform4x4f("modelMatrix", model);
 
+			TextureManager::instance().bind("default_normal", 2);
+
 			// Bind each texture
 			size_t currentTexture = 0;
 			for (auto &t : data->getTextures()) {
-				TextureManager::instance().bind(t, currentTexture);
+				switch (t.type) {
+				case assimp::TextureType::TT_Diffuse:
+					TextureManager::instance().bind(t.name, 0);
+					break ;
+				case assimp::TextureType::TT_Specular:
+					TextureManager::instance().bind(t.name, 1);
+					break ;
+				case assimp::TextureType::TT_Normal:
+					TextureManager::instance().bind(t.name, 2);
+					break ;
+				default:
+					fmt::print(stderr, "[WARNING] Texture type ({}) not handled\n",
+						t.type);
+					break ;
+				}
 				currentTexture++;
 			}
 
 			data->draw();
+
+			// Unbind Textures
+			glActiveTexture(GL_TEXTURE0);
+				glBindTexture(GL_TEXTURE_2D, 0);
+			glActiveTexture(GL_TEXTURE1);
+				glBindTexture(GL_TEXTURE_2D, 0);
+			glActiveTexture(GL_TEXTURE2);
+				glBindTexture(GL_TEXTURE_2D, 0);
 			shader->unbind();
 		}
 	}
@@ -188,16 +212,20 @@ public:
 
 		if (lights.size() == 0) { return ; }
 
-		auto [ light, transform ] = lights[0]->GetAll();
+		shader.setUniform1i("pointLightCount", lights.size());
 
-		shader.setUniform3f("pointLight.position", transform.position);
-		shader.setUniform3f("pointLight.ambient", light.Color);
-		shader.setUniform3f("pointLight.diffuse", light.Color);
-		shader.setUniform3f("pointLight.specular", light.Color);
+		for (size_t i = 0; i < lights.size(); i++) {
+			auto [ light, transform ] = lights[i]->GetAll();
 
-		shader.setUniform1f("pointLight.constant", light.constant);
-		shader.setUniform1f("pointLight.linear", light.linear);
-		shader.setUniform1f("pointLight.quadratic", light.quadratic);
+			shader.setUniform3f("pointLight[" + std::to_string(i) + "].position", transform.position);
+			shader.setUniform3f("pointLight[" + std::to_string(i) + "].ambient", light.Color);
+			shader.setUniform3f("pointLight[" + std::to_string(i) + "].diffuse", light.Color);
+			shader.setUniform3f("pointLight[" + std::to_string(i) + "].specular", light.Color);
+
+			shader.setUniform1f("pointLight[" + std::to_string(i) + "].constant", light.constant);
+			shader.setUniform1f("pointLight[" + std::to_string(i) + "].linear", light.linear);
+			shader.setUniform1f("pointLight[" + std::to_string(i) + "].quadratic", light.quadratic);
+		}
 	}
 
 	void RenderLightBillboard(PlayerCameraComponent &camera)
@@ -206,17 +234,19 @@ public:
 
 		if (lights.size() == 0 ) { return ; }
 
-		auto [ light, transform ] = lights[0]->GetAll();
+		for (auto const &lightEnt : lights) {
+			auto [ light, transform ] = lightEnt->GetAll();
 
-		_billboard.bind();
-		_billboard.setUniform4x4f("viewMatrix", camera.view);
-		_billboard.setUniform4x4f("viewProjectionMatrix", camera.viewProjection);
-		_billboard.setUniform4x4f("projectionMatrix", camera.projection);
-		_billboard.setUniform3f("particlePosition", transform.position);
+			_billboard.bind();
+			_billboard.setUniform4x4f("viewMatrix", camera.view);
+			_billboard.setUniform4x4f("viewProjectionMatrix", camera.viewProjection);
+			_billboard.setUniform4x4f("projectionMatrix", camera.projection);
+			_billboard.setUniform3f("particlePosition", transform.position);
 
-		TextureManager::instance().bind("light_bulb_icon", 0);
-		_quad.draw();
+			TextureManager::instance().bind("light_bulb_icon", 0);
+			_quad.draw();
 
-		_billboard.unbind();
+			_billboard.unbind();
+		}
 	}
 };

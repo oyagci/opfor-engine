@@ -3,6 +3,7 @@
 in vec3 FragPos;
 in vec3 Normal;
 in vec2 TexCoords;
+in mat3 TBN;
 
 out vec4 frag_color;
 
@@ -10,7 +11,6 @@ uniform vec3 lightColor;
 uniform vec3 lightDir;
 uniform vec3 lightPos;
 uniform vec3 viewPos;
-uniform sampler2D tex;
 
 struct DirectionalLight {
 	vec3 direction;
@@ -36,7 +36,18 @@ struct PointLight {
 	float quadratic;
 };
 
-uniform PointLight pointLight;
+struct Material {
+	sampler2D diffuse;  // 0
+	sampler2D specular; // 1
+	sampler2D normal;   // 2
+	float shininess;
+};
+
+#define MAX_NUM_POINT_LIGHTS	16
+
+uniform PointLight pointLight[MAX_NUM_POINT_LIGHTS];
+uniform int pointLightCount;
+uniform Material material;
 
 //vec4 CalcDirectionalLight(DirectionalLight light, vec3 normal)
 //{
@@ -60,7 +71,7 @@ uniform PointLight pointLight;
 //	return light;
 //}
 
-vec4 CalcPointLight(PointLight light, vec3 normal)
+vec3 CalcPointLight(PointLight light, vec3 normal, Material material)
 {
 	float dist = length(light.position - FragPos);
 	float attenuation = 1.0 / (light.constant + light.linear * dist + light.quadratic * (dist * dist));
@@ -80,13 +91,13 @@ vec4 CalcPointLight(PointLight light, vec3 normal)
 	vec3 reflect_dir = normalize(reflect(-light_dir, normal));
 	float specular_strength = 0.5;
 	float specular = pow(max(dot(view_dir, reflect_dir), 0.0), 32);
-	vec3 specular_light = specular_strength * specular * light.specular;
+	vec3 specular_light = vec3(texture(material.specular, TexCoords)) * specular * light.specular;
 
 	ambient_light *= attenuation;
 	diffuse_light *= attenuation;
 	specular_light *= attenuation;
 
-	vec4 result = vec4(ambient_light + diffuse_light + specular_light, 1.0);
+	vec3 result = vec3(ambient_light + diffuse_light + specular_light);
 
 	return result;
 }
@@ -95,7 +106,19 @@ void main()
 {
 	vec3 normal = normalize(Normal);
 //	vec4 light = CalcDirectionalLight(lightColor, lightDir, normal);
-	vec4 light = CalcPointLight(pointLight, normal);
 
-	frag_color = texture(tex, TexCoords) * light;
+	normal = texture(material.normal, TexCoords).rgb;
+	normal = normal * 2.0 - 1.0;
+	normal = normalize(TBN * normal);
+
+	vec3 lightResult = vec3(0.0, 0.0, 0.0);
+	for (int i = 0; i < pointLightCount; i++) {
+		lightResult += CalcPointLight(pointLight[i], normal, material);
+	}
+
+	vec4 tex = texture(material.diffuse, TexCoords);
+	if (tex.a < 0.0001)
+		discard ;
+
+	frag_color = texture(material.diffuse, TexCoords) * vec4(lightResult, 1.0);
 }

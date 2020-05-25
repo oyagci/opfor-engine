@@ -17,6 +17,9 @@ void TextureManager::createTexture(std::string const &name, std::string const &p
 
 void TextureManager::bind(std::string const &name, GLuint textureNumber)
 {
+	if (_textures.find(name) == _textures.end()) {
+		throw std::runtime_error("Texture does not exist");
+	}
 	_textures[name]->bind(textureNumber);
 }
 

@@ -89,7 +89,7 @@ MeshComponent initSkybox()
 		glm::uvec3(2, 7, 6)
 	};
 
-	mesh.addTexture("skybox-cubemap");
+	mesh.addTexture("skybox-cubemap", assimp::TextureType::TT_Diffuse);
 	for (const auto &v : verts) { mesh.addPosition(v); }
 	for (const auto &i : indices) { mesh.addTriangle(i); }
 	mesh.build();
@@ -115,6 +115,13 @@ int main()
 		{ GL_TEXTURE_WRAP_S, GL_REPEAT },
 	}, GL_TEXTURE_2D);
 
+	TextureManager::instance().createTexture("default_normal", "./img/default_normal.png", {
+		{ GL_TEXTURE_MAG_FILTER, GL_NEAREST },
+		{ GL_TEXTURE_MIN_FILTER, GL_NEAREST },
+		{ GL_TEXTURE_WRAP_R, GL_REPEAT },
+		{ GL_TEXTURE_WRAP_S, GL_REPEAT },
+	}, GL_TEXTURE_2D);
+
 	auto player = engine.CreateEntity<PlayerCameraComponent, TransformComponent>();
 
 	PlayerCameraComponent p;
@@ -129,12 +136,16 @@ int main()
 		t.position = glm::vec3(0.0f, 180.0f, -5.0f);
 	player->Set(t);
 
-	using MeshEntity = ecs::IEntity<MeshComponent, TransformComponent>;
-
 	auto [ shaderId, meshShader ] = ShaderManager::instance().Create();
 	meshShader.addVertexShader("./shaders/basic.vs.glsl")
 		.addFragmentShader("./shaders/basic.fs.glsl")
 		.link();
+
+	meshShader.bind();
+	meshShader.setUniform1i("material.diffuse", 0);
+	meshShader.setUniform1i("material.specular", 1);
+	meshShader.setUniform1i("material.normal", 2);
+	meshShader.unbind();
 
 	auto [ skyboxShaderId, skyboxShader ] = ShaderManager::instance().Create();
 	skyboxShader.addVertexShader("./shaders/cubemap.vs.glsl")
@@ -144,34 +155,32 @@ int main()
 	skyboxShader.setUniform1i("cubemap", 0);
 	skyboxShader.unbind();
 
-//	auto cubeMeshes = engine.LoadMeshes("./Cube.fbx");
-//	for (auto m : cubeMeshes) {
-//		ecs::IEntityBase *c = engine.CreateEntity<MeshComponent,
-//												  TransformComponent,
-//												  SelectedComponent>();
-//		MeshComponent mesh;
-//		mesh.Id = m;
-//		mesh.Shader = shaderId;
-//		c->Set(mesh);
-//
-//		TransformComponent t;
-//			t.scale = glm::vec3(100.0f, 100.0f, 100.0f);
-//		c->Set(t);
-//	}
+	auto cubeMeshes = engine.LoadMeshes("./dva/0.obj");
+	for (auto m : cubeMeshes) {
+		ecs::IEntityBase *c = engine.CreateEntity<MeshComponent,
+												  TransformComponent
+												  >();
+		MeshComponent mesh;
+		mesh.Id = m;
+		mesh.Shader = shaderId;
+		c->Set(mesh);
 
-	auto sponza = engine.LoadMeshes("./Sponza/sponza.obj");
-	std::vector<MeshEntity*> sponzaMeshes;
+		TransformComponent t;
+			t.scale = glm::vec3(100.0f, 100.0f, 100.0f);
+			t.position = glm::vec3(0.0f, 000.0f, 0.0f);
+		c->Set(t);
+	}
+
+	auto sponza = engine.LoadMeshes("Sponza/sponza.obj");
 	{
 		for (auto &m : sponza) {
-			MeshEntity *b = engine.CreateEntity<MeshComponent,
+			auto *b = engine.CreateEntity<MeshComponent,
 											    TransformComponent>();
 
 			MeshComponent mesh;
 			mesh.Id = m;
 			mesh.Shader = shaderId;
 			b->Set(mesh);
-
-			sponzaMeshes.push_back(b);
 		}
 	}
 
@@ -193,8 +202,16 @@ int main()
 	pointLight->Set(pl);
 
 	TransformComponent pt;
-	pt.position = glm::vec3(0.0f, 100.0f, 0.0f);
+	pt.position = glm::vec3(-500.0f, 100.0f, 0.0f);
 	pointLight->Set(pt);
+
+	auto pointLight2 = engine.CreateEntity<PointLightComponent, TransformComponent>();
+	pl.Color = glm::vec3(1.0f, 1.0f, 0.8f);
+	pl.Dir = glm::normalize(glm::vec3(-1.0f, -1.0f, -1.0f));
+	pointLight2->Set(pl);
+
+	pt.position = glm::vec3(500.0f, 100.0f, 0.0f);
+	pointLight2->Set(pt);
 
 	return engine::Engine::Instance().Run();
 }

@@ -57,6 +57,6 @@ void Texture::setParameter(GLenum target, GLenum param, GLenum value)
 
 void Texture::bind(GLuint textureNumber)
 {
-	glActiveTexture(textureNumber);
+	glActiveTexture(GL_TEXTURE0 + textureNumber);
 	glBindTexture(_target, _glId);
 }
