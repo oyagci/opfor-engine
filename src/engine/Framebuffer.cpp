@@ -30,12 +30,12 @@ Framebuffer::~Framebuffer()
 
 void Framebuffer::Bind()
 {
-	glBindFramebuffer(GL_FRAMEBUFFER, _id);
+	glBindFramebuffer(_bindType, _id);
 }
 
 void Framebuffer::Unbind()
 {
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	glBindFramebuffer(_bindType, 0);
 }
 
 bool Framebuffer::IsComplete()

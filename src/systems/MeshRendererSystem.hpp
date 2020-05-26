@@ -13,12 +13,14 @@
 #include "ShaderManager.hpp"
 #include <fmt/format.h>
 #include <glm/gtx/projection.hpp>
+#include "Engine.hpp"
 
 class MeshRendererSystem : public ecs::ComponentSystem
 {
 private:
 	lazy::graphics::Shader _fbShader;
 	lazy::graphics::Shader _billboard;
+	lazy::graphics::Shader _light;
 
 	engine::Framebuffer _framebuffer;
 	lazy::graphics::Mesh _quad;
@@ -75,11 +77,69 @@ private:
 			.link();
 	}
 
+	GLuint _gBuffer;
+	GLuint _gPosition;
+	GLuint _gNormal;
+	GLuint _gAlbedoSpec;
+	GLuint _gDepth;
+
+	void initGbuffer()
+	{
+
+		auto display = engine::Engine::Instance().GetDisplay();
+		auto [ width, height ] = std::tuple(display->getWidth(), display->getHeight());
+
+		glGenFramebuffers(1, &_gBuffer);
+		glBindFramebuffer(GL_FRAMEBUFFER, _gBuffer);
+
+		glGenTextures(1, &_gPosition);
+		glBindTexture(GL_TEXTURE_2D, _gPosition);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, width, height, 0, GL_RGBA, GL_FLOAT, nullptr);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, _gPosition, 0);
+
+		glGenTextures(1, &_gNormal);
+		glBindTexture(GL_TEXTURE_2D, _gNormal);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, width, height, 0, GL_RGBA, GL_FLOAT, nullptr);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, _gNormal, 0);
+
+		glGenTextures(1, &_gAlbedoSpec);
+		glBindTexture(GL_TEXTURE_2D, _gAlbedoSpec);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, GL_TEXTURE_2D, _gAlbedoSpec, 0);
+
+		glBindTexture(GL_TEXTURE_2D, 0);
+
+		glGenRenderbuffers(1, &_gDepth);
+		glBindRenderbuffer(GL_RENDERBUFFER, _gDepth);
+		glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, width, height);
+		glBindRenderbuffer(GL_RENDERBUFFER, 0);
+		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, _gDepth);
+
+		GLuint st = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+		assert(st == GL_FRAMEBUFFER_COMPLETE);
+
+		std::array<GLuint, 3> attachments = {
+			GL_COLOR_ATTACHMENT0,
+			GL_COLOR_ATTACHMENT1,
+			GL_COLOR_ATTACHMENT2
+		};
+		glDrawBuffers(3, attachments.data());
+
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	}
+
 public:
 	MeshRendererSystem() : _framebuffer(engine::Framebuffer_Type::RW)
 	{
 		initFramebuffer();
 		initBillboard();
+		initGbuffer();
 
 		TextureManager::instance().createTexture("light_bulb_icon", "./img/light_bulb_icon.png", {
 			{ GL_TEXTURE_WRAP_R, GL_WRAP_BORDER },
@@ -89,6 +149,11 @@ public:
 		}, GL_TEXTURE_2D);
 
 		assert(_framebuffer.IsComplete());
+
+		_light.addVertexShader("shaders/light.vs.glsl")
+			.addFragmentShader("shaders/light.fs.glsl")
+			.link();
+		assert(_light.isValid());
 	}
 
 	void OnUpdate(float __unused deltaTime) override
@@ -100,7 +165,9 @@ public:
 		auto playerCamera = player[0]->Get<PlayerCameraComponent>();
 		auto playerTransform = player[0]->Get<TransformComponent>();
 
-		_framebuffer.Bind();
+		glDisable(GL_BLEND);
+
+		glBindFramebuffer(GL_FRAMEBUFFER, _gBuffer);
 
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 		glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
@@ -108,20 +175,42 @@ public:
 
 		RenderMeshes(playerCamera, playerTransform);
 		RenderSkybox(playerCamera);
-		RenderLightBillboard(playerCamera);
 
-		_framebuffer.Unbind();
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-
-		glClearColor(1.0f, 0.0, 0.0f, 1.0f);
-		glClear(GL_COLOR_BUFFER_BIT);
+		glClearColor(0.0f, 0.0, 0.0f, 1.0f);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glDisable(GL_DEPTH_TEST);
 
+		_light.bind();
+
+		UpdateLight(_light);
+		_light.setUniform1i("gPosition", 0);
+		_light.setUniform1i("gNormal", 1);
+		_light.setUniform1i("gAlbedoSpec", 2);
+		_light.setUniform3f("viewPos", playerTransform.position);
+
+		// Bind GBuffer Textures
 		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, _framebuffer.GetColorTexture());
-		_fbShader.bind();
+			glBindTexture(GL_TEXTURE_2D, _gPosition);
+		glActiveTexture(GL_TEXTURE1);
+			glBindTexture(GL_TEXTURE_2D, _gNormal);
+		glActiveTexture(GL_TEXTURE2);
+			glBindTexture(GL_TEXTURE_2D, _gAlbedoSpec);
+
 		_quad.draw();
-		_fbShader.unbind();
+		_light.unbind();
+
+		// Unbind Textures
+		glActiveTexture(GL_TEXTURE0);
+			glBindTexture(GL_TEXTURE_2D, 0);
+		glActiveTexture(GL_TEXTURE1);
+			glBindTexture(GL_TEXTURE_2D, 0);
+		glActiveTexture(GL_TEXTURE2);
+			glBindTexture(GL_TEXTURE_2D, 0);
+
+		glEnable(GL_BLEND);
+		RenderLightBillboard(playerCamera);
 	}
 
 	void RenderMeshes(PlayerCameraComponent &camera, TransformComponent &playerTransform)
