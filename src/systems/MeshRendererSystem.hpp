@@ -159,6 +159,8 @@ public:
 	void OnUpdate(float __unused deltaTime) override
 	{
 		auto player = GetEntities<PlayerCameraComponent, TransformComponent>();
+		auto display = engine::Engine::Instance().GetDisplay();
+		auto [ width, height ] = std::tuple(display->getWidth(), display->getHeight());
 
 		if (player.size() == 0) { return ; }
 
@@ -174,7 +176,6 @@ public:
 		glEnable(GL_DEPTH_TEST);
 
 		RenderMeshes(playerCamera, playerTransform);
-		RenderSkybox(playerCamera);
 
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
@@ -209,7 +210,16 @@ public:
 		glActiveTexture(GL_TEXTURE2);
 			glBindTexture(GL_TEXTURE_2D, 0);
 
+
+		// Copy depth buffer to default framebuffer to enable depth testing with billboard
+		glBindFramebuffer(GL_READ_FRAMEBUFFER, _gBuffer);
+		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+		glBlitFramebuffer(0, 0, width, height, 0, 0, width, height, GL_DEPTH_BUFFER_BIT, GL_NEAREST);
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		glEnable(GL_BLEND);
+		glEnable(GL_DEPTH_TEST);
+
+		RenderSkybox(playerCamera);
 		RenderLightBillboard(playerCamera);
 	}
 
