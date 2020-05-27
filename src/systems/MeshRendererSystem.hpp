@@ -14,6 +14,7 @@
 #include <fmt/format.h>
 #include <glm/gtx/projection.hpp>
 #include "Engine.hpp"
+#include <random>
 
 class MeshRendererSystem : public ecs::ComponentSystem
 {
@@ -25,7 +26,15 @@ private:
 	engine::Framebuffer _framebuffer;
 	lazy::graphics::Mesh _quad;
 
-	void initQuad()
+	GLuint _ssaoFb;
+	GLuint _ssaoBlurFb;
+	GLuint _ssaoColorBuf;
+	GLuint _ssaoNoiseTex;
+	GLuint _ssaoBlurTex;
+	lazy::graphics::Shader _ssaoShader;
+	lazy::graphics::Shader _ssaoBlurShader;
+
+	void InitQuad()
 	{
 		std::array<glm::vec3, 4> pos = {
 			glm::vec3(-1.0f, -1.0f, 0.0f),
@@ -52,9 +61,9 @@ private:
 
 	}
 
-	void initFramebuffer()
+	void InitFramebuffer()
 	{
-		initQuad();
+		InitQuad();
 
 		_framebuffer.AttachColorBuffer();
 		_framebuffer.AttachDepthBuffer();
@@ -70,7 +79,7 @@ private:
 		assert(_fbShader.isValid());
 	}
 
-	void initBillboard()
+	void InitBillboard()
 	{
 		_billboard.addVertexShader("shaders/billboard.vs.glsl")
 			.addFragmentShader("shaders/billboard.fs.glsl")
@@ -83,9 +92,8 @@ private:
 	GLuint _gAlbedoSpec;
 	GLuint _gDepth;
 
-	void initGbuffer()
+	void InitGbuffer()
 	{
-
 		auto display = engine::Engine::Instance().GetDisplay();
 		auto [ width, height ] = std::tuple(display->getWidth(), display->getHeight());
 
@@ -97,6 +105,8 @@ private:
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, width, height, 0, GL_RGBA, GL_FLOAT, nullptr);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
 		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, _gPosition, 0);
 
 		glGenTextures(1, &_gNormal);
@@ -134,93 +144,125 @@ private:
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	}
 
-public:
-	MeshRendererSystem() : _framebuffer(engine::Framebuffer_Type::RW)
+	void InitSSAO()
 	{
-		initFramebuffer();
-		initBillboard();
-		initGbuffer();
-
-		TextureManager::instance().createTexture("light_bulb_icon", "./img/light_bulb_icon.png", {
-			{ GL_TEXTURE_WRAP_R, GL_WRAP_BORDER },
-			{ GL_TEXTURE_WRAP_S, GL_WRAP_BORDER },
-			{ GL_TEXTURE_MIN_FILTER, GL_NEAREST },
-			{ GL_TEXTURE_MAG_FILTER, GL_NEAREST },
-		}, GL_TEXTURE_2D);
-
-		assert(_framebuffer.IsComplete());
-
-		_light.addVertexShader("shaders/light.vs.glsl")
-			.addFragmentShader("shaders/light.fs.glsl")
-			.link();
-		assert(_light.isValid());
-	}
-
-	void OnUpdate(float __unused deltaTime) override
-	{
-		auto player = GetEntities<PlayerCameraComponent, TransformComponent>();
 		auto display = engine::Engine::Instance().GetDisplay();
 		auto [ width, height ] = std::tuple(display->getWidth(), display->getHeight());
 
-		if (player.size() == 0) { return ; }
+		_ssaoShader.addVertexShader("shaders/ssao.vs.glsl")
+			.addFragmentShader("shaders/ssao.fs.glsl")
+			.link();
+		assert(_ssaoShader.isValid());
 
-		auto playerCamera = player[0]->Get<PlayerCameraComponent>();
-		auto playerTransform = player[0]->Get<TransformComponent>();
+		glGenFramebuffers(1, &_ssaoFb);
+		glBindFramebuffer(GL_FRAMEBUFFER, _ssaoFb);
 
-		glDisable(GL_BLEND);
+		glGenTextures(1, &_ssaoColorBuf);
+		glBindTexture(GL_TEXTURE_2D, _ssaoColorBuf);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, width, height, 0, GL_RED, GL_FLOAT, nullptr);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
-		glBindFramebuffer(GL_FRAMEBUFFER, _gBuffer);
-
-		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-		glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
-		glEnable(GL_DEPTH_TEST);
-
-		RenderMeshes(playerCamera, playerTransform);
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, _ssaoColorBuf, 0);
+		assert(glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE);
 
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-		glClearColor(0.0f, 0.0, 0.0f, 1.0f);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		glDisable(GL_DEPTH_TEST);
+		GenSSAOKernel();
 
-		_light.bind();
+		_ssaoShader.bind();
+		_ssaoShader.setUniform1i("gPosition", 0);
+		_ssaoShader.setUniform1i("gNormal", 1);
+		_ssaoShader.setUniform1i("texNoise", 2);
+		_ssaoShader.unbind();
 
-		UpdateLight(_light);
-		_light.setUniform1i("gPosition", 0);
-		_light.setUniform1i("gNormal", 1);
-		_light.setUniform1i("gAlbedoSpec", 2);
-		_light.setUniform3f("viewPos", playerTransform.position);
+		_ssaoBlurShader.addVertexShader("shaders/ssao.vs.glsl")
+			.addFragmentShader("shaders/ssaoblur.fs.glsl")
+			.link();
 
-		// Bind GBuffer Textures
+		glGenFramebuffers(1, &_ssaoBlurFb);
+		glBindFramebuffer(GL_FRAMEBUFFER, _ssaoBlurFb);
+
+		glGenTextures(1, &_ssaoBlurFb);
+		glBindTexture(GL_TEXTURE_2D, _ssaoBlurFb);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, width, height, 0, GL_RED, GL_FLOAT, nullptr);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, _ssaoColorBuf, 0);
+	}
+
+	void GenSSAOKernel()
+	{
+		std::uniform_real_distribution<float> randomFloats(0.0f, 1.0f);
+		std::default_random_engine generator;
+		std::vector<glm::vec3> ssaoKernel;
+
+		auto lerp = [] (float a, float b, float f) -> float {
+			return a + f * (b - a);
+		};
+
+		for (size_t i = 0; i < 64; i++) {
+			glm::vec3 sample(randomFloats(generator) * 2.0f - 1.0f,
+							 randomFloats(generator) * 2.0f - 1.0f,
+							 randomFloats(generator));
+			sample = glm::normalize(sample);
+			sample *= randomFloats(generator);
+
+			// Make distribution closer to origin
+			float scale = (float)i / 64.0f;
+			scale = lerp(0.1f, 1.0f, scale * scale);
+			sample *= scale;
+
+			ssaoKernel.push_back(sample);
+		}
+
+		std::array<glm::vec3, 64> ssaoNoise;
+		for (size_t i = 0; i < 64; i++) {
+			glm::vec3 noise(randomFloats(generator) * 2.0f - 1.0f,
+							randomFloats(generator) * 2.0f - 1.0f,
+							0.0f);
+			ssaoNoise[i] = noise;
+		}
+
+		glGenTextures(1, &_ssaoNoiseTex);
+		glBindTexture(GL_TEXTURE_2D, _ssaoNoiseTex);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, 4, 4, 0, GL_RGB, GL_FLOAT, &ssaoNoise[0]);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+		glBindTexture(GL_TEXTURE_2D, 0);
+
+		_ssaoShader.bind();
+		GLuint sampleLoc = _ssaoShader.getUniformLocation("samples");
+		glUniform3fv(sampleLoc, 64, &ssaoKernel[0][0]);
+		_ssaoShader.unbind();
+	}
+
+	void RenderSSAO(PlayerCameraComponent &camera)
+	{
+		glBindFramebuffer(GL_FRAMEBUFFER, _ssaoFb);
+		_ssaoShader.bind();
+
+		glClear(GL_COLOR_BUFFER_BIT);
 		glActiveTexture(GL_TEXTURE0);
 			glBindTexture(GL_TEXTURE_2D, _gPosition);
 		glActiveTexture(GL_TEXTURE1);
 			glBindTexture(GL_TEXTURE_2D, _gNormal);
 		glActiveTexture(GL_TEXTURE2);
-			glBindTexture(GL_TEXTURE_2D, _gAlbedoSpec);
+			glBindTexture(GL_TEXTURE_2D, _ssaoNoiseTex);
 
+		_ssaoShader.setUniform4x4f("projectionMatrix", camera.projection);
 		_quad.draw();
-		_light.unbind();
+		_ssaoShader.unbind();
 
-		// Unbind Textures
+		glBindFramebuffer(GL_FRAMEBUFFER, _ssaoBlurFb);
 		glActiveTexture(GL_TEXTURE0);
-			glBindTexture(GL_TEXTURE_2D, 0);
-		glActiveTexture(GL_TEXTURE1);
-			glBindTexture(GL_TEXTURE_2D, 0);
-		glActiveTexture(GL_TEXTURE2);
-			glBindTexture(GL_TEXTURE_2D, 0);
-
-
-		// Copy depth buffer to default framebuffer to enable depth testing with billboard
-		glBindFramebuffer(GL_READ_FRAMEBUFFER, _gBuffer);
-		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
-		glBlitFramebuffer(0, 0, width, height, 0, 0, width, height, GL_DEPTH_BUFFER_BIT, GL_NEAREST);
+			glBindTexture(GL_TEXTURE_2D, _ssaoColorBuf);
+		_ssaoBlurShader.bind();
+		_quad.draw();
+		_ssaoShader.unbind();
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
-		glEnable(GL_BLEND);
-		glEnable(GL_DEPTH_TEST);
-
-		RenderSkybox(playerCamera);
-		RenderLightBillboard(playerCamera);
 	}
 
 	void RenderMeshes(PlayerCameraComponent &camera, TransformComponent &playerTransform)
@@ -347,5 +389,99 @@ public:
 
 			_billboard.unbind();
 		}
+	}
+
+public:
+	MeshRendererSystem() : _framebuffer(engine::Framebuffer_Type::RW)
+	{
+		InitFramebuffer();
+		InitBillboard();
+		InitGbuffer();
+		InitSSAO();
+
+		TextureManager::instance().createTexture("light_bulb_icon", "./img/light_bulb_icon.png", {
+			{ GL_TEXTURE_WRAP_R, GL_WRAP_BORDER },
+			{ GL_TEXTURE_WRAP_S, GL_WRAP_BORDER },
+			{ GL_TEXTURE_MIN_FILTER, GL_NEAREST },
+			{ GL_TEXTURE_MAG_FILTER, GL_NEAREST },
+		}, GL_TEXTURE_2D);
+
+		assert(_framebuffer.IsComplete());
+
+		_light.addVertexShader("shaders/light.vs.glsl")
+			.addFragmentShader("shaders/light.fs.glsl")
+			.link();
+		assert(_light.isValid());
+	}
+
+	void OnUpdate(float __unused deltaTime) override
+	{
+		auto player = GetEntities<PlayerCameraComponent, TransformComponent>();
+		auto display = engine::Engine::Instance().GetDisplay();
+		auto [ width, height ] = std::tuple(display->getWidth(), display->getHeight());
+
+		if (player.size() == 0) { return ; }
+
+		auto playerCamera = player[0]->Get<PlayerCameraComponent>();
+		auto playerTransform = player[0]->Get<TransformComponent>();
+
+		glDisable(GL_BLEND);
+
+		glBindFramebuffer(GL_FRAMEBUFFER, _gBuffer);
+
+			glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+			glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
+			glEnable(GL_DEPTH_TEST);
+
+			RenderMeshes(playerCamera, playerTransform);
+
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+		glClearColor(0.0f, 0.0, 0.0f, 1.0f);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		glDisable(GL_DEPTH_TEST);
+
+		// Lighting pass
+		_light.bind();
+			UpdateLight(_light);
+			_light.setUniform1i("gPosition", 0);
+			_light.setUniform1i("gNormal", 1);
+			_light.setUniform1i("gAlbedoSpec", 2);
+			_light.setUniform1i("gSSAO", 3);
+			_light.setUniform3f("viewPos", playerTransform.position);
+
+			// Bind GBuffer Textures
+			glActiveTexture(GL_TEXTURE0);
+				glBindTexture(GL_TEXTURE_2D, _gPosition);
+			glActiveTexture(GL_TEXTURE1);
+				glBindTexture(GL_TEXTURE_2D, _gNormal);
+			glActiveTexture(GL_TEXTURE2);
+				glBindTexture(GL_TEXTURE_2D, _gAlbedoSpec);
+			glActiveTexture(GL_TEXTURE3);
+				glBindTexture(GL_TEXTURE_2D, _ssaoBlurTex);
+
+			_quad.draw();
+		_light.unbind();
+
+		// Unbind Textures
+		glActiveTexture(GL_TEXTURE0);
+			glBindTexture(GL_TEXTURE_2D, 0);
+		glActiveTexture(GL_TEXTURE1);
+			glBindTexture(GL_TEXTURE_2D, 0);
+		glActiveTexture(GL_TEXTURE2);
+			glBindTexture(GL_TEXTURE_2D, 0);
+
+		// Copy depth buffer to default framebuffer to enable depth testing with billboard
+		// and other shaders
+		glBindFramebuffer(GL_READ_FRAMEBUFFER, _gBuffer);
+		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+		glBlitFramebuffer(0, 0, width, height, 0, 0, width, height, GL_DEPTH_BUFFER_BIT, GL_NEAREST);
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		glEnable(GL_BLEND);
+		glEnable(GL_DEPTH_TEST);
+
+		RenderSkybox(playerCamera);
+		RenderLightBillboard(playerCamera);
+		RenderSSAO(playerCamera);
 	}
 };

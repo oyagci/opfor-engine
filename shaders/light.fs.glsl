@@ -11,6 +11,7 @@ struct PointLight {
 	float constant;
 	float linear;
 	float quadratic;
+	float radius;
 };
 
 out vec4 frag_color;
@@ -19,13 +20,14 @@ uniform vec3 viewPos;
 uniform sampler2D gPosition;
 uniform sampler2D gNormal;
 uniform sampler2D gAlbedoSpec;
+uniform sampler2D gSSAO;
 
 uniform PointLight pointLight[MAX_NUM_POINT_LIGHTS];
 uniform int pointLightCount;
 
 in vec2 TexCoords;
 
-vec3 CalcPointLight(PointLight light, vec3 fragPos, vec3 normal, float spec)
+vec3 CalcPointLight(PointLight light, vec3 fragPos, vec3 normal, float spec, float ao)
 {
 	float dist = length(light.position - fragPos);
 	float attenuation = 1.0 / (light.constant + light.linear * dist + light.quadratic * (dist * dist));
@@ -33,8 +35,8 @@ vec3 CalcPointLight(PointLight light, vec3 fragPos, vec3 normal, float spec)
 	vec3 light_dir = normalize(light.position - fragPos);
 
 	/// Ambient
-	float ambient_strength = 0.1;
-	vec3 ambient_light = ambient_strength * light.ambient;
+	float ambient_strength = 0.3;
+	vec3 ambient_light = ambient_strength * light.ambient * ao;
 
 	/// Diffuse
 	float diffuse_strength = max(dot(normal, light_dir), 0.0);
@@ -61,10 +63,11 @@ void main()
 	vec3  normal = texture(gNormal, TexCoords).rgb;
 	vec3  albedo = texture(gAlbedoSpec, TexCoords).rgb;
 	float specular = texture(gAlbedoSpec, TexCoords).a;
+	float ao = texture(gSSAO, TexCoords).r;
 
 	vec3 lightResult = vec3(0.0, 0.0, 0.0);
 	for (int i = 0; i < pointLightCount; i++) {
-		lightResult += CalcPointLight(pointLight[i], fragPos, normal, specular);
+		lightResult += CalcPointLight(pointLight[i], fragPos, normal, specular, ao);
 	}
 
 	frag_color = vec4(texture(gAlbedoSpec, TexCoords).rgb, 1.0) * vec4(lightResult, 1.0);
