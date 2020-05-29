@@ -49,6 +49,9 @@ public:
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
 
+		bool show = true;
+		ImGui::ShowDemoWindow(&show);
+
 		auto selectedEnt = GetEntities<TransformComponent, SelectedComponent>();
 		if (selectedEnt.size() > 0) {
 

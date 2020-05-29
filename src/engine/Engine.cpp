@@ -16,6 +16,7 @@ Engine::Engine()
 	_display->enableCap(GL_BLEND);
 	_display->setFullscreen(true);
 	_display->showCursor(false);
+	glEnable(GL_DEBUG_OUTPUT);
 
 	maths::transform t = { glm::vec3(32, 64, 32), glm::quat(), glm::vec3(1), nullptr };
 	_camera = std::make_unique<Camera>(*_display, t);

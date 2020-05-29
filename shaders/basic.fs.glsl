@@ -17,6 +17,7 @@ struct Material {
 };
 
 uniform Material material;
+uniform samplerCube depthMap;
 
 void main()
 {

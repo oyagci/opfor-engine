@@ -155,7 +155,7 @@ int main()
 	skyboxShader.setUniform1i("cubemap", 0);
 	skyboxShader.unbind();
 
-	auto cubeMeshes = engine.LoadMeshes("./dva/0.obj");
+	auto cubeMeshes = engine.LoadMeshes("models/dva/0.obj");
 	for (auto m : cubeMeshes) {
 		ecs::IEntityBase *c = engine.CreateEntity<MeshComponent,
 												  TransformComponent
@@ -171,7 +171,7 @@ int main()
 		c->Set(t);
 	}
 
-	auto sponza = engine.LoadMeshes("Sponza/sponza.obj");
+	auto sponza = engine.LoadMeshes("models/Sponza/sponza.obj");
 	{
 		for (auto &m : sponza) {
 			auto *b = engine.CreateEntity<MeshComponent,
@@ -205,13 +205,13 @@ int main()
 	pt.position = glm::vec3(-500.0f, 100.0f, 0.0f);
 	pointLight->Set(pt);
 
-	auto pointLight2 = engine.CreateEntity<PointLightComponent, TransformComponent>();
-	pl.Color = glm::vec3(1.0f, 1.0f, 0.8f);
-	pl.Dir = glm::normalize(glm::vec3(-1.0f, -1.0f, -1.0f));
-	pointLight2->Set(pl);
-
-	pt.position = glm::vec3(500.0f, 100.0f, 0.0f);
-	pointLight2->Set(pt);
+//	auto pointLight2 = engine.CreateEntity<PointLightComponent, TransformComponent>();
+//	pl.Color = glm::vec3(1.0f, 1.0f, 0.8f);
+//	pl.Dir = glm::normalize(glm::vec3(-1.0f, -1.0f, -1.0f));
+//	pointLight2->Set(pl);
+//
+//	pt.position = glm::vec3(500.0f, 100.0f, 0.0f);
+//	pointLight2->Set(pt);
 
 	return engine::Engine::Instance().Run();
 }
