@@ -32,9 +32,9 @@ void Model::processNode(aiNode *node, const aiScene *scene)
 	}
 }
 
-Mesh Model::processMesh(aiMesh *mesh, const aiScene *scene)
+engine::Mesh Model::processMesh(aiMesh *mesh, const aiScene *scene)
 {
-	Mesh engineMesh;
+	engine::Mesh engineMesh;
 
 	for (unsigned int i = 0; i < mesh->mNumVertices; i++) {
 		// Vertex Position
@@ -71,15 +71,15 @@ Mesh Model::processMesh(aiMesh *mesh, const aiScene *scene)
 		aiMaterial *material = scene->mMaterials[mesh->mMaterialIndex];
 		auto diffuse = loadMaterialTextures(material, aiTextureType_DIFFUSE, GL_TEXTURE_2D);
 		for (auto &t : diffuse) {
-			engineMesh.addTexture(t, TextureType::TT_Diffuse);
+			engineMesh.addTexture(t, engine::Mesh::TextureType::TT_Diffuse);
 		}
 		auto specular = loadMaterialTextures(material, aiTextureType_SPECULAR, GL_TEXTURE_2D);
 		for (auto &s : specular) {
-			engineMesh.addTexture(s, TextureType::TT_Specular);
+			engineMesh.addTexture(s, engine::Mesh::TextureType::TT_Specular);
 		}
 		auto normal = loadMaterialTextures(material, aiTextureType_HEIGHT, GL_TEXTURE_2D);
 		for (auto &n : normal) {
-			engineMesh.addTexture(n, TextureType::TT_Normal);
+			engineMesh.addTexture(n, engine::Mesh::TextureType::TT_Normal);
 		}
 	}
 

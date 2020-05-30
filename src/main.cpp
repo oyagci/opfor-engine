@@ -20,7 +20,7 @@ using namespace engine;
 MeshComponent initSkybox()
 {
 	MeshComponent meshComponent;
-	assimp::Mesh mesh;
+	engine::Mesh mesh;
 	GLuint textureId;
 
 	const std::array<std::string, 6> paths = {
@@ -89,7 +89,7 @@ MeshComponent initSkybox()
 		glm::uvec3(2, 7, 6)
 	};
 
-	mesh.addTexture("skybox-cubemap", assimp::TextureType::TT_Diffuse);
+	mesh.addTexture("skybox-cubemap", engine::Mesh::TextureType::TT_Diffuse);
 	for (const auto &v : verts) { mesh.addPosition(v); }
 	for (const auto &i : indices) { mesh.addTriangle(i); }
 	mesh.build();

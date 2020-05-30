@@ -6,6 +6,7 @@
 #include "ecs/ecs.hpp"
 #include "EngineObject.hpp"
 #include "assimp/Model.hpp"
+#include "Mesh.hpp"
 #include <unordered_map>
 
 using namespace lazy;
@@ -36,7 +37,7 @@ private:
 
 	std::vector<std::unique_ptr<EngineObject>> _engineObjects;
 
-	std::unordered_map<unsigned int, std::unique_ptr<assimp::Mesh>> _meshes;
+	std::unordered_map<unsigned int, std::unique_ptr<Mesh>> _meshes;
 
 	static unsigned int _nextId;
 
@@ -96,7 +97,7 @@ public:
 
 		ids.reserve(model.getMeshes().size());
 		for (auto &m : model.getMeshes()) {
-			auto to_ptr = std::make_unique<assimp::Mesh>(std::move(m));
+			auto to_ptr = std::make_unique<Mesh>(std::move(m));
 
 			_meshes[_nextId] = std::move(to_ptr);
 			ids.push_back(_nextId);
@@ -107,15 +108,15 @@ public:
 		return ids;
 	}
 
-	unsigned int AddMesh(assimp::Mesh mesh)
+	unsigned int AddMesh(Mesh mesh)
 	{
-		auto to_ptr = std::make_unique<assimp::Mesh>(std::move(mesh));
+		auto to_ptr = std::make_unique<Mesh>(std::move(mesh));
 		_meshes[_nextId] = std::move(to_ptr);
 
 		return _nextId++;
 	}
 
-	assimp::Mesh *GetMesh(unsigned int id)
+	Mesh *GetMesh(unsigned int id)
 	{
 		auto mesh = _meshes.find(id);
 

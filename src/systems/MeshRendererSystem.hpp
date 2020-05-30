@@ -15,7 +15,6 @@
 #include <glm/gtx/projection.hpp>
 #include "Engine.hpp"
 #include <random>
-#include <atomic>
 
 class GBuffer
 {
@@ -116,7 +115,7 @@ private:
 	lazy::graphics::Shader _billboard;
 	lazy::graphics::Shader _light;
 	lazy::graphics::Shader _shadow;
-	lazy::graphics::Mesh _quad;
+	engine::Mesh _quad;
 
 	GLuint _ssaoFb;
 	GLuint _ssaoBlurFb;
@@ -394,13 +393,13 @@ private:
 			size_t currentTexture = 0;
 			for (auto &t : data->getTextures()) {
 				switch (t.type) {
-				case assimp::TextureType::TT_Diffuse:
+				case engine::Mesh::TextureType::TT_Diffuse:
 					TextureManager::instance().bind(t.name, 0);
 					break ;
-				case assimp::TextureType::TT_Specular:
+				case engine::Mesh::TextureType::TT_Specular:
 					TextureManager::instance().bind(t.name, 1);
 					break ;
-				case assimp::TextureType::TT_Normal:
+				case engine::Mesh::TextureType::TT_Normal:
 					TextureManager::instance().bind(t.name, 2);
 					break ;
 				default:
