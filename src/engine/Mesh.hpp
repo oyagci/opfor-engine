@@ -2,11 +2,12 @@
 
 #include "lazy.hpp"
 #include <vector>
+#include "IDrawable.hpp"
 
 namespace engine
 {
 
-class Mesh
+class Mesh : public IDrawable
 {
 public:
 	enum class TextureType {
@@ -55,7 +56,7 @@ public:
 
 	Mesh &build();
 
-	void draw() const;
+	void Draw() const override;
 	std::vector<Texture> const &getTextures() const;
 };
 

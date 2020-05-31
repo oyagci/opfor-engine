@@ -1,31 +1,26 @@
 #pragma once
 #include <vector>
 #include "lazy.hpp"
+#include "IDrawable.hpp"
 
 namespace engine {
-
-class Mesh;
 
 ///
 /// Group together (batch) multiple meshes that can be rendered in a single drawcall
 ///
-class Batch
+class Batch : public IDrawable
 {
 private:
-	struct BatchMesh {
-		std::vector<GLfloat> positions;
-		std::vector<GLfloat> normals;
-		std::vector<GLfloat> uvs;
-		std::vector<GLfloat> tangents;
-		std::vector<GLfloat> materials;
-		std::vector<GLuint>  indices;
-	};
+	std::vector<GLfloat> _positions;
+	std::vector<GLfloat> _normals;
+	std::vector<GLfloat> _uvs;
+	std::vector<GLfloat> _tangents;
+	std::vector<GLfloat> _materials;
+	std::vector<GLuint>  _indices;
 
 	GLuint _vao;
 	GLuint _vbo;
 	GLuint _ibo;
-
-	BatchMesh _batchMesh;
 
 	// On OpenGL 4, the minimun number of texture units must be at least 80
 	static constexpr GLuint MaxNumberOfTextureUnits = 80;
@@ -34,13 +29,20 @@ public:
 	Batch();
 
 	/// Add a mesh to the batch
-	void AddMesh(Mesh const &m);
+	void AddMesh(
+		std::vector<GLfloat> const &positions,
+		std::vector<GLfloat> const &normals,
+		std::vector<GLfloat> const &uvs,
+		std::vector<GLfloat> const &tangents,
+		std::vector<GLuint>  const &textures,
+		std::vector<GLuint>  const &indices
+	);
 
 	/// After this, the batch can be drawn with a call to Draw()
 	void Build();
 
 	/// Draw the batch
-	void Draw();
+	void Draw() const override;
 };
 
 }

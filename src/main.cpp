@@ -4,16 +4,19 @@
 #include "systems/MeshRendererSystem.hpp"
 #include "systems/SkyboxRendererSystem.hpp"
 #include "systems/ImguiSystem.hpp"
+#include "systems/BatchRendererSystem.hpp"
 #include "components/PlayerCameraComponent.hpp"
 #include "components/TransformComponent.hpp"
 #include "components/SkyboxComponent.hpp"
 #include "components/SelectedComponent.hpp"
+#include "components/BatchComponent.hpp"
 #include "stb_image.h"
 #include "lazy.hpp"
 #include "ShaderManager.hpp"
 #include <fmt/format.h>
 #include <utility>
 #include <string>
+#include "Batch.hpp"
 
 using namespace engine;
 
@@ -155,20 +158,48 @@ int main()
 	skyboxShader.setUniform1i("cubemap", 0);
 	skyboxShader.unbind();
 
-	auto cubeMeshes = engine.LoadMeshes("models/dva/0.obj");
-	for (auto m : cubeMeshes) {
-		ecs::IEntityBase *c = engine.CreateEntity<MeshComponent,
-												  TransformComponent
-												  >();
-		MeshComponent mesh;
-		mesh.Id = m;
-		mesh.Shader = shaderId;
-		c->Set(mesh);
+//	auto cubeMeshes = engine.LoadMeshes("models/dva/0.obj");
+//	for (auto m : cubeMeshes) {
+//		ecs::IEntityBase *c = engine.CreateEntity<MeshComponent,
+//												  TransformComponent
+//												  >();
+//		MeshComponent mesh;
+//		mesh.Id = m;
+//		mesh.Shader = shaderId;
+//		c->Set(mesh);
+//
+//		TransformComponent t;
+//			t.scale = glm::vec3(100.0f, 100.0f, 100.0f);
+//			t.position = glm::vec3(0.0f, 0.0f, 0.0f);
+//		c->Set(t);
+//	}
 
+	auto dvaMeshes = engine.LoadMeshes("models/dva/0.obj");
+	auto batch = std::make_unique<Batch>();
+	for (auto const &meshId : dvaMeshes) {
+		auto mesh = reinterpret_cast<engine::Mesh*>(engine.GetMesh(meshId));
+		batch->AddMesh(
+			mesh->GetPositions(),
+			mesh->GetNormals(),
+			mesh->GetUVs(),
+			mesh->GetTangents(),
+			mesh->GetTextureIDs(),
+			mesh->GetIndices());
+	}
+	batch->Build();
+
+	unsigned int batchId = engine.AddBatch(std::move(batch));
+
+	auto *batchEnt = engine.CreateEntity<MeshComponent, TransformComponent>();
+	{
 		TransformComponent t;
 			t.scale = glm::vec3(100.0f, 100.0f, 100.0f);
-			t.position = glm::vec3(0.0f, 000.0f, 0.0f);
-		c->Set(t);
+			t.position = glm::vec3(0.0f, 0.0f, 0.0f);
+		MeshComponent mesh;
+			mesh.Id = batchId;
+			mesh.Shader = shaderId;
+		batchEnt->Set(t);
+		batchEnt->Set(mesh);
 	}
 
 	auto sponza = engine.LoadMeshes("models/Sponza/sponza.obj");

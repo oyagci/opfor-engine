@@ -43,7 +43,7 @@ public:
 
 		glDepthMask(GL_FALSE);
 		TextureManager::instance().bind("skybox-cubemap", 0);
-		mesh->draw();
+		mesh->Draw();
 		glDepthMask(GL_TRUE);
 
 		_shader.unbind();

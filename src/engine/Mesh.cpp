@@ -173,7 +173,7 @@ namespace engine
 		return *this;
 	}
 
-	void Mesh::draw() const
+	void Mesh::Draw() const
 	{
 		glBindVertexArray(vao);
 		glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, nullptr);

@@ -15,99 +15,7 @@
 #include <glm/gtx/projection.hpp>
 #include "Engine.hpp"
 #include <random>
-
-class GBuffer
-{
-private:
-	GLuint _gBuffer;
-	GLuint _gPosition;
-	GLuint _gNormal;
-	GLuint _gAlbedoSpec;
-	GLuint _gDepth;
-
-	void Init()
-	{
-		auto display = engine::Engine::Instance().GetDisplay();
-		auto [ width, height ] = std::tuple(display->getWidth(), display->getHeight());
-
-		glGenFramebuffers(1, &_gBuffer);
-		glBindFramebuffer(GL_FRAMEBUFFER, _gBuffer);
-
-		glGenTextures(1, &_gPosition);
-		glBindTexture(GL_TEXTURE_2D, _gPosition);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, width, height, 0, GL_RGBA, GL_FLOAT, nullptr);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
-		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, _gPosition, 0);
-
-		glGenTextures(1, &_gNormal);
-		glBindTexture(GL_TEXTURE_2D, _gNormal);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, width, height, 0, GL_RGBA, GL_FLOAT, nullptr);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, _gNormal, 0);
-
-		glGenTextures(1, &_gAlbedoSpec);
-		glBindTexture(GL_TEXTURE_2D, _gAlbedoSpec);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, GL_TEXTURE_2D, _gAlbedoSpec, 0);
-
-		glBindTexture(GL_TEXTURE_2D, 0);
-
-		glGenRenderbuffers(1, &_gDepth);
-		glBindRenderbuffer(GL_RENDERBUFFER, _gDepth);
-		glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, width, height);
-		glBindRenderbuffer(GL_RENDERBUFFER, 0);
-		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, _gDepth);
-
-		GLuint st = glCheckFramebufferStatus(GL_FRAMEBUFFER);
-		assert(st == GL_FRAMEBUFFER_COMPLETE);
-
-		std::array<GLuint, 3> attachments = {
-			GL_COLOR_ATTACHMENT0,
-			GL_COLOR_ATTACHMENT1,
-			GL_COLOR_ATTACHMENT2
-		};
-		glDrawBuffers(3, attachments.data());
-
-		glBindFramebuffer(GL_FRAMEBUFFER, 0);
-	}
-
-public:
-	GBuffer()
-	{
-		Init();
-	}
-
-	~GBuffer()
-	{
-		glDeleteFramebuffers(1, &_gBuffer);
-		glDeleteTextures(1, &_gPosition);
-		glDeleteTextures(1, &_gNormal);
-		glDeleteTextures(1, &_gAlbedoSpec);
-		glDeleteTextures(1, &_gDepth);
-	}
-
-	void Bind()
-	{
-		glBindFramebuffer(GL_FRAMEBUFFER, _gBuffer);
-	}
-
-	void Unbind()
-	{
-		glBindFramebuffer(GL_FRAMEBUFFER, 0);
-	}
-
-	GLuint GetFramebufferId() { return _gBuffer; }
-	GLuint GetPositionTex() { return _gPosition; }
-	GLuint GetNormalTex() { return _gNormal; }
-	GLuint GetAlbedoSpecTex() { return _gAlbedoSpec; }
-	GLuint GetDepthTex() { return _gDepth; }
-};
+#include "GBuffer.hpp"
 
 class MeshRendererSystem : public ecs::ComponentSystem
 {
@@ -333,14 +241,14 @@ private:
 			glBindTexture(GL_TEXTURE_2D, _ssaoNoiseTex);
 
 		_ssaoShader.setUniform4x4f("projectionMatrix", camera.projection);
-		_quad.draw();
+		_quad.Draw();
 		_ssaoShader.unbind();
 
 		glBindFramebuffer(GL_FRAMEBUFFER, _ssaoBlurFb);
 		glActiveTexture(GL_TEXTURE0);
 			glBindTexture(GL_TEXTURE_2D, _ssaoColorBuf);
 		_ssaoBlurShader.bind();
-		_quad.draw();
+		_quad.Draw();
 		_ssaoShader.unbind();
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	}
@@ -359,7 +267,7 @@ private:
 			model = glm::translate(model, transform.position);
 			_shadow.setUniform4x4f("modelMatrix", model);
 
-			data->draw();
+			data->Draw();
 
 		}
 	}
@@ -391,26 +299,29 @@ private:
 
 			// Bind each texture
 			size_t currentTexture = 0;
-			for (auto &t : data->getTextures()) {
-				switch (t.type) {
-				case engine::Mesh::TextureType::TT_Diffuse:
-					TextureManager::instance().bind(t.name, 0);
-					break ;
-				case engine::Mesh::TextureType::TT_Specular:
-					TextureManager::instance().bind(t.name, 1);
-					break ;
-				case engine::Mesh::TextureType::TT_Normal:
-					TextureManager::instance().bind(t.name, 2);
-					break ;
-				default:
-					fmt::print(stderr, "[WARNING] Texture type ({}) not handled\n",
-						t.type);
-					break ;
+			auto meshCast = dynamic_cast<engine::Mesh*>(data);
+			if (meshCast != nullptr) {
+				for (auto &t : meshCast->getTextures()) {
+					switch (t.type) {
+					case engine::Mesh::TextureType::TT_Diffuse:
+						TextureManager::instance().bind(t.name, 0);
+						break ;
+					case engine::Mesh::TextureType::TT_Specular:
+						TextureManager::instance().bind(t.name, 1);
+						break ;
+					case engine::Mesh::TextureType::TT_Normal:
+						TextureManager::instance().bind(t.name, 2);
+						break ;
+					default:
+						fmt::print(stderr, "[WARNING] Texture type ({}) not handled\n",
+							t.type);
+						break ;
+					}
+					currentTexture++;
 				}
-				currentTexture++;
 			}
 
-			data->draw();
+			data->Draw();
 
 			// Unbind Textures
 			glActiveTexture(GL_TEXTURE0);
@@ -440,7 +351,7 @@ private:
 
 		glDepthMask(GL_FALSE);
 		TextureManager::instance().bind("skybox-cubemap", 0);
-		mesh->draw();
+		mesh->Draw();
 		glDepthMask(GL_TRUE);
 
 		shader->unbind();
@@ -484,7 +395,7 @@ private:
 			_billboard.setUniform3f("particlePosition", transform.position);
 
 			TextureManager::instance().bind("light_bulb_icon", 0);
-			_quad.draw();
+			_quad.Draw();
 
 			_billboard.unbind();
 		}
@@ -514,7 +425,7 @@ private:
 			glActiveTexture(GL_TEXTURE4);
 				glBindTexture(GL_TEXTURE_CUBE_MAP, _depthCubemap);
 
-			_quad.draw();
+			_quad.Draw();
 		_light.unbind();
 
 		// Unbind Textures

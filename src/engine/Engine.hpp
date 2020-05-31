@@ -7,6 +7,7 @@
 #include "EngineObject.hpp"
 #include "assimp/Model.hpp"
 #include "Mesh.hpp"
+#include "Batch.hpp"
 #include <unordered_map>
 
 using namespace lazy;
@@ -37,7 +38,8 @@ private:
 
 	std::vector<std::unique_ptr<EngineObject>> _engineObjects;
 
-	std::unordered_map<unsigned int, std::unique_ptr<Mesh>> _meshes;
+	std::unordered_map<unsigned int, std::unique_ptr<IDrawable>> _meshes;
+	std::unordered_map<unsigned int, std::unique_ptr<Batch>> _batches;
 
 	static unsigned int _nextId;
 
@@ -116,12 +118,30 @@ public:
 		return _nextId++;
 	}
 
-	Mesh *GetMesh(unsigned int id)
+	IDrawable *GetMesh(unsigned int id)
 	{
 		auto mesh = _meshes.find(id);
 
 		if (mesh != _meshes.end()) {
 			return mesh->second.get();
+		}
+
+		return nullptr;
+	}
+
+	unsigned int AddBatch(std::unique_ptr<Batch> batch)
+	{
+		_meshes[_nextId] = std::move(batch);
+
+		return _nextId++;
+	}
+
+	Batch *GetBatch(unsigned int id)
+	{
+		auto batch = _batches.find(id);
+
+		if (batch != _batches.end()) {
+			return batch->second.get();
 		}
 
 		return nullptr;

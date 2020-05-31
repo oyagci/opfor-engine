@@ -43,6 +43,7 @@ srcs = [
   'src/engine/assimp/Model.cpp',
   'src/engine/Framebuffer.cpp',
   'src/engine/Mesh.cpp',
+  'src/engine/Batch.cpp',
 ]
 
 imgui = [
