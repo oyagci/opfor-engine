@@ -46,6 +46,13 @@ public:
 	Mesh &addTriangle(const glm::u32vec3 &triangle);
 	Mesh &addTexture(std::string const &name, TextureType type);
 
+	std::vector<GLfloat> const &GetPositions() const { return vPositions; }
+	std::vector<GLfloat> const &GetNormals() const { return vNormals; }
+	std::vector<GLfloat> const &GetUVs() const { return vUvs; }
+	std::vector<GLfloat> const &GetTangents() const { return vTangents; }
+	std::vector<GLuint>  const &GetIndices() const { return indices; }
+	std::vector<GLuint>  const GetTextureIDs() const;
+
 	Mesh &build();
 
 	void draw() const;

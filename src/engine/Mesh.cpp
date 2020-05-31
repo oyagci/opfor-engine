@@ -1,5 +1,6 @@
 #include "Mesh.hpp"
 #include <fmt/format.h>
+#include "TextureManager.hpp"
 
 namespace engine
 {
@@ -177,6 +178,18 @@ namespace engine
 		glBindVertexArray(vao);
 		glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, nullptr);
 		glBindVertexArray(0);
+	}
+
+	std::vector<GLuint> const Mesh::GetTextureIDs() const
+	{
+		std::vector<GLuint> ids(textures.size());
+
+		for (auto const &t : textures) {
+			GLuint id = TextureManager::instance().get(t.name);
+			ids.push_back(id);
+		}
+
+		return ids;
 	}
 	
 }

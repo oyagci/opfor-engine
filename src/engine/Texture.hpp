@@ -31,6 +31,7 @@ public:
 	int width() const { return _width; }
 	int height() const { return _height; }
 	int nChannel() const { return _nChannel; }
+	GLuint id() const { return _glId; }
 
 	void setParameter(GLenum target, GLenum param, GLenum value);
 

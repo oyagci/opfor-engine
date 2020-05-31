@@ -19,6 +19,7 @@ public:
 		std::vector<std::pair<GLenum, GLenum>>, GLenum target);
 	void bind(std::string const &name, GLuint textureNumber);
 	void add(std::string const &name, Texture t);
+	GLuint get(std::string const &name) { return _textures[name]->id(); }
 
 private:
 	std::map<std::string, std::unique_ptr<Texture>> _textures;
