@@ -158,22 +158,6 @@ int main()
 	skyboxShader.setUniform1i("cubemap", 0);
 	skyboxShader.unbind();
 
-//	auto cubeMeshes = engine.LoadMeshes("models/dva/0.obj");
-//	for (auto m : cubeMeshes) {
-//		ecs::IEntityBase *c = engine.CreateEntity<MeshComponent,
-//												  TransformComponent
-//												  >();
-//		MeshComponent mesh;
-//		mesh.Id = m;
-//		mesh.Shader = shaderId;
-//		c->Set(mesh);
-//
-//		TransformComponent t;
-//			t.scale = glm::vec3(100.0f, 100.0f, 100.0f);
-//			t.position = glm::vec3(0.0f, 0.0f, 0.0f);
-//		c->Set(t);
-//	}
-
 	auto dvaMeshes = engine.LoadMeshes("models/dva/0.obj");
 	auto batch = std::make_unique<Batch>();
 	for (auto const &meshId : dvaMeshes) {

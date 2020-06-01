@@ -1,8 +1,6 @@
 #include "Model.hpp"
 #include <iostream>
 #include <vector>
-#include "Texture.hpp"
-#include "TextureManager.hpp"
 #include <fmt/format.h>
 
 namespace assimp {
@@ -69,15 +67,15 @@ engine::Mesh Model::processMesh(aiMesh *mesh, const aiScene *scene)
 	// Textures
 	if (mesh->mMaterialIndex > 0) {
 		aiMaterial *material = scene->mMaterials[mesh->mMaterialIndex];
-		auto diffuse = loadMaterialTextures(material, aiTextureType_DIFFUSE, GL_TEXTURE_2D);
+		auto diffuse = loadMaterialTextures(material, aiTextureType_DIFFUSE);
 		for (auto &t : diffuse) {
 			engineMesh.addTexture(t, engine::Mesh::TextureType::TT_Diffuse);
 		}
-		auto specular = loadMaterialTextures(material, aiTextureType_SPECULAR, GL_TEXTURE_2D);
+		auto specular = loadMaterialTextures(material, aiTextureType_SPECULAR);
 		for (auto &s : specular) {
 			engineMesh.addTexture(s, engine::Mesh::TextureType::TT_Specular);
 		}
-		auto normal = loadMaterialTextures(material, aiTextureType_HEIGHT, GL_TEXTURE_2D);
+		auto normal = loadMaterialTextures(material, aiTextureType_HEIGHT);
 		for (auto &n : normal) {
 			engineMesh.addTexture(n, engine::Mesh::TextureType::TT_Normal);
 		}
@@ -88,8 +86,7 @@ engine::Mesh Model::processMesh(aiMesh *mesh, const aiScene *scene)
 	return engineMesh;
 }
 
-std::vector<std::string> Model::loadMaterialTextures(aiMaterial *material, aiTextureType aitype,
-	GLenum target)
+std::vector<std::string> Model::loadMaterialTextures(aiMaterial *material, aiTextureType aitype)
 {
 	std::vector<std::string> textureNames;
 
@@ -99,12 +96,7 @@ std::vector<std::string> Model::loadMaterialTextures(aiMaterial *material, aiTex
 		std::string path = _directory + "/" + str.C_Str();
 		textureNames.push_back(str.C_Str());
 
-		TextureManager::instance().createTexture(str.C_Str(), path, {
-			{ GL_TEXTURE_WRAP_S, GL_REPEAT },
-			{ GL_TEXTURE_WRAP_T, GL_REPEAT },
-			{ GL_TEXTURE_MIN_FILTER, GL_LINEAR },
-			{ GL_TEXTURE_MAG_FILTER, GL_LINEAR },
-		}, target);
+		_textures[aitype].push_back({ str.C_Str(), path });
 	}
 
 	return textureNames;

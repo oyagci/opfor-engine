@@ -9,6 +9,7 @@
 #include "Mesh.hpp"
 #include "Batch.hpp"
 #include <unordered_map>
+#include "TextureManager.hpp"
 
 using namespace lazy;
 using namespace graphics;
@@ -96,6 +97,18 @@ public:
 	{
 		assimp::Model model(path);
 		std::vector<unsigned int> ids;
+
+		auto textures = model.getTextures();
+		for (auto const &[type, textureType] : textures) {
+			for (auto const &texture: textureType) {
+				TextureManager::instance().createTexture(texture.name, texture.path, {
+					{ GL_TEXTURE_WRAP_S, GL_REPEAT },
+					{ GL_TEXTURE_WRAP_T, GL_REPEAT },
+					{ GL_TEXTURE_MIN_FILTER, GL_LINEAR },
+					{ GL_TEXTURE_MAG_FILTER, GL_LINEAR },
+				}, GL_TEXTURE_2D);
+			}
+		}
 
 		ids.reserve(model.getMeshes().size());
 		for (auto &m : model.getMeshes()) {

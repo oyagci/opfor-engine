@@ -3,6 +3,7 @@
 #include "lazy.hpp"
 #include <vector>
 #include "IDrawable.hpp"
+#include "Material.hpp"
 
 namespace engine
 {
