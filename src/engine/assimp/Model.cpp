@@ -30,60 +30,76 @@ void Model::processNode(aiNode *node, const aiScene *scene)
 	}
 }
 
-engine::Mesh Model::processMesh(aiMesh *mesh, const aiScene *scene)
+Mesh Model::processMesh(aiMesh *mesh, const aiScene *scene)
 {
-	engine::Mesh engineMesh;
+	Mesh meshVert;
+
+	meshVert.Positions.reserve(mesh->mNumVertices * 3);
+	meshVert.Normals.reserve(mesh->mNumVertices * 3);
+	meshVert.Tangents.reserve(mesh->mNumVertices * 3);
 
 	for (unsigned int i = 0; i < mesh->mNumVertices; i++) {
 		// Vertex Position
 		auto vert = mesh->mVertices[i];
-		engineMesh.addPosition(glm::vec3(vert.x, vert.y, vert.z));
+		meshVert.Positions.push_back(vert.x);
+		meshVert.Positions.push_back(vert.y);
+		meshVert.Positions.push_back(vert.z);
 
 		// Vertex Normal
 		auto norm = mesh->mNormals[i];
-		engineMesh.addNormal(glm::vec3(norm.x, norm.y, norm.z));
+		meshVert.Normals.push_back(norm.x);
+		meshVert.Normals.push_back(norm.y);
+		meshVert.Normals.push_back(norm.z);
 
 		// Vertex Tangent
 		auto tangent = mesh->mTangents[i];
-		engineMesh.addTangent(glm::vec3(tangent.x, tangent.y, tangent.z));
+		meshVert.Tangents.push_back(tangent.x);
+		meshVert.Tangents.push_back(tangent.y);
+		meshVert.Tangents.push_back(tangent.z);
 
 		if (mesh->mTextureCoords[0]) { // Does the mesh contain texture coordinates?
 			glm::vec2 tex;
 			tex.x = mesh->mTextureCoords[0][i].x;
 			tex.y = mesh->mTextureCoords[0][i].y;
-			engineMesh.addUv(tex);
+			meshVert.TexCoords.push_back(tex.x);
+			meshVert.TexCoords.push_back(tex.y);
 		}
 	}
 
 	// Indices
+	meshVert.Indices.reserve(mesh->mNumFaces * 3);
 	for (unsigned int i = 0; i < mesh->mNumFaces; i++) {
 		auto &face = mesh->mFaces[i];
 
 		for (unsigned int j = 0; j < face.mNumIndices; j++) {
-			engineMesh.addIndex(face.mIndices[j]);
+			meshVert.Indices.push_back(face.mIndices[j]);
 		}
 	}
 
 	// Textures
 	if (mesh->mMaterialIndex > 0) {
 		aiMaterial *material = scene->mMaterials[mesh->mMaterialIndex];
+
 		auto diffuse = loadMaterialTextures(material, aiTextureType_DIFFUSE);
+		meshVert.DiffuseMaps.reserve(diffuse.size());
 		for (auto &t : diffuse) {
-			engineMesh.addTexture(t, engine::Mesh::TextureType::TT_Diffuse);
+			meshVert.DiffuseMaps.push_back(t);
 		}
+
 		auto specular = loadMaterialTextures(material, aiTextureType_SPECULAR);
+		meshVert.SpecularMaps.reserve(specular.size());
 		for (auto &s : specular) {
-			engineMesh.addTexture(s, engine::Mesh::TextureType::TT_Specular);
+			meshVert.SpecularMaps.push_back(s);
 		}
+
 		auto normal = loadMaterialTextures(material, aiTextureType_HEIGHT);
+		meshVert.NormalMaps.reserve(normal.size());
 		for (auto &n : normal) {
-			engineMesh.addTexture(n, engine::Mesh::TextureType::TT_Normal);
+			meshVert.NormalMaps.push_back(n);
 		}
 	}
 
-	engineMesh.build();
-
-	return engineMesh;
+	return meshVert;
 }
 
 std::vector<std::string> Model::loadMaterialTextures(aiMaterial *material, aiTextureType aitype)

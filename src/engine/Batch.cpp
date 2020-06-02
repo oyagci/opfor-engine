@@ -1,4 +1,5 @@
 #include "Batch.hpp"
+#include "Engine.hpp"
 
 namespace engine {
 
@@ -11,20 +12,15 @@ void Batch::AddMesh(
 	std::vector<GLfloat> const &normals,
 	std::vector<GLfloat> const &uvs,
 	std::vector<GLfloat> const &tangents,
-	std::vector<GLuint>  const &textures,
-	std::vector<GLuint>  const &indices
+	std::string const &material,
+	std::vector<GLuint> const &indices
 )
 {
 	_positions.insert(_positions.end(), positions.begin(), positions.end());
-	_normals.insert(_normals.end(), positions.begin(), positions.end());
-	_uvs.insert(_uvs.end(), positions.begin(), positions.end());
+	_normals.insert(_normals.end(), normals.begin(), normals.end());
+	_uvs.insert(_uvs.end(), uvs.begin(), uvs.end());
 	_tangents.insert(_tangents.end(), tangents.begin(), tangents.end());
-
-	std::vector<GLfloat> fTextures(textures.size());
-	std::transform(textures.begin(), textures.end(), fTextures.begin(),
-		[&] (GLuint tex) -> GLfloat { return static_cast<GLfloat>(tex); });
-	_materials.insert(_materials.end(), fTextures.begin(), fTextures.end());
-
+	_materials.push_back(material);
 	_indices.insert(_indices.end(), indices.begin(), indices.end());
 }
 
@@ -70,11 +66,16 @@ void Batch::Build()
 		glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), reinterpret_cast<void*>(offset));
 		offset += _tangents.size() * sizeof(GLfloat);
 	}
-	if (_materials.size() > 0) {
-		glBufferSubData(GL_ARRAY_BUFFER, offset, _materials.size() * sizeof(GLfloat), _materials.data());
-		glVertexAttribPointer(4, 1, GL_FLOAT, GL_FALSE, 1 * sizeof(GLfloat), reinterpret_cast<void*>(offset));
-		offset += _materials.size() * sizeof(GLfloat);
-	}
+//	if (_materials.size() > 0) {
+//		glBufferSubData(GL_ARRAY_BUFFER, offset, _materials.size() * sizeof(GLfloat), _materials.data());
+//		glVertexAttribPointer(4, 1, GL_FLOAT, GL_FALSE, 1 * sizeof(GLfloat), reinterpret_cast<void*>(offset));
+//		offset += _materials.size() * sizeof(GLfloat);
+//	}
+
+	std::vector<GLfloat> _materialIds{};
+	_materialIds.reserve(_materials.size());
+	std::transform(_materials.begin(), _materials.end(), _materialIds.begin(),
+		[] (std::string const &m) -> GLfloat { return engine::Engine::Instance().GetMaterialId(m); });
 
 	glGenBuffers(1, &_ibo);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _ibo);

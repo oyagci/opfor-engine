@@ -15,8 +15,8 @@ private:
 	std::vector<GLfloat> _normals;
 	std::vector<GLfloat> _uvs;
 	std::vector<GLfloat> _tangents;
-	std::vector<GLfloat> _materials;
-	std::vector<GLuint>  _indices;
+	std::vector<std::string> _materials;
+	std::vector<GLuint> _indices;
 
 	GLuint _vao;
 	GLuint _vbo;
@@ -34,8 +34,8 @@ public:
 		std::vector<GLfloat> const &normals,
 		std::vector<GLfloat> const &uvs,
 		std::vector<GLfloat> const &tangents,
-		std::vector<GLuint>  const &textures,
-		std::vector<GLuint>  const &indices
+		std::string const &material,
+		std::vector<GLuint> const &indices
 	);
 
 	/// After this, the batch can be drawn with a call to Draw()

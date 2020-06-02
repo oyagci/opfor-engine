@@ -24,6 +24,7 @@ namespace engine
 		vTangents = std::move(m.vTangents);
 		indices = std::move(m.indices);
 		textures = std::move(m.textures);
+		_material = std::move(m._material);
 
 		vao = m.vao;
 		m.vao = 0;
@@ -48,6 +49,7 @@ namespace engine
 			vTangents = std::move(rhs.vTangents);
 			indices = std::move(rhs.indices);
 			textures = std::move(rhs.textures);
+			_material = std::move(rhs._material);
 
 			vao = rhs.vao;
 			rhs.vao = 0;

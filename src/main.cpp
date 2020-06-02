@@ -158,46 +158,142 @@ int main()
 	skyboxShader.setUniform1i("cubemap", 0);
 	skyboxShader.unbind();
 
-	auto dvaMeshes = engine.LoadMeshes("models/dva/0.obj");
-	auto batch = std::make_unique<Batch>();
-	for (auto const &meshId : dvaMeshes) {
-		auto mesh = reinterpret_cast<engine::Mesh*>(engine.GetMesh(meshId));
-		batch->AddMesh(
-			mesh->GetPositions(),
-			mesh->GetNormals(),
-			mesh->GetUVs(),
-			mesh->GetTangents(),
-			mesh->GetTextureIDs(),
-			mesh->GetIndices());
+	// Load Assimp Model
+	assimp::Model dvaModel("models/dva/0.obj");
+	std::vector<engine::Mesh> dvaMeshes;
+
+	// Convert assimp::Mesh to engine::Mesh
+	for (auto const &assimp : dvaModel.getMeshes()) {
+		engine::Mesh mesh;
+
+		assert(assimp.Positions.size() % 3 == 0);
+		assert(assimp.Normals.size() % 3 == 0);
+		assert(assimp.Tangents.size() % 3 == 0);
+		for (size_t i = 0; i < assimp.Positions.size(); i += 3) {
+			glm::vec3 pos{ assimp.Positions[0 + i], assimp.Positions[1 + i],   assimp.Positions[2 + i] };
+			glm::vec3 norm{  assimp.Normals[0 + i],   assimp.Normals[1 + i],     assimp.Normals[2 + i] };
+			glm::vec3 tan{  assimp.Tangents[0 + i],  assimp.Tangents[1 + i],    assimp.Tangents[2 + i] };
+
+			mesh.addPosition(pos);
+			mesh.addNormal(norm);
+			mesh.addTangent(tan);
+		}
+
+		assert(assimp.TexCoords.size() % 2 == 0);
+		for (size_t i = 0; i < assimp.TexCoords.size(); i += 2) {
+			glm::vec2 tex{ assimp.TexCoords[0 + i], assimp.TexCoords[1 + i] };
+			mesh.addUv(tex);
+		}
+
+		for (size_t i = 0; i < assimp.Indices.size(); i++) {
+			mesh.addIndex(assimp.Indices[i]);
+		}
+
+		mesh.build();
+		dvaMeshes.push_back(std::move(mesh));
 	}
-	batch->Build();
 
-	unsigned int batchId = engine.AddBatch(std::move(batch));
-
-	auto *batchEnt = engine.CreateEntity<MeshComponent, TransformComponent>();
-	{
-		TransformComponent t;
-			t.scale = glm::vec3(100.0f, 100.0f, 100.0f);
-			t.position = glm::vec3(0.0f, 0.0f, 0.0f);
-		MeshComponent mesh;
-			mesh.Id = batchId;
-			mesh.Shader = shaderId;
-		batchEnt->Set(t);
-		batchEnt->Set(mesh);
-	}
-
-	auto sponza = engine.LoadMeshes("models/Sponza/sponza.obj");
-	{
-		for (auto &m : sponza) {
-			auto *b = engine.CreateEntity<MeshComponent,
-											    TransformComponent>();
-
-			MeshComponent mesh;
-			mesh.Id = m;
-			mesh.Shader = shaderId;
-			b->Set(mesh);
+	// Load Textures for Material
+	for (auto const &[type, texture] : dvaModel.getTextures()) {
+		for (auto const &t : texture) {
+			fmt::print("loading texture {} into memory\n", t.name);
+			TextureManager::instance().createTexture(t.name, t.path, {
+				{ GL_TEXTURE_MAG_FILTER, GL_LINEAR },
+				{ GL_TEXTURE_MIN_FILTER, GL_LINEAR },
+				{ GL_TEXTURE_WRAP_S, GL_REPEAT },
+				{ GL_TEXTURE_WRAP_T, GL_REPEAT },
+			}, GL_TEXTURE_2D);
 		}
 	}
+
+	// Create Material for Meshes
+	std::vector<Material> dvaMaterials{}; 
+	std::vector<std::string> materialNames{};
+	std::vector<unsigned int> materials{};
+	size_t matIndex = 0;
+	size_t i = 0;
+	for (auto &mesh : dvaModel.getMeshes()) {
+		Material mat{};
+
+		mat.shininess = 32.0f;
+		if (mesh.DiffuseMaps.size() > 0) {
+			mat.diffuse = TextureManager::instance().get(mesh.DiffuseMaps[0]);
+		}
+		if (mesh.NormalMaps.size() > 0) {
+			mat.normal = TextureManager::instance().get(mesh.NormalMaps[0]);
+		}
+		if (mesh.SpecularMaps.size() > 0) {
+			mat.specular = TextureManager::instance().get(mesh.SpecularMaps[0]);
+		}
+
+		dvaMaterials.push_back(mat);
+
+		std::string materialName("dva" + std::to_string(matIndex++));
+		engine.AddMaterial(materialName, mat);
+		materialNames.push_back(materialName);
+		fmt::print("create material {} {}", materialName, mat);
+		dvaMeshes[i].SetMaterial(materialName);
+		i++;
+	}
+
+	std::vector<unsigned int> dvaMeshIds;
+	for (auto &m : dvaMeshes) {
+		dvaMeshIds.push_back(engine.AddMesh(std::move(m)));
+	}
+
+	{
+		for (auto const &meshId : dvaMeshIds) {
+			auto dvaEnt = engine.CreateEntity<MeshComponent, TransformComponent>();
+			MeshComponent dvaMesh{};
+				dvaMesh.Id = meshId;
+				dvaMesh.Shader = shaderId;
+			dvaEnt->Set(dvaMesh);
+
+			TransformComponent t{};
+				t.scale = { 100.0f, 100.0f, 100.0f };
+			dvaEnt->Set(t);
+		}
+	}
+
+//	// Create a batch for the meshes
+//	auto batch = std::make_unique<Batch>();
+//	int i = 0;
+//	for (auto const &m : dvaModel.getMeshes()) {
+//		batch->AddMesh(
+//			m.Positions,
+//			m.Normals,
+//			m.TexCoords,
+//			m.Tangents,
+//			materialNames[i++],
+//			m.Indices);
+//	}
+//	batch->Build();
+	
+//	unsigned int batchId = engine.AddBatch(std::move(batch));
+//	auto *batchEnt = engine.CreateEntity<MeshComponent, TransformComponent>();
+//	{
+//		TransformComponent t;
+//			t.scale = glm::vec3(100.0f, 100.0f, 100.0f);
+//			t.position = glm::vec3(0.0f, 0.0f, 0.0f);
+//		MeshComponent mesh;
+//			mesh.Id = batchId;
+//			mesh.Shader = shaderId;
+//		batchEnt->Set(t);
+//		batchEnt->Set(mesh);
+//	}
+
+//	auto sponza = engine.LoadMeshes("models/Sponza/sponza.obj");
+//	{
+//		for (auto &m : sponza) {
+//			auto *b = engine.CreateEntity<MeshComponent,
+//											    TransformComponent>();
+//
+//			MeshComponent mesh;
+//			mesh.Id = m;
+//			mesh.Shader = shaderId;
+//			b->Set(mesh);
+//		}
+//	}
 
 	auto skybox = engine.CreateEntity<MeshComponent, TransformComponent, SkyboxComponent>();
 

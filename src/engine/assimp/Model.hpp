@@ -7,6 +7,7 @@
 #include <assimp/postprocess.h>
 #include "lazy.hpp"
 #include "engine/Mesh.hpp"
+#include "Mesh.hpp"
 
 namespace assimp {
 
@@ -16,7 +17,7 @@ public:
 	Model() = delete;
 	Model(std::string const &path);
 
-	std::vector<engine::Mesh> &getMeshes() {
+	std::vector<Mesh> &getMeshes() {
 		return _meshes;
 	}
 
@@ -31,12 +32,12 @@ public:
 private:
 	void loadModel(std::string path);
 	void processNode(aiNode *node, const aiScene *scene);
-	engine::Mesh processMesh(aiMesh *mesh, const aiScene *scene);
+	Mesh processMesh(aiMesh *mesh, const aiScene *scene);
 	std::string _directory;
 
 	std::vector<std::string> loadMaterialTextures(aiMaterial *material, aiTextureType aitype);
 
-	std::vector<engine::Mesh> _meshes;
+	std::vector<Mesh> _meshes;
 	TextureContainer _textures;
 };
 

@@ -10,6 +10,7 @@
 #include "Batch.hpp"
 #include <unordered_map>
 #include "TextureManager.hpp"
+#include <fmt/format.h>
 
 using namespace lazy;
 using namespace graphics;
@@ -42,7 +43,12 @@ private:
 	std::unordered_map<unsigned int, std::unique_ptr<IDrawable>> _meshes;
 	std::unordered_map<unsigned int, std::unique_ptr<Batch>> _batches;
 
+	using MaterialContainer = std::pair<unsigned int, Material>;
+
+	std::unordered_map<std::string, MaterialContainer> _materials;
+
 	static unsigned int _nextId;
+	static unsigned int _nextMaterialId;
 
 private:
 	Engine();
@@ -93,36 +99,6 @@ public:
 		return _ecs.GetEntityManager()->CreateEntity<ArgTypes...>();
 	}
 
-	std::vector<unsigned int> LoadMeshes(std::string const &path)
-	{
-		assimp::Model model(path);
-		std::vector<unsigned int> ids;
-
-		auto textures = model.getTextures();
-		for (auto const &[type, textureType] : textures) {
-			for (auto const &texture: textureType) {
-				TextureManager::instance().createTexture(texture.name, texture.path, {
-					{ GL_TEXTURE_WRAP_S, GL_REPEAT },
-					{ GL_TEXTURE_WRAP_T, GL_REPEAT },
-					{ GL_TEXTURE_MIN_FILTER, GL_LINEAR },
-					{ GL_TEXTURE_MAG_FILTER, GL_LINEAR },
-				}, GL_TEXTURE_2D);
-			}
-		}
-
-		ids.reserve(model.getMeshes().size());
-		for (auto &m : model.getMeshes()) {
-			auto to_ptr = std::make_unique<Mesh>(std::move(m));
-
-			_meshes[_nextId] = std::move(to_ptr);
-			ids.push_back(_nextId);
-
-			_nextId++;
-		}
-
-		return ids;
-	}
-
 	unsigned int AddMesh(Mesh mesh)
 	{
 		auto to_ptr = std::make_unique<Mesh>(std::move(mesh));
@@ -149,15 +125,43 @@ public:
 		return _nextId++;
 	}
 
-	Batch *GetBatch(unsigned int id)
+	void AddMaterial(std::string const &name, Material mat)
 	{
-		auto batch = _batches.find(id);
+		mat.name = name;
+		_materials[name] = MaterialContainer(_nextMaterialId++, mat);
+	}
 
-		if (batch != _batches.end()) {
-			return batch->second.get();
+	void BindMaterial(std::string const &name)
+	{
+		if (name.size() == 0) {
+			fmt::print("Material name not given\n");
+			return ;
 		}
+		if (_materials.find(name) == _materials.end()) {
+			fmt::print("Material not found ({})\n", name);
+			return ;
+		}
+		auto const &material = _materials[name].second;
 
-		return nullptr;
+		fmt::print("[{}] Binding {}\n", name, material.name);
+
+		if (material.diffuse > 0) {
+			glActiveTexture(GL_TEXTURE0);
+			glBindTexture(GL_TEXTURE_2D, material.diffuse);
+		}
+		if (material.specular > 0) {
+			glActiveTexture(GL_TEXTURE1);
+			glBindTexture(GL_TEXTURE_2D, material.specular);
+		}
+		if (material.normal > 0) {
+			glActiveTexture(GL_TEXTURE2);
+			glBindTexture(GL_TEXTURE_2D, material.normal);
+		}
+	}
+
+	unsigned int GetMaterialId(std::string const &name)
+	{
+		return _materials[name].first;
 	}
 };
 

@@ -298,28 +298,28 @@ private:
 			TextureManager::instance().bind("default_normal", 2);
 
 			// Bind each texture
-			size_t currentTexture = 0;
 			auto meshCast = dynamic_cast<engine::Mesh*>(data);
 			if (meshCast != nullptr) {
-				for (auto &t : meshCast->getTextures()) {
-					switch (t.type) {
-					case engine::Mesh::TextureType::TT_Diffuse:
-						TextureManager::instance().bind(t.name, 0);
-						break ;
-					case engine::Mesh::TextureType::TT_Specular:
-						TextureManager::instance().bind(t.name, 1);
-						break ;
-					case engine::Mesh::TextureType::TT_Normal:
-						TextureManager::instance().bind(t.name, 2);
-						break ;
-					default:
-						fmt::print(stderr, "[WARNING] Texture type ({}) not handled\n",
-							t.type);
-						break ;
-					}
-					currentTexture++;
-				}
+				engine::Engine::Instance().BindMaterial(meshCast->GetMaterial());
+				//for (auto &t : meshCast->getTextures()) {
+				//	switch (t.type) {
+				//	case engine::Mesh::TextureType::TT_Diffuse:
+				//		TextureManager::instance().bind(t.name, 0);
+				//		break ;
+				//	case engine::Mesh::TextureType::TT_Specular:
+				//		TextureManager::instance().bind(t.name, 1);
+				//		break ;
+				//	case engine::Mesh::TextureType::TT_Normal:
+				//		TextureManager::instance().bind(t.name, 2);
+				//		break ;
+				//	default:
+				//		fmt::print(stderr, "[WARNING] Texture type ({}) not handled\n",
+				//			t.type);
+				//		break ;
+				//	}
+				//}
 			}
+
 
 			data->Draw();
 

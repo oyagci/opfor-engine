@@ -7,6 +7,7 @@ namespace engine
 {
 
 unsigned int Engine::_nextId = 0;
+unsigned int Engine::_nextMaterialId = 0;
 
 Engine::Engine()
 {

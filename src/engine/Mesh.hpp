@@ -34,6 +34,8 @@ private:
 	GLuint ibo;
 	GLuint objectBuffer;
 
+	std::string _material;
+
 public:
 	Mesh();
 	~Mesh();
@@ -54,6 +56,9 @@ public:
 	std::vector<GLfloat> const &GetTangents() const { return vTangents; }
 	std::vector<GLuint>  const &GetIndices() const { return indices; }
 	std::vector<GLuint>  const GetTextureIDs() const;
+
+	void SetMaterial(std::string name) { _material = name; }
+	std::string GetMaterial() const { return _material; }
 
 	Mesh &build();
 
