@@ -141,9 +141,8 @@ public:
 			fmt::print("Material not found ({})\n", name);
 			return ;
 		}
-		auto const &material = _materials[name].second;
 
-		fmt::print("[{}] Binding {}\n", name, material.name);
+		auto const &material = _materials[name].second;
 
 		if (material.diffuse > 0) {
 			glActiveTexture(GL_TEXTURE0);
