@@ -17,6 +17,7 @@
 #include <utility>
 #include <string>
 #include "Batch.hpp"
+#include "Logger.hpp"
 
 using namespace engine;
 
@@ -142,7 +143,7 @@ std::vector<unsigned int> LoadMesh(std::string const &path, std::string const &n
 	// Load Textures for Material
 	for (auto const &[type, texture] : model.getTextures()) {
 		for (auto const &t : texture) {
-			fmt::print("loading texture {} into memory\n", t.name);
+			Logger::Verbose("Loading texture {} into memory\n", t.name);
 			TextureManager::instance().createTexture(t.name, t.path, {
 				{ GL_TEXTURE_MAG_FILTER, GL_LINEAR },
 				{ GL_TEXTURE_MIN_FILTER, GL_LINEAR },
@@ -170,14 +171,37 @@ std::vector<unsigned int> LoadMesh(std::string const &path, std::string const &n
 		if (mesh.SpecularMaps.size() > 0) {
 			mat.specular = TextureManager::instance().get(mesh.SpecularMaps[0]);
 		}
+		
+		auto checkMaterialExists = [&] (std::vector<Material> &materials, Material &rhs) -> std::optional<size_t> {
+			std::optional<size_t> matIndex;
 
-		materials.push_back(mat);
+			for (size_t i = 0; i < materials.size(); i++) {
+				auto &mat = materials[i];
+				if (rhs.diffuse == mat.diffuse &&
+					rhs.normal == mat.normal &&
+					rhs.specular == mat.specular) {
+					matIndex = i;
+				}
+			}
 
-		std::string materialName(name + std::to_string(matIndex++));
-		engine::Engine::Instance().AddMaterial(materialName, mat);
-		materialNames.push_back(materialName);
-		fmt::print("create material {} {}", materialName, mat);
-		meshes[i].SetMaterial(materialName);
+			return matIndex;
+		};
+
+		auto existingIndex = checkMaterialExists(materials, mat);
+		if (existingIndex.has_value()) {
+			meshes[i].SetMaterial(materials[existingIndex.value()].name);
+			Logger::Verbose("Set material {} {}", materials[existingIndex.value()].name, mat);
+		}
+		else {
+			std::string materialName(name + std::to_string(matIndex++));
+			mat.name = materialName;
+			materials.push_back(mat);
+			engine::Engine::Instance().AddMaterial(materialName, mat);
+			materialNames.push_back(materialName);
+			meshes[i].SetMaterial(materialName);
+			Logger::Verbose("Create material {} {}", materialName, mat);
+		}
+
 		i++;
 	}
 
@@ -191,6 +215,8 @@ std::vector<unsigned int> LoadMesh(std::string const &path, std::string const &n
 
 int main()
 {
+
+	Logger::Verbose("Hello World\n");
 	auto &engine = Engine::Instance();
 	engine.CreateComponentSystem<CameraMovementSystem>();
 	engine.CreateComponentSystem<SkyboxRendererSystem>();

@@ -11,6 +11,7 @@
 #include <unordered_map>
 #include "TextureManager.hpp"
 #include <fmt/format.h>
+#include "Logger.hpp"
 
 using namespace lazy;
 using namespace graphics;
@@ -127,6 +128,11 @@ public:
 
 	void AddMaterial(std::string const &name, Material mat)
 	{
+		if (name.size() == 0) {
+			Logger::Warn("Warning: Creating a material without a name is illegal.\n");
+			return ;
+		}
+
 		mat.name = name;
 		_materials[name] = MaterialContainer(_nextMaterialId++, mat);
 	}
@@ -134,11 +140,11 @@ public:
 	void BindMaterial(std::string const &name)
 	{
 		if (name.size() == 0) {
-			fmt::print("Material name not given\n");
+			Logger::Warn("Material name not given\n");
 			return ;
 		}
 		if (_materials.find(name) == _materials.end()) {
-			fmt::print("Material not found ({})\n", name);
+			Logger::Warn("Material not found ({})\n", name);
 			return ;
 		}
 
@@ -161,6 +167,21 @@ public:
 	unsigned int GetMaterialId(std::string const &name)
 	{
 		return _materials[name].first;
+	}
+
+	std::vector<std::string> GetMaterialList() const
+	{
+		std::vector<std::string> materials;
+
+		materials.resize(_materials.size());
+		std::transform(_materials.begin(), _materials.end(), materials.begin(),
+			[] (auto mat) { return mat.first; });
+		return materials;
+	}
+
+	void Close()
+	{
+		glfwSetWindowShouldClose(_display->getWindow(), GLFW_TRUE);
 	}
 };
 

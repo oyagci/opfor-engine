@@ -11,11 +11,11 @@ unsigned int Engine::_nextMaterialId = 0;
 
 Engine::Engine()
 {
-	_display = std::make_unique<Display>("ft_vox", 1920, 1080);
+	_display = std::make_unique<Display>("3D Engine", 1920, 1080);
 	_display->enableCap(GL_DEPTH_TEST);
 	_display->enableCap(GL_CULL_FACE);
 	_display->enableCap(GL_BLEND);
-	_display->setFullscreen(true);
+	_display->setFullscreen(false);
 	_display->showCursor(false);
 	glEnable(GL_DEBUG_OUTPUT);
 

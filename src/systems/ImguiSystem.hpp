@@ -12,18 +12,25 @@
 #include "components/PointLightComponent.hpp"
 #include "ImGuizmo/ImGuizmo.h"
 #include <glm/gtx/matrix_decompose.hpp>
+#include "Engine.hpp"
+#include "Logger.hpp"
 
 class ImguiSystem : public ecs::ComponentSystem
 {
 private:
 	lazy::graphics::Display *_display;
 
+	bool _logAutoScroll;
+
 public:
-	ImguiSystem() : _display(nullptr)
+	ImguiSystem() : _display(nullptr), _logAutoScroll(true)
 	{
 		IMGUI_CHECKVERSION();
 		ImGui::CreateContext();
 		ImGui::StyleColorsDark();
+
+		// Enable Docking
+		ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 	}
 
 	~ImguiSystem()
@@ -40,17 +47,57 @@ public:
 			ImGui_ImplOpenGL3_Init("#version 450");
 		}
 
+        ImGui_ImplOpenGL3_NewFrame();
+        ImGui_ImplGlfw_NewFrame();
+        ImGui::NewFrame();
+
+		ImGuiDockNodeFlags dockspaceFlags = ImGuiDockNodeFlags_PassthruCentralNode;
+		bool is_open = true;
+
+		ImGuiViewport *viewport = ImGui::GetMainViewport();
+		ImGui::SetNextWindowPos(viewport->GetWorkPos());
+		ImGui::SetNextWindowSize(viewport->GetWorkSize());
+		ImGui::SetNextWindowViewport(viewport->ID);
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
+
+		ImGuiWindowFlags windowFlags = ImGuiWindowFlags_MenuBar |
+									   ImGuiWindowFlags_NoDocking |
+									   ImGuiWindowFlags_NoTitleBar |
+									   ImGuiWindowFlags_NoCollapse |
+									   ImGuiWindowFlags_NoResize |
+									   ImGuiWindowFlags_NoMove |
+									   ImGuiWindowFlags_NoBackground;
+
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
+		ImGui::Begin("Dockspace", &is_open, windowFlags);
+		ImGui::PopStyleVar();
+
+		ImGui::PopStyleVar(2);
+
+		ImGuiIO &io = ImGui::GetIO();
+		if (io.ConfigFlags & ImGuiConfigFlags_DockingEnable) {
+			ImGuiID dockspaceId = ImGui::GetID("MyDockSpace");
+			ImGui::DockSpace(dockspaceId, ImVec2(0.0f, 0.0f), dockspaceFlags);
+		}
+
+		if (ImGui::BeginMenuBar()) {
+			if (ImGui::BeginMenu("File")) {
+				if (ImGui::MenuItem("Close")) {
+					engine::Engine::Instance().Close();
+				}
+				ImGui::EndMenu();
+			}
+			ImGui::EndMenuBar();
+		}
+
 		auto cameraEnt = GetEntities<PlayerCameraComponent>()[0];
 		auto camera = cameraEnt->Get<PlayerCameraComponent>();
 
 		glm::mat4 guizmo(1.0f);
 
-        ImGui_ImplOpenGL3_NewFrame();
-        ImGui_ImplGlfw_NewFrame();
-        ImGui::NewFrame();
-
-		bool show = true;
-		ImGui::ShowDemoWindow(&show);
+//		bool show = true;
+//		ImGui::ShowDemoWindow(&show);
 
 		auto selectedEnt = GetEntities<TransformComponent, SelectedComponent>();
 		if (selectedEnt.size() > 0) {
@@ -102,6 +149,10 @@ public:
 		}
 
 		LightProperties();
+		Materials();
+		Log();
+
+		ImGui::End();
 
 		ImGui::Render();
 		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
@@ -145,6 +196,72 @@ public:
 
 		lights[0]->Set(newLight);
 
+	}
+
+	void Materials()
+	{
+		auto materialList = engine::Engine::Instance().GetMaterialList();
+		std::sort(materialList.begin(), materialList.end());
+		ImGui::Begin("Materials");
+		ImGui::TreeNode("Materials");
+		for (auto const &m: materialList) {
+			ImGui::Text("%s", m.c_str());
+		}
+		ImGui::End();
+	}
+
+	void Log()
+	{
+		if (!ImGui::Begin("Log")) {
+			ImGui::End();
+			return ;
+		}
+
+		if (ImGui::BeginPopup("Options")) {
+			ImGui::Checkbox("Auto-Scroll", &_logAutoScroll);
+			ImGui::EndPopup();
+		}
+
+		if (ImGui::Button("Options")) {
+			ImGui::OpenPopup("Options");
+		}
+		ImGui::SameLine();
+		bool clear = ImGui::Button("Clear");
+		ImGui::SameLine();
+		bool copy = ImGui::Button("Copy");
+
+		ImGui::Separator();
+		ImGui::BeginChild("scolling", ImVec2(0, 0), false, ImGuiWindowFlags_HorizontalScrollbar);
+
+		auto &logs = Logger::GetLog();
+		auto &lineOffsets = Logger::GetLineOffsets();
+
+		const char *bufp = logs.data();
+		const char *bufendp = logs.data() + logs.size();
+
+		ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(0, 0));
+
+		ImGuiListClipper clipper;
+		clipper.Begin(lineOffsets.size());
+		while (clipper.Step()) {
+			for (int line_no = clipper.DisplayStart; line_no < clipper.DisplayEnd; line_no++) {
+				const char *line_start = bufp + lineOffsets[line_no];
+				const char *line_end = (line_no + 1 < static_cast<int>(lineOffsets.size())) ?
+					(bufp + lineOffsets[line_no + 1] - 1) : bufendp;
+				ImGui::TextUnformatted(line_start, line_end);
+			}
+		}
+		clipper.End();
+
+		ImGui::PopStyleVar();
+
+		if (_logAutoScroll && ImGui::GetScrollY() >= ImGui::GetScrollMaxY()) {
+			ImGui::SetScrollHereY(1.0f);
+		}
+
+		ImGui::EndChild();
+
+		ImGui::End();
 	}
 
 //	void EditTransform(const glm::mat4 &view, const glm::mat4 &proj)
