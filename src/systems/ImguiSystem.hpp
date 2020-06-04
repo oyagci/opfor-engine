@@ -22,83 +22,24 @@ private:
 
 	bool _logAutoScroll;
 
-public:
-	ImguiSystem() : _display(nullptr), _logAutoScroll(true)
+private:
+	void BeginFrame()
 	{
-		IMGUI_CHECKVERSION();
-		ImGui::CreateContext();
-		ImGui::StyleColorsDark();
-
-		// Enable Docking
-		ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_DockingEnable;
-	}
-
-	~ImguiSystem()
-	{
-		ImGui::DestroyContext();
-	}
-
-	void OnUpdate(float __unused deltaTime) override
-	{
-		if (!_display) {
-			auto displays = GetEntities<DisplayComponent>();
-			_display = displays[0]->Get<DisplayComponent>().display;
-			ImGui_ImplGlfw_InitForOpenGL(_display->getWindow(), true);
-			ImGui_ImplOpenGL3_Init("#version 450");
-		}
-
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
+	}
 
-		ImGuiDockNodeFlags dockspaceFlags = ImGuiDockNodeFlags_PassthruCentralNode;
-		bool is_open = true;
+	void EndFrame()
+	{
+		ImGui::Render();
+		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+	}
 
-		ImGuiViewport *viewport = ImGui::GetMainViewport();
-		ImGui::SetNextWindowPos(viewport->GetWorkPos());
-		ImGui::SetNextWindowSize(viewport->GetWorkSize());
-		ImGui::SetNextWindowViewport(viewport->ID);
-		ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
-		ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
-
-		ImGuiWindowFlags windowFlags = ImGuiWindowFlags_MenuBar |
-									   ImGuiWindowFlags_NoDocking |
-									   ImGuiWindowFlags_NoTitleBar |
-									   ImGuiWindowFlags_NoCollapse |
-									   ImGuiWindowFlags_NoResize |
-									   ImGuiWindowFlags_NoMove |
-									   ImGuiWindowFlags_NoBackground;
-
-		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
-		ImGui::Begin("Dockspace", &is_open, windowFlags);
-		ImGui::PopStyleVar();
-
-		ImGui::PopStyleVar(2);
-
-		ImGuiIO &io = ImGui::GetIO();
-		if (io.ConfigFlags & ImGuiConfigFlags_DockingEnable) {
-			ImGuiID dockspaceId = ImGui::GetID("MyDockSpace");
-			ImGui::DockSpace(dockspaceId, ImVec2(0.0f, 0.0f), dockspaceFlags);
-		}
-
-		if (ImGui::BeginMenuBar()) {
-			if (ImGui::BeginMenu("File")) {
-				if (ImGui::MenuItem("Close")) {
-					engine::Engine::Instance().Close();
-				}
-				ImGui::EndMenu();
-			}
-			ImGui::EndMenuBar();
-		}
-
+	void DrawGuizmoSelectedEnt()
+	{
 		auto cameraEnt = GetEntities<PlayerCameraComponent>()[0];
 		auto camera = cameraEnt->Get<PlayerCameraComponent>();
-
-		glm::mat4 guizmo(1.0f);
-
-//		bool show = true;
-//		ImGui::ShowDemoWindow(&show);
-
 		auto selectedEnt = GetEntities<TransformComponent, SelectedComponent>();
 		if (selectedEnt.size() > 0) {
 
@@ -147,33 +88,56 @@ public:
 			selectedEnt[0]->Set<TransformComponent>(selected);
 
 		}
+	}
 
-		LightProperties();
-		Materials();
-		Log();
+	void BeginDockspace()
+	{
+		ImGuiDockNodeFlags dockspaceFlags = ImGuiDockNodeFlags_PassthruCentralNode;
+		bool is_open = true;
 
+		ImGuiViewport *viewport = ImGui::GetMainViewport();
+		ImGui::SetNextWindowPos(viewport->GetWorkPos());
+		ImGui::SetNextWindowSize(viewport->GetWorkSize());
+		ImGui::SetNextWindowViewport(viewport->ID);
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
+
+		ImGuiWindowFlags windowFlags = ImGuiWindowFlags_MenuBar |
+									   ImGuiWindowFlags_NoDocking |
+									   ImGuiWindowFlags_NoTitleBar |
+									   ImGuiWindowFlags_NoCollapse |
+									   ImGuiWindowFlags_NoResize |
+									   ImGuiWindowFlags_NoMove |
+									   ImGuiWindowFlags_NoBackground;
+
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
+		ImGui::Begin("Dockspace", &is_open, windowFlags);
+		ImGui::PopStyleVar();
+		ImGui::PopStyleVar(2);
+
+		ImGuiIO &io = ImGui::GetIO();
+		if (io.ConfigFlags & ImGuiConfigFlags_DockingEnable) {
+			ImGuiID dockspaceId = ImGui::GetID("MyDockSpace");
+			ImGui::DockSpace(dockspaceId, ImVec2(0.0f, 0.0f), dockspaceFlags);
+		}
+
+	}
+
+	void EndDockspace()
+	{
 		ImGui::End();
+	}
 
-		ImGui::Render();
-		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-
-		auto &kbd = lazy::inputs::input::getKeyboard();
-
-		if (kbd.getKeyDown(GLFW_KEY_ESCAPE)) {
-			auto playerEnts = GetEntities<PlayerCameraComponent>();
-			if (playerEnts.size() > 0) {
-				auto camera = playerEnts[0]->Get<PlayerCameraComponent>();
-				auto displayEnt = GetEntities<DisplayComponent>()[0];
-				auto display = displayEnt->Get<DisplayComponent>();
-
-				// Enable/Disable input for camera
-				camera.useInput = !camera.useInput;
-				playerEnts[0]->Set(camera);
-
-				// Enable/Switch cursor
-				display.display->showCursor(!camera.useInput);
-				displayEnt->Set(display);
+	void MenuBar()
+	{
+		if (ImGui::BeginMenuBar()) {
+			if (ImGui::BeginMenu("File")) {
+				if (ImGui::MenuItem("Close")) {
+					engine::Engine::Instance().Close();
+				}
+				ImGui::EndMenu();
 			}
+			ImGui::EndMenuBar();
 		}
 	}
 
@@ -203,9 +167,11 @@ public:
 		auto materialList = engine::Engine::Instance().GetMaterialList();
 		std::sort(materialList.begin(), materialList.end());
 		ImGui::Begin("Materials");
-		ImGui::TreeNode("Materials");
-		for (auto const &m: materialList) {
-			ImGui::Text("%s", m.c_str());
+		if (ImGui::TreeNode("Materials")) {
+			for (auto const &m: materialList) {
+				ImGui::Text("%s", m.c_str());
+			}
+			ImGui::TreePop();
 		}
 		ImGui::End();
 	}
@@ -262,6 +228,61 @@ public:
 		ImGui::EndChild();
 
 		ImGui::End();
+	}
+
+public:
+	ImguiSystem() : _display(nullptr), _logAutoScroll(true)
+	{
+		IMGUI_CHECKVERSION();
+		ImGui::CreateContext();
+		ImGui::StyleColorsDark();
+
+		// Enable Docking
+		ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+	}
+
+	~ImguiSystem()
+	{
+		ImGui::DestroyContext();
+	}
+
+	void OnUpdate(float __unused deltaTime) override
+	{
+		if (!_display) {
+			auto displays = GetEntities<DisplayComponent>();
+			_display = displays[0]->Get<DisplayComponent>().display;
+			ImGui_ImplGlfw_InitForOpenGL(_display->getWindow(), true);
+			ImGui_ImplOpenGL3_Init("#version 450");
+		}
+
+		BeginFrame();
+		BeginDockspace();
+			MenuBar();
+			DrawGuizmoSelectedEnt();
+			LightProperties();
+			Materials();
+			Log();
+		EndDockspace();
+		EndFrame();
+
+		auto &kbd = lazy::inputs::input::getKeyboard();
+
+		if (kbd.getKeyDown(GLFW_KEY_ESCAPE)) {
+			auto playerEnts = GetEntities<PlayerCameraComponent>();
+			if (playerEnts.size() > 0) {
+				auto camera = playerEnts[0]->Get<PlayerCameraComponent>();
+				auto displayEnt = GetEntities<DisplayComponent>()[0];
+				auto display = displayEnt->Get<DisplayComponent>();
+
+				// Enable/Disable input for camera
+				camera.useInput = !camera.useInput;
+				playerEnts[0]->Set(camera);
+
+				// Enable/Switch cursor
+				display.display->showCursor(!camera.useInput);
+				displayEnt->Set(display);
+			}
+		}
 	}
 
 //	void EditTransform(const glm::mat4 &view, const glm::mat4 &proj)
