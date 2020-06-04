@@ -281,6 +281,11 @@ public:
 		_currentLevel = std::make_unique<T>();
 		_currentLevel->Load();
 	}
+
+	auto GetEntity(unsigned int id)
+	{
+		return _entityManager->GetEntity(id);
+	}
 };
 
 }

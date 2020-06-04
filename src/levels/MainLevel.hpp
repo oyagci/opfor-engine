@@ -13,6 +13,7 @@
 #include "components/SkyboxComponent.hpp"
 #include "components/SelectedComponent.hpp"
 #include "components/PointLightComponent.hpp"
+#include "components/LuaScriptComponent.hpp"
 
 // TODO: Something better
 MeshComponent initSkybox();
@@ -162,12 +163,16 @@ public:
 			}
 		}
 
-		_pointLight = engine.CreateEntity<PointLightComponent, TransformComponent, SelectedComponent>();
+		_pointLight = engine.CreateEntity<PointLightComponent, TransformComponent, SelectedComponent, LuaScriptComponent>();
 		PointLightComponent pl;
 			pl.Color = glm::vec3(1.0f, 1.0f, 0.8f);
 			pl.Dir = glm::normalize(glm::vec3(-1.0f, -1.0f, -1.0f));
 			pl.Intensity = 1000.0f;
 		_pointLight->Set(pl);
+
+		auto &pointLightLua = _pointLight->Get<LuaScriptComponent>();
+			pointLightLua.Runtime.PushGlobal("__ENTITY_ID__", _pointLight->GetId());
+			pointLightLua.Runtime.Load("scripts/custom_script.lua");
 
 		TransformComponent pt;
 			pt.position = glm::vec3(-50.0f, 10.0f, 0.0f);

@@ -149,7 +149,7 @@ public:
 	/// Get a const reference to the data of component U
 	///
 	template <typename U>
-	U const &Get() const
+	U &Get() const
 	{
 		static_assert(std::is_base_of<IComponentBase, U>::value, "typename U must de derived from IComponentBase");
 

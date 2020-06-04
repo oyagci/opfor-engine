@@ -25,6 +25,7 @@ incdirs += include_directories('thirdparty')
 incdirs += include_directories('thirdparty/imgui')
 incdirs += include_directories('thirdparty/ImGuizmo')
 incdirs += include_directories('thirdparty/tinygltf')
+incdirs += include_directories('thirdparty/lua-5.3.5/src')
 
 srcs = [
   'src/main.cpp',
@@ -46,6 +47,7 @@ srcs = [
   'src/engine/Framebuffer.cpp',
   'src/engine/Mesh.cpp',
   'src/engine/Batch.cpp',
+  'src/engine/lualib.cpp',
 ]
 
 imgui = [
@@ -75,6 +77,49 @@ srcs += tinygltf_src
 cmake = import('cmake')
 lazyGL = cmake.subproject('LazyGL')
 #assimp = cmake.subproject('assimp-5.0.1')
+
+# Lua
+lua_src = [
+  'thirdparty/lua-5.3.5/src/lfunc.c',
+  'thirdparty/lua-5.3.5/src/lopcodes.c',
+  'thirdparty/lua-5.3.5/src/lauxlib.c',
+  #  'thirdparty/lua-5.3.5/src/luac.c',
+  'thirdparty/lua-5.3.5/src/ltm.c',
+  'thirdparty/lua-5.3.5/src/lbitlib.c',
+  'thirdparty/lua-5.3.5/src/ldo.c',
+  'thirdparty/lua-5.3.5/src/lgc.c',
+  'thirdparty/lua-5.3.5/src/liolib.c',
+  'thirdparty/lua-5.3.5/src/lobject.c',
+  'thirdparty/lua-5.3.5/src/lmathlib.c',
+  'thirdparty/lua-5.3.5/src/lstate.c',
+  'thirdparty/lua-5.3.5/src/ltable.c',
+  'thirdparty/lua-5.3.5/src/ldump.c',
+  'thirdparty/lua-5.3.5/src/lcorolib.c',
+  'thirdparty/lua-5.3.5/src/lua.c',
+  'thirdparty/lua-5.3.5/src/llex.c',
+  'thirdparty/lua-5.3.5/src/lundump.c',
+  'thirdparty/lua-5.3.5/src/lmem.c',
+  'thirdparty/lua-5.3.5/src/lbaselib.c',
+  'thirdparty/lua-5.3.5/src/ldblib.c',
+  'thirdparty/lua-5.3.5/src/lctype.c',
+  'thirdparty/lua-5.3.5/src/lutf8lib.c',
+  'thirdparty/lua-5.3.5/src/lvm.c',
+  'thirdparty/lua-5.3.5/src/lzio.c',
+  'thirdparty/lua-5.3.5/src/lstrlib.c',
+  'thirdparty/lua-5.3.5/src/lapi.c',
+  'thirdparty/lua-5.3.5/src/lstring.c',
+  'thirdparty/lua-5.3.5/src/loslib.c',
+  'thirdparty/lua-5.3.5/src/lcode.c',
+  'thirdparty/lua-5.3.5/src/ltablib.c',
+  'thirdparty/lua-5.3.5/src/lparser.c',
+  'thirdparty/lua-5.3.5/src/loadlib.c',
+  'thirdparty/lua-5.3.5/src/linit.c',
+  'thirdparty/lua-5.3.5/src/ldebug.c',
+]
+
+lua_deps = [ meson.get_compiler('c').find_library('m') ]
+lua_inc = include_directories('thirdparty/lua-5.3.5/src')
+lib_lua = library('lua', lua_src, include_directories: lua_inc, dependencies: lua_deps)
 
 deps = [
   lazyGL.dependency('LazyGL'),
@@ -115,5 +160,6 @@ endif
 executable('ft_vox',
   srcs,
   include_directories : incdirs,
-  dependencies: deps
+  dependencies: deps,
+  link_with: lib_lua
 )

@@ -1,8 +1,27 @@
+#include "Engine.hpp"
+#include "engine/assimp/Model.hpp"
+#include "engine/Model.hpp"
+#include "systems/CameraMovementSystem.hpp"
+#include "systems/MeshRendererSystem.hpp"
+#include "systems/SkyboxRendererSystem.hpp"
+#include "systems/ImguiSystem.hpp"
+#include "systems/BatchRendererSystem.hpp"
+#include "systems/LuaSystem.hpp"
+#include "components/PlayerCameraComponent.hpp"
+#include "components/TransformComponent.hpp"
+#include "components/SkyboxComponent.hpp"
+#include "components/SelectedComponent.hpp"
+#include "components/BatchComponent.hpp"
+#include "components/LuaScriptComponent.hpp"
+#include "stb_image.h"
+#include "lazy.hpp"
+#include "ShaderManager.hpp"
 #include <fmt/format.h>
 #include <utility>
 #include <string>
 #include <optional>
 #include <utility>
+#include "LuaRuntime.hpp"
 
 #include "lazy.hpp"
 #include "stb_image.h"
@@ -101,6 +120,103 @@ MeshComponent initSkybox()
 
 	return meshComponent;
 }
+
+// unsigned int g_ShaderId;
+
+// static int addPointLight(lua_State *L);
+// static int setModelScale(lua_State *L);
+// 
+// static int loadModel(lua_State *L)
+// {
+// 	std::string path(lua_tostring(L, 1)); /* Param 1: String: Path to the model */
+// 	std::string name(lua_tostring(L, 2)); /* Param 2: String: Name of the model */
+// 
+// 	fmt::print("loadModel(\"{}\")\n", path);
+// 	Model model;
+// 	model.LoadFromGLTF(path);
+// 
+// 	if (model.GetMeshes().size() > 0) {
+// 
+// 		ModelComponent modelComponent;
+// 			modelComponent.Name = name; 
+// 			modelComponent.Shader = g_ShaderId;
+// 			modelComponent.Meshes.reserve(model.GetMeshes().size());
+// 			modelComponent.Meshes.insert(modelComponent.Meshes.begin(), model.GetMeshes().begin(), model.GetMeshes().end());
+// 
+// 		auto entity = engine::Engine::Instance().CreateEntity<ModelComponent, TransformComponent, LuaScriptComponent>();
+// 			entity->Set(modelComponent);
+// 			entity->SetName(name);
+// 
+// 		auto &luaScript = entity->Get<LuaScriptComponent>();
+// 			luaScript.Path = "scripts/custom_script.lua";
+// 			luaScript.Runtime.PushGlobal("__ENTITY_ID__", entity->GetId());
+// 			luaScript.Runtime.RegisterFunction("loadModel", &loadModel);
+// 			luaScript.Runtime.RegisterFunction("setModelScale", &setModelScale);
+// 			luaScript.Runtime.RegisterFunction("addPointLight", &addPointLight);
+// 			luaScript.Runtime.Load("scripts/custom_script.lua");
+// 
+// 		lua_pushnumber(L, static_cast<lua_Number>(entity->GetId()));
+// 	}
+// 	else {
+// 		lua_pushnumber(L, static_cast<lua_Number>(-1));
+// 	}
+// 
+// 	return 1;
+// }
+// 
+// static int setModelScale(lua_State *L)
+// {
+// 	lua_Number modelId = lua_tonumber(L, 1);
+// 	lua_Number x = lua_tonumber(L, 2);
+// 	lua_Number y = lua_tonumber(L, 3);
+// 	lua_Number z = lua_tonumber(L, 4);
+// 
+// 	auto const entity = engine::Engine::Instance().GetEntity(modelId);
+// 	if (entity.has_value() && entity.value()->HasComponents<TransformComponent>()) {
+// 
+// 		auto transform = entity.value()->Get<TransformComponent>();
+// 		transform.scale = { x, y, z };
+// 		entity.value()->Set(transform);
+// 	}
+// 
+// 	return 0;
+// }
+// 
+// static int addPointLight(lua_State *L)
+// {
+// 	std::string name(lua_tostring(L, 1));   /* Param 1: String: Name */
+// 
+// 	lua_getfield(L, 2, "x"); /* Param 2: Vector3: Light Position */
+// 	lua_getfield(L, 2, "y");
+// 	lua_getfield(L, 2, "z");
+// 	glm::vec3 position = { luaL_checknumber(L, -3), luaL_checknumber(L, -2), luaL_checknumber(L, -1) };
+// 	lua_pop(L, 3);
+// 
+// 	lua_getfield(L, 3, "r"); /* Param 3: RGB: Light Color */
+// 	lua_getfield(L, 3, "g");
+// 	lua_getfield(L, 3, "b");
+// 	glm::vec3 color = { luaL_checknumber(L, -3), luaL_checknumber(L, -2), luaL_checknumber(L, -1) };
+// 	lua_pop(L, 3);
+// 
+// 	lua_Number intensity = luaL_checknumber(L, 4);
+// 
+// 	auto pointLight = engine::Engine::Instance().CreateEntity<PointLightComponent, TransformComponent>();
+// 
+// 	PointLightComponent pt;
+// 		pt.Color = color;
+// 		pt.Intensity = intensity;
+// 
+// 	TransformComponent tr;
+// 		tr.position = position;
+// 
+// 	pointLight->Set(pt);
+// 	pointLight->Set(tr);
+// 	pointLight->SetName(name);
+// 
+// 	lua_pushnumber(L, pointLight->GetId());
+// 
+// 	return 1;
+// }
 
 std::vector<unsigned int> LoadMesh(std::string const &path, std::string const &name)
 {
@@ -215,11 +331,14 @@ std::vector<unsigned int> LoadMesh(std::string const &path, std::string const &n
 int main()
 {
 	Logger::Verbose("Hello World\n");
+	fmt::print("{} - {}\n", LUA_COPYRIGHT, LUA_AUTHORS);
+
 	auto &engine = Engine::Instance();
 	engine.CreateComponentSystem<CameraMovementSystem>();
 	engine.CreateComponentSystem<SkyboxRendererSystem>();
 	engine.CreateComponentSystem<MeshRendererSystem>();
 	engine.CreateComponentSystem<ImguiSystem>();
+	engine.CreateComponentSystem<LuaSystem>();
 
 	TextureManager::instance().createTexture("prototype_tile_8", "./img/prototype_tile_8.png", {
 		{ GL_TEXTURE_MAG_FILTER, GL_LINEAR },
