@@ -137,6 +137,13 @@ private:
 				}
 				ImGui::EndMenu();
 			}
+			if (ImGui::BeginMenu("Lighting")) {
+				if (ImGui::MenuItem("Build")) {
+					/* Build Lighting for the Level */
+					engine::Engine::Instance().OnBuildLighting();
+				}
+				ImGui::EndMenu();
+			}
 			ImGui::EndMenuBar();
 		}
 	}

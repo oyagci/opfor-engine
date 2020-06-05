@@ -12,6 +12,7 @@
 #include "TextureManager.hpp"
 #include <fmt/format.h>
 #include "Logger.hpp"
+#include "Action.hpp"
 
 using namespace lazy;
 using namespace graphics;
@@ -53,6 +54,11 @@ private:
 
 private:
 	Engine();
+
+public:
+	/// Observer for building the lighting of the level
+	/// Call this to rebuild the lighting of the scene
+	Action<> OnBuildLighting;
 
 public:
 	Engine(Engine const &) = delete;
@@ -162,6 +168,18 @@ public:
 			glActiveTexture(GL_TEXTURE2);
 			glBindTexture(GL_TEXTURE_2D, material.normal);
 		}
+	}
+
+	void UnbindMaterial()
+	{
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, 0);
+
+		glActiveTexture(GL_TEXTURE1);
+		glBindTexture(GL_TEXTURE_2D, 0);
+
+		glActiveTexture(GL_TEXTURE2);
+		glBindTexture(GL_TEXTURE_2D, 0);
 	}
 
 	unsigned int GetMaterialId(std::string const &name)

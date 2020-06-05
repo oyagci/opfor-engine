@@ -40,8 +40,6 @@ int Engine::Run()
 
 	while (!_display->isClosed())
 	{
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
 		Update();
 
 		Time::instance().update();

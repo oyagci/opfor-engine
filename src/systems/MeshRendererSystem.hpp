@@ -39,6 +39,8 @@ private:
 	GLuint _depthCubemap;
 	glm::mat4 _shadowProjection;
 
+	Callback<> buildShadowMap;
+
 	static constexpr unsigned int ShadowWidth  = 2048;
 	static constexpr unsigned int ShadowHeight = 2048;
 
@@ -81,7 +83,6 @@ private:
 	{
 		glViewport(0, 0, ShadowWidth, ShadowHeight);
 		glBindFramebuffer(GL_FRAMEBUFFER, _depthmapFb);
-		glClear(GL_DEPTH_BUFFER_BIT);
 	}
 
 	void UnbindShadowMap()
@@ -227,7 +228,7 @@ private:
 		_ssaoShader.unbind();
 	}
 
-	void RenderSSAO(PlayerCameraComponent &camera)
+	void RenderSSAO(PlayerCameraComponent const &camera)
 	{
 		glBindFramebuffer(GL_FRAMEBUFFER, _ssaoFb);
 		_ssaoShader.bind();
@@ -253,7 +254,7 @@ private:
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	}
 
-	void RenderShadowMeshes(TransformComponent &playerTransform)
+	void RenderShadowMeshes()
 	{
 		auto meshes = GetEntities<MeshComponent, TransformComponent>();
 
@@ -272,7 +273,7 @@ private:
 		}
 	}
 
-	void RenderMeshes(PlayerCameraComponent &camera, TransformComponent &playerTransform)
+	void RenderMeshes(PlayerCameraComponent const &camera, TransformComponent const &playerTransform)
 	{
 		auto meshes = GetEntities<MeshComponent, TransformComponent>();
 
@@ -307,18 +308,17 @@ private:
 
 			data->Draw();
 
-			// Unbind Textures
-			glActiveTexture(GL_TEXTURE0);
-				glBindTexture(GL_TEXTURE_2D, 0);
-			glActiveTexture(GL_TEXTURE1);
-				glBindTexture(GL_TEXTURE_2D, 0);
-			glActiveTexture(GL_TEXTURE2);
-				glBindTexture(GL_TEXTURE_2D, 0);
+			if (meshCast != nullptr) {
+				if (meshCast->GetMaterial() != "") {
+					engine::Engine::Instance().UnbindMaterial();
+				}
+			}
+
 			shader->unbind();
 		}
 	}
 
-	void RenderSkybox(PlayerCameraComponent &camera)
+	void RenderSkybox(PlayerCameraComponent const &camera)
 	{
 		auto skybox = GetEntities<MeshComponent, SkyboxComponent>();
 
@@ -363,7 +363,7 @@ private:
 		}
 	}
 
-	void RenderLightBillboard(PlayerCameraComponent &camera)
+	void RenderLightBillboard(PlayerCameraComponent const &camera)
 	{
 		auto lights = GetEntities<PointLightComponent, TransformComponent>();
 
@@ -410,20 +410,71 @@ private:
 				glBindTexture(GL_TEXTURE_CUBE_MAP, _depthCubemap);
 
 			_quad.Draw();
-		_light.unbind();
 
-		// Unbind Textures
-		glActiveTexture(GL_TEXTURE0);
-			glBindTexture(GL_TEXTURE_2D, 0);
-		glActiveTexture(GL_TEXTURE1);
-			glBindTexture(GL_TEXTURE_2D, 0);
-		glActiveTexture(GL_TEXTURE2);
-			glBindTexture(GL_TEXTURE_2D, 0);
+			// Unbind Textures
+			glActiveTexture(GL_TEXTURE0);
+				glBindTexture(GL_TEXTURE_2D, 0);
+			glActiveTexture(GL_TEXTURE1);
+				glBindTexture(GL_TEXTURE_2D, 0);
+			glActiveTexture(GL_TEXTURE2);
+				glBindTexture(GL_TEXTURE_2D, 0);
+			glActiveTexture(GL_TEXTURE3);
+				glBindTexture(GL_TEXTURE_2D, 0);
+			glActiveTexture(GL_TEXTURE4);
+				glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
+		_light.unbind();
+	}
+
+	void BakeShadowMap()
+	{
+		Logger::Info("Building shadow map\n");
+
+		auto lights = GetEntities<PointLightComponent, TransformComponent>();
+		auto players = GetEntities<PlayerCameraComponent, TransformComponent>();
+
+		if (lights.size() == 0) return ;
+		if (players.size() == 0) return ;
+
+		auto playerTransform = players[0]->Get<TransformComponent>();
+		auto lightPos = lights[0]->Get<TransformComponent>().position;
+
+		std::array<glm::mat4, 6> shadowTransforms = {
+			_shadowProjection * glm::lookAt(lightPos, lightPos + glm::vec3( 1.0, 0.0, 0.0), glm::vec3(0.0,-1.0, 0.0)),
+			_shadowProjection * glm::lookAt(lightPos, lightPos + glm::vec3(-1.0, 0.0, 0.0), glm::vec3(0.0,-1.0, 0.0)),
+			_shadowProjection * glm::lookAt(lightPos, lightPos + glm::vec3( 0.0, 1.0, 0.0), glm::vec3(0.0, 0.0, 1.0)),
+			_shadowProjection * glm::lookAt(lightPos, lightPos + glm::vec3( 0.0,-1.0, 0.0), glm::vec3(0.0, 0.0,-1.0)),
+			_shadowProjection * glm::lookAt(lightPos, lightPos + glm::vec3( 0.0, 0.0, 1.0), glm::vec3(0.0,-1.0, 0.0)),
+			_shadowProjection * glm::lookAt(lightPos, lightPos + glm::vec3( 0.0, 0.0,-1.0), glm::vec3(0.0,-1.0, 0.0)),
+		};
+
+		BindShadowMap();
+
+		glDisable(GL_BLEND);
+		glEnable(GL_DEPTH_TEST);
+		glClear(GL_DEPTH_BUFFER_BIT);
+
+		_shadow.bind();
+		_shadow.setUniform4x4f("model", glm::mat4(1.0f));
+		glUniformMatrix4fv(_shadow.getUniformLocation("shadowMatrices"), 6, GL_FALSE,
+			(float *)shadowTransforms.data());
+		_shadow.setUniform1f("far_plane", 10000.0f);
+		_shadow.setUniform3f("lightPos", lightPos);
+
+			RenderShadowMeshes();
+
+		_shadow.unbind();
+
+		UnbindShadowMap();
+
+		Logger::Info("Done building shadow map\n");
 	}
 
 public:
 	MeshRendererSystem()
 	{
+		buildShadowMap = [this] { BakeShadowMap(); };
+		engine::Engine::Instance().OnBuildLighting += buildShadowMap;
+
 		InitFramebuffer();
 		InitBillboard();
 		InitSSAO();
@@ -442,58 +493,31 @@ public:
 //		assert(_light.isValid());
 	}
 
+	~MeshRendererSystem()
+	{
+		engine::Engine::Instance().OnBuildLighting -= buildShadowMap;
+	}
+
 	void OnUpdate(float __unused deltaTime) override
 	{
 		auto player = GetEntities<PlayerCameraComponent, TransformComponent>();
 		auto display = engine::Engine::Instance().GetDisplay();
 		auto [ width, height ] = std::tuple(display->getWidth(), display->getHeight());
-		auto lights = GetEntities<PointLightComponent, TransformComponent>();
 
 		if (player.size() == 0) { return ; }
 
-		auto playerCamera = player[0]->Get<PlayerCameraComponent>();
-		auto playerTransform = player[0]->Get<TransformComponent>();
-
-		glDisable(GL_BLEND);
-
-		glEnable(GL_DEPTH_TEST);
-		BindShadowMap();
-		{
-			auto l = lights[0];
-			auto [ pl, tc ] = l->GetAll();
-
-			auto lightPos = tc.position;
-
-			std::array<glm::mat4, 6> shadowTransforms = {
-				_shadowProjection * glm::lookAt(lightPos, lightPos + glm::vec3( 1.0, 0.0, 0.0), glm::vec3(0.0,-1.0, 0.0)),
-				_shadowProjection * glm::lookAt(lightPos, lightPos + glm::vec3(-1.0, 0.0, 0.0), glm::vec3(0.0,-1.0, 0.0)),
-				_shadowProjection * glm::lookAt(lightPos, lightPos + glm::vec3( 0.0, 1.0, 0.0), glm::vec3(0.0, 0.0, 1.0)),
-				_shadowProjection * glm::lookAt(lightPos, lightPos + glm::vec3( 0.0,-1.0, 0.0), glm::vec3(0.0, 0.0,-1.0)),
-				_shadowProjection * glm::lookAt(lightPos, lightPos + glm::vec3( 0.0, 0.0, 1.0), glm::vec3(0.0,-1.0, 0.0)),
-				_shadowProjection * glm::lookAt(lightPos, lightPos + glm::vec3( 0.0, 0.0,-1.0), glm::vec3(0.0,-1.0, 0.0)),
-			};
-
-			_shadow.bind();
-			_shadow.setUniform4x4f("model", glm::mat4(1.0f));
-			glUniformMatrix4fv(_shadow.getUniformLocation("shadowMatrices"), 6, GL_FALSE, (float *)shadowTransforms.data());
-			_shadow.setUniform1f("far_plane", 10000.0f);
-			_shadow.setUniform3f("lightPos", lightPos);
-			RenderShadowMeshes(playerTransform);
-			_shadow.unbind();
-		}
-		UnbindShadowMap();
+		auto [ playerCamera, playerTransform ] = player[0]->GetAll();
 
 		_gBuffer.Bind();
-		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-		glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
-		glEnable(GL_DEPTH_TEST);
-		RenderMeshes(playerCamera, playerTransform);
+			glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+			glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
+			glEnable(GL_DEPTH_TEST);
+			RenderMeshes(playerCamera, playerTransform);
+			glDisable(GL_DEPTH_TEST);
 		_gBuffer.Unbind();
 
 		glClearColor(0.0f, 0.0, 0.0f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		glDisable(GL_DEPTH_TEST);
-
 		RenderLight(playerTransform.position);
 
 		// Copy depth buffer to default framebuffer to enable depth testing with billboard
@@ -502,11 +526,13 @@ public:
 		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
 		glBlitFramebuffer(0, 0, width, height, 0, 0, width, height, GL_DEPTH_BUFFER_BIT, GL_NEAREST);
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
 		glEnable(GL_BLEND);
 		glEnable(GL_DEPTH_TEST);
-
-		RenderSkybox(playerCamera);
-		RenderSSAO(playerCamera);
-		RenderLightBillboard(playerCamera);
+			RenderSkybox(playerCamera);
+			RenderSSAO(playerCamera);
+			RenderLightBillboard(playerCamera);
+		glDisable(GL_DEPTH_TEST);
+		glDisable(GL_BLEND);
 	}
 };
