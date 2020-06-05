@@ -70,9 +70,16 @@ protected:
 protected:
 	/// The entity's components
 	std::unordered_map<TypeIndex, std::unique_ptr<IComponentBase>> Components;
+	std::string Name;
 
 public:
+	IEntityBase() : Name("Unnamed Entity")
+	{
+	}
 	virtual ~IEntityBase() = default;
+
+	std::string const &GetName() const { return Name; }
+	void SetName(std::string const &name) { Name = name; }
 
 	///
 	/// Check if the entity has the component U

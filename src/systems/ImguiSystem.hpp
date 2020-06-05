@@ -230,6 +230,19 @@ private:
 		ImGui::End();
 	}
 
+	void EntityList()
+	{
+		ImGui::Begin("Entities");
+
+		auto allEnts = GetAllEntities();
+		for (auto const &ent : allEnts) {
+			auto name = ent->GetName();
+			ImGui::Text("%s", name.c_str());
+		}
+
+		ImGui::End();
+	}
+
 public:
 	ImguiSystem() : _display(nullptr), _logAutoScroll(true)
 	{
@@ -262,6 +275,7 @@ public:
 			LightProperties();
 			Materials();
 			Log();
+			EntityList();
 		EndDockspace();
 		EndFrame();
 

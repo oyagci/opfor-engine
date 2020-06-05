@@ -68,6 +68,17 @@ private:
 
 		return entities;
 	}
+
+	std::vector<IEntityBase*> GetAllEntities()
+	{
+		std::vector<IEntityBase*> entities;
+
+		for (auto &e : Entities) {
+			entities.push_back(e.get());
+		}
+
+		return entities;
+	}
 };
 
 class EntityManager
@@ -99,6 +110,11 @@ public:
 	std::vector<IEntity<Types...>*> GetEntities()
 	{
 		return Manager.GetEntities<Types...>();
+	}
+
+	std::vector<IEntityBase*> GetAllEntities()
+	{
+		return Manager.GetAllEntities();
 	}
 };
 

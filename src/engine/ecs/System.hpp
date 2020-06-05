@@ -34,6 +34,11 @@ public:
 
 		return entities;
 	}
+
+	std::vector<IEntityBase*> GetAllEntities()
+	{
+		return EntityMgr->GetAllEntities();
+	}
 };
 
 class ComponentSystem : public ISystemBase

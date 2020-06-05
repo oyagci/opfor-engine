@@ -245,6 +245,7 @@ int main()
 		p.view = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, 0.0f));
 		p.viewProjection = p.projection * p.view;
 	player->Set(p);
+	player->SetName("Player");
 
 	TransformComponent t;
 		t.direction = glm::vec3(0.0f, 0.0f, 1.0f);
@@ -282,6 +283,8 @@ int main()
 			TransformComponent t{};
 				t.scale = { 100.0f, 100.0f, 100.0f };
 			dvaEnt->Set(t);
+
+			dvaEnt->SetName("D.Va Mesh");
 		}
 	}
 
@@ -296,6 +299,8 @@ int main()
 		TransformComponent t{};
 			t.scale = { 1.0f, 1.0f, 1.0f };
 		spon->Set(t);
+
+		spon->SetName("Sponza Mesh");
 	}
 
 //	// Create a batch for the meshes
@@ -343,11 +348,13 @@ int main()
 	MeshComponent s = initSkybox();
 		s.Shader = skyboxShaderId;
 	skybox->Set(s);
+	skybox->SetName("Skybox");
 
 	auto display = engine.CreateEntity<DisplayComponent>();
 	DisplayComponent d;
 	d.display = engine.GetDisplay();
 	display->Set(d);
+	display->SetName("Display");
 
 	auto pointLight = engine.CreateEntity<PointLightComponent, TransformComponent, SelectedComponent>();
 	PointLightComponent pl;
@@ -358,6 +365,8 @@ int main()
 	TransformComponent pt;
 	pt.position = glm::vec3(-500.0f, 100.0f, 0.0f);
 	pointLight->Set(pt);
+
+	pointLight->SetName("Point Light");
 
 //	auto pointLight2 = engine.CreateEntity<PointLightComponent, TransformComponent>();
 //	pl.Color = glm::vec3(1.0f, 1.0f, 0.8f);
