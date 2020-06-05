@@ -1,6 +1,8 @@
 # 3D Engine
 Game Engine in C++ and OpenGL
 
+![Editor Screenshot](./img/Screenshot_Editor_1.png)
+
 ## Examples
 ### Creating a Component
 ```cpp
