@@ -200,8 +200,9 @@ private:
 		}
 		ImGui::SameLine();
 		bool clear = ImGui::Button("Clear");
-		ImGui::SameLine();
-		bool copy = ImGui::Button("Copy");
+		if (clear) {
+			Logger::Clear();
+		}
 
 		ImGui::Separator();
 		ImGui::BeginChild("scolling", ImVec2(0, 0), false, ImGuiWindowFlags_HorizontalScrollbar);

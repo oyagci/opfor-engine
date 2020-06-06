@@ -168,6 +168,8 @@ private:
 		_ssaoBlurShader.addVertexShader("shaders/ssao.vs.glsl")
 			.addFragmentShader("shaders/ssaoblur.fs.glsl")
 			.link();
+		_ssaoBlurShader.bind();
+		_ssaoBlurShader.setUniform1i("ssaoInput", 0);
 
 		glGenFramebuffers(1, &_ssaoBlurFb);
 		glBindFramebuffer(GL_FRAMEBUFFER, _ssaoBlurFb);
@@ -198,7 +200,7 @@ private:
 			sample *= randomFloats(generator);
 
 			// Make distribution closer to origin
-			float scale = (float)i / 64.0f;
+			float scale = static_cast<float>(i) / 64.0f;
 			scale = lerp(0.1f, 1.0f, scale * scale);
 			sample *= scale;
 
@@ -223,8 +225,11 @@ private:
 		glBindTexture(GL_TEXTURE_2D, 0);
 
 		_ssaoShader.bind();
-		GLuint sampleLoc = _ssaoShader.getUniformLocation("samples");
-		glUniform3fv(sampleLoc, 64, &ssaoKernel[0][0]);
+//		GLuint sampleLoc = _ssaoShader.getUniformLocation("samples");
+		for (size_t i = 0; i < 64; i++) {
+			_ssaoShader.setUniform3f("samples[" + std::to_string(i) + "]", ssaoKernel[i]);
+		}
+//		glUniform3fv(sampleLoc, 64, &ssaoKernel[0][0]);
 		_ssaoShader.unbind();
 	}
 
@@ -232,6 +237,9 @@ private:
 	{
 		glBindFramebuffer(GL_FRAMEBUFFER, _ssaoFb);
 		_ssaoShader.bind();
+		_ssaoShader.setUniform1i("gPosition", 0);
+		_ssaoShader.setUniform1i("gNormal", 1);
+		_ssaoShader.setUniform1i("texNoise", 2);
 
 		glClear(GL_COLOR_BUFFER_BIT);
 		glActiveTexture(GL_TEXTURE0);
@@ -242,16 +250,29 @@ private:
 			glBindTexture(GL_TEXTURE_2D, _ssaoNoiseTex);
 
 		_ssaoShader.setUniform4x4f("projectionMatrix", camera.projection);
+		_ssaoShader.setUniform4x4f("viewMatrix", camera.view);
 		_quad.Draw();
+
+		glActiveTexture(GL_TEXTURE0);
+			glBindTexture(GL_TEXTURE_2D, 0);
+		glActiveTexture(GL_TEXTURE1);
+			glBindTexture(GL_TEXTURE_2D, 0);
+		glActiveTexture(GL_TEXTURE2);
+			glBindTexture(GL_TEXTURE_2D, 0);
 		_ssaoShader.unbind();
 
-		glBindFramebuffer(GL_FRAMEBUFFER, _ssaoBlurFb);
-		glActiveTexture(GL_TEXTURE0);
-			glBindTexture(GL_TEXTURE_2D, _ssaoColorBuf);
-		_ssaoBlurShader.bind();
-		_quad.Draw();
-		_ssaoShader.unbind();
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+//		glBindFramebuffer(GL_FRAMEBUFFER, _ssaoBlurFb);
+//
+//		_ssaoBlurShader.bind();
+//		_ssaoBlurShader.setUniform1i("ssaoInput", 0);
+//		glActiveTexture(GL_TEXTURE0);
+//		glBindTexture(GL_TEXTURE_2D, _ssaoColorBuf);
+//		_quad.Draw();
+//		glBindTexture(GL_TEXTURE_2D, 0);
+//		_ssaoShader.unbind();
+
+//		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	}
 
 	void RenderShadowMeshes()
@@ -405,7 +426,8 @@ private:
 			glActiveTexture(GL_TEXTURE2);
 				glBindTexture(GL_TEXTURE_2D, _gBuffer.GetAlbedoSpecTex());
 			glActiveTexture(GL_TEXTURE3);
-				glBindTexture(GL_TEXTURE_2D, _ssaoBlurTex);
+				//glBindTexture(GL_TEXTURE_2D, _ssaoBlurTex);
+				glBindTexture(GL_TEXTURE_2D, _ssaoColorBuf);
 			glActiveTexture(GL_TEXTURE4);
 				glBindTexture(GL_TEXTURE_CUBE_MAP, _depthCubemap);
 
@@ -530,7 +552,7 @@ public:
 		glEnable(GL_BLEND);
 		glEnable(GL_DEPTH_TEST);
 			RenderSkybox(playerCamera);
-			RenderSSAO(playerCamera);
+//			RenderSSAO(playerCamera);
 			RenderLightBillboard(playerCamera);
 		glDisable(GL_DEPTH_TEST);
 		glDisable(GL_BLEND);

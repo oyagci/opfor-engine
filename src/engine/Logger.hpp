@@ -120,4 +120,10 @@ public:
 	{
 		return Instance()._lineOffsets;
 	}
+
+	static void Clear()
+	{
+		Instance()._log = "";
+		Instance()._lineOffsets.clear();
+	}
 };

@@ -69,8 +69,9 @@ vec3 CalcPointLight(PointLight light, vec3 fragPos, vec3 normal, float spec, flo
 
 	/// Specular
 	vec3 view_dir = normalize(viewPos - fragPos);
-	vec3 reflect_dir = normalize(reflect(-light_dir, normal));
-	float specular = pow(max(dot(view_dir, reflect_dir), 0.0), 16);
+	vec3 halfway_dir = normalize(light_dir + view_dir);
+	//vec3 reflect_dir = normalize(reflect(-light_dir, normal));
+	float specular = pow(max(dot(view_dir, halfway_dir), 0.0), 16);
 	vec3 specular_light = spec * specular * light.specular;
 
 	float shadow = CalcShadow(light, fragPos);
