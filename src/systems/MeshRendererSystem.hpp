@@ -325,6 +325,9 @@ private:
 				if (meshCast->GetMaterial() != "") {
 					engine::Engine::Instance().BindMaterial(meshCast->GetMaterial());
 				}
+				if (meshCast->GetPbrMaterial().has_value()) {
+					engine::Engine::Instance().BindPbrMaterial(meshCast->GetPbrMaterial().value());
+				}
 			}
 
 			data->Draw();

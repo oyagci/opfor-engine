@@ -24,6 +24,7 @@ incdirs += include_directories('src/engine')
 incdirs += include_directories('thirdparty')
 incdirs += include_directories('thirdparty/imgui')
 incdirs += include_directories('thirdparty/ImGuizmo')
+incdirs += include_directories('thirdparty/tinygltf')
 
 srcs = [
   'src/main.cpp',
@@ -62,11 +63,17 @@ imgui_guizmo = [
   'thirdparty/ImGuizmo/ImCurveEdit.cpp',
 ]
 
+tinygltf_src = [
+  'src/engine/tinygltf.cpp'
+]
+
 srcs += imgui
 srcs += imgui_guizmo
+srcs += tinygltf_src
 
 cmake = import('cmake')
 lazyGL = cmake.subproject('LazyGL')
+#assimp = cmake.subproject('assimp-5.0.1')
 
 deps = [
   lazyGL.dependency('LazyGL'),

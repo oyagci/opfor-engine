@@ -2,6 +2,7 @@
 #include <iostream>
 #include <vector>
 #include <fmt/format.h>
+#include "Logger.hpp"
 
 namespace assimp {
 
@@ -10,11 +11,18 @@ Model::Model(std::string const &path)
 	Assimp::Importer import;
 	const aiScene *scene = import.ReadFile(path.c_str(), aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_CalcTangentSpace);
 
+	Logger::Verbose("Loading {}\n", path);
+
 	if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
 	{
-		fmt::print("Could not load model");
+		fmt::print("Could not load model\n");
+		Logger::Warn("Could not load model\n");
 		return ;
 	}
+
+	Logger::Verbose("NUMBER OF TEXTURES  IN SCENE : {}\n", scene->mNumTextures);
+	Logger::Verbose("NUMBER OF MATERIALS IN SCENE : {}\n", scene->mNumMaterials);
+
 	_directory = path.substr(0, path.find_last_of('/'));
 	processNode(scene->mRootNode, scene);
 }
@@ -77,7 +85,7 @@ Mesh Model::processMesh(aiMesh *mesh, const aiScene *scene)
 	}
 
 	// Textures
-	if (mesh->mMaterialIndex > 0) {
+	if (scene->HasMaterials() && mesh->mMaterialIndex >= 0) {
 		aiMaterial *material = scene->mMaterials[mesh->mMaterialIndex];
 
 		auto diffuse = loadMaterialTextures(material, aiTextureType_DIFFUSE);
@@ -106,13 +114,18 @@ std::vector<std::string> Model::loadMaterialTextures(aiMaterial *material, aiTex
 {
 	std::vector<std::string> textureNames;
 
+	Logger::Verbose("Number of Textures of type {} : {}\n", aitype, material->GetTextureCount(aitype));
 	for (unsigned int i = 0; i < material->GetTextureCount(aitype); i++) {
-		aiString str;
-		material->GetTexture(aitype, i, &str);
-		std::string path = _directory + "/" + str.C_Str();
-		textureNames.push_back(str.C_Str());
-
-		_textures[aitype].push_back({ str.C_Str(), path });
+		aiString str{};
+		//material->GetTexture(aitype, i, &str);
+		if (material->Get(AI_MATKEY_TEXTURE(aitype, i), str) == aiReturn_SUCCESS) {
+			std::string path = _directory + "/" + str.C_Str();
+			std::string name = str.C_Str();
+			if (name == "") { abort(); }
+			textureNames.push_back(str.C_Str());
+			Logger::Verbose("Texture Path: {}\n", path);
+			_textures[aitype].push_back({ str.C_Str(), path });
+		}
 	}
 
 	return textureNames;

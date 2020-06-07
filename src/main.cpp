@@ -18,6 +18,9 @@
 #include <string>
 #include "Batch.hpp"
 #include "Logger.hpp"
+#include "tiny_gltf.h"
+#include <optional>
+#include <utility>
 
 using namespace engine;
 
@@ -101,6 +104,184 @@ MeshComponent initSkybox()
 	meshComponent.Id = Engine::Instance().AddMesh(std::move(mesh));
 
 	return meshComponent;
+}
+
+std::optional<std::vector<unsigned int>> TinyLoader(std::string const &path)
+{
+	std::optional<std::vector<unsigned int>> meshes_ret;
+
+	tinygltf::Model model;
+	tinygltf::TinyGLTF loader;
+	std::string err;
+	std::string warn;
+
+	bool ret = loader.LoadASCIIFromFile(&model, &err, &warn, path);
+
+	if (!warn.empty()) {
+		Logger::Warn("{}\n", warn);
+	}
+	if (!err.empty()) {
+		Logger::Error("{}\n", err);
+	}
+	if (ret == false) {
+		return meshes_ret;
+	}
+
+	std::string modelName = path.substr(path.find_last_of("/") + 1, path.find_last_of("."));
+
+	// Load Materials
+	// --------------
+	std::vector<std::string> pbrMaterials; // Save the material index to be able to set the material of the mesh later
+	size_t currentMaterialIndex = 0;
+	for (auto const &material : model.materials) {
+
+		PbrMaterial pbrMaterial;
+
+		auto const baseColorTexture = material.pbrMetallicRoughness.baseColorTexture.index;
+		if (baseColorTexture >= 0) {
+			pbrMaterial.Albedo = model.images[model.textures[baseColorTexture].source].uri;
+		}
+
+		auto const &normalTexture = material.normalTexture.index;
+		if (normalTexture >= 0) {
+			pbrMaterial.Normal = model.images[model.textures[normalTexture].source].uri;
+		}
+
+		auto const metallicTexture = material.pbrMetallicRoughness.metallicRoughnessTexture.index;
+		if (metallicTexture >= 0) {
+			pbrMaterial.Metallic = model.images[model.textures[metallicTexture].source].uri;
+		}
+
+		pbrMaterial.Name = modelName + "-" + std::to_string(currentMaterialIndex);
+
+		fmt::print("Material \"{}\" {{\n", pbrMaterial.Name);
+		fmt::print("  Albedo: {},\n", pbrMaterial.Albedo.value_or("(null)"));
+		fmt::print("  Normal: {},\n", pbrMaterial.Normal.value_or("(null)"));
+		fmt::print("  Metalic: {},\n", pbrMaterial.Metallic.value_or("(null)"));
+		fmt::print("}}\n");
+
+		pbrMaterials.push_back(pbrMaterial.Name);
+		engine::Engine::Instance().AddPbrMaterial(pbrMaterial);
+
+		currentMaterialIndex++;
+	}
+
+	// Load texture images
+	// -------------------
+	std::string directory = path.substr(0, path.find_last_of('/')) + "/";
+
+	for (auto const &t : model.images) {
+
+		std::string name = t.uri;
+		std::string path = directory + t.uri;
+
+		Logger::Verbose("Loading texture {} into memory\n", name);
+		TextureManager::instance().createTexture(name, path, {
+			{ GL_TEXTURE_MAG_FILTER, GL_LINEAR },
+			{ GL_TEXTURE_MIN_FILTER, GL_LINEAR },
+			{ GL_TEXTURE_WRAP_S, GL_REPEAT },
+			{ GL_TEXTURE_WRAP_T, GL_REPEAT },
+		}, GL_TEXTURE_2D);
+	}
+
+	std::vector<unsigned int> meshes;
+
+	for (auto const &mesh : model.meshes) {
+
+		engine::Mesh current;
+
+		for (auto const &primitive : mesh.primitives) {
+
+			// Helper Lambda
+			// Returns the count and the attributes
+			auto getVertex = [&] (std::string const &attributeName) -> std::optional<std::pair<size_t, const float *>> {
+
+				std::optional<std::pair<size_t, const float *>> ret;
+
+				auto const &attribute = primitive.attributes.find(attributeName);
+
+				if (attribute == primitive.attributes.end()) {
+					return ret;
+				}
+
+				tinygltf::Accessor const &accessor = model.accessors[attribute->second];
+				tinygltf::BufferView const &bufferView = model.bufferViews[accessor.bufferView];
+				tinygltf::Buffer const &buffer = model.buffers[bufferView.buffer];
+
+				ret = std::pair<size_t, const float *>(accessor.count,
+					reinterpret_cast<const float *>(&buffer.data[bufferView.byteOffset + accessor.byteOffset]));
+				return ret;
+			};
+
+			// Get data for indices 
+			tinygltf::Accessor const &indAccessor = model.accessors[primitive.indices];
+			tinygltf::BufferView const &indBufferView = model.bufferViews[indAccessor.bufferView];
+			tinygltf::Buffer const &indBuffer = model.buffers[indBufferView.buffer];
+
+			auto positions = getVertex("POSITION");
+			auto normals   = getVertex("NORMAL");
+			auto tangents  = getVertex("TANGENT");
+			auto texcoords = getVertex("TEXCOORD_0");
+			auto indices   = reinterpret_cast<const GLushort*>(&indBuffer.data[indBufferView.byteOffset + indAccessor.byteOffset]);
+
+			if (positions.has_value()) {
+				for (size_t i = 0; i < positions.value().first; i++) {
+					current.addPosition({
+						positions.value().second[i * 3 + 0],
+						positions.value().second[i * 3 + 1],
+						positions.value().second[i * 3 + 2]
+					});
+				}
+			}
+
+			if (normals.has_value()) {
+				for (size_t i = 0; i < normals.value().first; i++) {
+					current.addNormal({
+						normals.value().second[i * 3 + 0],
+						normals.value().second[i * 3 + 1],
+						normals.value().second[i * 3 + 2]
+					});
+				}
+			}
+
+			if (tangents.has_value()) {
+				for (size_t i = 0; i < tangents.value().first; i++) {
+					current.addTangent({
+						tangents.value().second[i * 3 + 0],
+						tangents.value().second[i * 3 + 1],
+						tangents.value().second[i * 3 + 2]
+					});
+				}
+			}
+
+			if (texcoords.has_value()) {
+				for (size_t i = 0; i < texcoords.value().first; i++) {
+					current.addUv({
+						texcoords.value().second[i * 2 + 0],
+						texcoords.value().second[i * 2 + 1]
+					});
+				}
+			}
+
+			for (size_t i = 0; i < indAccessor.count; i++) {
+				current.addTriangle({
+					static_cast<GLuint>(indices[i * 3 + 0]),
+					static_cast<GLuint>(indices[i * 3 + 1]),
+					static_cast<GLuint>(indices[i * 3 + 2])
+				});
+			}
+
+			current.build();
+			current.SetPbrMaterial(pbrMaterials[primitive.material]);
+			meshes.push_back(engine::Engine::Instance().AddMesh(std::move(current)));
+		}
+	}
+
+	if (meshes.size() > 0) {
+		meshes_ret = meshes;
+	}
+
+	return meshes_ret;
 }
 
 std::vector<unsigned int> LoadMesh(std::string const &path, std::string const &name)
@@ -288,21 +469,22 @@ int main()
 		}
 	}
 
-	auto sponMeshIds = LoadMesh("models/Sponza/sponza.obj", "sponza");
-	for (auto const &meshId : sponMeshIds) {
-		auto spon = engine.CreateEntity<MeshComponent, TransformComponent>();
-		MeshComponent dvaMesh{};
-			dvaMesh.Id = meshId;
-			dvaMesh.Shader = shaderId;
-		spon->Set(dvaMesh);
+	//auto sponMeshIds = LoadMesh("models/Sponza/sponza.obj", "sponza");
+	//auto sponMeshIds = LoadMesh("models/glTF-Sample-Models/2.0/Sponza/glTF/Sponza.gltf", "sponza");
+	auto sponMeshIds = TinyLoader("models/glTF-Sample-Models/2.0/Sponza/glTF/Sponza.gltf").value();
+		for (auto const &meshId : sponMeshIds) {
+			auto spon = engine.CreateEntity<MeshComponent, TransformComponent>();
+			MeshComponent dvaMesh{};
+				dvaMesh.Id = meshId;
+				dvaMesh.Shader = shaderId;
+			spon->Set(dvaMesh);
 
-		TransformComponent t{};
-			t.scale = { 1.0f, 1.0f, 1.0f };
-		spon->Set(t);
+			TransformComponent t{};
+				t.scale = { 1.0f, 1.0f, 1.0f };
+			spon->Set(t);
 
-		spon->SetName("Sponza Mesh");
-	}
-
+			spon->SetName("Sponza Mesh");
+		}
 //	// Create a batch for the meshes
 //	auto batch = std::make_unique<Batch>();
 //	int i = 0;

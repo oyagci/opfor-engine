@@ -48,6 +48,7 @@ private:
 	using MaterialContainer = std::pair<unsigned int, Material>;
 
 	std::unordered_map<std::string, MaterialContainer> _materials;
+	std::unordered_map<std::string, PbrMaterial> _pbrMaterials;
 
 	static unsigned int _nextId;
 	static unsigned int _nextMaterialId;
@@ -130,6 +131,54 @@ public:
 		_meshes[_nextId] = std::move(batch);
 
 		return _nextId++;
+	}
+
+	void AddPbrMaterial(PbrMaterial material)
+	{
+		if (_pbrMaterials.find(material.Name) != _pbrMaterials.end()) {
+			Logger::Warn("Material {} already exists\n", material.Name);
+		}
+
+		_pbrMaterials[material.Name] = material;
+	}
+
+	void BindPbrMaterial(std::string const &name)
+	{
+		if (name.size() == 0) {
+			Logger::Warn("Material name not given\n");
+			return ;
+		}
+		if (_pbrMaterials.find(name) == _pbrMaterials.end()) {
+			Logger::Warn("Material not found ({})\n", name);
+			return ;
+		}
+
+		auto const &material = _pbrMaterials[name];
+
+		if (material.Albedo.has_value()) {
+			glActiveTexture(GL_TEXTURE0);
+			glBindTexture(GL_TEXTURE_2D, TextureManager::instance().get(material.Albedo.value()));
+		}
+//		if (material.specular > 0) {
+//			glActiveTexture(GL_TEXTURE1);
+//			glBindTexture(GL_TEXTURE_2D, material.specular);
+//		}
+		if (material.Normal.has_value()) {
+			glActiveTexture(GL_TEXTURE2);
+			glBindTexture(GL_TEXTURE_2D, TextureManager::instance().get(material.Normal.value()));
+		}
+	}
+
+	void UnbindPbrMaterial()
+	{
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, 0);
+
+		glActiveTexture(GL_TEXTURE1);
+		glBindTexture(GL_TEXTURE_2D, 0);
+
+		glActiveTexture(GL_TEXTURE2);
+		glBindTexture(GL_TEXTURE_2D, 0);
 	}
 
 	void AddMaterial(std::string const &name, Material mat)

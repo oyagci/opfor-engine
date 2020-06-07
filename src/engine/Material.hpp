@@ -3,6 +3,14 @@
 #include <string>
 #include <fmt/format.h>
 
+struct PbrMaterial
+{
+	std::string Name;
+	std::optional<std::string> Albedo;
+	std::optional<std::string> Normal;
+	std::optional<std::string> Metallic;
+};
+
 /// Keeps track of which OpenGL texture id each material uses
 struct Material
 {

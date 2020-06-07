@@ -4,7 +4,7 @@
 
 namespace engine
 {
-	Mesh::Mesh() : vao(0), ibo(0), objectBuffer(0)
+	Mesh::Mesh() : vao(0), ibo(0), objectBuffer(0), lightMap(0)
 	{
 		addTexture("prototype_tile_8", TextureType::TT_Diffuse);
 	}
@@ -14,6 +14,7 @@ namespace engine
 		glDeleteBuffers(1, &ibo);
 		glDeleteBuffers(1, &objectBuffer);
 		glDeleteVertexArrays(1, &vao);
+		glDeleteTextures(1, &lightMap);
 	}
 
 	Mesh::Mesh(Mesh &&m)
@@ -34,6 +35,12 @@ namespace engine
 
 		ibo = m.ibo;
 		m.ibo = 0;
+
+		lightMap = m.lightMap;
+		m.lightMap = 0;
+
+		_pbrMaterial = std::move(m._pbrMaterial);
+		m._pbrMaterial.reset();
 	}
 
 	Mesh &Mesh::operator=(Mesh &&rhs)
@@ -42,6 +49,7 @@ namespace engine
 		{
 			glDeleteVertexArrays(1, &vao);
 			glDeleteBuffers(1, &objectBuffer);
+			glDeleteTextures(1, &lightMap);
 
 			vPositions = std::move(rhs.vPositions);
 			vNormals = std::move(rhs.vNormals);
@@ -59,6 +67,12 @@ namespace engine
 
 			ibo = rhs.ibo;
 			rhs.ibo = 0;
+
+			lightMap = rhs.lightMap;
+			rhs.lightMap = 0;
+
+			_pbrMaterial = rhs._pbrMaterial;
+			rhs._pbrMaterial.reset();
 		}
 		return *this;
 	}
@@ -192,6 +206,16 @@ namespace engine
 		}
 
 		return ids;
+	}
+
+	void Mesh::InitLightmap()
+	{
+		const glm::uvec2 LightmapSize{ 1024, 1024 };
+
+		glGenTextures(1, &lightMap);
+		glBindTexture(GL_TEXTURE_2D, lightMap);
+
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, LightmapSize.x, LightmapSize.y, 0, GL_RED, GL_FLOAT, nullptr);
 	}
 	
 }
