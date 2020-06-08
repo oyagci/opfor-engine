@@ -16,8 +16,8 @@ void main()
 	vec3 cameraUp = { viewMatrix[0][1], viewMatrix[1][1], viewMatrix[2][1] };
 
 	vec3 vertexPos = particlePosition
-					 + cameraRight * in_position.x * 30.0
-					 + cameraUp * in_position.y * 30.0;
+					 + cameraRight * in_position.x * 3.0
+					 + cameraUp * in_position.y * 3.0;
 
 	gl_Position = viewProjectionMatrix * vec4(vertexPos, 1.0f);
 

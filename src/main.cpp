@@ -127,11 +127,27 @@ std::optional<std::vector<unsigned int>> TinyLoader(std::string const &path)
 		return meshes_ret;
 	}
 
-	std::string modelName = path.substr(path.find_last_of("/") + 1, path.find_last_of("."));
+	std::string modelName;
+	if (path.find_last_of("/") != std::string::npos) {
+		if (path.find_last_of(".") != std::string::npos) {
+			modelName = path.substr(path.find_last_of("/") + 1, path.find_last_of("."));
+		}
+		else {
+			modelName = path.substr(path.find_last_of("/") + 1);
+		}
+	}
+	else if (path.find_last_of(".") != std::string::npos) {
+		modelName = path.substr(0, path.find_last_of("."));
+	}
+	else {
+		modelName = path;
+	}
+
+	fmt::print("Model name is \"{}\"\n", modelName);
 
 	// Load Materials
 	// --------------
-	std::vector<std::string> pbrMaterials; // Save the material index to be able to set the material of the mesh later
+	std::vector<std::string> pbrMaterials; // Save the materials' index to be able to set the material of the mesh later
 	size_t currentMaterialIndex = 0;
 	for (auto const &material : model.materials) {
 
@@ -142,7 +158,7 @@ std::optional<std::vector<unsigned int>> TinyLoader(std::string const &path)
 			pbrMaterial.Albedo = model.images[model.textures[baseColorTexture].source].uri;
 		}
 
-		auto const &normalTexture = material.normalTexture.index;
+		auto const normalTexture = material.normalTexture.index;
 		if (normalTexture >= 0) {
 			pbrMaterial.Normal = model.images[model.textures[normalTexture].source].uri;
 		}
@@ -154,11 +170,11 @@ std::optional<std::vector<unsigned int>> TinyLoader(std::string const &path)
 
 		pbrMaterial.Name = modelName + "-" + std::to_string(currentMaterialIndex);
 
-		fmt::print("Material \"{}\" {{\n", pbrMaterial.Name);
-		fmt::print("  Albedo: {},\n", pbrMaterial.Albedo.value_or("(null)"));
-		fmt::print("  Normal: {},\n", pbrMaterial.Normal.value_or("(null)"));
-		fmt::print("  Metalic: {},\n", pbrMaterial.Metallic.value_or("(null)"));
-		fmt::print("}}\n");
+//		fmt::print("Material \"{}\" {{\n", pbrMaterial.Name);
+//		fmt::print("  Albedo: {},\n", pbrMaterial.Albedo.value_or("(null)"));
+//		fmt::print("  Normal: {},\n", pbrMaterial.Normal.value_or("(null)"));
+//		fmt::print("  Metalic: {},\n", pbrMaterial.Metallic.value_or("(null)"));
+//		fmt::print("}}\n");
 
 		pbrMaterials.push_back(pbrMaterial.Name);
 		engine::Engine::Instance().AddPbrMaterial(pbrMaterial);
@@ -194,6 +210,7 @@ std::optional<std::vector<unsigned int>> TinyLoader(std::string const &path)
 
 			// Helper Lambda
 			// Returns the count and the attributes
+			// TODO: Return the number of components per element (vec{2,3,4}, scalar, ...)
 			auto getVertex = [&] (std::string const &attributeName) -> std::optional<std::pair<size_t, const float *>> {
 
 				std::optional<std::pair<size_t, const float *>> ret;
@@ -204,7 +221,9 @@ std::optional<std::vector<unsigned int>> TinyLoader(std::string const &path)
 					return ret;
 				}
 
-				tinygltf::Accessor const &accessor = model.accessors[attribute->second];
+				auto const [name, indice] = *attribute;
+
+				tinygltf::Accessor const &accessor = model.accessors[indice];
 				tinygltf::BufferView const &bufferView = model.bufferViews[accessor.bufferView];
 				tinygltf::Buffer const &buffer = model.buffers[bufferView.buffer];
 
@@ -223,6 +242,9 @@ std::optional<std::vector<unsigned int>> TinyLoader(std::string const &path)
 			auto tangents  = getVertex("TANGENT");
 			auto texcoords = getVertex("TEXCOORD_0");
 			auto indices   = reinterpret_cast<const GLushort*>(&indBuffer.data[indBufferView.byteOffset + indAccessor.byteOffset]);
+
+			// Build the mesh
+			// --------------
 
 			if (positions.has_value()) {
 				for (size_t i = 0; i < positions.value().first; i++) {
@@ -247,9 +269,9 @@ std::optional<std::vector<unsigned int>> TinyLoader(std::string const &path)
 			if (tangents.has_value()) {
 				for (size_t i = 0; i < tangents.value().first; i++) {
 					current.addTangent({
-						tangents.value().second[i * 3 + 0],
-						tangents.value().second[i * 3 + 1],
-						tangents.value().second[i * 3 + 2]
+						tangents.value().second[i * 4 + 0],
+						tangents.value().second[i * 4 + 1],
+						tangents.value().second[i * 4 + 2]
 					});
 				}
 			}
@@ -263,7 +285,9 @@ std::optional<std::vector<unsigned int>> TinyLoader(std::string const &path)
 				}
 			}
 
-			for (size_t i = 0; i < indAccessor.count; i++) {
+			// Component type for indices is SCALAR, that means the count must be divided by 3 when building
+			// triangles so that we do not overrun the buffer
+			for (size_t i = 0; i < indAccessor.count / 3; i++) {
 				current.addTriangle({
 					static_cast<GLuint>(indices[i * 3 + 0]),
 					static_cast<GLuint>(indices[i * 3 + 1]),
@@ -273,6 +297,8 @@ std::optional<std::vector<unsigned int>> TinyLoader(std::string const &path)
 
 			current.build();
 			current.SetPbrMaterial(pbrMaterials[primitive.material]);
+
+			// Register this mesh to the engine and save its index
 			meshes.push_back(engine::Engine::Instance().AddMesh(std::move(current)));
 		}
 	}
@@ -421,7 +447,7 @@ int main()
 	auto player = engine.CreateEntity<PlayerCameraComponent, TransformComponent>();
 
 	PlayerCameraComponent p;
-		p.projection = glm::perspective(glm::radians(90.0f), 16.0f / 9.0f, 0.1f, 10000.0f);
+		p.projection = glm::perspective(glm::radians(90.0f), 16.0f / 9.0f, 0.1f, 1000.0f);
 		p.model = glm::mat4(1.0f);
 		p.view = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, 0.0f));
 		p.viewProjection = p.projection * p.view;
@@ -462,15 +488,13 @@ int main()
 			dvaEnt->Set(dvaMesh);
 
 			TransformComponent t{};
-				t.scale = { 100.0f, 100.0f, 100.0f };
+				t.scale = { 10.0f, 10.0f, 10.0f };
 			dvaEnt->Set(t);
 
 			dvaEnt->SetName("D.Va Mesh");
 		}
 	}
 
-	//auto sponMeshIds = LoadMesh("models/Sponza/sponza.obj", "sponza");
-	//auto sponMeshIds = LoadMesh("models/glTF-Sample-Models/2.0/Sponza/glTF/Sponza.gltf", "sponza");
 	auto sponMeshIds = TinyLoader("models/glTF-Sample-Models/2.0/Sponza/glTF/Sponza.gltf").value();
 		for (auto const &meshId : sponMeshIds) {
 			auto spon = engine.CreateEntity<MeshComponent, TransformComponent>();
@@ -480,7 +504,7 @@ int main()
 			spon->Set(dvaMesh);
 
 			TransformComponent t{};
-				t.scale = { 1.0f, 1.0f, 1.0f };
+				t.scale = { 0.10f, 0.10f, 0.10f };
 			spon->Set(t);
 
 			spon->SetName("Sponza Mesh");
@@ -545,7 +569,7 @@ int main()
 	pointLight->Set(pl);
 
 	TransformComponent pt;
-	pt.position = glm::vec3(-500.0f, 100.0f, 0.0f);
+	pt.position = glm::vec3(-50.0f, 10.0f, 0.0f);
 	pointLight->Set(pt);
 
 	pointLight->SetName("Point Light");

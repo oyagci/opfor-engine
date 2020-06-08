@@ -56,7 +56,7 @@ private:
 
 		float aspect = static_cast<float>(ShadowWidth) / static_cast<float>(ShadowHeight);
 		float near = 1.0f;
-		float far = 10000.0f;
+		float far = 1000.0f;
 		_shadowProjection = glm::perspective(glm::radians(90.0f), aspect, near, far);
 
 		glGenFramebuffers(1, &_depthmapFb);

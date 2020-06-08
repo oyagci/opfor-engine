@@ -73,10 +73,10 @@ public:
 		bool rgt = lazy::inputs::input::getKeyboard().getKey(GLFW_KEY_D);
 		bool lft = lazy::inputs::input::getKeyboard().getKey(GLFW_KEY_A);
 
-		transform.position += fwd * 10.0f * front;
-		transform.position += bck * 10.0f * -front;
-		transform.position += rgt * 10.0f * right;
-		transform.position += lft * 10.0f * -right;
+		transform.position += fwd * 1.0f * front;
+		transform.position += bck * 1.0f * -front;
+		transform.position += rgt * 1.0f * right;
+		transform.position += lft * 1.0f * -right;
 		playerCamera[0]->Set(transform);
 	}
 };

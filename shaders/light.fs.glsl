@@ -33,7 +33,8 @@ float CalcShadow(PointLight light, vec3 fragPos)
 	float far_plane = 10000.0;
 	vec3 fragToLight = fragPos - light.position;
 	float currentDepth = length(fragToLight);
-	float bias = 10.0;
+	float bias = 1.0;
+	float bias_max = 10.0;
 	float shadow = 0.0;
 
 	// PCF 
@@ -43,7 +44,7 @@ float CalcShadow(PointLight light, vec3 fragPos)
 		for (float y = -off; y < off; y += off / (samples * 0.5)) {
 			for (float z = -off; z < off; z += off / (samples * 0.5)) {
 				float closestDepth = (texture(depthMap, fragToLight + vec3(x, y, z))).r * far_plane;
-				shadow += (currentDepth - bias > closestDepth) ? 1.0 : 0.0;
+				shadow += (currentDepth - mix(1.0, bias_max, currentDepth / far_plane) > closestDepth) ? 1.0 : 0.0;
 			}
 		}
 	}
