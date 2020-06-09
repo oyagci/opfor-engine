@@ -409,7 +409,7 @@ private:
 		}
 	}
 
-	void RenderLight(glm::vec3 const &viewPos)
+	void RenderLight(glm::vec3 const &viewPos, float const exposure)
 	{
 		// Lighting pass
 		_light.bind();
@@ -420,6 +420,7 @@ private:
 			_light.setUniform1i("gSSAO", 3);
 			_light.setUniform1i("depthMap", 4);
 			_light.setUniform3f("viewPos", viewPos);
+			_light.setUniform1f("exposure", exposure);
 
 			// Bind GBuffer Textures
 			glActiveTexture(GL_TEXTURE0);
@@ -543,7 +544,7 @@ public:
 
 		glClearColor(0.0f, 0.0, 0.0f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		RenderLight(playerTransform.position);
+		RenderLight(playerTransform.position, playerCamera.exposure);
 
 		// Copy depth buffer to default framebuffer to enable depth testing with billboard
 		// and other shaders

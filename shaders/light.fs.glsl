@@ -23,6 +23,7 @@ uniform sampler2D gAlbedoSpec;
 uniform sampler2D gSSAO;
 uniform samplerCube depthMap;
 
+uniform float exposure;
 uniform PointLight pointLight[MAX_NUM_POINT_LIGHTS];
 uniform int pointLightCount;
 
@@ -99,5 +100,9 @@ void main()
 		lightResult += CalcPointLight(pointLight[i], fragPos, normal, specular, ao);
 	}
 
-	frag_color = vec4(texture(gAlbedoSpec, TexCoords).rgb, 1.0) * vec4(lightResult, 1.0);
+	vec3 color = albedo * lightResult;
+
+	color = vec3(1.0) - exp(-color * exposure);
+
+	frag_color = vec4(color, 1.0);
 }

@@ -451,12 +451,13 @@ int main()
 		p.model = glm::mat4(1.0f);
 		p.view = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, 0.0f));
 		p.viewProjection = p.projection * p.view;
+		p.exposure = 1.0f;
 	player->Set(p);
 	player->SetName("Player");
 
 	TransformComponent t;
 		t.direction = glm::vec3(0.0f, 0.0f, 1.0f);
-		t.position = glm::vec3(0.0f, 180.0f, -5.0f);
+		t.position = glm::vec3(0.0f, 18.0f, -0.5f);
 	player->Set(t);
 
 	auto [ shaderId, meshShader ] = ShaderManager::instance().Create();

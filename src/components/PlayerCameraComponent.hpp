@@ -10,5 +10,6 @@ struct PlayerCameraComponent : ecs::IComponentBase
 	glm::mat4 view;
 	glm::mat4 viewProjection;
 
+	float exposure;
 	bool useInput = true;
 };
