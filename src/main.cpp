@@ -148,14 +148,25 @@ std::optional<std::vector<unsigned int>> TinyLoader(std::string const &path)
 	// Load Materials
 	// --------------
 	std::vector<std::string> pbrMaterials; // Save the materials' index to be able to set the material of the mesh later
+	std::string directory = path.substr(0, path.find_last_of('/')) + "/";
+
 	size_t currentMaterialIndex = 0;
 	for (auto const &material : model.materials) {
 
 		PbrMaterial pbrMaterial;
 
+		pbrMaterial.Name = modelName + "-" + std::to_string(currentMaterialIndex);
+
 		auto const baseColorTexture = material.pbrMetallicRoughness.baseColorTexture.index;
 		if (baseColorTexture >= 0) {
 			pbrMaterial.Albedo = model.images[model.textures[baseColorTexture].source].uri;
+
+			TextureManager::instance().createTexture(pbrMaterial.Albedo.value(), directory + pbrMaterial.Albedo.value(), {
+				{ GL_TEXTURE_MAG_FILTER, GL_LINEAR },
+				{ GL_TEXTURE_MIN_FILTER, GL_LINEAR },
+				{ GL_TEXTURE_WRAP_S, GL_REPEAT },
+				{ GL_TEXTURE_WRAP_T, GL_REPEAT },
+			}, GL_TEXTURE_2D, true);
 		}
 
 		auto const normalTexture = material.normalTexture.index;
@@ -163,18 +174,18 @@ std::optional<std::vector<unsigned int>> TinyLoader(std::string const &path)
 			pbrMaterial.Normal = model.images[model.textures[normalTexture].source].uri;
 		}
 
-		auto const metallicTexture = material.pbrMetallicRoughness.metallicRoughnessTexture.index;
-		if (metallicTexture >= 0) {
-			pbrMaterial.Metallic = model.images[model.textures[metallicTexture].source].uri;
+		// Blue channel : metalness
+		// Green channel : roughness
+		auto const metallicRoughnessTexture = material.pbrMetallicRoughness.metallicRoughnessTexture.index;
+		if (metallicRoughnessTexture >= 0) {
+			pbrMaterial.MetallicRoughness = model.images[model.textures[metallicRoughnessTexture].source].uri;
 		}
 
-		pbrMaterial.Name = modelName + "-" + std::to_string(currentMaterialIndex);
+		auto const metallicFactor = static_cast<float>(material.pbrMetallicRoughness.metallicFactor);
+		pbrMaterial.MetallicFactor = metallicFactor;
 
-//		fmt::print("Material \"{}\" {{\n", pbrMaterial.Name);
-//		fmt::print("  Albedo: {},\n", pbrMaterial.Albedo.value_or("(null)"));
-//		fmt::print("  Normal: {},\n", pbrMaterial.Normal.value_or("(null)"));
-//		fmt::print("  Metalic: {},\n", pbrMaterial.Metallic.value_or("(null)"));
-//		fmt::print("}}\n");
+		auto const roughnessFactor = static_cast<float>(material.pbrMetallicRoughness.roughnessFactor);
+		pbrMaterial.RoughnessFactor = roughnessFactor;
 
 		pbrMaterials.push_back(pbrMaterial.Name);
 		engine::Engine::Instance().AddPbrMaterial(pbrMaterial);
@@ -184,7 +195,6 @@ std::optional<std::vector<unsigned int>> TinyLoader(std::string const &path)
 
 	// Load texture images
 	// -------------------
-	std::string directory = path.substr(0, path.find_last_of('/')) + "/";
 
 	for (auto const &t : model.images) {
 
@@ -466,9 +476,11 @@ int main()
 		.link();
 
 	meshShader.bind();
-	meshShader.setUniform1i("material.diffuse", 0);
-	meshShader.setUniform1i("material.specular", 1);
+	meshShader.setUniform1i("material.albedo", 0);
+	meshShader.setUniform1i("material.metallicRoughness", 1);
 	meshShader.setUniform1i("material.normal", 2);
+	meshShader.setUniform1f("material.metallicFactor", 1.0f);
+	meshShader.setUniform1f("material.roughnessFactor", 1.0f);
 	meshShader.unbind();
 
 	auto [ skyboxShaderId, skyboxShader ] = ShaderManager::instance().Create();
@@ -479,37 +491,60 @@ int main()
 	skyboxShader.setUniform1i("cubemap", 0);
 	skyboxShader.unbind();
 
-	auto dvaMeshIds = LoadMesh("models/dva/0.obj", "dva");
-	{
-		for (auto const &meshId : dvaMeshIds) {
-			auto dvaEnt = engine.CreateEntity<MeshComponent, TransformComponent>();
-			MeshComponent dvaMesh{};
-				dvaMesh.Id = meshId;
-				dvaMesh.Shader = shaderId;
-			dvaEnt->Set(dvaMesh);
+//	auto dvaMeshIds = LoadMesh("models/dva/0.obj", "dva");
+//	{
+//		for (auto const &meshId : dvaMeshIds) {
+//			auto dvaEnt = engine.CreateEntity<MeshComponent, TransformComponent>();
+//			MeshComponent dvaMesh{};
+//				dvaMesh.Id = meshId;
+//				dvaMesh.Shader = shaderId;
+//			dvaEnt->Set(dvaMesh);
+//
+//			TransformComponent t{};
+//				t.scale = { 10.0f, 10.0f, 10.0f };
+//			dvaEnt->Set(t);
+//
+//			dvaEnt->SetName("D.Va Mesh");
+//		}
+//	}
 
-			TransformComponent t{};
-				t.scale = { 10.0f, 10.0f, 10.0f };
-			dvaEnt->Set(t);
+	auto sponMeshIds = TinyLoader("models/glTF-Sample-Models/2.0/Sponza/glTF/Sponza.gltf").value();
+	for (auto const &meshId : sponMeshIds) {
+		auto spon = engine.CreateEntity<MeshComponent, TransformComponent>();
+		MeshComponent dvaMesh{};
+			dvaMesh.Id = meshId;
+			dvaMesh.Shader = shaderId;
+		spon->Set(dvaMesh);
 
-			dvaEnt->SetName("D.Va Mesh");
+		TransformComponent t{};
+			t.scale = { 0.10f, 0.10f, 0.10f };
+		spon->Set(t);
+
+		spon->SetName("Sponza Mesh");
+	}
+
+	auto pbrSphere = TinyLoader("models/PbrSphere/PbrSphere.gltf").value();
+
+	for (size_t x = 0; x < 5; x++) {
+		for (int y = 0; y < 5; y++) {
+
+			for (auto const &meshId : pbrSphere) {
+				auto sphere = engine.CreateEntity<MeshComponent, TransformComponent>();
+				MeshComponent mesh{};
+					mesh.Id = meshId;
+					mesh.Shader = shaderId;
+				sphere->Set(mesh);
+
+				TransformComponent t{};
+					t.scale = { 0.10f, 0.10f, 0.10f };
+					t.position = { x * 105.0f, y * 105.0f, 0.0f };
+				sphere->Set(t);
+
+				sphere->SetName(fmt::format("PBR Sphere {}", 5 * x + y));
+			}
 		}
 	}
 
-	auto sponMeshIds = TinyLoader("models/glTF-Sample-Models/2.0/Sponza/glTF/Sponza.gltf").value();
-		for (auto const &meshId : sponMeshIds) {
-			auto spon = engine.CreateEntity<MeshComponent, TransformComponent>();
-			MeshComponent dvaMesh{};
-				dvaMesh.Id = meshId;
-				dvaMesh.Shader = shaderId;
-			spon->Set(dvaMesh);
-
-			TransformComponent t{};
-				t.scale = { 0.10f, 0.10f, 0.10f };
-			spon->Set(t);
-
-			spon->SetName("Sponza Mesh");
-		}
 //	// Create a batch for the meshes
 //	auto batch = std::make_unique<Batch>();
 //	int i = 0;
@@ -563,9 +598,11 @@ int main()
 	display->Set(d);
 	display->SetName("Display");
 
+	float const lightIntensity = 1000.0f;
+
 	auto pointLight = engine.CreateEntity<PointLightComponent, TransformComponent, SelectedComponent>();
 	PointLightComponent pl;
-	pl.Color = glm::vec3(1.0f, 1.0f, 0.8f);
+	pl.Color = glm::vec3(1.0f, 1.0f, 0.8f) * lightIntensity;
 	pl.Dir = glm::normalize(glm::vec3(-1.0f, -1.0f, -1.0f));
 	pointLight->Set(pl);
 

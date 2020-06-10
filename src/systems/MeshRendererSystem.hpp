@@ -326,7 +326,37 @@ private:
 					engine::Engine::Instance().BindMaterial(meshCast->GetMaterial());
 				}
 				if (meshCast->GetPbrMaterial().has_value()) {
-					engine::Engine::Instance().BindPbrMaterial(meshCast->GetPbrMaterial().value());
+
+					auto material = engine::Engine::Instance().GetPbrMaterial(
+						meshCast->GetPbrMaterial().value());
+
+					if (material.has_value()) {
+						auto m = material.value();
+
+						if (m->Albedo.has_value()) {
+							auto albedo = m->Albedo.value();
+							auto texture = TextureManager::instance().get(albedo);
+							
+							glActiveTexture(GL_TEXTURE0);
+							glBindTexture(GL_TEXTURE_2D, texture);
+						}
+
+						if (m->MetallicRoughness.has_value()) {
+							auto metallicRoughness = m->MetallicRoughness.value();
+							auto texture = TextureManager::instance().get(metallicRoughness);
+
+							glActiveTexture(GL_TEXTURE1);
+							glBindTexture(GL_TEXTURE_2D, texture);
+						}
+
+						if (m->Normal.has_value()) {
+							auto normal = m->Normal.value();
+							auto texture = TextureManager::instance().get(normal);
+
+							glActiveTexture(GL_TEXTURE2);
+							glBindTexture(GL_TEXTURE_2D, texture);
+						}
+					}
 				}
 			}
 
@@ -418,6 +448,7 @@ private:
 			_light.setUniform1i("gNormal", 1);
 			_light.setUniform1i("gAlbedoSpec", 2);
 			_light.setUniform1i("gSSAO", 3);
+			_light.setUniform1i("gMetallicRoughness", 5);
 			_light.setUniform1i("depthMap", 4);
 			_light.setUniform3f("viewPos", viewPos);
 			_light.setUniform1f("exposure", exposure);
@@ -434,6 +465,8 @@ private:
 				glBindTexture(GL_TEXTURE_2D, _ssaoColorBuf);
 			glActiveTexture(GL_TEXTURE4);
 				glBindTexture(GL_TEXTURE_CUBE_MAP, _depthCubemap);
+			glActiveTexture(GL_TEXTURE5);
+				glBindTexture(GL_TEXTURE_2D, _gBuffer.GetMetallicRoughnessTex());
 
 			_quad.Draw();
 
@@ -448,6 +481,8 @@ private:
 				glBindTexture(GL_TEXTURE_2D, 0);
 			glActiveTexture(GL_TEXTURE4);
 				glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
+			glActiveTexture(GL_TEXTURE5);
+				glBindTexture(GL_TEXTURE_2D, 0);
 		_light.unbind();
 	}
 
@@ -533,6 +568,8 @@ public:
 		if (player.size() == 0) { return ; }
 
 		auto [ playerCamera, playerTransform ] = player[0]->GetAll();
+
+		BakeShadowMap();
 
 		_gBuffer.Bind();
 			glClearColor(0.0f, 0.0f, 0.0f, 1.0f);

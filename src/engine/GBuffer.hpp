@@ -11,6 +11,7 @@ private:
 	GLuint _gNormal;
 	GLuint _gAlbedoSpec;
 	GLuint _gDepth;
+	GLuint _gMetallicRoughness;
 
 	void Init()
 	{
@@ -43,6 +44,13 @@ private:
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, GL_TEXTURE_2D, _gAlbedoSpec, 0);
 
+		glGenTextures(1, &_gMetallicRoughness);
+		glBindTexture(GL_TEXTURE_2D, _gMetallicRoughness);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, width, height, 0, GL_RGBA, GL_FLOAT, nullptr);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT3, GL_TEXTURE_2D, _gMetallicRoughness, 0);
+
 		glBindTexture(GL_TEXTURE_2D, 0);
 
 		glGenRenderbuffers(1, &_gDepth);
@@ -54,12 +62,13 @@ private:
 		GLuint st = glCheckFramebufferStatus(GL_FRAMEBUFFER);
 		assert(st == GL_FRAMEBUFFER_COMPLETE);
 
-		std::array<GLuint, 3> attachments = {
+		std::array<GLuint, 4> attachments = {
 			GL_COLOR_ATTACHMENT0,
 			GL_COLOR_ATTACHMENT1,
-			GL_COLOR_ATTACHMENT2
+			GL_COLOR_ATTACHMENT2,
+			GL_COLOR_ATTACHMENT3,
 		};
-		glDrawBuffers(3, attachments.data());
+		glDrawBuffers(attachments.size(), attachments.data());
 
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	}
@@ -77,6 +86,7 @@ public:
 		glDeleteTextures(1, &_gNormal);
 		glDeleteTextures(1, &_gAlbedoSpec);
 		glDeleteTextures(1, &_gDepth);
+		glDeleteTextures(1, &_gMetallicRoughness);
 	}
 
 	void Bind()
@@ -89,9 +99,10 @@ public:
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	}
 
-	GLuint GetFramebufferId() { return _gBuffer; }
-	GLuint GetPositionTex() { return _gPosition; }
-	GLuint GetNormalTex() { return _gNormal; }
-	GLuint GetAlbedoSpecTex() { return _gAlbedoSpec; }
-	GLuint GetDepthTex() { return _gDepth; }
+	GLuint GetFramebufferId() const { return _gBuffer; }
+	GLuint GetPositionTex() const { return _gPosition; }
+	GLuint GetNormalTex() const { return _gNormal; }
+	GLuint GetAlbedoSpecTex() const { return _gAlbedoSpec; }
+	GLuint GetDepthTex() const { return _gDepth; }
+	GLuint GetMetallicRoughnessTex() const { return _gMetallicRoughness; }
 };

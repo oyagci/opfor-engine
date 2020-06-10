@@ -181,6 +181,14 @@ public:
 		glBindTexture(GL_TEXTURE_2D, 0);
 	}
 
+	std::optional<PbrMaterial const *> GetPbrMaterial(std::string const &name)
+	{
+		if (_pbrMaterials.find(name) != _pbrMaterials.end()) {
+			return std::make_optional(&_pbrMaterials[name]);
+		}
+		return std::nullopt;
+	}
+
 	void AddMaterial(std::string const &name, Material mat)
 	{
 		if (name.size() == 0) {

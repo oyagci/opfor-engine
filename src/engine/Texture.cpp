@@ -33,15 +33,30 @@ bool Texture::load(std::string const &path)
 		GLuint format = 3;
 
 		if (_nChannel == 3) {
-			format = GL_RGB;
+			if (_srgb) {
+				format = GL_SRGB;
+			}
+			else {
+				format = GL_RGB;
+			}
 		}
 		else if (_nChannel == 4) {
-			format = GL_RGBA;
+			if (_srgb) {
+				format = GL_SRGB_ALPHA;
+			}
+			else {
+				format = GL_RGBA;
+			}
 		}
+
+		float outFormat;
+		if      (format == GL_SRGB) { outFormat = GL_RGB; }
+		else if (format == GL_SRGB_ALPHA) { outFormat = GL_RGBA; }
+		else { outFormat = format; }
 
 		glTexImage2D(GL_TEXTURE_2D, 0,
 			format, _width, _height, 0,
-			format, GL_UNSIGNED_BYTE, data);
+			outFormat, GL_UNSIGNED_BYTE, data);
 		glGenerateMipmap(GL_TEXTURE_2D);
 		stbi_image_free(data);
 		return true;

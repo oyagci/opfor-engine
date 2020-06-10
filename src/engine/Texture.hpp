@@ -34,12 +34,14 @@ public:
 	GLuint id() const { return _glId; }
 
 	void setParameter(GLenum target, GLenum param, GLenum value);
+	void setSRGB(bool srgb) { _srgb = srgb; }
 
 private:
 	std::string _name;
 	int _width;
 	int _height;
 	int _nChannel;
+	bool _srgb;
 	GLuint _glId;
 	GLenum _target;
 };

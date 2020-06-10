@@ -2,7 +2,7 @@
 #include <fmt/format.h>
 
 void TextureManager::createTexture(std::string const &name, std::string const &path,
-	std::vector<std::pair<GLenum, GLenum>> parameters, GLenum target)
+	std::vector<std::pair<GLenum, GLenum>> parameters, GLenum target, bool srgb)
 {
 	if (_textures.find(name) != _textures.end()) { return ; }
 
@@ -12,6 +12,7 @@ void TextureManager::createTexture(std::string const &name, std::string const &p
 	for (auto const &p : parameters) {
 		_textures[name]->setParameter(GL_TEXTURE_2D, p.first, p.second);
 	}
+	_textures[name]->setSRGB(srgb);
 	_textures[name]->load(path);
 }
 
