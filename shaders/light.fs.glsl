@@ -1,17 +1,18 @@
 #version 450 core
-#define MAX_NUM_POINT_LIGHTS	16
+#define MAX_NUM_POINT_LIGHTS		16
+#define MAX_NUM_DIRECTIONAL_LIGHTS	1
 
 struct PointLight {
 	vec3 position;
-
-	vec3 ambient;
-	vec3 diffuse;
-	vec3 specular;
-
-	float constant;
-	float linear;
-	float quadratic;
+	vec3 color;
+	float intensity;
 	float radius;
+};
+
+struct DirectionalLight {
+	vec3 direction;
+	vec3 color;
+	float intensity;
 };
 
 out vec4 frag_color;
@@ -28,12 +29,15 @@ uniform float exposure;
 uniform PointLight pointLight[MAX_NUM_POINT_LIGHTS];
 uniform int pointLightCount;
 
+uniform DirectionalLight directionalLights[MAX_NUM_DIRECTIONAL_LIGHTS];
+uniform int directionalLightCount;
+
 in vec2 TexCoords;
 
-float CalcShadow(PointLight light, vec3 fragPos)
+float CalcShadow(vec3 lightPos, vec3 fragPos)
 {
 	float far_plane = 10000.0;
-	vec3 fragToLight = fragPos - light.position;
+	vec3 fragToLight = fragPos - lightPos;
 	float currentDepth = length(fragToLight);
 	float bias = 1.0;
 	float shadow = 0.0;
@@ -53,39 +57,6 @@ float CalcShadow(PointLight light, vec3 fragPos)
 
 	return shadow;
 }
-
-// vec3 CalcPointLight(PointLight light, vec3 fragPos, vec3 normal, float spec, float ao)
-// {
-// 	float dist = length(light.position - fragPos);
-// 	float attenuation = 1.0 / (light.constant + light.linear * dist + light.quadratic * (dist * dist));
-// 
-// 	vec3 light_dir = normalize(light.position - fragPos);
-// 
-// 	/// Ambient
-// 	float ambient_strength = 0.5;
-// 	vec3 ambient_light = ambient_strength * light.ambient * ao;
-// 
-// 	/// Diffuse
-// 	float diffuse_strength = max(dot(normal, light_dir), 0.0);
-// 	vec3 diffuse_light = diffuse_strength * light.diffuse;
-// 
-// 	/// Specular
-// 	vec3 view_dir = normalize(viewPos - fragPos);
-// 	vec3 halfway_dir = normalize(light_dir + view_dir);
-// 	//vec3 reflect_dir = normalize(reflect(-light_dir, normal));
-// 	float specular = pow(max(dot(view_dir, halfway_dir), 0.0), 16);
-// 	vec3 specular_light = spec * specular * light.specular;
-// 
-// 	float shadow = CalcShadow(light, fragPos);
-// 
-// 	ambient_light *= attenuation;
-// 	diffuse_light *= attenuation;
-// 	specular_light *= attenuation;
-// 
-// 	vec3 result = vec3((ambient_light + (1.0 - shadow)) * (diffuse_light + specular_light));
-// 
-// 	return result;
-// }
 
 const float PI = 3.14159265359;
 
@@ -148,7 +119,7 @@ vec3 CalcPbr()
 
 		float dist = length(pointLight[i].position - fragPos);
 		float attenuation = 1.0 / (dist * dist);
-		vec3 radiance = pointLight[i].ambient * attenuation;
+		vec3 radiance = pointLight[i].color * pointLight[i].intensity * attenuation;
 
 		// DFG
 
@@ -168,7 +139,7 @@ vec3 CalcPbr()
 		Lo += ((kd * fragColor / PI + specular) * radiance * NdotL);
 	}
 
-	float shadow = CalcShadow(pointLight[0], fragPos);
+	float shadow = CalcShadow(pointLight[0].position, fragPos);
 
 	vec3 ambient = vec3(0.01) * fragColor; // * ao;
 	vec3 color = ambient + Lo;
@@ -183,18 +154,6 @@ vec3 CalcPbr()
 
 void main()
 {
-	//vec3  fragPos = texture(gPosition, TexCoords).rgb;
-	//vec3  normal = texture(gNormal, TexCoords).rgb;
-	//vec3  albedo = texture(gAlbedoSpec, TexCoords).rgb;
-	//float specular = texture(gAlbedoSpec, TexCoords).a;
-	//float ao = 0.0;//texture(gSSAO, TexCoords).r;
-
-	//vec3 lightResult = vec3(0.0, 0.0, 0.0);
-	//for (int i = 0; i < pointLightCount; i++) {
-	//	lightResult += CalcPointLight(pointLight[i], fragPos, normal, specular, ao);
-	//}
-
-	//vec3 color = albedo * lightResult;
 	vec3 color = CalcPbr();
 
 	color = vec3(1.0) - exp(-color * exposure);

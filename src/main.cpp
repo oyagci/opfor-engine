@@ -187,6 +187,8 @@ std::optional<std::vector<unsigned int>> TinyLoader(std::string const &path)
 		auto const roughnessFactor = static_cast<float>(material.pbrMetallicRoughness.roughnessFactor);
 		pbrMaterial.RoughnessFactor = roughnessFactor;
 
+		fmt::print("{}\n", pbrMaterial);
+
 		pbrMaterials.push_back(pbrMaterial.Name);
 		engine::Engine::Instance().AddPbrMaterial(pbrMaterial);
 
@@ -598,19 +600,24 @@ int main()
 	display->Set(d);
 	display->SetName("Display");
 
-	float const lightIntensity = 1000.0f;
-
 	auto pointLight = engine.CreateEntity<PointLightComponent, TransformComponent, SelectedComponent>();
 	PointLightComponent pl;
-	pl.Color = glm::vec3(1.0f, 1.0f, 0.8f) * lightIntensity;
-	pl.Dir = glm::normalize(glm::vec3(-1.0f, -1.0f, -1.0f));
+		pl.Color = glm::vec3(1.0f, 1.0f, 0.8f);
+		pl.Dir = glm::normalize(glm::vec3(-1.0f, -1.0f, -1.0f));
 	pointLight->Set(pl);
 
 	TransformComponent pt;
-	pt.position = glm::vec3(-50.0f, 10.0f, 0.0f);
+		pt.position = glm::vec3(-50.0f, 10.0f, 0.0f);
 	pointLight->Set(pt);
 
 	pointLight->SetName("Point Light");
+
+	auto directionalLight = engine.CreateEntity<DirectionalLightComponent>();
+	DirectionalLightComponent dl;
+		dl.Color = glm::vec3(1.0f, 1.0f, 0.8f);
+		dl.Direction = glm::vec3(-0.3f, -1.0f, -0.3f);
+		dl.Intensity = 1.0f;
+	directionalLight->Set(dl);
 
 //	auto pointLight2 = engine.CreateEntity<PointLightComponent, TransformComponent>();
 //	pl.Color = glm::vec3(1.0f, 1.0f, 0.8f);

@@ -8,6 +8,7 @@
 #include "components/TransformComponent.hpp"
 #include "components/SkyboxComponent.hpp"
 #include "components/PointLightComponent.hpp"
+#include "components/DirectionalLightComponent.hpp"
 #include "Engine.hpp"
 #include "Framebuffer.hpp"
 #include "ShaderManager.hpp"
@@ -406,14 +407,25 @@ private:
 		for (size_t i = 0; i < lights.size(); i++) {
 			auto [ light, transform ] = lights[i]->GetAll();
 
-			shader.setUniform3f("pointLight[" + std::to_string(i) + "].position", transform.position);
-			shader.setUniform3f("pointLight[" + std::to_string(i) + "].ambient", light.Color);
-			shader.setUniform3f("pointLight[" + std::to_string(i) + "].diffuse", light.Color);
-			shader.setUniform3f("pointLight[" + std::to_string(i) + "].specular", light.Color);
+			std::string pointLight = "pointLight[" + std::to_string(i) + "]";
 
-			shader.setUniform1f("pointLight[" + std::to_string(i) + "].constant", light.constant);
-			shader.setUniform1f("pointLight[" + std::to_string(i) + "].linear", light.linear);
-			shader.setUniform1f("pointLight[" + std::to_string(i) + "].quadratic", light.quadratic);
+			shader.setUniform3f(pointLight + ".position", transform.position);
+			shader.setUniform3f(pointLight + ".color", light.Color);
+			shader.setUniform1f(pointLight + ".intensity", light.Intensity);
+		}
+
+		auto dirLights = GetEntities<DirectionalLightComponent>();
+
+		shader.setUniform1i("directionalLightCount", dirLights.size());
+
+		for (size_t i = 0; i < dirLights.size(); i++) {
+			auto [ light ] = dirLights[i]->GetAll();
+
+			std::string directionalLight = "directionalLights[" + std::to_string(i) + "]";
+
+			shader.setUniform3f(directionalLight + ".direction", light.Direction);
+			shader.setUniform3f(directionalLight + ".color", light.Color);
+			shader.setUniform1f(directionalLight + ".intensity", light.Intensity);
 		}
 	}
 
