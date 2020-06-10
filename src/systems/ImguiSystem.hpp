@@ -49,29 +49,25 @@ private:
 			model = glm::scale(model, selected.scale);
 			model = glm::translate(model, selected.position);
 
+			bool changed = false;
+
 			ImGuizmo::BeginFrame();
 			ImGuiIO& io = ImGui::GetIO();
 			ImGuizmo::SetRect(0, 0, io.DisplaySize.x, io.DisplaySize.y);
-			ImGuizmo::Manipulate(&camera.view[0][0], &camera.projection[0][0],
-				ImGuizmo::TRANSLATE,
-				ImGuizmo::WORLD,
-				&model[0][0],
-				nullptr,
-				nullptr);
-
 			{
 				std::array<float, 3> rotation{} , translation{}, scale{};
 				ImGuizmo::DecomposeMatrixToComponents(&model[0][0],
 					translation.data(), rotation.data(), scale.data());
 
 				ImGui::Begin("Object Transform");
-				ImGui::InputFloat3("Position", translation.data(), 3);
-				ImGui::InputFloat3("Rotation", rotation.data(), 3);
-				ImGui::InputFloat3("Scale", scale.data(), 3);
+				changed += ImGui::InputFloat3("Position", translation.data(), 3);
+				changed += ImGui::InputFloat3("Rotation", rotation.data(), 3);
+				changed += ImGui::InputFloat3("Scale", scale.data(), 3);
 				if (ImGui::Button("Reset")) {
 					rotation.fill(0.0f);
 					translation.fill(0.0f);
 					scale.fill(1.0f);
+					changed = true;
 				}
 				ImGui::End();
 
@@ -82,10 +78,25 @@ private:
 			glm::quat rotation;
 			glm::vec3 skew(0.0f);
 			glm::vec4 persp(0.0f);
-//			ImGuizmo::DecomposeMatrixToComponents(&model[0][0], &selected.position[0], &rotation[0], &selected.scale[0]);
+			ImGuizmo::DecomposeMatrixToComponents(&model[0][0], &selected.position[0], &rotation[0], &selected.scale[0]);
+
+			glm::mat4 cpy = model;
+
+			ImGuizmo::Manipulate(&camera.view[0][0], &camera.projection[0][0],
+				ImGuizmo::TRANSLATE,
+				ImGuizmo::WORLD,
+				&model[0][0],
+				nullptr,
+				nullptr);
+
+			if (cpy != model) {
+				changed = true;
+			}
 
 			glm::decompose(model, selected.scale, rotation, selected.position, skew, persp);
-			selectedEnt[0]->Set<TransformComponent>(selected);
+			if (changed) {
+				selectedEnt[0]->Set(selected);
+			}
 
 		}
 	}
@@ -151,6 +162,7 @@ private:
 	void LightProperties()
 	{
 		auto lights = GetEntities<PointLightComponent, TransformComponent>();
+		auto cameras = GetEntities<PlayerCameraComponent>();
 
 		if (lights.size() == 0) { return ; }
 
@@ -160,9 +172,14 @@ private:
 
 		ImGui::Begin("Light Properties");
 		ImGui::ColorEdit3("Color", &newLight.Color[0]);
-		ImGui::InputFloat("Constant", &newLight.constant);
-		ImGui::InputFloat("Linear", &newLight.linear);
-		ImGui::InputFloat("Quadratic", &newLight.quadratic);
+		ImGui::InputFloat("Intensity", &newLight.Intensity);
+		if (cameras.size() > 0) {
+			auto camera = cameras[0]->Get<PlayerCameraComponent>();
+			if (ImGui::InputFloat("Camera Exposure", &camera.exposure)) {
+				cameras[0]->Set(camera);
+				Logger::Verbose("Change camera exposure\n");
+			}
+		}
 		ImGui::End();
 
 		lights[0]->Set(newLight);
