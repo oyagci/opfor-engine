@@ -296,14 +296,20 @@ private:
 		}
 	}
 
+	int x = 0;
+	int y = 0;
+
 	void RenderMeshes(PlayerCameraComponent const &camera, TransformComponent const &playerTransform)
 	{
 		auto meshes = GetEntities<MeshComponent, TransformComponent>();
 
-		for (auto m : meshes) {
-			auto [ meshId, shaderId ] = m->Get<MeshComponent>();
+		x = 0;
+		y = 0;
+
+		for (auto mesh : meshes) {
+			auto [ meshId, shaderId ] = mesh->Get<MeshComponent>();
 			auto data = engine::Engine::Instance().GetMesh(meshId);
-			auto &transform = m->Get<TransformComponent>();
+			auto &transform = mesh->Get<TransformComponent>();
 
 			auto shader = ShaderManager::instance().Get(shaderId).value();
 			shader->bind();
@@ -326,9 +332,6 @@ private:
 			// Bind each texture
 			auto meshCast = dynamic_cast<engine::Mesh*>(data);
 			if (meshCast != nullptr) {
-				if (meshCast->GetMaterial() != "") {
-					engine::Engine::Instance().BindMaterial(meshCast->GetMaterial());
-				}
 				if (meshCast->GetPbrMaterial().has_value()) {
 
 					auto material = engine::Engine::Instance().GetPbrMaterial(
@@ -340,6 +343,21 @@ private:
 						shader->setUniform4f("material.baseColor", m->BaseColor);
 						shader->setUniform1f("material.metallicFactor", m->MetallicFactor);
 						shader->setUniform1f("material.roughnessFactor", m->RoughnessFactor);
+
+						if (mesh->GetName().find("PBR Sphere") != std::string::npos) {
+							shader->setUniform1f("material.metallicFactor", (1.0f/6.0f) * x);
+							shader->setUniform1f("material.roughnessFactor",(1.0f/6.0f) * y);
+
+							x += 1;
+
+							if (x >= 6) {
+								x = 0;
+								y += 1;
+							}
+							if (y >= 6) {
+								y = 0;
+							}
+						}
 
 						if (m->Albedo.has_value()) {
 							auto albedo = m->Albedo.value();
@@ -378,13 +396,6 @@ private:
 			}
 
 			data->Draw();
-
-			if (meshCast != nullptr) {
-				if (meshCast->GetMaterial() != "") {
-					engine::Engine::Instance().UnbindMaterial();
-				}
-			}
-
 			shader->unbind();
 		}
 	}
