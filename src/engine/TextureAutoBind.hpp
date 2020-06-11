@@ -6,25 +6,25 @@
 class TextureAutoBind
 {
 private:
-	GLuint _unit;
-	GLenum _type;
-	GLuint _id;
+	GLenum _unit;
+	GLenum _target;
+	GLuint _texture;
 	bool _bIsBound;
 
 public:
 	TextureAutoBind()
 	{
 		_unit = 0;
-		_type = 0;
-		_id = 0;
+		_target = 0;
+		_texture = 0;
 		_bIsBound = false;
 	}
 
-	TextureAutoBind(unsigned int unit, GLenum type, unsigned int id)
+	TextureAutoBind(GLenum unit, GLenum target, GLuint id)
 	{
 		_unit = unit;
-		_type = type;
-		_id = id;
+		_target = target;
+		_texture = id;
 		_bIsBound = false;
 
 		Bind();
@@ -40,13 +40,11 @@ public:
 	TextureAutoBind(TextureAutoBind &&other)
 	{
 		_unit = other._unit;
-		_type = other._type;
-		_id = other._id;
+		_target = other._target;
+		_texture = other._texture;
 		_bIsBound = other._bIsBound;
 
-		other._unit = 0;
-		other._type = 0;
-		other._id = 0;
+		other._texture = 0;
 		other._bIsBound = false;
 	}
 
@@ -58,14 +56,12 @@ public:
 				Unbind();
 			}
 
-			_id = other._id;
-			_type = other._type;
+			_texture = other._texture;
+			_target = other._target;
 			_unit = other._unit;
 			_bIsBound = other._bIsBound;
 
-			other._unit = 0;
-			other._type = 0;
-			other._id = 0;
+			other._texture = 0;
 
 			if (!_bIsBound) {
 				Bind();
@@ -79,17 +75,20 @@ public:
 		if (_bIsBound) {
 			_bIsBound = false;
 			glActiveTexture(_unit);
-			glBindTexture(_type, 0);
+			glBindTexture(_target, 0);
 		}
 		else throw std::runtime_error("Tried to unbind an unbound texture");
 	}
 
 	void Bind()
 	{
+		if (_target == 0 || _unit == 0 || _texture == 0) {
+			throw std::runtime_error("Tried to bind a null texture");
+		}
 		if (!_bIsBound) {
 			_bIsBound = true;
 			glActiveTexture(_unit);
-			glBindTexture(_type, _id);
+			glBindTexture(_target, _texture);
 		}
 		else throw std::runtime_error("Tried to bind a bound texture");
 	}
