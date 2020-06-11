@@ -141,8 +141,7 @@ vec3 CalcPbr()
 
 	float shadow = CalcShadow(pointLight[0].position, fragPos);
 
-	vec3 ambient = vec3(0.01) * fragColor; // * ao;
-	vec3 color = ambient + Lo;
+	vec3 color = Lo;
 
 	color = color * (1.0 - shadow);
 

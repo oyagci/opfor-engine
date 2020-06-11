@@ -156,6 +156,12 @@ std::optional<std::vector<unsigned int>> TinyLoader(std::string const &path)
 		PbrMaterial pbrMaterial;
 
 		pbrMaterial.Name = modelName + "-" + std::to_string(currentMaterialIndex);
+		
+		float r = static_cast<float>(material.pbrMetallicRoughness.baseColorFactor[0]);
+		float g = static_cast<float>(material.pbrMetallicRoughness.baseColorFactor[1]);
+		float b = static_cast<float>(material.pbrMetallicRoughness.baseColorFactor[2]);
+		float a = static_cast<float>(material.pbrMetallicRoughness.baseColorFactor[3]);
+		pbrMaterial.BaseColor = { r, g, b, a };
 
 		auto const baseColorTexture = material.pbrMetallicRoughness.baseColorTexture.index;
 		if (baseColorTexture >= 0) {
@@ -538,7 +544,7 @@ int main()
 				sphere->Set(mesh);
 
 				TransformComponent t{};
-					t.scale = { 0.10f, 0.10f, 0.10f };
+					t.scale = { 0.05f, 0.05f, 0.05f };
 					t.position = { x * 105.0f, y * 105.0f, 0.0f };
 				sphere->Set(t);
 

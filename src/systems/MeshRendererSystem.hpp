@@ -17,6 +17,7 @@
 #include "Engine.hpp"
 #include <random>
 #include "GBuffer.hpp"
+#include "TextureAutoBind.hpp"
 
 class MeshRendererSystem : public ecs::ComponentSystem
 {
@@ -318,7 +319,9 @@ private:
 			model = glm::translate(model, transform.position);
 			shader->setUniform4x4f("modelMatrix", model);
 
-			TextureManager::instance().bind("default_normal", 2);
+			TextureAutoBind albedoBind;
+			TextureAutoBind metallicRoughnessBind;
+			TextureAutoBind normalBind;
 
 			// Bind each texture
 			auto meshCast = dynamic_cast<engine::Mesh*>(data);
@@ -334,28 +337,41 @@ private:
 					if (material.has_value()) {
 						auto m = material.value();
 
+						shader->setUniform4f("material.baseColor", m->BaseColor);
+						shader->setUniform1f("material.metallicFactor", m->MetallicFactor);
+						shader->setUniform1f("material.roughnessFactor", m->RoughnessFactor);
+
 						if (m->Albedo.has_value()) {
 							auto albedo = m->Albedo.value();
 							auto texture = TextureManager::instance().get(albedo);
-							
-							glActiveTexture(GL_TEXTURE0);
-							glBindTexture(GL_TEXTURE_2D, texture);
+
+							shader->setUniform1i("material.hasAlbedo", 1);
+							albedoBind = TextureAutoBind(GL_TEXTURE0, GL_TEXTURE_2D, texture);
+						}
+						else {
+							shader->setUniform1i("material.hasAlbedo", 0);
 						}
 
 						if (m->MetallicRoughness.has_value()) {
 							auto metallicRoughness = m->MetallicRoughness.value();
 							auto texture = TextureManager::instance().get(metallicRoughness);
 
-							glActiveTexture(GL_TEXTURE1);
-							glBindTexture(GL_TEXTURE_2D, texture);
+							shader->setUniform1i("material.hasMetallicRoughness", 1);
+							metallicRoughnessBind = TextureAutoBind(GL_TEXTURE1, GL_TEXTURE_2D, texture);
+						}
+						else {
+							shader->setUniform1i("material.hasMetallicRoughness", 0);
 						}
 
 						if (m->Normal.has_value()) {
 							auto normal = m->Normal.value();
 							auto texture = TextureManager::instance().get(normal);
 
-							glActiveTexture(GL_TEXTURE2);
-							glBindTexture(GL_TEXTURE_2D, texture);
+							normalBind = TextureAutoBind(GL_TEXTURE2, GL_TEXTURE_2D, texture);
+						}
+						else {
+							auto const defaultNormal = TextureManager::instance().get("default_normal");
+							normalBind = TextureAutoBind(GL_TEXTURE2, GL_TEXTURE_2D, defaultNormal);
 						}
 					}
 				}

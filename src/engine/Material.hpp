@@ -2,16 +2,21 @@
 
 #include <string>
 #include <fmt/format.h>
+#include <glm/vec4.hpp>
 
 struct PbrMaterial
 {
 	std::string Name;
+	glm::vec4 BaseColor;
 	std::optional<std::string> Albedo;
 	std::optional<std::string> Normal;
 	std::optional<std::string> MetallicRoughness;
 
 	float RoughnessFactor;
 	float MetallicFactor;
+
+	bool hasMetallic;
+	bool hasRoughness;
 };
 
 /// Keeps track of which OpenGL texture id each material uses
@@ -68,6 +73,7 @@ struct fmt::formatter<PbrMaterial>
 	{
 		return format_to(ctx.out(),
 			"Material \"{}\" {{\n"
+			"  BaseColor: {{ {}, {}, {}, {} }},\n"
 			"  Albedo: {},\n"
 			"  Normal: {},\n"
 			"  MetallicRoughness: {},\n"
@@ -75,6 +81,7 @@ struct fmt::formatter<PbrMaterial>
 			"  RoughnessFactor: {},\n"
 			"}}",
 			m.Name,
+			m.BaseColor[0], m.BaseColor[1], m.BaseColor[2], m.BaseColor[3],
 			m.Albedo.value_or("(null)"),
 			m.Normal.value_or("(null)"),
 			m.MetallicRoughness.value_or("(null)"),

@@ -14,11 +14,15 @@ in mat3 TBN;
 in float MaterialID;
 
 struct Material {
+	vec4 baseColor;
 	sampler2D albedo;
 	sampler2D metallicRoughness;
 	sampler2D normal;
 	float metallicFactor;
 	float roughnessFactor;
+
+	bool hasAlbedo;
+	bool hasMetallicRoughness;
 };
 
 uniform Material materials[NUM_MATERIALS];
@@ -40,10 +44,21 @@ void main()
 
 	gPosition = FragPos;
 	gNormal = normal;
-	gAlbedoSpec.rgb = texture(material.albedo, TexCoords).rgb;
+	if (material.hasAlbedo) {
+		gAlbedoSpec.rgb = texture(material.albedo, TexCoords).rgb * material.baseColor.rgb;
+	}
+	else {
+		gAlbedoSpec.rgb = material.baseColor.rgb;
+	}
 	gAlbedoSpec.a = 0.0;
 
 	gMetallicRoughness = vec4(0.0);
-	gMetallicRoughness.b = texture(material.metallicRoughness, TexCoords).b * material.metallicFactor;
-	gMetallicRoughness.g = texture(material.metallicRoughness, TexCoords).g * material.roughnessFactor;
+	if (material.hasMetallicRoughness) {
+		gMetallicRoughness.b = texture(material.metallicRoughness, TexCoords).b * material.metallicFactor;
+		gMetallicRoughness.g = texture(material.metallicRoughness, TexCoords).g * material.roughnessFactor;
+	}
+	else {
+		gMetallicRoughness.b = material.metallicFactor;
+		gMetallicRoughness.g = material.roughnessFactor;
+	}
 }
