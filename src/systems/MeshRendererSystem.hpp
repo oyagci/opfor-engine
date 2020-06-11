@@ -325,9 +325,7 @@ private:
 			model = glm::translate(model, transform.position);
 			shader->setUniform4x4f("modelMatrix", model);
 
-			TextureAutoBind albedoBind;
-			TextureAutoBind metallicRoughnessBind;
-			TextureAutoBind normalBind;
+			std::vector<TextureAutoBind> textureBindings;
 
 			// Bind each texture
 			auto meshCast = dynamic_cast<engine::Mesh*>(data);
@@ -364,7 +362,7 @@ private:
 							auto texture = TextureManager::instance().get(albedo);
 
 							shader->setUniform1i("material.hasAlbedo", 1);
-							albedoBind = TextureAutoBind(GL_TEXTURE0, GL_TEXTURE_2D, texture);
+							textureBindings.push_back(TextureAutoBind(GL_TEXTURE0, GL_TEXTURE_2D, texture));
 						}
 						else {
 							shader->setUniform1i("material.hasAlbedo", 0);
@@ -375,7 +373,7 @@ private:
 							auto texture = TextureManager::instance().get(metallicRoughness);
 
 							shader->setUniform1i("material.hasMetallicRoughness", 1);
-							metallicRoughnessBind = TextureAutoBind(GL_TEXTURE1, GL_TEXTURE_2D, texture);
+							textureBindings.push_back(TextureAutoBind(GL_TEXTURE1, GL_TEXTURE_2D, texture));
 						}
 						else {
 							shader->setUniform1i("material.hasMetallicRoughness", 0);
@@ -385,11 +383,11 @@ private:
 							auto normal = m->Normal.value();
 							auto texture = TextureManager::instance().get(normal);
 
-							normalBind = TextureAutoBind(GL_TEXTURE2, GL_TEXTURE_2D, texture);
+							textureBindings.push_back(TextureAutoBind(GL_TEXTURE2, GL_TEXTURE_2D, texture));
 						}
 						else {
 							auto const defaultNormal = TextureManager::instance().get("default_normal");
-							normalBind = TextureAutoBind(GL_TEXTURE2, GL_TEXTURE_2D, defaultNormal);
+							textureBindings.push_back(TextureAutoBind(GL_TEXTURE2, GL_TEXTURE_2D, defaultNormal));
 						}
 					}
 				}
