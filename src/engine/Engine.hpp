@@ -56,10 +56,15 @@ private:
 private:
 	Engine();
 
+	Callback<size_t> _selectItem;
+
 public:
 	/// Observer for building the lighting of the level
 	/// Call this to rebuild the lighting of the scene
 	Action<> OnBuildLighting;
+
+	/// Select an item in the editor
+	Action<size_t> OnSelectItem;
 
 public:
 	Engine(Engine const &) = delete;

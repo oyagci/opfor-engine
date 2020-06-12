@@ -46,8 +46,8 @@ private:
 			auto selected = selectedEnt[0]->Get<TransformComponent>();
 
 			glm::mat4 model(1.0f);
-			model = glm::scale(model, selected.scale);
 			model = glm::translate(model, selected.position);
+			model = glm::scale(model, selected.scale);
 
 			bool changed = false;
 
@@ -255,14 +255,26 @@ private:
 		ImGui::End();
 	}
 
+	size_t selectedItem = 1;
+
 	void EntityList()
 	{
 		ImGui::Begin("Entities");
 
+		size_t lastItem = selectedItem;
 		auto allEnts = GetAllEntities();
+
+		size_t itemIndex = 0;
 		for (auto const &ent : allEnts) {
 			auto name = ent->GetName();
-			ImGui::Text("%s", name.c_str());
+			name += "##" + std::to_string(itemIndex);
+			if (ImGui::Selectable(name.c_str(), selectedItem == itemIndex)) {
+				Logger::Verbose("Clicked on item {} (prev. {}) (ID. {})\n",
+					itemIndex, selectedItem, allEnts[itemIndex]->GetId());
+				selectedItem = itemIndex;
+				engine::Engine::Instance().OnSelectItem(selectedItem);
+			}
+			itemIndex++;
 		}
 
 		ImGui::End();
@@ -293,8 +305,11 @@ public:
 			ImGui_ImplOpenGL3_Init("#version 450");
 		}
 
+		bool b = true;
+
 		BeginFrame();
 		BeginDockspace();
+			ImGui::ShowDemoWindow(&b);
 			MenuBar();
 			DrawGuizmoSelectedEnt();
 			LightProperties();

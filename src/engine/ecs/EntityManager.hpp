@@ -79,6 +79,17 @@ private:
 
 		return entities;
 	}
+
+	std::optional<IEntityBase *> GetEntity(size_t id)
+	{
+		for (auto &ent : Entities) {
+			if (ent->GetId() == id) {
+				return std::make_optional(ent.get());
+			}
+		}
+
+		return std::nullopt;
+	}
 };
 
 class EntityManager
@@ -115,6 +126,11 @@ public:
 	std::vector<IEntityBase*> GetAllEntities()
 	{
 		return Manager.GetAllEntities();
+	}
+
+	std::optional<IEntityBase *> GetEntity(size_t id)
+	{
+		return Manager.GetEntity(id);
 	}
 };
 

@@ -35,6 +35,7 @@ srcs = [
   'src/engine/Engine.cpp',
   'src/engine/utils/Settings.cpp',
   'src/engine/ecs/ECSEngine.cpp',
+  'src/engine/ecs/Entity.cpp',
   'src/engine/ui/TextRenderer.cpp',
   'src/engine/ui/Anchor.cpp',
   'src/engine/ui/Button.cpp',
@@ -109,7 +110,7 @@ if build_machine.system() == 'darwin'
   incdirs += include_directories('/Users/oyagci/.brew/include/freetype2') 
 endif
 
-subdir('tests')
+#subdir('tests')
 
 executable('ft_vox',
   srcs,

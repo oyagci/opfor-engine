@@ -440,7 +440,6 @@ std::vector<unsigned int> LoadMesh(std::string const &path, std::string const &n
 
 int main()
 {
-
 	Logger::Verbose("Hello World\n");
 	auto &engine = Engine::Instance();
 	engine.CreateComponentSystem<CameraMovementSystem>();
@@ -469,7 +468,7 @@ int main()
 		p.model = glm::mat4(1.0f);
 		p.view = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, 0.0f));
 		p.viewProjection = p.projection * p.view;
-		p.exposure = 1.0f;
+		p.exposure = 2.0f;
 	player->Set(p);
 	player->SetName("Player");
 
@@ -533,8 +532,8 @@ int main()
 
 	auto pbrSphere = TinyLoader("models/PbrSphere/PbrSphere.gltf").value();
 
-	for (size_t x = 0; x < 5; x++) {
-		for (int y = 0; y < 5; y++) {
+	for (size_t x = 0; x < 6; x++) {
+		for (int y = 0; y < 6; y++) {
 
 			for (auto const &meshId : pbrSphere) {
 				auto sphere = engine.CreateEntity<MeshComponent, TransformComponent>();
@@ -545,7 +544,7 @@ int main()
 
 				TransformComponent t{};
 					t.scale = { 0.05f, 0.05f, 0.05f };
-					t.position = { x * 105.0f, y * 105.0f, 0.0f };
+					t.position = { x * 6.0f, (y + 1) * 6.0f, -13.0f };
 				sphere->Set(t);
 
 				sphere->SetName(fmt::format("PBR Sphere {}", 5 * x + y));
@@ -580,19 +579,6 @@ int main()
 //		batchEnt->Set(mesh);
 //	}
 
-//	auto sponza = engine.LoadMeshes("models/Sponza/sponza.obj");
-//	{
-//		for (auto &m : sponza) {
-//			auto *b = engine.CreateEntity<MeshComponent,
-//											    TransformComponent>();
-//
-//			MeshComponent mesh;
-//			mesh.Id = m;
-//			mesh.Shader = shaderId;
-//			b->Set(mesh);
-//		}
-//	}
-
 	auto skybox = engine.CreateEntity<MeshComponent, TransformComponent, SkyboxComponent>();
 
 	MeshComponent s = initSkybox();
@@ -610,6 +596,7 @@ int main()
 	PointLightComponent pl;
 		pl.Color = glm::vec3(1.0f, 1.0f, 0.8f);
 		pl.Dir = glm::normalize(glm::vec3(-1.0f, -1.0f, -1.0f));
+		pl.Intensity = 1000.0f;
 	pointLight->Set(pl);
 
 	TransformComponent pt;

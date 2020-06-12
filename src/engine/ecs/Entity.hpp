@@ -67,15 +67,41 @@ protected:
 		return *dynamic_cast<U*>(Components[GetTypeIndex<U>()].get());
 	}
 
+	///
+	/// Remove a registered component from the entity
+	///
+	template <typename U>
+	void RemoveComponents()
+	{
+		auto it = Components.find(GetTypeIndex<U>());
+		if (it != Components.end()) {
+			Components.erase(it);
+		}
+	}
+
+	///
+	/// Remove a list of registered components from the entity
+	///
+	template <typename U, typename V, typename ... UTypes>
+	void RemoveComponents()
+	{
+		RemoveComponents<U>();
+		RemoveComponents<V, UTypes...>();
+	}
+
 protected:
 	/// The entity's components
 	std::unordered_map<TypeIndex, std::unique_ptr<IComponentBase>> Components;
 	std::string Name;
+	unsigned int Id;
+
+	static unsigned int NextEntityID;
 
 public:
-	IEntityBase() : Name("Unnamed Entity")
+	IEntityBase() : Name("Unnamed Entity"), Id(NextEntityID++)
 	{
 	}
+
 	virtual ~IEntityBase() = default;
 
 	std::string const &GetName() const { return Name; }
@@ -103,7 +129,7 @@ public:
 	/// Modify the data of the component U
 	///
 	template <typename U>
-	void Set(U &data)
+	void Set(U const &data)
 	{
 		static_assert(std::is_base_of<IComponentBase, U>::value, "typename U must de derived from IComponentBase");
 		GetComponent<U>() = data;
@@ -113,7 +139,7 @@ public:
 	/// Modify the data of the component U
 	///
 	template <typename U>
-	void Set(U &&data)
+	void Set(U const &&data)
 	{
 		static_assert(std::is_base_of<IComponentBase, U>::value, "typename U must de derived from IComponentBase");
 		GetComponent<U>() = std::move(data);
@@ -132,6 +158,23 @@ public:
 		auto component = Components.find(GetTypeIndex<U>());
 
 		return *dynamic_cast<U*>(component->second.get());
+	}
+
+	template <typename U, typename ... UTypes>
+	void AddComponents()
+	{
+		RegisterComponents<U, UTypes...>();
+	}
+
+	template <typename U, typename ... UTypes>
+	void DeleteComponents()
+	{
+		RemoveComponents<U, UTypes...>();
+	}
+
+	unsigned int GetId() const
+	{
+		return Id;
 	}
 
 	class MissingComponentException : public std::exception

@@ -2,6 +2,7 @@
 #include "Time.hpp"
 #include "utils/Settings.hpp"
 #include "stb_image.h"
+#include "components/SelectedComponent.hpp"
 
 namespace engine
 {
@@ -32,6 +33,30 @@ Engine::Engine()
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glDepthFunc(GL_LEQUAL);
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+
+	_selectItem = Callback<size_t>([&] (size_t id) {
+		auto ents = _ecs.GetEntityManager()->GetAllEntities();
+		std::vector<ecs::IEntityBase const *> matches;
+
+		for (auto const &ent : ents) {
+			if (ent->GetId() == id) {
+				matches.push_back(ent);
+			}
+		}
+
+		if (matches.size() > 0) {
+			auto prev = _ecs.GetEntityManager()->GetEntities<SelectedComponent>();
+			for (auto &p : prev) {
+				p->DeleteComponents<SelectedComponent>();
+			}
+
+			auto entity = _ecs.GetEntityManager()->GetEntity(matches[0]->GetId());
+			if (entity.has_value()) {
+				entity.value()->AddComponents<SelectedComponent>();
+			}
+		}
+	});
+	OnSelectItem += _selectItem;
 }
 
 int Engine::Run()

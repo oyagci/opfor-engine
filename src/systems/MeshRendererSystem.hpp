@@ -287,8 +287,8 @@ private:
 			auto &transform = m->Get<TransformComponent>();
 
 			glm::mat4 model(1.0f);
-			model = glm::scale(model, transform.scale);
 			model = glm::translate(model, transform.position);
+			model = glm::scale(model, transform.scale);
 			_shadow.setUniform4x4f("modelMatrix", model);
 
 			data->Draw();
@@ -321,8 +321,8 @@ private:
 			UpdateLight(*shader);
 
 			glm::mat4 model(1.0f);
-			model = glm::scale(model, transform.scale);
 			model = glm::translate(model, transform.position);
+			model = glm::scale(model, transform.scale);
 			shader->setUniform4x4f("modelMatrix", model);
 
 			std::vector<TextureAutoBind> textureBindings;
@@ -525,7 +525,7 @@ private:
 
 	void BakeShadowMap()
 	{
-		Logger::Info("Building shadow map\n");
+		//Logger::Info("Building shadow map\n");
 
 		auto lights = GetEntities<PointLightComponent, TransformComponent>();
 		auto players = GetEntities<PlayerCameraComponent, TransformComponent>();
@@ -564,7 +564,7 @@ private:
 
 		UnbindShadowMap();
 
-		Logger::Info("Done building shadow map\n");
+		//Logger::Info("Done building shadow map\n");
 	}
 
 public:
