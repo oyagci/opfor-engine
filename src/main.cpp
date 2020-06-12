@@ -617,8 +617,9 @@ int main()
 //	pl.Dir = glm::normalize(glm::vec3(-1.0f, -1.0f, -1.0f));
 //	pointLight2->Set(pl);
 //
-//	pt.position = glm::vec3(500.0f, 100.0f, 0.0f);
+//	pt.position = glm::vec3(50.0f, 10.0f, 0.0f);
 //	pointLight2->Set(pt);
+//	pointLight2->SetName("Point Light 2");
 
 	return engine::Engine::Instance().Run();
 }
