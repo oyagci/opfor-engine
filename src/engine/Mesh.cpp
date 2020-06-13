@@ -103,11 +103,12 @@ namespace engine
 		return *this;
 	}
 
-	Mesh &Mesh::addTangent(const glm::vec3 &v)
+	Mesh &Mesh::addTangent(const glm::vec4 &v)
 	{
 		vTangents.push_back(v.x);
 		vTangents.push_back(v.y);
 		vTangents.push_back(v.z);
+		vTangents.push_back(v.w);
 
 		return *this;
 	}
@@ -176,7 +177,7 @@ namespace engine
 		}
 		if (vTangents.size() > 0) {
 			glBufferSubData(GL_ARRAY_BUFFER, offset, vTangents.size() * sizeof(GLfloat), vTangents.data());
-			glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), reinterpret_cast<void*>(offset));
+			glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), reinterpret_cast<void*>(offset));
 			offset += vTangents.size() * sizeof(GLfloat);
 		}
 

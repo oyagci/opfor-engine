@@ -290,7 +290,8 @@ std::optional<std::vector<unsigned int>> TinyLoader(std::string const &path)
 					current.addTangent({
 						tangents.value().second[i * 4 + 0],
 						tangents.value().second[i * 4 + 1],
-						tangents.value().second[i * 4 + 2]
+						tangents.value().second[i * 4 + 2],
+						tangents.value().second[i * 4 + 3]
 					});
 				}
 			}
@@ -345,7 +346,7 @@ std::vector<unsigned int> LoadMesh(std::string const &path, std::string const &n
 		for (size_t i = 0; i < assimp.Positions.size(); i += 3) {
 			glm::vec3 pos{ assimp.Positions[0 + i], assimp.Positions[1 + i],   assimp.Positions[2 + i] };
 			glm::vec3 norm{  assimp.Normals[0 + i],   assimp.Normals[1 + i],     assimp.Normals[2 + i] };
-			glm::vec3 tan{  assimp.Tangents[0 + i],  assimp.Tangents[1 + i],    assimp.Tangents[2 + i] };
+			glm::vec4 tan{  assimp.Tangents[0 + i],  assimp.Tangents[1 + i],    assimp.Tangents[2 + i], 1.0 };
 
 			mesh.addPosition(pos);
 			mesh.addNormal(norm);

@@ -49,7 +49,7 @@ public:
 	Mesh &addPosition(const glm::vec3 &v);
 	Mesh &addNormal(const glm::vec3 &v);
 	Mesh &addUv(const glm::vec2 &v);
-	Mesh &addTangent(const glm::vec3 &v);
+	Mesh &addTangent(const glm::vec4 &v);
 	Mesh &addIndex(const int index);
 	Mesh &addTriangle(const glm::u32vec3 &triangle);
 	Mesh &addTexture(std::string const &name, TextureType type);
