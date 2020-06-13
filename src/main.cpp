@@ -204,17 +204,18 @@ std::optional<std::vector<unsigned int>> TinyLoader(std::string const &path)
 	// Load texture images
 	// -------------------
 
-	for (auto const &t : model.images) {
+	for (auto const &t : model.textures) {
+		auto const &sampler = model.samplers[t.sampler];
+		auto const &image = model.images[t.source];
 
-		std::string name = t.uri;
-		std::string path = directory + t.uri;
+		std::string name = image.uri;
+		std::string path = directory + image.uri;
 
-		Logger::Verbose("Loading texture {} into memory\n", name);
 		TextureManager::instance().createTexture(name, path, {
-			{ GL_TEXTURE_MAG_FILTER, GL_LINEAR },
-			{ GL_TEXTURE_MIN_FILTER, GL_LINEAR },
-			{ GL_TEXTURE_WRAP_S, GL_REPEAT },
-			{ GL_TEXTURE_WRAP_T, GL_REPEAT },
+			{ GL_TEXTURE_MAG_FILTER, sampler.magFilter },
+			{ GL_TEXTURE_MIN_FILTER, sampler.minFilter },
+			{ GL_TEXTURE_WRAP_S, sampler.wrapS },
+			{ GL_TEXTURE_WRAP_T, sampler.wrapT },
 		}, GL_TEXTURE_2D);
 	}
 
