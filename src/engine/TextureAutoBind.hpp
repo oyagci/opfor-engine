@@ -2,13 +2,14 @@
 
 #include "lazy.hpp"
 #include <exception>
+#include <optional>
 
 class TextureAutoBind
 {
 private:
 	GLenum _unit;
 	GLenum _target;
-	GLuint _texture;
+	std::optional<GLuint> _texture;
 	bool _bIsBound;
 
 public:
@@ -16,7 +17,6 @@ public:
 	{
 		_unit = 0;
 		_target = 0;
-		_texture = 0;
 		_bIsBound = false;
 	}
 
@@ -32,7 +32,7 @@ public:
 
 	~TextureAutoBind()
 	{
-		if (_bIsBound) {
+		if (_bIsBound && _texture.has_value()) {
 			Unbind();
 		}
 	}
@@ -44,7 +44,7 @@ public:
 		_texture = other._texture;
 		_bIsBound = other._bIsBound;
 
-		other._texture = 0;
+		other._texture.reset();
 		other._bIsBound = false;
 	}
 
@@ -61,7 +61,7 @@ public:
 			_unit = other._unit;
 			_bIsBound = other._bIsBound;
 
-			other._texture = 0;
+			other._texture.reset();
 
 			if (!_bIsBound) {
 				Bind();
@@ -82,13 +82,13 @@ public:
 
 	void Bind()
 	{
-		if (_target == 0 || _unit == 0 || _texture == 0) {
+		if (_target == 0 || _unit == 0 || !_texture.has_value()) {
 			throw std::runtime_error("Tried to bind a null texture");
 		}
 		if (!_bIsBound) {
 			_bIsBound = true;
 			glActiveTexture(_unit);
-			glBindTexture(_target, _texture);
+			glBindTexture(_target, _texture.value());
 		}
 		else throw std::runtime_error("Tried to bind a bound texture");
 	}
@@ -96,5 +96,10 @@ public:
 	bool IsBound() const
 	{
 		return _bIsBound;
+	}
+
+	bool HasTexture() const
+	{
+		return _texture.has_value();
 	}
 };
