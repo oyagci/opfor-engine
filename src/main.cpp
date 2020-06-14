@@ -106,6 +106,127 @@ MeshComponent initSkybox()
 	return meshComponent;
 }
 
+std::optional<std::vector<unsigned int>> TinyProcessNode(tinygltf::Node const &node, tinygltf::Model const &model, std::vector<std::string> const &materials)
+{
+	std::vector<unsigned int> allMeshes;
+
+	if (node.mesh >= 0) {
+
+		auto const &mesh = model.meshes[node.mesh];
+		engine::Mesh current;
+
+		for (auto const &primitive : mesh.primitives) {
+
+			// Helper Lambda
+			// Returns the count and the attributes
+			// TODO: Return the number of components per element (vec{2,3,4}, scalar, ...)
+			auto getVertex = [&] (std::string const &attributeName) -> std::optional<std::pair<size_t, const float *>> {
+
+				std::optional<std::pair<size_t, const float *>> ret;
+
+				auto const &attribute = primitive.attributes.find(attributeName);
+
+				if (attribute == primitive.attributes.end()) {
+					return ret;
+				}
+
+				auto const [name, indice] = *attribute;
+
+				tinygltf::Accessor const &accessor = model.accessors[indice];
+				tinygltf::BufferView const &bufferView = model.bufferViews[accessor.bufferView];
+				tinygltf::Buffer const &buffer = model.buffers[bufferView.buffer];
+
+				ret = std::pair<size_t, const float *>(accessor.count,
+					reinterpret_cast<const float *>(&buffer.data[bufferView.byteOffset + accessor.byteOffset]));
+				return ret;
+			};
+
+			// Get data for indices
+			tinygltf::Accessor const &indAccessor = model.accessors[primitive.indices];
+			tinygltf::BufferView const &indBufferView = model.bufferViews[indAccessor.bufferView];
+			tinygltf::Buffer const &indBuffer = model.buffers[indBufferView.buffer];
+
+			auto positions = getVertex("POSITION");
+			auto normals   = getVertex("NORMAL");
+			auto tangents  = getVertex("TANGENT");
+			auto texcoords = getVertex("TEXCOORD_0");
+			auto indices   = reinterpret_cast<const GLushort*>(&indBuffer.data[indBufferView.byteOffset + indAccessor.byteOffset]);
+
+			// Build the mesh
+			// --------------
+
+			if (positions.has_value()) {
+				for (size_t i = 0; i < positions.value().first; i++) {
+					current.addPosition({
+						positions.value().second[i * 3 + 0],
+						positions.value().second[i * 3 + 1],
+						positions.value().second[i * 3 + 2]
+					});
+				}
+			}
+
+			if (normals.has_value()) {
+				for (size_t i = 0; i < normals.value().first; i++) {
+					current.addNormal({
+						normals.value().second[i * 3 + 0],
+						normals.value().second[i * 3 + 1],
+						normals.value().second[i * 3 + 2]
+					});
+				}
+			}
+
+			if (tangents.has_value()) {
+				for (size_t i = 0; i < tangents.value().first; i++) {
+					current.addTangent({
+						tangents.value().second[i * 4 + 0],
+						tangents.value().second[i * 4 + 1],
+						tangents.value().second[i * 4 + 2],
+						tangents.value().second[i * 4 + 3]
+					});
+				}
+			}
+
+			if (texcoords.has_value()) {
+				for (size_t i = 0; i < texcoords.value().first; i++) {
+					current.addUv({
+						texcoords.value().second[i * 2 + 0],
+						texcoords.value().second[i * 2 + 1]
+					});
+				}
+			}
+
+			// Component type for indices is SCALAR, that means the count must be divided by 3 when building
+			// triangles so that we do not overrun the buffer
+			for (size_t i = 0; i < indAccessor.count / 3; i++) {
+				current.addTriangle({
+					static_cast<GLuint>(indices[i * 3 + 0]),
+					static_cast<GLuint>(indices[i * 3 + 1]),
+					static_cast<GLuint>(indices[i * 3 + 2])
+				});
+			}
+
+			current.build();
+			current.SetPbrMaterial(materials[primitive.material]);
+
+			// Register this mesh to the engine and save its index
+			allMeshes.push_back(engine::Engine::Instance().AddMesh(std::move(current)));
+		}
+	}
+
+	for (auto const &child : node.children) {
+		auto meshes = TinyProcessNode(model.nodes[child], model, materials);
+		if (meshes.has_value()) {
+			allMeshes.insert(allMeshes.end(), meshes.value().begin(), meshes.value().end());
+		}
+	}
+
+	if (allMeshes.size() > 0) {
+		return allMeshes;
+	}
+
+	return std::nullopt;
+}
+
 std::optional<std::vector<unsigned int>> TinyLoader(std::string const &path)
 {
 	std::optional<std::vector<unsigned int>> meshes_ret;
@@ -221,105 +342,12 @@ std::optional<std::vector<unsigned int>> TinyLoader(std::string const &path)
 
 	std::vector<unsigned int> meshes;
 
-	for (auto const &mesh : model.meshes) {
-
-		engine::Mesh current;
-
-		for (auto const &primitive : mesh.primitives) {
-
-			// Helper Lambda
-			// Returns the count and the attributes
-			// TODO: Return the number of components per element (vec{2,3,4}, scalar, ...)
-			auto getVertex = [&] (std::string const &attributeName) -> std::optional<std::pair<size_t, const float *>> {
-
-				std::optional<std::pair<size_t, const float *>> ret;
-
-				auto const &attribute = primitive.attributes.find(attributeName);
-
-				if (attribute == primitive.attributes.end()) {
-					return ret;
-				}
-
-				auto const [name, indice] = *attribute;
-
-				tinygltf::Accessor const &accessor = model.accessors[indice];
-				tinygltf::BufferView const &bufferView = model.bufferViews[accessor.bufferView];
-				tinygltf::Buffer const &buffer = model.buffers[bufferView.buffer];
-
-				ret = std::pair<size_t, const float *>(accessor.count,
-					reinterpret_cast<const float *>(&buffer.data[bufferView.byteOffset + accessor.byteOffset]));
-				return ret;
-			};
-
-			// Get data for indices 
-			tinygltf::Accessor const &indAccessor = model.accessors[primitive.indices];
-			tinygltf::BufferView const &indBufferView = model.bufferViews[indAccessor.bufferView];
-			tinygltf::Buffer const &indBuffer = model.buffers[indBufferView.buffer];
-
-			auto positions = getVertex("POSITION");
-			auto normals   = getVertex("NORMAL");
-			auto tangents  = getVertex("TANGENT");
-			auto texcoords = getVertex("TEXCOORD_0");
-			auto indices   = reinterpret_cast<const GLushort*>(&indBuffer.data[indBufferView.byteOffset + indAccessor.byteOffset]);
-
-			// Build the mesh
-			// --------------
-
-			if (positions.has_value()) {
-				for (size_t i = 0; i < positions.value().first; i++) {
-					current.addPosition({
-						positions.value().second[i * 3 + 0],
-						positions.value().second[i * 3 + 1],
-						positions.value().second[i * 3 + 2]
-					});
-				}
+	for (auto const &scene : model.scenes) {
+		for (auto const &node : scene.nodes) {
+			auto const newMeshes = TinyProcessNode(model.nodes[node], model, pbrMaterials);
+			if (newMeshes.has_value()) {
+				meshes.insert(meshes.end(), newMeshes.value().begin(), newMeshes.value().end());
 			}
-
-			if (normals.has_value()) {
-				for (size_t i = 0; i < normals.value().first; i++) {
-					current.addNormal({
-						normals.value().second[i * 3 + 0],
-						normals.value().second[i * 3 + 1],
-						normals.value().second[i * 3 + 2]
-					});
-				}
-			}
-
-			if (tangents.has_value()) {
-				for (size_t i = 0; i < tangents.value().first; i++) {
-					current.addTangent({
-						tangents.value().second[i * 4 + 0],
-						tangents.value().second[i * 4 + 1],
-						tangents.value().second[i * 4 + 2],
-						tangents.value().second[i * 4 + 3]
-					});
-				}
-			}
-
-			if (texcoords.has_value()) {
-				for (size_t i = 0; i < texcoords.value().first; i++) {
-					current.addUv({
-						texcoords.value().second[i * 2 + 0],
-						texcoords.value().second[i * 2 + 1]
-					});
-				}
-			}
-
-			// Component type for indices is SCALAR, that means the count must be divided by 3 when building
-			// triangles so that we do not overrun the buffer
-			for (size_t i = 0; i < indAccessor.count / 3; i++) {
-				current.addTriangle({
-					static_cast<GLuint>(indices[i * 3 + 0]),
-					static_cast<GLuint>(indices[i * 3 + 1]),
-					static_cast<GLuint>(indices[i * 3 + 2])
-				});
-			}
-
-			current.build();
-			current.SetPbrMaterial(pbrMaterials[primitive.material]);
-
-			// Register this mesh to the engine and save its index
-			meshes.push_back(engine::Engine::Instance().AddMesh(std::move(current)));
 		}
 	}
 
@@ -381,7 +409,7 @@ std::vector<unsigned int> LoadMesh(std::string const &path, std::string const &n
 	}
 
 	// Create Material for Meshes
-	std::vector<Material> materials{}; 
+	std::vector<Material> materials{};
 	std::vector<std::string> materialNames{};
 	size_t matIndex = 0;
 	size_t i = 0;
@@ -517,39 +545,61 @@ int main()
 //		}
 //	}
 
-	auto sponMeshIds = TinyLoader("models/glTF-Sample-Models/2.0/Sponza/glTF/Sponza.gltf").value();
-	for (auto const &meshId : sponMeshIds) {
-		auto spon = engine.CreateEntity<MeshComponent, TransformComponent>();
-		MeshComponent dvaMesh{};
-			dvaMesh.Id = meshId;
-			dvaMesh.Shader = shaderId;
-		spon->Set(dvaMesh);
+	auto sponMeshIds = TinyLoader("models/glTF-Sample-Models/2.0/Sponza/glTF/Sponza.gltf");
+	if (sponMeshIds.has_value()) {
+		for (auto const &meshId : sponMeshIds.value()) {
+			auto spon = engine.CreateEntity<MeshComponent, TransformComponent>();
+			MeshComponent dvaMesh{};
+				dvaMesh.Id = meshId;
+				dvaMesh.Shader = shaderId;
+			spon->Set(dvaMesh);
 
-		TransformComponent t{};
-			t.scale = { 0.10f, 0.10f, 0.10f };
-		spon->Set(t);
+			TransformComponent t{};
+				t.scale = { 0.10f, 0.10f, 0.10f };
+			spon->Set(t);
 
-		spon->SetName("Sponza Mesh");
+			spon->SetName("Sponza Mesh");
+		}
 	}
 
-	auto pbrSphere = TinyLoader("models/PbrSphere/PbrSphere.gltf").value();
+	auto env = TinyLoader("models/glTF-Sample-Models/2.0/EnvironmentTest/glTF/EnvironmentTest.gltf");
+	if (env.has_value()) {
+		for (auto const &meshId : env.value()) {
+			auto spon = engine.CreateEntity<MeshComponent, TransformComponent>();
+			MeshComponent dvaMesh{};
+				dvaMesh.Id = meshId;
+				dvaMesh.Shader = shaderId;
+			spon->Set(dvaMesh);
 
-	for (size_t x = 0; x < 6; x++) {
-		for (int y = 0; y < 6; y++) {
+			TransformComponent t{};
+				t.scale = { 0.10f, 0.10f, 0.10f };
+				t.scale = { 1.0f, 1.0f, 1.0f };
+			spon->Set(t);
 
-			for (auto const &meshId : pbrSphere) {
-				auto sphere = engine.CreateEntity<MeshComponent, TransformComponent>();
-				MeshComponent mesh{};
-					mesh.Id = meshId;
-					mesh.Shader = shaderId;
-				sphere->Set(mesh);
+			spon->SetName("EnvTest");
+		}
+	}
 
-				TransformComponent t{};
-					t.scale = { 0.05f, 0.05f, 0.05f };
-					t.position = { x * 6.0f, (y + 1) * 6.0f, -13.0f };
-				sphere->Set(t);
+	auto pbrSphere = TinyLoader("models/PbrSphere/PbrSphere.gltf");
 
-				sphere->SetName(fmt::format("PBR Sphere {}", 5 * x + y));
+	if (pbrSphere.has_value()) {
+		for (size_t x = 0; x < 6; x++) {
+			for (int y = 0; y < 6; y++) {
+
+				for (auto const &meshId : pbrSphere.value()) {
+					auto sphere = engine.CreateEntity<MeshComponent, TransformComponent>();
+					MeshComponent mesh{};
+						mesh.Id = meshId;
+						mesh.Shader = shaderId;
+					sphere->Set(mesh);
+
+					TransformComponent t{};
+						t.scale = { 0.05f, 0.05f, 0.05f };
+						t.position = { x * 6.0f, (y + 1) * 6.0f, -13.0f };
+					sphere->Set(t);
+
+					sphere->SetName(fmt::format("PBR Sphere {}", 5 * x + y));
+				}
 			}
 		}
 	}
