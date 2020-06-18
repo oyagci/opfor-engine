@@ -9,6 +9,7 @@
 #include "components/SkyboxComponent.hpp"
 #include "components/PointLightComponent.hpp"
 #include "components/DirectionalLightComponent.hpp"
+#include "components/ModelComponent.hpp"
 #include "Engine.hpp"
 #include "Framebuffer.hpp"
 #include "ShaderManager.hpp"
@@ -279,19 +280,23 @@ private:
 
 	void RenderShadowMeshes()
 	{
-		auto meshes = GetEntities<MeshComponent, TransformComponent>();
+		auto entities = GetEntities<ModelComponent, TransformComponent>();
 
-		for (auto m : meshes) {
-			auto [ meshId, shaderId ] = m->Get<MeshComponent>();
-			auto data = engine::Engine::Instance().GetMesh(meshId);
-			auto &transform = m->Get<TransformComponent>();
+		for (auto const entity: entities) {
 
-			glm::mat4 model(1.0f);
-			model = glm::translate(model, transform.position);
-			model = glm::scale(model, transform.scale);
-			_shadow.setUniform4x4f("modelMatrix", model);
+			auto [ model, transform ] = entity->GetAll();
 
-			data->Draw();
+			for (auto const meshId : model.Meshes) {
+
+				auto const *mesh = engine::Engine::Instance().GetMesh(meshId);
+
+				glm::mat4 model(1.0f);
+				model = glm::translate(model, transform.position);
+				model = glm::scale(model, transform.scale);
+				_shadow.setUniform4x4f("modelMatrix", model);
+
+				mesh->Draw();
+			}
 
 		}
 	}
@@ -301,100 +306,107 @@ private:
 
 	void RenderMeshes(PlayerCameraComponent const &camera, TransformComponent const &playerTransform)
 	{
-		auto meshes = GetEntities<MeshComponent, TransformComponent>();
+		auto models = GetEntities<ModelComponent, TransformComponent>();
 
 		x = 0;
 		y = 0;
 
-		for (auto mesh : meshes) {
-			auto [ meshId, shaderId ] = mesh->Get<MeshComponent>();
-			auto data = engine::Engine::Instance().GetMesh(meshId);
-			auto &transform = mesh->Get<TransformComponent>();
+		for (auto const &entity : models) {
 
-			auto shader = ShaderManager::instance().Get(shaderId).value();
-			shader->bind();
-			shader->setUniform4x4f("viewProjectionMatrix", camera.viewProjection);
-			shader->setUniform4x4f("viewMatrix", camera.view);
-			shader->setUniform4x4f("projectionMatrix", camera.projection);
-			shader->setUniform3f("viewPos", playerTransform.position);
+			auto const [ model, transform ] = entity->GetAll();
 
-			UpdateLight(*shader);
+			for (auto const meshId : model.Meshes) {
 
-			glm::mat4 model(1.0f);
-			model = glm::translate(model, transform.position);
-			model = glm::scale(model, transform.scale);
-			shader->setUniform4x4f("modelMatrix", model);
+				auto const mesh = engine::Engine::Instance().GetMesh(meshId);
+				auto const shaderId = model.Shader;
+				auto shader = ShaderManager::instance().Get(shaderId).value();
 
-			std::vector<TextureAutoBind> textureBindings;
+				shader->bind();
+				shader->setUniform4x4f("viewProjectionMatrix", camera.viewProjection);
+				shader->setUniform4x4f("viewMatrix", camera.view);
+				shader->setUniform4x4f("projectionMatrix", camera.projection);
+				shader->setUniform3f("viewPos", playerTransform.position);
 
-			// Bind each texture
-			auto meshCast = dynamic_cast<engine::Mesh*>(data);
-			if (meshCast != nullptr) {
-				if (meshCast->GetPbrMaterial().has_value()) {
+				UpdateLight(*shader);
 
-					auto material = engine::Engine::Instance().GetPbrMaterial(
-						meshCast->GetPbrMaterial().value());
+				glm::mat4 modelMatrix(1.0f);
+				modelMatrix = glm::translate(modelMatrix, transform.position);
+				modelMatrix = glm::scale(modelMatrix, transform.scale);
+				shader->setUniform4x4f("modelMatrix", modelMatrix);
 
-					if (material.has_value()) {
-						auto m = material.value();
+				std::vector<TextureAutoBind> textureBindings;
 
-						shader->setUniform4f("material.baseColor", m->BaseColor);
-						shader->setUniform1f("material.metallicFactor", m->MetallicFactor);
-						shader->setUniform1f("material.roughnessFactor", m->RoughnessFactor);
+				// Bind each texture
+				auto meshCast = dynamic_cast<engine::Mesh*>(mesh);
+				if (meshCast != nullptr) {
+					if (meshCast->GetPbrMaterial().has_value()) {
 
-						if (mesh->GetName().find("PBR Sphere") != std::string::npos) {
-							shader->setUniform1f("material.metallicFactor", (1.0f/6.0f) * x);
-							shader->setUniform1f("material.roughnessFactor",(1.0f/6.0f) * y);
+						auto material = engine::Engine::Instance().GetPbrMaterial(
+							meshCast->GetPbrMaterial().value());
 
-							x += 1;
+						if (material.has_value()) {
+							auto m = material.value();
 
-							if (x >= 6) {
-								x = 0;
-								y += 1;
+							shader->setUniform4f("material.baseColor", m->BaseColor);
+							shader->setUniform1f("material.metallicFactor", m->MetallicFactor);
+							shader->setUniform1f("material.roughnessFactor", m->RoughnessFactor);
+
+							if (model.Name.find("PBR Sphere") != std::string::npos) {
+
+								shader->setUniform1f("material.metallicFactor", (1.0f/6.0f) * x);
+								shader->setUniform1f("material.roughnessFactor",(1.0f/6.0f) * y);
+
+								x += 1;
+
+								if (x >= 6) {
+									x = 0;
+									y += 1;
+								}
+								if (y >= 6) {
+									y = 0;
+								}
 							}
-							if (y >= 6) {
-								y = 0;
+
+							if (m->Albedo.has_value()) {
+								auto albedo = m->Albedo.value();
+								auto texture = TextureManager::instance().get(albedo);
+
+								shader->setUniform1i("material.hasAlbedo", 1);
+								textureBindings.push_back(TextureAutoBind(GL_TEXTURE0, GL_TEXTURE_2D, texture));
 							}
-						}
+							else {
+								shader->setUniform1i("material.hasAlbedo", 0);
+							}
 
-						if (m->Albedo.has_value()) {
-							auto albedo = m->Albedo.value();
-							auto texture = TextureManager::instance().get(albedo);
+							if (m->MetallicRoughness.has_value()) {
+								auto metallicRoughness = m->MetallicRoughness.value();
+								auto texture = TextureManager::instance().get(metallicRoughness);
 
-							shader->setUniform1i("material.hasAlbedo", 1);
-							textureBindings.push_back(TextureAutoBind(GL_TEXTURE0, GL_TEXTURE_2D, texture));
-						}
-						else {
-							shader->setUniform1i("material.hasAlbedo", 0);
-						}
+								shader->setUniform1i("material.hasMetallicRoughness", 1);
+								textureBindings.push_back(TextureAutoBind(GL_TEXTURE1, GL_TEXTURE_2D, texture));
+							}
+							else {
+								shader->setUniform1i("material.hasMetallicRoughness", 0);
+							}
 
-						if (m->MetallicRoughness.has_value()) {
-							auto metallicRoughness = m->MetallicRoughness.value();
-							auto texture = TextureManager::instance().get(metallicRoughness);
+							if (m->Normal.has_value()) {
+								auto normal = m->Normal.value();
+								auto texture = TextureManager::instance().get(normal);
 
-							shader->setUniform1i("material.hasMetallicRoughness", 1);
-							textureBindings.push_back(TextureAutoBind(GL_TEXTURE1, GL_TEXTURE_2D, texture));
-						}
-						else {
-							shader->setUniform1i("material.hasMetallicRoughness", 0);
-						}
-
-						if (m->Normal.has_value()) {
-							auto normal = m->Normal.value();
-							auto texture = TextureManager::instance().get(normal);
-
-							textureBindings.push_back(TextureAutoBind(GL_TEXTURE2, GL_TEXTURE_2D, texture));
-						}
-						else {
-							auto const defaultNormal = TextureManager::instance().get("default_normal");
-							textureBindings.push_back(TextureAutoBind(GL_TEXTURE2, GL_TEXTURE_2D, defaultNormal));
+								textureBindings.push_back(TextureAutoBind(GL_TEXTURE2, GL_TEXTURE_2D, texture));
+							}
+							else {
+								auto const defaultNormal = TextureManager::instance().get("default_normal");
+								textureBindings.push_back(TextureAutoBind(GL_TEXTURE2, GL_TEXTURE_2D, defaultNormal));
+							}
 						}
 					}
 				}
+
+				mesh->Draw();
+				shader->unbind();
 			}
 
-			data->Draw();
-			shader->unbind();
 		}
 	}
 

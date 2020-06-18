@@ -3,6 +3,7 @@
 #include "utils/Settings.hpp"
 #include "stb_image.h"
 #include "components/SelectedComponent.hpp"
+#include "engine/Model.hpp"
 
 namespace engine
 {
@@ -59,6 +60,12 @@ Engine::Engine()
 	OnSelectItem += _selectItem;
 }
 
+/*
+ * Needed because unique_ptr needs complete types
+ * and there are some forward declared classes in the hpp file
+ */
+Engine::~Engine() = default;
+
 int Engine::Run()
 {
 	Settings::instance().load("config.ini");
@@ -104,6 +111,25 @@ void Engine::UpdateSubobjects(std::vector<EngineObject*> subobjects)
 		o->Update();
 		UpdateSubobjects(o->GetSubobjects());
 	}
+}
+
+unsigned int Engine::RegisterModel(Model model)
+{
+	auto modelPtr = std::make_unique<Model>(model);
+
+	_models[_nextId] = std::move(modelPtr);
+	return _nextId++;
+}
+
+std::optional<Model const *> Engine::GetModel(unsigned int id) const
+{
+	auto const model = _models.find(id);
+
+	if (model != _models.end()) {
+		return std::make_optional(model->second.get());
+	}
+
+	return std::nullopt;
 }
 
 }

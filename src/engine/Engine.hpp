@@ -28,6 +28,8 @@ namespace ecs
 namespace engine
 {
 
+class Model;
+
 class Engine
 {
 private:
@@ -42,6 +44,7 @@ private:
 
 	std::vector<std::unique_ptr<EngineObject>> _engineObjects;
 
+	std::unordered_map<unsigned int, std::unique_ptr<engine::Model>> _models;
 	std::unordered_map<unsigned int, std::unique_ptr<IDrawable>> _meshes;
 	std::unordered_map<unsigned int, std::unique_ptr<Batch>> _batches;
 
@@ -55,6 +58,7 @@ private:
 
 private:
 	Engine();
+	~Engine();
 
 	Callback<size_t> _selectItem;
 
@@ -263,6 +267,9 @@ public:
 	{
 		glfwSetWindowShouldClose(_display->getWindow(), GLFW_TRUE);
 	}
+
+	unsigned int RegisterModel(engine::Model model);
+	std::optional<engine::Model const *> GetModel(unsigned int id) const;
 };
 
 }
