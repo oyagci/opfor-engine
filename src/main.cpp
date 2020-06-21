@@ -1,27 +1,22 @@
+#include <fmt/format.h>
+#include <utility>
+#include <string>
+#include <optional>
+#include <utility>
+
+#include "lazy.hpp"
+#include "stb_image.h"
+#include "Logger.hpp"
+#include "tiny_gltf.h"
 #include "Engine.hpp"
-#include "engine/assimp/Model.hpp"
-#include "engine/Model.hpp"
+#include "assimp/Model.hpp"
+#include "Model.hpp"
+#include "levels/MainLevel.hpp"
+
 #include "systems/CameraMovementSystem.hpp"
 #include "systems/MeshRendererSystem.hpp"
 #include "systems/SkyboxRendererSystem.hpp"
 #include "systems/ImguiSystem.hpp"
-#include "systems/BatchRendererSystem.hpp"
-#include "components/PlayerCameraComponent.hpp"
-#include "components/TransformComponent.hpp"
-#include "components/SkyboxComponent.hpp"
-#include "components/SelectedComponent.hpp"
-#include "components/BatchComponent.hpp"
-#include "stb_image.h"
-#include "lazy.hpp"
-#include "ShaderManager.hpp"
-#include <fmt/format.h>
-#include <utility>
-#include <string>
-#include "Batch.hpp"
-#include "Logger.hpp"
-#include "tiny_gltf.h"
-#include <optional>
-#include <utility>
 
 using namespace engine;
 
@@ -256,167 +251,13 @@ int main()
 		t.position = glm::vec3(0.0f, 18.0f, -0.5f);
 	player->Set(t);
 
-	auto [ shaderId, meshShader ] = ShaderManager::instance().Create();
-	meshShader.addVertexShader("./shaders/basic.vs.glsl")
-		.addFragmentShader("./shaders/basic.fs.glsl")
-		.link();
-
-	meshShader.bind();
-	meshShader.setUniform1i("material.albedo", 0);
-	meshShader.setUniform1i("material.metallicRoughness", 1);
-	meshShader.setUniform1i("material.normal", 2);
-	meshShader.setUniform1f("material.metallicFactor", 1.0f);
-	meshShader.setUniform1f("material.roughnessFactor", 1.0f);
-	meshShader.unbind();
-
-	auto [ skyboxShaderId, skyboxShader ] = ShaderManager::instance().Create();
-	skyboxShader.addVertexShader("./shaders/cubemap.vs.glsl")
-		.addFragmentShader("./shaders/cubemap.fs.glsl")
-		.link();
-	skyboxShader.bind();
-	skyboxShader.setUniform1i("cubemap", 0);
-	skyboxShader.unbind();
-
-	auto sponModel = Model();
-	sponModel.LoadFromGLTF("models/glTF-Sample-Models/2.0/Sponza/glTF/Sponza.gltf");
-	engine.RegisterModel(sponModel);
-
-	if (sponModel.GetMeshes().size() > 0) {
-
-		ModelComponent sponzaModel;
-			sponzaModel.Name = "Sponza";
-			sponzaModel.Shader = shaderId;
-			sponzaModel.Meshes.reserve(sponModel.GetMeshes().size());
-			sponzaModel.Meshes.insert(sponzaModel.Meshes.begin(), sponModel.GetMeshes().begin(), sponModel.GetMeshes().end());
-
-
-		TransformComponent sponzaTransform;
-		sponzaTransform.scale = { 0.1f, 0.1f, 0.1f };
-
-		auto sponza = engine.CreateEntity<ModelComponent, TransformComponent>();
-		sponza->Set(sponzaModel);
-		sponza->Set(sponzaTransform);
-		sponza->SetName("Sponza");
-
-	}
-
-	auto pbrSphere = Model();
-	pbrSphere.LoadFromGLTF("models/PbrSphere/PbrSphere.gltf");
-	engine.RegisterModel(pbrSphere);
-
-	if (pbrSphere.GetMeshes().size() > 0) {
-		for (size_t x = 0; x < 6; x++) {
-			for (int y = 0; y < 6; y++) {
-
-				ModelComponent pbrSphereModel{};
-					pbrSphereModel.Meshes.reserve(pbrSphere.GetMeshes().size());
-					pbrSphereModel.Meshes.insert(pbrSphereModel.Meshes.begin(), pbrSphere.GetMeshes().begin(), pbrSphere.GetMeshes().end());
-					pbrSphereModel.Name = "PBR Sphere";
-					pbrSphereModel.Shader = shaderId;
-
-				TransformComponent t{};
-					t.scale = { 0.05f, 0.05f, 0.05f };
-					t.position = { x * 6.0f, (y + 1) * 6.0f, -13.0f };
-
-				auto sphere = engine.CreateEntity<ModelComponent, TransformComponent>();
-
-				sphere->Set(pbrSphereModel);
-				sphere->Set(t);
-				sphere->SetName(fmt::format("PBR Sphere {}", 5 * x + y));
-
-			}
-		}
-	}
-
-	auto env = Model();
-	env.LoadFromGLTF("models/glTF-Sample-Models/2.0/EnvironmentTest/glTF/EnvironmentTest.gltf");
-	engine.RegisterModel(env);
-
-	if (env.GetMeshes().size() > 0) {
-		for (auto const &meshId : env.GetMeshes()) {
-			auto spon = engine.CreateEntity<MeshComponent, TransformComponent>();
-			MeshComponent dvaMesh{};
-				dvaMesh.Id = meshId;
-				dvaMesh.Shader = shaderId;
-			spon->Set(dvaMesh);
-
-			TransformComponent t{};
-				t.scale = { 0.10f, 0.10f, 0.10f };
-				t.scale = { 1.0f, 1.0f, 1.0f };
-			spon->Set(t);
-
-			spon->SetName("EnvTest");
-		}
-	}
-
-//	// Create a batch for the meshes
-//	auto batch = std::make_unique<Batch>();
-//	int i = 0;
-//	for (auto const &m : dvaModel.getMeshes()) {
-//		batch->AddMesh(
-//			m.Positions,
-//			m.Normals,
-//			m.TexCoords,
-//			m.Tangents,
-//			materialNames[i++],
-//			m.Indices);
-//	}
-//	batch->Build();
-	
-//	unsigned int batchId = engine.AddBatch(std::move(batch));
-//	auto *batchEnt = engine.CreateEntity<MeshComponent, TransformComponent>();
-//	{
-//		TransformComponent t;
-//			t.scale = glm::vec3(100.0f, 100.0f, 100.0f);
-//			t.position = glm::vec3(0.0f, 0.0f, 0.0f);
-//		MeshComponent mesh;
-//			mesh.Id = batchId;
-//			mesh.Shader = shaderId;
-//		batchEnt->Set(t);
-//		batchEnt->Set(mesh);
-//	}
-
-	auto skybox = engine.CreateEntity<MeshComponent, TransformComponent, SkyboxComponent>();
-
-	MeshComponent s = initSkybox();
-		s.Shader = skyboxShaderId;
-	skybox->Set(s);
-	skybox->SetName("Skybox");
-
 	auto display = engine.CreateEntity<DisplayComponent>();
 	DisplayComponent d;
 	d.display = engine.GetDisplay();
 	display->Set(d);
 	display->SetName("Display");
 
-	auto pointLight = engine.CreateEntity<PointLightComponent, TransformComponent, SelectedComponent>();
-	PointLightComponent pl;
-		pl.Color = glm::vec3(1.0f, 1.0f, 0.8f);
-		pl.Dir = glm::normalize(glm::vec3(-1.0f, -1.0f, -1.0f));
-		pl.Intensity = 1000.0f;
-	pointLight->Set(pl);
-
-	TransformComponent pt;
-		pt.position = glm::vec3(-50.0f, 10.0f, 0.0f);
-	pointLight->Set(pt);
-
-	pointLight->SetName("Point Light");
-
-	auto directionalLight = engine.CreateEntity<DirectionalLightComponent>();
-	DirectionalLightComponent dl;
-		dl.Color = glm::vec3(1.0f, 1.0f, 0.8f);
-		dl.Direction = glm::vec3(-0.3f, -1.0f, -0.3f);
-		dl.Intensity = 1.0f;
-	directionalLight->Set(dl);
-
-//	auto pointLight2 = engine.CreateEntity<PointLightComponent, TransformComponent>();
-//	pl.Color = glm::vec3(1.0f, 1.0f, 0.8f);
-//	pl.Dir = glm::normalize(glm::vec3(-1.0f, -1.0f, -1.0f));
-//	pointLight2->Set(pl);
-//
-//	pt.position = glm::vec3(50.0f, 10.0f, 0.0f);
-//	pointLight2->Set(pt);
-//	pointLight2->SetName("Point Light 2");
+	engine.LoadLevel<MainLevel>();
 
 	return engine::Engine::Instance().Run();
 }

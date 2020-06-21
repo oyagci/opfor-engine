@@ -13,6 +13,7 @@
 #include <fmt/format.h>
 #include "Logger.hpp"
 #include "Action.hpp"
+#include "Level.hpp"
 
 using namespace lazy;
 using namespace graphics;
@@ -47,6 +48,7 @@ private:
 	std::unordered_map<unsigned int, std::unique_ptr<engine::Model>> _models;
 	std::unordered_map<unsigned int, std::unique_ptr<IDrawable>> _meshes;
 	std::unordered_map<unsigned int, std::unique_ptr<Batch>> _batches;
+	std::unique_ptr<ILevel> _currentLevel;
 
 	using MaterialContainer = std::pair<unsigned int, Material>;
 
@@ -168,10 +170,6 @@ public:
 			glActiveTexture(GL_TEXTURE0);
 			glBindTexture(GL_TEXTURE_2D, TextureManager::instance().get(material.Albedo.value()));
 		}
-//		if (material.specular > 0) {
-//			glActiveTexture(GL_TEXTURE1);
-//			glBindTexture(GL_TEXTURE_2D, material.specular);
-//		}
 		if (material.Normal.has_value()) {
 			glActiveTexture(GL_TEXTURE2);
 			glBindTexture(GL_TEXTURE_2D, TextureManager::instance().get(material.Normal.value()));
@@ -270,6 +268,19 @@ public:
 
 	unsigned int RegisterModel(engine::Model model);
 	std::optional<engine::Model const *> GetModel(unsigned int id) const;
+
+	template <typename T>
+	void LoadLevel()
+	{
+		static_assert(std::is_base_of<ILevel, T>::value && !std::is_same<ILevel, T>::value);
+
+		if (_currentLevel) {
+			_currentLevel->Unload();
+		}
+
+		_currentLevel = std::make_unique<T>();
+		_currentLevel->Load();
+	}
 };
 
 }
