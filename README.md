@@ -1,7 +1,11 @@
 # 3D Engine
 Game Engine in C++ and OpenGL.
 
-PBR Renderering.
+Notable Features:
+	- C++17
+	- OpenGL
+	- PBR Renderering
+	- Lua Scripting Support
 
 ![Editor Screenshot 1](./img/Screenshot-1.png)
 
@@ -56,6 +60,29 @@ public:
 ### Instanciating a System
 ```cpp
 engine.CreateSystem<MySystem>();
+```
+
+## Lua Scripting
+This engine supports Lua scripting through a `LuaScriptComponent` you can attach on any entity
+
+```cpp
+#include "components/LuaScriptComponent.hpp"
+
+// [...]
+
+auto myEntity = engine.CreateEntity<LuaScriptComponent>();
+
+auto &luaScript = myEntity->Get<LuaScriptComponent>();
+	luaScript.Runtime.Load("scripts/myScript.lua");
+```
+
+```lua
+-- File: script/myScript.lua
+
+-- This function is called on each frame
+function onUpdate(deltaTime)
+	io.write("Hello World!\n")
+end
 ```
 ## Build
 
