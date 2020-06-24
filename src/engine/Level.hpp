@@ -93,5 +93,14 @@ public:
 
 	void Unload() override {
 		_isLoaded = false;
+
+		for (auto &entity : _entities) {
+			engine::Engine::Instance().DeleteEntity(entity->GetId());
+		}
+		_entities.clear();
+
+		ShaderManager::instance().Delete(_meshShader);
+
+		_meshShader = 0;
 	}
 };

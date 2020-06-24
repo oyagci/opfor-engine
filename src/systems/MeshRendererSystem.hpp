@@ -319,7 +319,15 @@ private:
 
 				auto const mesh = engine::Engine::Instance().GetMesh(meshId);
 				auto const shaderId = model.Shader;
-				auto shader = ShaderManager::instance().Get(shaderId).value();
+
+				auto shaderOpt = ShaderManager::instance().Get(shaderId);
+
+				if (!shaderOpt.has_value()) {
+					Logger::Warn("Shader {} does not exist\n", shaderId);
+					continue ;
+				}
+
+				auto &shader = shaderOpt.value();
 
 				shader->bind();
 				shader->setUniform4x4f("viewProjectionMatrix", camera.viewProjection);

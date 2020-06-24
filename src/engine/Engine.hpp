@@ -278,6 +278,11 @@ public:
 	{
 		return _entityManager->GetEntity(id);
 	}
+
+	void DeleteEntity(unsigned int entityId)
+	{
+		_entityManager->DeleteEntity(entityId);
+	}
 };
 
 }

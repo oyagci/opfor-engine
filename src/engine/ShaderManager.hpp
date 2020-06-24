@@ -2,7 +2,7 @@
 
 #include "lazy.hpp"
 #include <memory>
-#include <vector>
+#include <unordered_map>
 
 class ShaderManager
 {
@@ -17,26 +17,36 @@ public:
 	std::tuple<unsigned int, lazy::graphics::Shader&> Create()
 	{
 		auto shader = std::make_unique<lazy::graphics::Shader>();
+		auto shaderId = _nextId++;
 
-		_shaders.push_back(std::move(shader));
+		_shaders[shaderId] = std::move(shader);
 
-		return { _shaders.size() - 1, *_shaders.back() };
+		return { shaderId, *_shaders[shaderId] };
 	}
+
 	std::optional<lazy::graphics::Shader*> Get(unsigned int id)
 	{
-		std::optional<lazy::graphics::Shader*> shader;
-		if (id < _shaders.size()) {
-			shader = _shaders[id].get();
+		if (_shaders.find(id) != _shaders.end()) {
+			return std::make_optional(_shaders[id].get());
 		}
-		return shader;
+
+		return std::nullopt;
+	}
+
+	void Delete(unsigned int id)
+	{
+		if (_shaders.find(id) == _shaders.end()) { return ; }
+
+		_shaders.erase(id);
 	}
 
 private:
-	std::vector<std::unique_ptr<lazy::graphics::Shader>> _shaders;
+	std::unordered_map<unsigned int, std::unique_ptr<lazy::graphics::Shader>> _shaders;
+
+	unsigned int _nextId = 0;
 
 private:
 	ShaderManager()
 	{
-		_shaders.reserve(10);
 	};
 };

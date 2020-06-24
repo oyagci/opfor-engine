@@ -90,6 +90,16 @@ private:
 
 		return std::nullopt;
 	}
+
+	void DeleteEntity(unsigned int entityId)
+	{
+		auto entity = std::find_if(Entities.begin(), Entities.end(),
+			[entityId] (auto const &ptr) { return ptr->GetId() == entityId; });
+
+		if (entity != Entities.end()) {
+			Entities.erase(entity);
+		}
+	}
 };
 
 class EntityManager
@@ -131,6 +141,11 @@ public:
 	std::optional<IEntityBase *> GetEntity(size_t id)
 	{
 		return Manager.GetEntity(id);
+	}
+
+	void DeleteEntity(unsigned int entityId)
+	{
+		Manager.DeleteEntity(entityId);
 	}
 };
 
