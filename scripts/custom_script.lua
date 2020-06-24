@@ -7,7 +7,8 @@ end
 offset = 0.0
 
 function onUpdate(deltaTime)
-	offset = offset + 0.01
+	io.write(deltaTime .. "\n")
+	offset = offset + deltaTime * 1.0
 	xpos = math.sin(offset) * 10.0
 	ypos = math.cos(offset) * 10.0
 

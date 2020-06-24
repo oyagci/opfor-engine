@@ -18,20 +18,16 @@ private:
 	void operator=(Time const&) = delete;
 
 public:
-	void update()
-	{
-		_lastFrame = glfwGetTime();
-	}
-
 	float getDeltaTime()
 	{
-		float currentFrame = glfwGetTime();
-		float deltaTime = currentFrame - _lastFrame;
-		return deltaTime;
+		_lastFrame = _newFrame;
+		_newFrame = glfwGetTime();
+		return _newFrame - _lastFrame;
 	};
 
 private:
 	float _lastFrame = 0.0f;
+	float _newFrame = 0.0f;
 };
 
 }

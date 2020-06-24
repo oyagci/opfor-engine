@@ -72,11 +72,9 @@ int Engine::Run()
 
 	while (!_display->isClosed())
 	{
-		Update();
-
-		Time::instance().update();
-
 		float deltaTime = Time::instance().getDeltaTime();
+
+		Update();
 
 		_camera->update();
 		_ecs.Update(deltaTime);
