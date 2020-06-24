@@ -235,18 +235,30 @@ private:
 		// -------------------
 
 		for (auto const &t : model.textures) {
-			auto const &sampler = model.samplers[t.sampler];
+
 			auto const &image = model.images[t.source];
 
 			std::string name = image.uri;
 			std::string path = directory + image.uri;
 
-			TextureManager::instance().createTexture(name, path, {
-				{ GL_TEXTURE_MAG_FILTER, sampler.magFilter },
-				{ GL_TEXTURE_MIN_FILTER, sampler.minFilter },
-				{ GL_TEXTURE_WRAP_S, sampler.wrapS },
-				{ GL_TEXTURE_WRAP_T, sampler.wrapT },
-			}, GL_TEXTURE_2D);
+			if (t.sampler >= 0) {
+				auto const &sampler = model.samplers[t.sampler];
+
+				TextureManager::instance().createTexture(name, path, {
+					{ GL_TEXTURE_MAG_FILTER, sampler.magFilter },
+					{ GL_TEXTURE_MIN_FILTER, sampler.minFilter },
+					{ GL_TEXTURE_WRAP_S, sampler.wrapS },
+					{ GL_TEXTURE_WRAP_T, sampler.wrapT },
+				}, GL_TEXTURE_2D);
+			}
+			else {
+				TextureManager::instance().createTexture(name, path, {
+					{ GL_TEXTURE_MAG_FILTER, GL_LINEAR },
+					{ GL_TEXTURE_MIN_FILTER, GL_LINEAR },
+					{ GL_TEXTURE_WRAP_S, GL_REPEAT },
+					{ GL_TEXTURE_WRAP_T, GL_REPEAT },
+				}, GL_TEXTURE_2D);
+			}
 		}
 
 		std::vector<unsigned int> meshes;
