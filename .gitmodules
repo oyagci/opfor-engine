@@ -4,3 +4,6 @@
 [submodule "subprojects/json"]
 	path = subprojects/json
 	url = https://github.com/nlohmann/json.git
+[submodule "thirdparty/nativefiledialog"]
+	path = thirdparty/nativefiledialog
+	url = https://github.com/oyagci/nativefiledialog

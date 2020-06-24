@@ -26,6 +26,7 @@ incdirs += include_directories('thirdparty/imgui')
 incdirs += include_directories('thirdparty/ImGuizmo')
 incdirs += include_directories('thirdparty/tinygltf')
 incdirs += include_directories('thirdparty/lua-5.3.5/src')
+incdirs += include_directories('thirdparty/nativefiledialog/src/include')
 
 srcs = [
   'src/main.cpp',
@@ -70,9 +71,15 @@ tinygltf_src = [
   'src/engine/tinygltf.cpp'
 ]
 
+nativefiledialog_src = [
+  'thirdparty/nativefiledialog/src/nfd_common.c',
+  'thirdparty/nativefiledialog/src/nfd_gtk.c'
+]
+
 srcs += imgui
 srcs += imgui_guizmo
 srcs += tinygltf_src
+srcs += nativefiledialog_src
 
 cmake = import('cmake')
 lazyGL = cmake.subproject('LazyGL')
@@ -143,6 +150,7 @@ if build_machine.system() == 'linux'
 	dependency('x11', required : true),
 	dependency('xi', required : true),
 	dependency('xrandr', required : true),
+	dependency('gtk+-3.0', required: true),
 	meson.get_compiler('cpp').find_library('freetype'),
   ]
   deps += deps_linux

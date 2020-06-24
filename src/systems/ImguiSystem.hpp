@@ -14,6 +14,8 @@
 #include <glm/gtx/matrix_decompose.hpp>
 #include "Engine.hpp"
 #include "Logger.hpp"
+#include "nfd.hpp"
+#include <unistd.h>
 
 class ImguiSystem : public ecs::ComponentSystem
 {
@@ -146,6 +148,25 @@ private:
 				if (ImGui::MenuItem("Close")) {
 					engine::Engine::Instance().Close();
 				}
+
+				ImGui::Separator();
+
+				if (ImGui::MenuItem("New Level")) {
+				}
+				if (ImGui::MenuItem("Open Level")) {
+					char *outPath = nullptr;
+					NFD_OpenDialog(nullptr, getcwd(nullptr, 0), &outPath);
+					if (outPath) {
+						engine::Engine::Instance().LoadLevel(outPath);
+					}
+				}
+				if (ImGui::MenuItem("Save Level")) {
+				}
+				if (ImGui::MenuItem("Save Level As...")) {
+					char *outPath = nullptr;
+					NFD_OpenDialog(nullptr, getcwd(nullptr, 0), &outPath);
+				}
+
 				ImGui::EndMenu();
 			}
 			if (ImGui::BeginMenu("Lighting")) {
@@ -289,6 +310,11 @@ public:
 
 		// Enable Docking
 		ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+
+		auto &io = ImGui::GetIO();
+
+		ImFont *roboto = io.Fonts->AddFontFromFileTTF("thirdparty/imgui/misc/fonts/Roboto-Medium.ttf", 16);
+		io.FontDefault = roboto;
 	}
 
 	~ImguiSystem()
