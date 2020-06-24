@@ -7,6 +7,7 @@
 #include <fmt/format.h>
 #include "lua.hpp"
 #include "lualib.h"
+#include "Logger.hpp"
 
 struct lua_StateDeleter
 {
@@ -86,10 +87,8 @@ public:
 		}
 
 		if (lua_pcall(_state.get(), nbArgs, 0, 0) != LUA_OK) {
-			fmt::print("Runtime Error\n");
-			fmt::print("=============\n");
-			const char *str = lua_tostring(_state.get(), -1);
-			fmt::print("{}\n\n", str);
+			const char *err = lua_tostring(_state.get(), -1);
+			Logger::Error("Runtime Error: {}\n", err);
 		}
 	}
 
