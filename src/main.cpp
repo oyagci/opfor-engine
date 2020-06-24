@@ -30,7 +30,6 @@
 #include "Engine.hpp"
 #include "assimp/Model.hpp"
 #include "Model.hpp"
-#include "levels/MainLevel.hpp"
 
 #include "systems/CameraMovementSystem.hpp"
 #include "systems/MeshRendererSystem.hpp"
@@ -375,8 +374,6 @@ int main()
 	d.display = engine.GetDisplay();
 	display->Set(d);
 	display->SetName("Display");
-
-	engine.LoadLevel<MainLevel>();
 
 	return engine::Engine::Instance().Run();
 }

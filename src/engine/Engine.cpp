@@ -4,6 +4,7 @@
 #include "stb_image.h"
 #include "components/SelectedComponent.hpp"
 #include "engine/Model.hpp"
+#include "Level.hpp"
 
 namespace engine
 {
@@ -58,6 +59,8 @@ Engine::Engine()
 		}
 	});
 	OnSelectItem += _selectItem;
+
+	_currentLevel = std::make_unique<Level>();
 }
 
 /*

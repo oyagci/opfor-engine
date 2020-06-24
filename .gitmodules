@@ -1,3 +1,6 @@
 [submodule "LazyGL"]
 	path = subprojects/LazyGL
 	url = https://github.com/oyagci/LazyGL.git
+[submodule "subprojects/json"]
+	path = subprojects/json
+	url = https://github.com/nlohmann/json.git

@@ -13,7 +13,7 @@
 #include <fmt/format.h>
 #include "Logger.hpp"
 #include "Action.hpp"
-#include "Level.hpp"
+#include "ILevel.hpp"
 
 using namespace lazy;
 using namespace graphics;
@@ -269,17 +269,9 @@ public:
 	unsigned int RegisterModel(engine::Model model);
 	std::optional<engine::Model const *> GetModel(unsigned int id) const;
 
-	template <typename T>
-	void LoadLevel()
+	void LoadLevel(std::string const &path)
 	{
-		static_assert(std::is_base_of<ILevel, T>::value && !std::is_same<ILevel, T>::value);
-
-		if (_currentLevel) {
-			_currentLevel->Unload();
-		}
-
-		_currentLevel = std::make_unique<T>();
-		_currentLevel->Load();
+		_currentLevel->Load(path);
 	}
 
 	auto GetEntity(unsigned int id)

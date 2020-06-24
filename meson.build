@@ -76,6 +76,7 @@ srcs += tinygltf_src
 
 cmake = import('cmake')
 lazyGL = cmake.subproject('LazyGL')
+json = cmake.subproject('json')
 #assimp = cmake.subproject('assimp-5.0.1')
 
 # Lua
@@ -123,6 +124,7 @@ lib_lua = library('lua', lua_src, include_directories: lua_inc, dependencies: lu
 
 deps = [
   lazyGL.dependency('LazyGL'),
+  json.dependency('nlohmann_json'),
   dependency('glew', required : true),
   dependency('glfw3', required : true),
   dependency('threads', required : true),
