@@ -278,11 +278,10 @@ private:
 
 	size_t selectedItem = 1;
 
-	void EntityList()
+	void SceneHierarchy()
 	{
-		ImGui::Begin("Entities");
+		ImGui::Begin("Scene Hierarchy");
 
-		size_t lastItem = selectedItem;
 		auto allEnts = GetAllEntities();
 
 		size_t itemIndex = 0;
@@ -341,7 +340,7 @@ public:
 			LightProperties();
 			Materials();
 			Log();
-			EntityList();
+			SceneHierarchy();
 		EndDockspace();
 		EndFrame();
 
