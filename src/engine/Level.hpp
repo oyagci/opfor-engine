@@ -12,12 +12,14 @@
 #include "components/PointLightComponent.hpp"
 #include "components/LuaScriptComponent.hpp"
 
+#include "uuid.h"
+
 using json = nlohmann::json;
 
 class Level : public engine::ILevel
 {
 	unsigned int _meshShader;
-	std::vector<ecs::IEntityBase *> _entities;
+	std::unordered_map<uuids::uuid, ecs::IEntityBase *> _entities;
 	bool _isLoaded = false;
 
 public:
@@ -48,6 +50,9 @@ public:
 			auto entity = engine::Engine::Instance().CreateEntity<ModelComponent, TransformComponent>();
 			auto engineModel = engine::Model();
 
+			auto uuidstr = model["uuid"].get<std::string>();
+			auto uuid = uuids::uuid::from_string(uuidstr).value();
+
 			entity->SetName(model["name"]);
 
 			engineModel.LoadFromGLTF(model["uri"].get<std::string>());
@@ -66,36 +71,35 @@ public:
 				modelTransform.position = { position[0], position[1], position[2] };
 				modelTransform.scale = { scale[0], scale[1], scale[2] };
 
-			_entities.push_back(entity);
+			_entities[uuid] = entity;
 		}
-
-		for (auto const &light : levelJson["lights"]) {
-
-			if (light["type"].get<std::string>() == "POINT") {
-				auto entity = engine::Engine::Instance().CreateEntity<PointLightComponent, TransformComponent>();
-
-				auto color = light["color"].get<std::array<float, 3>>();
-
-				auto &lightProperties = entity->Get<PointLightComponent>();
-					lightProperties.Color = { color[0], color[1], color[2] };
-					lightProperties.Intensity = light["intensity"].get<float>();
-
-				auto position = light["transform"]["position"].get<std::array<float, 3>>();
-				auto &lightTransform = entity->Get<TransformComponent>();
-					lightTransform.position = { position[0], position[1], position[2] };
-
-				entity->SetName(light["name"]);
-
-				_entities.push_back(entity);
-			}
-		}
+//		for (auto const &light : levelJson["lights"]) {
+//
+//			if (light["type"].get<std::string>() == "POINT") {
+//				auto entity = engine::Engine::Instance().CreateEntity<PointLightComponent, TransformComponent>();
+//
+//				auto color = light["color"].get<std::array<float, 3>>();
+//
+//				auto &lightProperties = entity->Get<PointLightComponent>();
+//					lightProperties.Color = { color[0], color[1], color[2] };
+//					lightProperties.Intensity = light["intensity"].get<float>();
+//
+//				auto position = light["transform"]["position"].get<std::array<float, 3>>();
+//				auto &lightTransform = entity->Get<TransformComponent>();
+//					lightTransform.position = { position[0], position[1], position[2] };
+//
+//				entity->SetName(light["name"]);
+//
+//				_entities.push_back(entity);
+//			}
+//		}
 	}
 
 	void Unload() override {
 		_isLoaded = false;
 
 		for (auto &entity : _entities) {
-			engine::Engine::Instance().DeleteEntity(entity->GetId());
+			engine::Engine::Instance().DeleteEntity(entity.second->GetId());
 		}
 		_entities.clear();
 

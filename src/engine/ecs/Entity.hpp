@@ -9,6 +9,7 @@
 #include "Component.hpp"
 #include <iostream>
 #include <tuple>
+#include "uuid.h"
 
 namespace ecs {
 
@@ -94,11 +95,12 @@ protected:
 	std::unordered_map<TypeIndex, std::unique_ptr<IComponentBase>> Components;
 	std::string Name;
 	unsigned int Id;
+	uuids::uuid Uuid;
 
 	static unsigned int NextEntityID;
 
 public:
-	IEntityBase() : Name("Unnamed Entity"), Id(NextEntityID++)
+	IEntityBase() : Name("Unnamed Entity"), Id(NextEntityID++), Uuid(uuids::uuid_system_generator{}())
 	{
 	}
 
@@ -175,6 +177,11 @@ public:
 	unsigned int GetId() const
 	{
 		return Id;
+	}
+
+	uuids::uuid const &GetUuid() const
+	{
+		return Uuid;
 	}
 
 	class MissingComponentException : public std::exception
