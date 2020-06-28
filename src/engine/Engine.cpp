@@ -3,6 +3,8 @@
 #include "utils/Settings.hpp"
 #include "stb_image.h"
 #include "components/SelectedComponent.hpp"
+#include "components/ModelComponent.hpp"
+#include "components/LuaScriptComponent.hpp"
 #include "engine/Model.hpp"
 #include "Level.hpp"
 
@@ -122,6 +124,14 @@ unsigned int Engine::RegisterModel(Model model)
 	return _nextId++;
 }
 
+void Engine::RemoveModel(unsigned int id)
+{
+	auto model = _models.find(id);
+	if (model != _models.end()) {
+		_models.erase(model);
+	}
+}
+
 std::optional<Model const *> Engine::GetModel(unsigned int id) const
 {
 	auto const model = _models.find(id);
@@ -131,6 +141,30 @@ std::optional<Model const *> Engine::GetModel(unsigned int id) const
 	}
 
 	return std::nullopt;
+}
+
+void Engine::OnRebuildModel(ModelComponent &model)
+{
+	for (auto const &m : model.Meshes) {
+		RemoveModel(m);
+	}
+	model.Meshes.clear();
+
+	Model modelData{};
+	modelData.LoadFromGLTF(model.Path);
+
+	auto const &meshes = modelData.GetMeshes();
+
+	if (meshes.size() > 0) {
+		model.Meshes.reserve(meshes.size());
+		model.Meshes.insert(model.Meshes.begin(), meshes.begin(), meshes.end());
+	}
+}
+
+void Engine::OnReloadScript(LuaScriptComponent &script)
+{
+	script.Runtime.Reset();
+	script.Runtime.Load(script.Path);
 }
 
 }

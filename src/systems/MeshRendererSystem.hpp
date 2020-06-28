@@ -301,15 +301,9 @@ private:
 		}
 	}
 
-	int x = 0;
-	int y = 0;
-
 	void RenderMeshes(PlayerCameraComponent const &camera, TransformComponent const &playerTransform)
 	{
 		auto models = GetEntities<ModelComponent, TransformComponent>();
-
-		x = 0;
-		y = 0;
 
 		for (auto const &entity : models) {
 
@@ -358,22 +352,6 @@ private:
 							shader->setUniform4f("material.baseColor", m->BaseColor);
 							shader->setUniform1f("material.metallicFactor", m->MetallicFactor);
 							shader->setUniform1f("material.roughnessFactor", m->RoughnessFactor);
-
-							if (model.Name.find("PBR Sphere") != std::string::npos) {
-
-								shader->setUniform1f("material.metallicFactor", (1.0f/6.0f) * x);
-								shader->setUniform1f("material.roughnessFactor",(1.0f/6.0f) * y);
-
-								x += 1;
-
-								if (x >= 6) {
-									x = 0;
-									y += 1;
-								}
-								if (y >= 6) {
-									y = 0;
-								}
-							}
 
 							if (m->Albedo.has_value()) {
 								auto albedo = m->Albedo.value();

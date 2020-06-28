@@ -26,6 +26,9 @@ namespace ecs
 	class EntityManager;
 }
 
+struct ModelComponent;
+struct LuaScriptComponent;
+
 namespace engine
 {
 
@@ -71,6 +74,10 @@ public:
 
 	/// Select an item in the editor
 	Action<size_t> OnSelectItem;
+
+	// Editor
+	void OnRebuildModel(ModelComponent &model);
+	void OnReloadScript(LuaScriptComponent &script);
 
 public:
 	Engine(Engine const &) = delete;
@@ -268,6 +275,7 @@ public:
 
 	unsigned int RegisterModel(engine::Model model);
 	std::optional<engine::Model const *> GetModel(unsigned int id) const;
+	void RemoveModel(unsigned int id);
 
 	void LoadLevel(std::string const &path)
 	{
@@ -283,6 +291,10 @@ public:
 	{
 		_entityManager->DeleteEntity(entityId);
 	}
+
+	void RebuildModel(ModelComponent &model);
+
+	auto &GetCurrentLevel() { return _currentLevel; }
 };
 
 }

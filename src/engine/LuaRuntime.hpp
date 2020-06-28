@@ -57,6 +57,14 @@ public:
 		return true;
 	}
 
+	void Reset()
+	{
+		if (_state) {
+			_state.reset(luaL_newstate());
+			luaL_openlibs(_state.get());
+		}
+	}
+
 	void PushArg(float arg) const
 	{
 		lua_pushnumber(_state.get(), arg);

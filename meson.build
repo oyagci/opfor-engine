@@ -58,7 +58,8 @@ imgui = [
   'thirdparty/imgui/imgui_impl_glfw.cpp',
   'thirdparty/imgui/imgui_widgets.cpp',
   'thirdparty/imgui/imgui_impl_opengl3.cpp',
-  'thirdparty/imgui/imgui_draw.cpp'
+  'thirdparty/imgui/imgui_draw.cpp',
+  'thirdparty/imgui/misc/cpp/imgui_stdlib.cpp',
 ]
 
 imgui_guizmo = [

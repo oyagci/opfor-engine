@@ -23,6 +23,10 @@ class Level : public engine::ILevel
 	bool _isLoaded = false;
 
 public:
+
+	///
+	/// Load a level from a level JSON
+	///
 	void Load(std::string const &path) override
 	{
 		if (_isLoaded) {
@@ -106,5 +110,16 @@ public:
 		ShaderManager::instance().Delete(_meshShader);
 
 		_meshShader = 0;
+	}
+
+	///
+	/// Create an Entity.
+	/// The lifetime of the created entity is managed by the Level (Load/Unload)
+	///
+	ecs::IEntityBase *CreateEntity() override
+	{
+		auto entity = engine::Engine::Instance().CreateEntity<TransformComponent>();
+		_entities[entity->GetUuid()] = entity;
+		return entity;
 	}
 };
