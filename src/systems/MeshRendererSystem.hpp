@@ -599,8 +599,6 @@ public:
 	void OnUpdate(float __unused deltaTime) override
 	{
 		auto player = GetEntities<PlayerCameraComponent, TransformComponent>();
-		//auto display = opfor::Engine::Get().GetWindow();
-		//auto [ width, height ] = std::tuple(display->GetWidth(), display->GetHeight());
 
 		if (player.size() == 0) { return ; }
 
@@ -615,21 +613,21 @@ public:
 			opfor::Renderer::PushCapability(opfor::RendererCaps::DepthTest, true);
 				RenderMeshes(playerCamera, playerTransform);
 			opfor::Renderer::PopCapability(opfor::RendererCaps::DepthTest);
-
 		opfor::Renderer::PopFramebuffer();
 
-		opfor::Renderer::SetClearColor({ 0.0f, 0.0f, 0.0f, 1.0f });
-		opfor::Renderer::Clear(opfor::ClearFlag::ColorBit);
+		opfor::Renderer::SetClearColor({ 1.0f, 0.0f, 1.0f, 1.0f });
+		opfor::Renderer::Clear(opfor::ClearFlag::ColorBit | opfor::ClearFlag::DepthBit);
 
 		RenderLight(playerTransform.position, playerCamera.exposure);
 
-		// Copy depth buffer to default framebuffer to enable depth testing with billboard
+		// Copy depth buffer to viewport framebuffer to enable depth testing with billboard
 		// and other shaders
+		auto const viewport = opfor::Engine::Get().GetViewport();
 		opfor::Renderer::CopyFramebufferToDefaultFramebuffer(_gBuffer.GetFramebuffer(), opfor::CopyTarget::DepthBufferBit);
 
 		opfor::Renderer::PushCapability(opfor::RendererCaps::Blend, true);
 		opfor::Renderer::PushCapability(opfor::RendererCaps::DepthTest, true);
-//			RenderSSAO(playerCamera);
+			// RenderSSAO(playerCamera);
 			RenderLightBillboard(playerCamera);
 		opfor::Renderer::PopCapability(opfor::RendererCaps::DepthTest);
 		opfor::Renderer::PopCapability(opfor::RendererCaps::Blend);

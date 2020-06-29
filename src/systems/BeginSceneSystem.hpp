@@ -2,6 +2,7 @@
 
 #include "ecs/System.hpp"
 #include "engine/renderer/Renderer.hpp"
+#include "Engine.hpp"
 
 class BeginSceneSystem : public ecs::ComponentSystem
 {

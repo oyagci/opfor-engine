@@ -15,6 +15,8 @@
 #include "engine/core/base.hpp"
 #include "engine/core/Window.hpp"
 #include "engine/renderer/Context.hpp"
+#include "engine/renderer/Framebuffer.hpp"
+#include "engine/renderer/Texture.hpp"
 
 using namespace lazy;
 using namespace graphics;
@@ -60,6 +62,9 @@ private:
 	std::unordered_map<std::string, MaterialContainer> _materials;
 	std::unordered_map<std::string, PbrMaterial> _pbrMaterials;
 
+	opfor::SharedPtr<opfor::Framebuffer> _viewportFramebuffer;
+	opfor::SharedPtr<opfor::Texture2D> _viewportTexture;
+
 	static unsigned int _nextId;
 	static unsigned int _nextMaterialId;
 
@@ -75,6 +80,8 @@ private:
 	~Engine();
 
 	Callback<size_t> _selectItem;
+
+	void InitViewport();
 
 public:
 	/// Observer for building the lighting of the level
@@ -300,6 +307,9 @@ public:
 	void RebuildModel(ModelComponent &model);
 
 	auto &GetCurrentLevel() { return _currentLevel; }
+
+	auto GetViewport() { return _viewportFramebuffer; }
+	auto GetViewportTexture() { return _viewportTexture; }
 };
 
 }

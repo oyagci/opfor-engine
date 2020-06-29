@@ -56,6 +56,8 @@ Engine::Engine()
 	OnSelectItem += _selectItem;
 
 	_currentLevel = std::make_unique<Level>();
+
+	InitViewport();
 }
 
 /*
@@ -63,6 +65,24 @@ Engine::Engine()
  * and there are some forward declared classes in the hpp file
  */
 Engine::~Engine() = default;
+
+void Engine::InitViewport()
+{
+	_viewportFramebuffer = opfor::Framebuffer::Create();
+	_viewportTexture = opfor::Texture2D::Create();
+
+	_viewportTexture->SetSize(1920, 1080);
+	_viewportTexture->SetInputFormat(opfor::DataFormat::RGB);
+	_viewportTexture->SetOutputFormat(opfor::DataFormat::RGB);
+	_viewportTexture->SetDataType(opfor::DataType::UnsignedInt);
+	_viewportTexture->SetTextureParameters({
+		{ opfor::TextureParameterType::MagnifyFilter, opfor::TextureParameterValue::Nearest },
+		{ opfor::TextureParameterType::MignifyFilter, opfor::TextureParameterValue::Nearest },
+	});
+	_viewportTexture->Build();
+
+	_viewportFramebuffer->AttachTexture(_viewportTexture, opfor::FramebufferAttachment::ColorAttachment0);
+}
 
 int Engine::Run()
 {
