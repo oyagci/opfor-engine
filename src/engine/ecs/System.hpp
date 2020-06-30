@@ -45,9 +45,9 @@ class ComponentSystem : public ISystemBase
 {
 public:
 	virtual ~ComponentSystem() {}
-	virtual void OnUpdate(float __unused deltaTime)
-	{
-	}
+	virtual void OnStart() {}
+	virtual void OnUpdate(float __unused deltaTime) {}
+	virtual void OnStop() {}
 };
 
 }

@@ -75,6 +75,11 @@ public:
 	/// Select an item in the editor
 	Action<size_t> OnSelectItem;
 
+	/// Called when the level starts
+	Action<> OnStartPlaying;
+	/// Called when the level stops
+	Action<> OnStopPlaying;
+
 	// Editor
 	void OnRebuildModel(ModelComponent &model);
 	void OnReloadScript(LuaScriptComponent &script);

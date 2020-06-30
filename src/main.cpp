@@ -5,7 +5,6 @@
 #include "systems/MeshRendererSystem.hpp"
 #include "systems/SkyboxRendererSystem.hpp"
 #include "systems/ImguiSystem.hpp"
-#include "systems/BatchRendererSystem.hpp"
 #include "systems/LuaSystem.hpp"
 #include "components/PlayerCameraComponent.hpp"
 #include "components/TransformComponent.hpp"
