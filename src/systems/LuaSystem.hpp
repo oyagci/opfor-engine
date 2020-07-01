@@ -4,59 +4,102 @@
 #include "components/LuaScriptComponent.hpp"
 #include "Engine.hpp"
 
-namespace {
+//
+//   State Transitions:
+//
+//   +-----------<----------+
+//   |                      |
+// [Start] --+-> [Play] -> [Stop]
+//           |     |
+//           +<- [Pause]
+//
+class LuaSystemState_Start;
+class LuaSystemState_Play;
+class LuaSystemState_Pause;
+class LuaSystemState_Stop;
 
-class LuaSystemState : public ecs::ComponentSystem
-{
-private:
-public:
-	virtual ~LuaSystemState() {}
-	virtual void OnUpdate(float) override {}
-};
-
-class LuaSystemIdleState : public LuaSystemState
-{
-private:
-public:
-};
-
-class LuaSystemPlayState : public LuaSystemState
+class LuaSystemState
 {
 public:
-	void OnStart() override
+	ecs::EntityManager *EntityMgr;
+
+	using NextState = std::optional<std::unique_ptr<LuaSystemState>>;
+
+protected:
+	template <typename T>
+	auto CreateState()
 	{
-		auto luaScripts = GetEntities<LuaScriptComponent>();
+		static_assert(std::is_base_of<LuaSystemState, T>::value &&
+			!std::is_same<LuaSystemState, T>::value, "T must be derived from LuaSystemState");
 
-		for (auto const &script : luaScripts) {
-			auto [ lua ] = script->GetAll();
+		auto state = std::make_unique<T>();
+		state->EntityMgr = EntityMgr;
 
-			lua.Runtime.Call("onStart");
-		}
+		return state;
 	}
 
-	void OnUpdate(float deltaTime) override
+public:
+	virtual ~LuaSystemState() {}
+	virtual NextState OnStart() { return std::nullopt; }
+	virtual NextState OnUpdate(float) { return std::nullopt; }
+	virtual NextState OnStop() { return std::nullopt; }
+};
+
+class LuaSystemState_Start : public LuaSystemState
+{
+public:
+	NextState OnStart() override;
+};
+
+class LuaSystemState_Play : public LuaSystemState
+{
+public:
+	NextState OnUpdate(float deltaTime) override
 	{
-		auto luaScripts = GetEntities<LuaScriptComponent>();
+		NextState nextState;
+
+		auto luaScripts = EntityMgr->GetEntities<LuaScriptComponent>();
 
 		for (auto const &script : luaScripts) {
 			auto [ lua ] = script->GetAll();
 
 			lua.Runtime.Call("onUpdate", deltaTime);
 		}
+
+		return nextState;
 	}
 
-	void OnStop() override
+	NextState OnStop() override
 	{
-		auto luaScripts = GetEntities<LuaScriptComponent>();
+		NextState nextState;
+
+		auto luaScripts = EntityMgr->GetEntities<LuaScriptComponent>();
 
 		for (auto const &script : luaScripts) {
 			auto [ lua ] = script->GetAll();
 
 			lua.Runtime.Call("onStop");
 		}
+
+		nextState = CreateState<LuaSystemState_Start>();
+		return nextState;
 	}
 };
 
+inline LuaSystemState::NextState LuaSystemState_Start::OnStart()
+{
+	NextState nextState;
+
+	auto luaScripts = EntityMgr->GetEntities<LuaScriptComponent>();
+
+	for (auto const &script : luaScripts) {
+		auto [ lua ] = script->GetAll();
+
+		lua.Runtime.Call("onStart");
+	}
+
+	nextState = CreateState<LuaSystemState_Play>();
+	return nextState;
 }
 
 class LuaSystem : public ecs::ComponentSystem
@@ -67,31 +110,43 @@ private:
 	Callback<> _cbStart;
 	Callback<> _cbStop;
 
+private:
 public:
 	LuaSystem()
 	{
-		_current = std::make_unique<LuaSystemIdleState>();
-
 		_cbStart = Callback<>([&] { OnStart(); });
-		_cbStart = Callback<>([&] { OnStop(); });
+		_cbStop = Callback<>([&] { OnStop(); });
 
 		engine::Engine::Instance().OnStartPlaying += _cbStart;
+		engine::Engine::Instance().OnStopPlaying += _cbStop;
+
+		_current = std::make_unique<LuaSystemState_Start>();
 	}
 
 	void OnStart() override
 	{
-		_current = std::make_unique<LuaSystemPlayState>();
-		_current->OnStart();
+		_current->EntityMgr = EntityMgr;
+		auto next = _current->OnStart();
+		if (next) {
+			_current = std::move(next.value());
+		}
 	}
 
 	void OnUpdate(float deltaTime) override
 	{
-		_current->OnUpdate(deltaTime);
+		_current->EntityMgr = EntityMgr;
+		auto next = _current->OnUpdate(deltaTime);
+		if (next) {
+			_current = std::move(next.value());
+		}
 	}
 
 	void OnStop() override
 	{
-		_current->OnStop();
-		_current = std::make_unique<LuaSystemIdleState>();
+		_current->EntityMgr = EntityMgr;
+		auto next = _current->OnStop();
+		if (next) {
+			_current = std::move(next.value());
+		}
 	}
 };

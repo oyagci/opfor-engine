@@ -61,6 +61,13 @@ private:
 	static unsigned int _nextId;
 	static unsigned int _nextMaterialId;
 
+	enum class PlayState {
+		Stopped,
+		Playing,
+		Paused,
+	};
+	PlayState _isPlaying;
+
 private:
 	Engine();
 	~Engine();
@@ -83,6 +90,32 @@ public:
 	// Editor
 	void OnRebuildModel(ModelComponent &model);
 	void OnReloadScript(LuaScriptComponent &script);
+
+	void StartPlaying()
+	{
+		if (_isPlaying == PlayState::Stopped) {
+			_isPlaying = PlayState::Playing;
+			OnStartPlaying();
+		}
+	}
+
+	void PausePlaying()
+	{
+		if (_isPlaying == PlayState::Playing) {
+			_isPlaying = PlayState::Paused;
+		}
+	}
+
+	void StopPlaying()
+	{
+		if (_isPlaying == PlayState::Paused ||
+			_isPlaying == PlayState::Playing) {
+			_isPlaying = PlayState::Stopped;
+			OnStopPlaying();
+		}
+	}
+
+	auto IsPlaying() { return _isPlaying == PlayState::Playing; }
 
 public:
 	Engine(Engine const &) = delete;

@@ -140,7 +140,7 @@ private:
 
 	void MenuBar()
 	{
-		if (ImGui::BeginMenuBar()) {
+		if (ImGui::BeginMainMenuBar()) {
 			if (ImGui::BeginMenu("File")) {
 				if (ImGui::MenuItem("Close")) {
 					engine::Engine::Instance().Close();
@@ -173,7 +173,7 @@ private:
 				}
 				ImGui::EndMenu();
 			}
-			ImGui::EndMenuBar();
+			ImGui::EndMainMenuBar();
 		}
 	}
 
@@ -493,6 +493,28 @@ private:
 		ImGui::End();
 	}
 
+	void PlayMenu()
+	{
+		if (ImGui::Begin("Editor Actions")) {
+			ImGui::PushItemWidth(-1);
+			if (engine::Engine::Instance().IsPlaying()) {
+				if (ImGui::Button("Pause")) {
+				}
+				ImGui::SameLine();
+				if (ImGui::Button("Stop")) {
+					engine::Engine::Instance().StopPlaying();
+				}
+			}
+			else {
+				if (ImGui::Button("Play")) {
+					engine::Engine::Instance().StartPlaying();
+				}
+			}
+			ImGui::PopItemWidth();
+		}
+		ImGui::End();
+	}
+
 public:
 	ImguiSystem() : _display(nullptr), _logAutoScroll(true), _currentEntity(nullptr)
 	{
@@ -529,6 +551,7 @@ public:
 		BeginDockspace();
 			ImGui::ShowDemoWindow(&b);
 			MenuBar();
+			PlayMenu();
 			DrawGuizmoSelectedEnt();
 			Materials();
 			Log();
