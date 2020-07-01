@@ -22,6 +22,8 @@ class Level : public engine::ILevel
 	std::unordered_map<uuids::uuid, ecs::IEntityBase *> _entities;
 	bool _isLoaded = false;
 
+	std::unordered_map<uuids::uuid, ModelComponent> _models;
+
 public:
 
 	///
@@ -51,52 +53,70 @@ public:
 		auto levelJson = json::parse(levelJsonFile);
 
 		for (auto const &model : levelJson["models"]) {
-			auto entity = engine::Engine::Instance().CreateEntity<ModelComponent, TransformComponent>();
-			auto engineModel = engine::Model();
+			ModelComponent component{};
+			engine::Model engineModel;
 
 			auto uuidstr = model["uuid"].get<std::string>();
 			auto uuid = uuids::uuid::from_string(uuidstr).value();
 
-			entity->SetName(model["name"]);
-
 			engineModel.LoadFromGLTF(model["uri"].get<std::string>());
 
-			auto &modelComponent = entity->Get<ModelComponent>();
-				modelComponent.Meshes.insert(modelComponent.Meshes.begin(),
-					engineModel.GetMeshes().begin(),
-					engineModel.GetMeshes().end());
-				modelComponent.Shader = _meshShader;
+			component.Meshes.insert(component.Meshes.begin(),
+				engineModel.GetMeshes().begin(),
+				engineModel.GetMeshes().end());
+			component.Shader = _meshShader;
 
-			auto const position = model["transform"]["position"].get<std::array<float, 3>>();
-			//auto const rotation = model["transform"]["position"].get<std::array<float, 3>>();
-			auto const scale = model["transform"]["scale"].get<std::array<float, 3>>();
-
-			auto &modelTransform = entity->Get<TransformComponent>();
-				modelTransform.position = { position[0], position[1], position[2] };
-				modelTransform.scale = { scale[0], scale[1], scale[2] };
-
-			_entities[uuid] = entity;
+			_models[uuid] = component;
 		}
-//		for (auto const &light : levelJson["lights"]) {
-//
-//			if (light["type"].get<std::string>() == "POINT") {
-//				auto entity = engine::Engine::Instance().CreateEntity<PointLightComponent, TransformComponent>();
-//
-//				auto color = light["color"].get<std::array<float, 3>>();
-//
-//				auto &lightProperties = entity->Get<PointLightComponent>();
-//					lightProperties.Color = { color[0], color[1], color[2] };
-//					lightProperties.Intensity = light["intensity"].get<float>();
-//
-//				auto position = light["transform"]["position"].get<std::array<float, 3>>();
-//				auto &lightTransform = entity->Get<TransformComponent>();
-//					lightTransform.position = { position[0], position[1], position[2] };
-//
-//				entity->SetName(light["name"]);
-//
-//				_entities.push_back(entity);
-//			}
-//		}
+
+		for (auto const &ent : levelJson["entities"]) {
+
+			auto entity = CreateEntity();
+
+			entity->SetName(ent["name"]);
+
+			for (auto const &component : ent["components"]) {
+				std::string type = component["type"];
+
+				if (type == "MODEL") {
+					auto uuid = uuids::uuid::from_string(component["uuid"].get<std::string>());
+
+					if (!uuid.has_value()) {
+						Logger::Error("Entity does not have a UUID\n");
+						continue ;
+					}
+
+					entity->AddComponents<ModelComponent>();
+					entity->Get<ModelComponent>() = _models[uuid.value()];
+				}
+				else if (type == "LUASCRIPT") {
+					entity->AddComponents<LuaScriptComponent>();
+					entity->Get<LuaScriptComponent>().Path = component["script"];
+				}
+				else if (type == "POINTLIGHT") {
+					entity->AddComponents<PointLightComponent>();
+
+					auto &pl = entity->Get<PointLightComponent>();
+					std::array<float, 3> color = component["color"];
+					pl.Color = { color[0], color[1], color[2] };
+					pl.Intensity = component["intensity"];
+				}
+				else if (type == "TRANSFORM") {
+					auto transform(component["transform"]);
+					std::array<float, 3> position = transform["position"];
+					//std::array<float, 3> rotation = transform["rotation"];
+					std::array<float, 3> scale = transform["scale"];
+
+					entity->AddComponents<TransformComponent>();
+					auto &tr = entity->Get<TransformComponent>();
+					tr.position = { position[0], position[1], position[2] };
+					//tr.rotation = { rotation[0], rotation[1], rotation[2] };
+					tr.scale = { scale[0], scale[1], scale[2] };
+				}
+			}
+		}
+
+		_isLoaded = true;
 	}
 
 	void Unload() override {
@@ -106,6 +126,7 @@ public:
 			engine::Engine::Instance().DeleteEntity(entity.second->GetId());
 		}
 		_entities.clear();
+		_models.clear();
 
 		ShaderManager::instance().Delete(_meshShader);
 
