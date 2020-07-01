@@ -14,7 +14,7 @@ class SystemManager_Impl
 	friend class SystemManager;
 
 private:
-	SystemManager_Impl() = default;
+	SystemManager_Impl(EntityManager *mgr) : Systems{}, EntityMgr(mgr) {}
 
 	std::vector<std::unique_ptr<ISystemBase>> Systems;
 	EntityManager *EntityMgr;
@@ -46,10 +46,7 @@ private:
 	SystemManager_Impl Manager;
 
 public:
-	SystemManager(EntityManager *entityMgr)
-	{
-		Manager.EntityMgr = entityMgr;
-	}
+	SystemManager(EntityManager *entityMgr) : Manager(entityMgr) {}
 
 	SystemManager(SystemManager const &) = delete;
 	void operator=(SystemManager const &) = delete;
