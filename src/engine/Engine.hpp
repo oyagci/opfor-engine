@@ -13,7 +13,6 @@
 #include <fmt/format.h>
 #include "Logger.hpp"
 #include "Action.hpp"
-#include "ILevel.hpp"
 
 using namespace lazy;
 using namespace graphics;
@@ -25,6 +24,8 @@ namespace ecs
 	class SystemManager;
 	class EntityManager;
 }
+
+class ImguiSystem;
 
 struct ModelComponent;
 struct LuaScriptComponent;
@@ -41,17 +42,13 @@ private:
 	std::unique_ptr<Camera> _camera;
 	std::unique_ptr<UI> _ui;
 
-	ecs::ECSEngine _ecs;
-
-	ecs::EntityManager *_entityManager;
-	ecs::SystemManager *_systemManager;
+	ecs::ECSEngine::Instance *_ecs;
 
 	std::vector<std::unique_ptr<EngineObject>> _engineObjects;
 
 	std::unordered_map<unsigned int, std::unique_ptr<engine::Model>> _models;
 	std::unordered_map<unsigned int, std::unique_ptr<IDrawable>> _meshes;
 	std::unordered_map<unsigned int, std::unique_ptr<Batch>> _batches;
-	std::unique_ptr<ILevel> _currentLevel;
 
 	using MaterialContainer = std::pair<unsigned int, Material>;
 
@@ -67,6 +64,8 @@ private:
 		Paused,
 	};
 	PlayState _isPlaying;
+
+	std::unique_ptr<ImguiSystem> _editor;
 
 private:
 	Engine();
@@ -90,32 +89,6 @@ public:
 	// Editor
 	void OnRebuildModel(ModelComponent &model);
 	void OnReloadScript(LuaScriptComponent &script);
-
-	void StartPlaying()
-	{
-		if (_isPlaying == PlayState::Stopped) {
-			_isPlaying = PlayState::Playing;
-			OnStartPlaying();
-		}
-	}
-
-	void PausePlaying()
-	{
-		if (_isPlaying == PlayState::Playing) {
-			_isPlaying = PlayState::Paused;
-		}
-	}
-
-	void StopPlaying()
-	{
-		if (_isPlaying == PlayState::Paused ||
-			_isPlaying == PlayState::Playing) {
-			_isPlaying = PlayState::Stopped;
-			OnStopPlaying();
-		}
-	}
-
-	auto IsPlaying() { return _isPlaying == PlayState::Playing; }
 
 public:
 	Engine(Engine const &) = delete;
@@ -148,20 +121,20 @@ public:
 		return ret;
 	}
 
-	template <typename T, typename ... ArgTypes>
-	void CreateComponentSystem(ArgTypes... args)
-	{
-		static_assert(std::is_base_of<ecs::ComponentSystem, T>::value && !std::is_same<ecs::ComponentSystem, T>::value,
-			"T must be derived from EngineObject");
+	//template <typename T, typename ... ArgTypes>
+	//void CreateComponentSystem(ArgTypes... args)
+	//{
+	//	static_assert(std::is_base_of<ecs::ComponentSystem, T>::value && !std::is_same<ecs::ComponentSystem, T>::value,
+	//		"T must be derived from EngineObject");
 
-		_ecs.GetSystemManager()->InstantiateSystem<T>(std::forward(args)...);
-	}
+	//	_ecs->SystemManager->InstantiateSystem<T>(std::forward(args)...);
+	//}
 
-	template <typename ... ArgTypes>
-	[[nodiscard]] ecs::IEntity<ArgTypes...> *CreateEntity()
-	{
-		return _ecs.GetEntityManager()->CreateEntity<ArgTypes...>();
-	}
+	//template <typename ... ArgTypes>
+	//[[nodiscard]] ecs::IEntity<ArgTypes...> *CreateEntity()
+	//{
+	//	return _ecs->EntityManager->CreateEntity<ArgTypes...>();
+	//}
 
 	unsigned int AddMesh(Mesh mesh)
 	{
@@ -315,24 +288,7 @@ public:
 	std::optional<engine::Model const *> GetModel(unsigned int id) const;
 	void RemoveModel(unsigned int id);
 
-	void LoadLevel(std::string const &path)
-	{
-		_currentLevel->Load(path);
-	}
-
-	auto GetEntity(unsigned int id)
-	{
-		return _entityManager->GetEntity(id);
-	}
-
-	void DeleteEntity(unsigned int entityId)
-	{
-		_entityManager->DeleteEntity(entityId);
-	}
-
 	void RebuildModel(ModelComponent &model);
-
-	auto &GetCurrentLevel() { return _currentLevel; }
 };
 
 }

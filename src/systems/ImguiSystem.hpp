@@ -49,55 +49,55 @@ private:
 
 	void DrawGuizmoSelectedEnt()
 	{
-		auto cameraEnt = GetEntities<PlayerCameraComponent>()[0];
-		auto camera = cameraEnt->Get<PlayerCameraComponent>();
-		auto selectedEnt = GetEntities<TransformComponent, SelectedComponent>();
-		if (selectedEnt.size() > 0) {
-
-			auto selected = selectedEnt[0]->Get<TransformComponent>();
-
-			glm::mat4 model(1.0f);
-			model = glm::translate(model, selected.position);
-			model = glm::scale(model, selected.scale);
-
-			bool changed = false;
-
-			ImGuizmo::BeginFrame();
-			ImGuiIO& io = ImGui::GetIO();
-			ImGuizmo::SetRect(0, 0, io.DisplaySize.x, io.DisplaySize.y);
-			{
-				std::array<float, 3> rotation{} , translation{}, scale{};
-				ImGuizmo::DecomposeMatrixToComponents(&model[0][0],
-					translation.data(), rotation.data(), scale.data());
-
-				ImGuizmo::RecomposeMatrixFromComponents(translation.data(), rotation.data(), scale.data(),
-					&model[0][0]);
-			}
-
-			glm::quat rotation;
-			glm::vec3 skew(0.0f);
-			glm::vec4 persp(0.0f);
-			ImGuizmo::DecomposeMatrixToComponents(&model[0][0], &selected.position[0], &rotation[0], &selected.scale[0]);
-
-			glm::mat4 cpy = model;
-
-			ImGuizmo::Manipulate(&camera.view[0][0], &camera.projection[0][0],
-				ImGuizmo::TRANSLATE,
-				ImGuizmo::WORLD,
-				&model[0][0],
-				nullptr,
-				nullptr);
-
-			if (cpy != model) {
-				changed = true;
-			}
-
-			glm::decompose(model, selected.scale, rotation, selected.position, skew, persp);
-			if (changed) {
-				selectedEnt[0]->Set(selected);
-			}
-
-		}
+//		auto cameraEnt = GetEntities<PlayerCameraComponent>()[0];
+//		auto camera = cameraEnt->Get<PlayerCameraComponent>();
+//		auto selectedEnt = GetEntities<TransformComponent, SelectedComponent>();
+//		if (selectedEnt.size() > 0) {
+//
+//			auto selected = selectedEnt[0]->Get<TransformComponent>();
+//
+//			glm::mat4 model(1.0f);
+//			model = glm::translate(model, selected.position);
+//			model = glm::scale(model, selected.scale);
+//
+//			bool changed = false;
+//
+//			ImGuizmo::BeginFrame();
+//			ImGuiIO& io = ImGui::GetIO();
+//			ImGuizmo::SetRect(0, 0, io.DisplaySize.x, io.DisplaySize.y);
+//			{
+//				std::array<float, 3> rotation{} , translation{}, scale{};
+//				ImGuizmo::DecomposeMatrixToComponents(&model[0][0],
+//					translation.data(), rotation.data(), scale.data());
+//
+//				ImGuizmo::RecomposeMatrixFromComponents(translation.data(), rotation.data(), scale.data(),
+//					&model[0][0]);
+//			}
+//
+//			glm::quat rotation;
+//			glm::vec3 skew(0.0f);
+//			glm::vec4 persp(0.0f);
+//			ImGuizmo::DecomposeMatrixToComponents(&model[0][0], &selected.position[0], &rotation[0], &selected.scale[0]);
+//
+//			glm::mat4 cpy = model;
+//
+//			ImGuizmo::Manipulate(&camera.view[0][0], &camera.projection[0][0],
+//				ImGuizmo::TRANSLATE,
+//				ImGuizmo::WORLD,
+//				&model[0][0],
+//				nullptr,
+//				nullptr);
+//
+//			if (cpy != model) {
+//				changed = true;
+//			}
+//
+//			glm::decompose(model, selected.scale, rotation, selected.position, skew, persp);
+//			if (changed) {
+//				selectedEnt[0]->Set(selected);
+//			}
+//
+//		}
 	}
 
 	void BeginDockspace()
@@ -154,7 +154,7 @@ private:
 					char *outPath = nullptr;
 					NFD_OpenDialog(nullptr, getcwd(nullptr, 0), &outPath);
 					if (outPath) {
-						engine::Engine::Instance().LoadLevel(outPath);
+						// TODO: Load the Scene
 					}
 				}
 				if (ImGui::MenuItem("Save Level")) {
@@ -259,34 +259,31 @@ private:
 		if (ImGui::BeginPopup("hierarchy_popup_menu")) {
 			if (ImGui::BeginMenu("Add...")) {
 				if (ImGui::MenuItem("Entity")) {
-					auto ent = engine::Engine::Instance().GetCurrentLevel()->CreateEntity();
-					(void)ent;
+					// TODO: Create a new Entity;
 				}
 				if (ImGui::MenuItem("Point Light")) {
-					auto ent = engine::Engine::Instance().GetCurrentLevel()->CreateEntity();
-					ent->AddComponents<PointLightComponent>();
-					(void)ent;
+					// TODO: Create a new Point Light
 				}
 				ImGui::EndMenu();
 			}
 			ImGui::EndPopup();
 		}
 
-		auto allEnts = GetAllEntities();
-
-		size_t itemIndex = 0;
-		for (auto const &ent : allEnts) {
-			auto name = ent->GetName();
-			name += "##" + std::to_string(itemIndex);
-			if (ImGui::Selectable(name.c_str(), selectedItem == itemIndex)) {
-				Logger::Verbose("Clicked on item {} (prev. {}) (ID. {})\n",
-					itemIndex, selectedItem, allEnts[itemIndex]->GetId());
-				selectedItem = itemIndex;
-				_currentEntity = allEnts[itemIndex];
-				engine::Engine::Instance().OnSelectItem(selectedItem);
-			}
-			itemIndex++;
-		}
+//		auto allEnts = GetAllEntities();
+//
+//		size_t itemIndex = 0;
+//		for (auto const &ent : allEnts) {
+//			auto name = ent->GetName();
+//			name += "##" + std::to_string(itemIndex);
+//			if (ImGui::Selectable(name.c_str(), selectedItem == itemIndex)) {
+//				Logger::Verbose("Clicked on item {} (prev. {}) (ID. {})\n",
+//					itemIndex, selectedItem, allEnts[itemIndex]->GetId());
+//				selectedItem = itemIndex;
+//				_currentEntity = allEnts[itemIndex];
+//				engine::Engine::Instance().OnSelectItem(selectedItem);
+//			}
+//			itemIndex++;
+//		}
 
 		ImGui::End();
 	}
@@ -497,18 +494,14 @@ private:
 	{
 		if (ImGui::Begin("Editor Actions")) {
 			ImGui::PushItemWidth(-1);
-			if (engine::Engine::Instance().IsPlaying()) {
-				if (ImGui::Button("Pause")) {
-				}
-				ImGui::SameLine();
-				if (ImGui::Button("Stop")) {
-					engine::Engine::Instance().StopPlaying();
-				}
+			// TODO: Play/Pause/Resume/Stop the Scene
+			if (ImGui::Button("Pause")) {
 			}
-			else {
-				if (ImGui::Button("Play")) {
-					engine::Engine::Instance().StartPlaying();
-				}
+			ImGui::SameLine();
+			if (ImGui::Button("Stop")) {
+			}
+			ImGui::SameLine();
+			if (ImGui::Button("Play")) {
 			}
 			ImGui::PopItemWidth();
 		}
@@ -539,8 +532,7 @@ public:
 	void OnUpdate(float __unused deltaTime) override
 	{
 		if (!_display) {
-			auto displays = GetEntities<DisplayComponent>();
-			_display = displays[0]->Get<DisplayComponent>().display;
+			_display = engine::Engine::Instance().GetDisplay();
 			ImGui_ImplGlfw_InitForOpenGL(_display->getWindow(), true);
 			ImGui_ImplOpenGL3_Init("#version 450");
 		}
@@ -560,61 +552,22 @@ public:
 		EndDockspace();
 		EndFrame();
 
-		auto &kbd = lazy::inputs::input::getKeyboard();
-
-		if (kbd.getKeyDown(GLFW_KEY_ESCAPE)) {
-			auto playerEnts = GetEntities<PlayerCameraComponent>();
-			if (playerEnts.size() > 0) {
-				auto camera = playerEnts[0]->Get<PlayerCameraComponent>();
-				auto displayEnt = GetEntities<DisplayComponent>()[0];
-				auto display = displayEnt->Get<DisplayComponent>();
-
-				// Enable/Disable input for camera
-				camera.useInput = !camera.useInput;
-				playerEnts[0]->Set(camera);
-
-				// Enable/Switch cursor
-				display.display->showCursor(!camera.useInput);
-				displayEnt->Set(display);
-			}
-		}
-	}
-
-//	void EditTransform(const glm::mat4 &view, const glm::mat4 &proj)
-//	{
-//		glm::mat4 matrix(1.0f);
-//		static ImGuizmo::OPERATION mCurrentGizmoOperation(ImGuizmo::ROTATE);
-//		static ImGuizmo::MODE mCurrentGizmoMode(ImGuizmo::WORLD);
-//		if (ImGui::IsKeyPressed('t'))
-//			mCurrentGizmoOperation = ImGuizmo::TRANSLATE;
-//		if (ImGui::IsKeyPressed('e'))
-//			mCurrentGizmoOperation = ImGuizmo::ROTATE;
-//		if (ImGui::IsKeyPressed('r')) // r Key
-//			mCurrentGizmoOperation = ImGuizmo::SCALE;
-//		if (ImGui::RadioButton("Translate", mCurrentGizmoOperation == ImGuizmo::TRANSLATE))
-//			mCurrentGizmoOperation = ImGuizmo::TRANSLATE;
-//		ImGui::SameLine();
-//		if (ImGui::RadioButton("Rotate", mCurrentGizmoOperation == ImGuizmo::ROTATE))
-//			mCurrentGizmoOperation = ImGuizmo::ROTATE;
-//		ImGui::SameLine();
-//		if (ImGui::RadioButton("Scale", mCurrentGizmoOperation == ImGuizmo::SCALE))
-//			mCurrentGizmoOperation = ImGuizmo::SCALE;
+//		auto &kbd = lazy::inputs::input::getKeyboard();
+//		if (kbd.getKeyDown(GLFW_KEY_ESCAPE)) {
+//			auto playerEnts = GetEntities<PlayerCameraComponent>();
+//			if (playerEnts.size() > 0) {
+//				auto camera = playerEnts[0]->Get<PlayerCameraComponent>();
+//				auto displayEnt = GetEntities<DisplayComponent>()[0];
+//				auto display = displayEnt->Get<DisplayComponent>();
 //
-//		if (mCurrentGizmoOperation != ImGuizmo::SCALE)
-//		{
-//			if (ImGui::RadioButton("Local", mCurrentGizmoMode == ImGuizmo::LOCAL))
-//				mCurrentGizmoMode = ImGuizmo::LOCAL;
-//			ImGui::SameLine();
-//			if (ImGui::RadioButton("World", mCurrentGizmoMode == ImGuizmo::WORLD))
-//				mCurrentGizmoMode = ImGuizmo::WORLD;
+//				// Enable/Disable input for camera
+//				camera.useInput = !camera.useInput;
+//				playerEnts[0]->Set(camera);
+//
+//				// Enable/Switch cursor
+//				display.display->showCursor(!camera.useInput);
+//				displayEnt->Set(display);
+//			}
 //		}
-//		static bool useSnap(false);
-//		if (ImGui::IsKeyPressed(83))
-//			useSnap = !useSnap;
-//		ImGui::Checkbox("", &useSnap);
-//		ImGui::SameLine();
-//		ImGuiIO& io = ImGui::GetIO();
-//		ImGuizmo::SetRect(0, 0, io.DisplaySize.x, io.DisplaySize.y);
-//		ImGuizmo::Manipulate(&view[0][0], &proj[0][0], mCurrentGizmoOperation, mCurrentGizmoMode, &_guizmo[0][0], &_guizmo[0][0], nullptr);
-//	}
+	}
 };

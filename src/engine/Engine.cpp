@@ -6,7 +6,7 @@
 #include "components/ModelComponent.hpp"
 #include "components/LuaScriptComponent.hpp"
 #include "engine/Model.hpp"
-#include "Level.hpp"
+#include "systems/ImguiSystem.hpp"
 
 namespace engine
 {
@@ -21,7 +21,7 @@ Engine::Engine()
 	_display->enableCap(GL_CULL_FACE);
 	_display->enableCap(GL_BLEND);
 	_display->setFullscreen(false);
-	_display->showCursor(false);
+	_display->showCursor(true);
 	glEnable(GL_DEBUG_OUTPUT);
 
 	maths::transform t = { glm::vec3(32, 64, 32), glm::quat(), glm::vec3(1), nullptr };
@@ -29,17 +29,17 @@ Engine::Engine()
 	_camera->setProjection(glm::radians(80.0f), 0.1f, 1000.0f);
 
 	_ui = std::make_unique<UI>(_display->getWidth(), _display->getHeight());
-
-	_systemManager = _ecs.GetSystemManager();
-	_entityManager = _ecs.GetEntityManager();
+	_editor = std::make_unique<ImguiSystem>();
 
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glDepthFunc(GL_LEQUAL);
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 
+	_ecs = ecs::ECSEngine::Get().CreateInstance();
+
 	_selectItem = Callback<size_t>([&] (size_t id) {
-		auto ents = _ecs.GetEntityManager()->GetAllEntities();
+		auto ents = _ecs->EntityManager->GetAllEntities();
 		std::vector<ecs::IEntityBase const *> matches;
 
 		for (auto const &ent : ents) {
@@ -49,12 +49,12 @@ Engine::Engine()
 		}
 
 		if (matches.size() > 0) {
-			auto prev = _ecs.GetEntityManager()->GetEntities<SelectedComponent>();
+			auto prev = _ecs->EntityManager->GetEntities<SelectedComponent>();
 			for (auto &p : prev) {
 				p->DeleteComponents<SelectedComponent>();
 			}
 
-			auto entity = _ecs.GetEntityManager()->GetEntity(matches[0]->GetId());
+			auto entity = _ecs->EntityManager->GetEntity(matches[0]->GetId());
 			if (entity.has_value()) {
 				entity.value()->AddComponents<SelectedComponent>();
 			}
@@ -62,7 +62,19 @@ Engine::Engine()
 	});
 	OnSelectItem += _selectItem;
 
-	_currentLevel = std::make_unique<Level>();
+	TextureManager::instance().createTexture("prototype_tile_8", "./img/prototype_tile_8.png", {
+		{ GL_TEXTURE_MAG_FILTER, GL_LINEAR },
+		{ GL_TEXTURE_MIN_FILTER, GL_LINEAR },
+		{ GL_TEXTURE_WRAP_R, GL_REPEAT },
+		{ GL_TEXTURE_WRAP_S, GL_REPEAT },
+	}, GL_TEXTURE_2D);
+
+	TextureManager::instance().createTexture("default_normal", "./img/default_normal.png", {
+		{ GL_TEXTURE_MAG_FILTER, GL_NEAREST },
+		{ GL_TEXTURE_MIN_FILTER, GL_NEAREST },
+		{ GL_TEXTURE_WRAP_R, GL_REPEAT },
+		{ GL_TEXTURE_WRAP_S, GL_REPEAT },
+	}, GL_TEXTURE_2D);
 }
 
 /*
@@ -77,15 +89,19 @@ int Engine::Run()
 
 	while (!_display->isClosed())
 	{
+		//glClear(GL_COLOR_BUFFER_BIT);
+
 		float deltaTime = Time::instance().getDeltaTime();
 
 		Update();
 
 		_camera->update();
-		_ecs.Update(deltaTime);
+		ecs::ECSEngine::Get().Update(deltaTime);
 
 		_display->update();
 		_display->updateInputs();
+
+		_editor->OnUpdate(deltaTime);
 
 		_ui->update();
 		_ui->render();

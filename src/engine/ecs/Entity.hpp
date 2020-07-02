@@ -198,7 +198,7 @@ template <typename T, typename ... Types>
 class IEntity : public IEntityBase
 {
 public:
-	typedef std::tuple<const T&, const Types&...> Components;
+	typedef std::tuple<const T&, const Types&...> ComponentsType;
 
 public:
 	IEntity()
@@ -209,9 +209,28 @@ public:
 	///
 	/// Returns a tuple containing a const reference to every component
 	///
-	Components GetAll()
+	ComponentsType GetAll()
 	{
 		return std::tie(Get<T>(), Get<Types>()...);
+	}
+
+	template <typename U, typename R, typename ... OtherTypes>
+	void DuplicateContent(IEntity<T, Types...> *dupl)
+	{
+		if (nullptr != dupl->Components[GetTypeIndex<U>()].get() &&
+			nullptr != Components[GetTypeIndex<U>()].get()) {
+			*dupl->Components[GetTypeIndex<U>()] = *Components[GetTypeIndex<U>()];
+		}
+		DuplicateContent<R, OtherTypes...>();
+	}
+
+	std::unique_ptr<IEntity<T, Types...>> Duplicate()
+	{
+		auto dupl = std::make_unique<IEntity<T, Types...>>();
+
+		DuplicateContent<T, Types...>(dupl.get());
+
+		return dupl;
 	}
 
 	static_assert(is_component_base<T, Types...>(),

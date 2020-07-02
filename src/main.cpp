@@ -328,51 +328,7 @@ std::vector<unsigned int> LoadMesh(std::string const &path, std::string const &n
 
 int main()
 {
-	Logger::Verbose("Hello World\n");
 	fmt::print("{} - {}\n", LUA_COPYRIGHT, LUA_AUTHORS);
-
-	auto &engine = Engine::Instance();
-	engine.CreateComponentSystem<CameraMovementSystem>();
-	engine.CreateComponentSystem<SkyboxRendererSystem>();
-	engine.CreateComponentSystem<MeshRendererSystem>();
-	engine.CreateComponentSystem<ImguiSystem>();
-	engine.CreateComponentSystem<LuaSystem>();
-
-	TextureManager::instance().createTexture("prototype_tile_8", "./img/prototype_tile_8.png", {
-		{ GL_TEXTURE_MAG_FILTER, GL_LINEAR },
-		{ GL_TEXTURE_MIN_FILTER, GL_LINEAR },
-		{ GL_TEXTURE_WRAP_R, GL_REPEAT },
-		{ GL_TEXTURE_WRAP_S, GL_REPEAT },
-	}, GL_TEXTURE_2D);
-
-	TextureManager::instance().createTexture("default_normal", "./img/default_normal.png", {
-		{ GL_TEXTURE_MAG_FILTER, GL_NEAREST },
-		{ GL_TEXTURE_MIN_FILTER, GL_NEAREST },
-		{ GL_TEXTURE_WRAP_R, GL_REPEAT },
-		{ GL_TEXTURE_WRAP_S, GL_REPEAT },
-	}, GL_TEXTURE_2D);
-
-	auto player = engine.CreateEntity<PlayerCameraComponent, TransformComponent>();
-
-	PlayerCameraComponent p;
-		p.projection = glm::perspective(glm::radians(90.0f), 16.0f / 9.0f, 0.1f, 1000.0f);
-		p.model = glm::mat4(1.0f);
-		p.view = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, 0.0f));
-		p.viewProjection = p.projection * p.view;
-		p.exposure = 2.0f;
-	player->Set(p);
-	player->SetName("Player");
-
-	TransformComponent t;
-		t.direction = glm::vec3(0.0f, 0.0f, 1.0f);
-		t.position = glm::vec3(0.0f, 18.0f, -0.5f);
-	player->Set(t);
-
-	auto display = engine.CreateEntity<DisplayComponent>();
-	DisplayComponent d;
-	d.display = engine.GetDisplay();
-	display->Set(d);
-	display->SetName("Display");
 
 	return engine::Engine::Instance().Run();
 }

@@ -5,6 +5,8 @@
 #include <vector>
 #include "Entity.hpp"
 #include "EntityManager.hpp"
+#include <typeinfo>
+#include <fmt/format.h>
 
 #ifndef __unused
 # define __unused __attribute__((unused))
