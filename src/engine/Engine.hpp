@@ -13,6 +13,7 @@
 #include <fmt/format.h>
 #include "Logger.hpp"
 #include "Action.hpp"
+#include "Scene.hpp"
 
 using namespace lazy;
 using namespace graphics;
@@ -65,6 +66,7 @@ private:
 	};
 	PlayState _isPlaying;
 
+	std::unique_ptr<Scene> _Scene;
 	std::unique_ptr<ImguiSystem> _editor;
 
 private:

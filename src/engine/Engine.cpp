@@ -7,6 +7,7 @@
 #include "components/LuaScriptComponent.hpp"
 #include "engine/Model.hpp"
 #include "systems/ImguiSystem.hpp"
+#include "DevScene.hpp"
 
 namespace engine
 {
@@ -87,25 +88,29 @@ int Engine::Run()
 {
 	Settings::instance().load("config.ini");
 
+	_Scene = std::make_unique<DevScene>();
+	_Scene->OnPlay();
 	while (!_display->isClosed())
 	{
-		//glClear(GL_COLOR_BUFFER_BIT);
-
 		float deltaTime = Time::instance().getDeltaTime();
 
 		Update();
+		_Scene->OnUpdate(deltaTime);
 
 		_camera->update();
 		ecs::ECSEngine::Get().Update(deltaTime);
-
-		_display->update();
-		_display->updateInputs();
 
 		_editor->OnUpdate(deltaTime);
 
 		_ui->update();
 		_ui->render();
+
+		_display->update();
+		_display->updateInputs();
+
+		// glClear(GL_COLOR_BUFFER_BIT);
 	}
+	_Scene->OnStop();
 
 	return 0;
 }

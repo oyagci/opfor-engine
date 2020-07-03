@@ -54,6 +54,8 @@ public:
 		uuids::uuid instanceUuid(uuids::uuid_system_generator{}());
 
 		_Instances[instanceUuid].Uuid = instanceUuid;
+		_Instances[instanceUuid].EntityManager = std::make_unique<EntityManager>();
+		_Instances[instanceUuid].SystemManager = std::make_unique<SystemManager>(_Instances[instanceUuid].EntityManager.get());
 
 		return &_Instances[instanceUuid];
 	}
