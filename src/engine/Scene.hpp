@@ -121,8 +121,23 @@ public:
 		Update(deltaTime);
 	}
 
+	void OnSetup()
+	{
+		Setup();
+	}
+
 	ecs::ECSEngine::Instance &ECS() { return *EcsInstance; }
 
-	virtual void Play() {};
+	/// Setup the base state of the scene.
+	/// This is where you should instantiate systems and entities
+	virtual void Setup() {}
+
+	/// Called right before the scene starts playing.
+	/// This is best suited to attach scripts to your entities.
+	virtual void Play() {}
+
+	/// Called every frame while playing.
+	/// This is where you should update the logic of your scene
 	virtual void Update(float /* deltaTime */) {};
+
 };
