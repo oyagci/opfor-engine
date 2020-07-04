@@ -291,6 +291,8 @@ public:
 	void RemoveModel(unsigned int id);
 
 	void RebuildModel(ModelComponent &model);
+
+	Scene &GetCurrentScene() { return *_Scene; }
 };
 
 }

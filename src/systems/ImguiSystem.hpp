@@ -31,7 +31,7 @@ private:
 	lazy::graphics::Display *_display;
 
 	bool _logAutoScroll;
-	ecs::IEntityBase *_currentEntity;
+	std::optional<ecs::IEntityBase*> _currentEntity;
 
 private:
 	void BeginFrame()
@@ -49,55 +49,55 @@ private:
 
 	void DrawGuizmoSelectedEnt()
 	{
-//		auto cameraEnt = GetEntities<PlayerCameraComponent>()[0];
-//		auto camera = cameraEnt->Get<PlayerCameraComponent>();
-//		auto selectedEnt = GetEntities<TransformComponent, SelectedComponent>();
-//		if (selectedEnt.size() > 0) {
-//
-//			auto selected = selectedEnt[0]->Get<TransformComponent>();
-//
-//			glm::mat4 model(1.0f);
-//			model = glm::translate(model, selected.position);
-//			model = glm::scale(model, selected.scale);
-//
-//			bool changed = false;
-//
-//			ImGuizmo::BeginFrame();
-//			ImGuiIO& io = ImGui::GetIO();
-//			ImGuizmo::SetRect(0, 0, io.DisplaySize.x, io.DisplaySize.y);
-//			{
-//				std::array<float, 3> rotation{} , translation{}, scale{};
-//				ImGuizmo::DecomposeMatrixToComponents(&model[0][0],
-//					translation.data(), rotation.data(), scale.data());
-//
-//				ImGuizmo::RecomposeMatrixFromComponents(translation.data(), rotation.data(), scale.data(),
-//					&model[0][0]);
-//			}
-//
-//			glm::quat rotation;
-//			glm::vec3 skew(0.0f);
-//			glm::vec4 persp(0.0f);
-//			ImGuizmo::DecomposeMatrixToComponents(&model[0][0], &selected.position[0], &rotation[0], &selected.scale[0]);
-//
-//			glm::mat4 cpy = model;
-//
-//			ImGuizmo::Manipulate(&camera.view[0][0], &camera.projection[0][0],
-//				ImGuizmo::TRANSLATE,
-//				ImGuizmo::WORLD,
-//				&model[0][0],
-//				nullptr,
-//				nullptr);
-//
-//			if (cpy != model) {
-//				changed = true;
-//			}
-//
-//			glm::decompose(model, selected.scale, rotation, selected.position, skew, persp);
-//			if (changed) {
-//				selectedEnt[0]->Set(selected);
-//			}
-//
-//		}
+		auto cameraEnt = engine::Engine::Instance().GetCurrentScene().ECS().EntityManager->GetEntities<PlayerCameraComponent>()[0];
+		auto camera = cameraEnt->Get<PlayerCameraComponent>();
+		auto selectedEnt = engine::Engine::Instance().GetCurrentScene().ECS().EntityManager->GetEntities<TransformComponent, SelectedComponent>();
+		if (selectedEnt.size() > 0) {
+
+			auto selected = selectedEnt[0]->Get<TransformComponent>();
+
+			glm::mat4 model(1.0f);
+			model = glm::translate(model, selected.position);
+			model = glm::scale(model, selected.scale);
+
+			bool changed = false;
+
+			ImGuizmo::BeginFrame();
+			ImGuiIO& io = ImGui::GetIO();
+			ImGuizmo::SetRect(0, 0, io.DisplaySize.x, io.DisplaySize.y);
+			{
+				std::array<float, 3> rotation{} , translation{}, scale{};
+				ImGuizmo::DecomposeMatrixToComponents(&model[0][0],
+					translation.data(), rotation.data(), scale.data());
+
+				ImGuizmo::RecomposeMatrixFromComponents(translation.data(), rotation.data(), scale.data(),
+					&model[0][0]);
+			}
+
+			glm::quat rotation;
+			glm::vec3 skew(0.0f);
+			glm::vec4 persp(0.0f);
+			ImGuizmo::DecomposeMatrixToComponents(&model[0][0], &selected.position[0], &rotation[0], &selected.scale[0]);
+
+			glm::mat4 cpy = model;
+
+			ImGuizmo::Manipulate(&camera.view[0][0], &camera.projection[0][0],
+				ImGuizmo::TRANSLATE,
+				ImGuizmo::WORLD,
+				&model[0][0],
+				nullptr,
+				nullptr);
+
+			if (cpy != model) {
+				changed = true;
+			}
+
+			glm::decompose(model, selected.scale, rotation, selected.position, skew, persp);
+			if (changed) {
+				selectedEnt[0]->Set(selected);
+			}
+
+		}
 	}
 
 	void BeginDockspace()
@@ -269,21 +269,31 @@ private:
 			ImGui::EndPopup();
 		}
 
-//		auto allEnts = GetAllEntities();
-//
-//		size_t itemIndex = 0;
-//		for (auto const &ent : allEnts) {
-//			auto name = ent->GetName();
-//			name += "##" + std::to_string(itemIndex);
-//			if (ImGui::Selectable(name.c_str(), selectedItem == itemIndex)) {
-//				Logger::Verbose("Clicked on item {} (prev. {}) (ID. {})\n",
-//					itemIndex, selectedItem, allEnts[itemIndex]->GetId());
-//				selectedItem = itemIndex;
-//				_currentEntity = allEnts[itemIndex];
-//				engine::Engine::Instance().OnSelectItem(selectedItem);
-//			}
-//			itemIndex++;
-//		}
+		auto allEnts = engine::Engine::Instance().GetCurrentScene().ECS().EntityManager->GetAllEntities();
+
+		size_t itemIndex = 0;
+		for (auto const &ent : allEnts) {
+			auto name = ent->GetName();
+			name += "##" + std::to_string(itemIndex);
+			if (ImGui::Selectable(name.c_str(), selectedItem == itemIndex)) {
+				Logger::Verbose("Clicked on item {} (prev. {}) (ID. {})\n",
+					itemIndex, selectedItem, allEnts[itemIndex]->GetId());
+				selectedItem = itemIndex;
+
+				// Remove SelectedComponent from current entity
+				if (_currentEntity.has_value() && _currentEntity.value()->HasComponents<SelectedComponent>()) {
+					_currentEntity.value()->DeleteComponents<SelectedComponent>();
+				}
+
+				// Save the new selected entity
+				_currentEntity = allEnts[itemIndex];
+
+				// Add SelectedComponent to the new selected entity;
+				_currentEntity.value()->AddComponents<SelectedComponent>();
+
+			}
+			itemIndex++;
+		}
 
 		ImGui::End();
 	}
@@ -291,13 +301,13 @@ private:
 	void ObjectTransform()
 	{
 		if (!_currentEntity) { return ; }
-		if (!_currentEntity->HasComponents<TransformComponent>()) { return; }
+		if (!_currentEntity.value()->HasComponents<TransformComponent>()) { return; }
 
 		if (!ImGui::CollapsingHeader("Transform")) { return ; }
 
 		bool changed = false;
 
-		auto &transform = _currentEntity->Get<TransformComponent>();
+		auto &transform = _currentEntity.value()->Get<TransformComponent>();
 
 		std::array<float, 3> rotation{};
 		std::array<float, 3> translation{ transform.position.x, transform.position.y, transform.position.z };
@@ -323,11 +333,11 @@ private:
 	void ObjectMesh()
 	{
 		if (!_currentEntity) { return ; }
-		if (!_currentEntity->HasComponents<ModelComponent>()) { return; }
+		if (!_currentEntity.value()->HasComponents<ModelComponent>()) { return; }
 
 		if (!ImGui::CollapsingHeader("Static Mesh")) { return ; }
 
-		auto &model = _currentEntity->Get<ModelComponent>();
+		auto &model = _currentEntity.value()->Get<ModelComponent>();
 
 		ImGui::SetNextItemWidth(ImGui::GetFontSize() * 8);
 		ImGui::Columns(2, NULL, true);
@@ -356,11 +366,11 @@ private:
 	void ObjectLight()
 	{
 		if (!_currentEntity) { return ; }
-		if (!_currentEntity->HasComponents<PointLightComponent>()) { return; }
+		if (!_currentEntity.value()->HasComponents<PointLightComponent>()) { return; }
 
 		if (!ImGui::CollapsingHeader("Light")) { return ; }
 
-		auto &light = _currentEntity->Get<PointLightComponent>();
+		auto &light = _currentEntity.value()->Get<PointLightComponent>();
 
 		std::array<const char *, 1> lightTypes = { "Point" };
 		size_t currentTypeIdx = 0;
@@ -407,11 +417,11 @@ private:
 	void ObjectLuaScript()
 	{
 		if (!_currentEntity) { return ; }
-		if (!_currentEntity->HasComponents<LuaScriptComponent>()) { return; }
+		if (!_currentEntity.value()->HasComponents<LuaScriptComponent>()) { return; }
 
 		if (!ImGui::CollapsingHeader("Lua Script")) { return ; }
 
-		auto &luaScript = _currentEntity->Get<LuaScriptComponent>();
+		auto &luaScript = _currentEntity.value()->Get<LuaScriptComponent>();
 
 		ImGui::SetNextItemWidth(ImGui::GetFontSize() * 8);
 		ImGui::Columns(2, NULL, true);
@@ -427,22 +437,22 @@ private:
 				newPath != nullptr) {
 				luaScript.Path = std::string(newPath);
 				engine::Engine::Instance().OnReloadScript(luaScript);
-				luaScript.Runtime.PushGlobal("__ENTITY_ID__", _currentEntity->GetId());
+				luaScript.Runtime.PushGlobal("__ENTITY_ID__", _currentEntity.value()->GetId());
 			}
 		}
 	}
 
 	void Properties()
 	{
-		if (_currentEntity == nullptr) { return ; }
+		if (!_currentEntity) { return ; }
 
 		ImGui::Begin("Properties");
-			std::string entityName = _currentEntity->GetName();
+			std::string entityName = _currentEntity.value()->GetName();
 			if (ImGui::InputText("##EntityName", &entityName)) {
-				_currentEntity->SetName(entityName);
+				_currentEntity.value()->SetName(entityName);
 			}
 
-			uuids::uuid const &uuid = _currentEntity->GetUuid();
+			uuids::uuid const &uuid = _currentEntity.value()->GetUuid();
 			ImGui::SameLine();
 			ImGui::LabelText("##UUID", "%s", uuids::to_string(uuid).data());
 			ImGui::Separator();
@@ -471,16 +481,16 @@ private:
 					shader.setUniform1i("material.normal", 2);
 					shader.unbind();
 
-					_currentEntity->AddComponents<ModelComponent>();
+					_currentEntity.value()->AddComponents<ModelComponent>();
 
-					auto &model = _currentEntity->Get<ModelComponent>();
+					auto &model = _currentEntity.value()->Get<ModelComponent>();
 					model.Shader = shaderId;
 				}
 				if (ImGui::MenuItem("Transform")) {
-					_currentEntity->AddComponents<TransformComponent>();
+					_currentEntity.value()->AddComponents<TransformComponent>();
 				}
 				if (ImGui::MenuItem("Lua Script")) {
-					_currentEntity->AddComponents<LuaScriptComponent>();
+					_currentEntity.value()->AddComponents<LuaScriptComponent>();
 				}
 				if (ImGui::MenuItem("Child Entity")) {
 				}
@@ -509,7 +519,7 @@ private:
 	}
 
 public:
-	ImguiSystem() : _display(nullptr), _logAutoScroll(true), _currentEntity(nullptr)
+	ImguiSystem() : _display(nullptr), _logAutoScroll(true)
 	{
 		IMGUI_CHECKVERSION();
 		ImGui::CreateContext();
@@ -552,22 +562,20 @@ public:
 		EndDockspace();
 		EndFrame();
 
-//		auto &kbd = lazy::inputs::input::getKeyboard();
-//		if (kbd.getKeyDown(GLFW_KEY_ESCAPE)) {
-//			auto playerEnts = GetEntities<PlayerCameraComponent>();
-//			if (playerEnts.size() > 0) {
-//				auto camera = playerEnts[0]->Get<PlayerCameraComponent>();
-//				auto displayEnt = GetEntities<DisplayComponent>()[0];
-//				auto display = displayEnt->Get<DisplayComponent>();
-//
-//				// Enable/Disable input for camera
-//				camera.useInput = !camera.useInput;
-//				playerEnts[0]->Set(camera);
-//
-//				// Enable/Switch cursor
-//				display.display->showCursor(!camera.useInput);
-//				displayEnt->Set(display);
-//			}
-//		}
+		auto &kbd = lazy::inputs::input::getKeyboard();
+		if (kbd.getKeyDown(GLFW_KEY_ESCAPE)) {
+			auto playerEnts = engine::Engine::Instance().GetCurrentScene().ECS().EntityManager->GetEntities<PlayerCameraComponent>();
+			if (playerEnts.size() > 0) {
+				auto camera = playerEnts[0]->Get<PlayerCameraComponent>();
+				auto display = engine::Engine::Instance().GetDisplay();
+
+				// Enable/Disable input for camera
+				camera.useInput = !camera.useInput;
+				playerEnts[0]->Set(camera);
+
+				// Enable/Switch cursor
+				display->showCursor(!camera.useInput);
+			}
+		}
 	}
 };
