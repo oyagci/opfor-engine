@@ -142,25 +142,25 @@ public:
 
 	void OnEditorStart()
 	{
-		_EditorEcs = ecs::ECSEngine::Get().CreateInstance();
+		// _EditorEcs = ecs::ECSEngine::Get().CreateInstance();
 
-		_EditorEcs->SystemManager->InstantiateSystem<CameraMovementSystem>();
-		_EditorEcs->EntityManager->CreateEntity<PlayerCameraComponent, TransformComponent>();
+		// _EditorEcs->SystemManager->InstantiateSystem<CameraMovementSystem>();
+		// _EditorEcs->EntityManager->CreateEntity<PlayerCameraComponent, TransformComponent>();
 
-		_EditorCamera = _EditorEcs->EntityManager->CreateEntity<PlayerCameraComponent, TransformComponent>();
-		auto &camera = _EditorCamera->Get<PlayerCameraComponent>();
-			camera.projection = glm::perspective(glm::radians(90.0f), 16.0f / 9.0f, 0.1f, 1000.0f);
-			camera.model = glm::mat4(1.0f);
-			camera.view = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, 0.0f));
-			camera.viewProjection = camera.projection * camera.view;
-			camera.exposure = 2.0f;
-		_EditorCamera->Get<TransformComponent>().position = { 200.0f, 200.0f, 200.0f };
-		_EditorCamera->SetName("Editor Camera");
+		// _EditorCamera = _EditorEcs->EntityManager->CreateEntity<PlayerCameraComponent, TransformComponent>();
+		// auto &camera = _EditorCamera->Get<PlayerCameraComponent>();
+		// 	camera.projection = glm::perspective(glm::radians(90.0f), 16.0f / 9.0f, 0.1f, 1000.0f);
+		// 	camera.model = glm::mat4(1.0f);
+		// 	camera.view = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, 0.0f));
+		// 	camera.viewProjection = camera.projection * camera.view;
+		// 	camera.exposure = 2.0f;
+		// _EditorCamera->Get<TransformComponent>().position = { 200.0f, 200.0f, 200.0f };
+		// _EditorCamera->SetName("Editor Camera");
 	}
 
 	void OnEditorUpdate(float deltaTime)
 	{
-		//_EditorEcs->SystemManager->Update(deltaTime);
+		_EditorEcs->SystemManager->Update(deltaTime);
 	}
 
 	void OnEditorStop()

@@ -89,16 +89,16 @@ int Engine::Run()
 
 	_Scene = std::make_unique<DevScene>();
 	_Scene->OnSetup();
-	_Scene->OnEditorStart();
+	_Scene->OnPlay();
 	while (!_display->isClosed())
 	{
 		float deltaTime = Time::instance().getDeltaTime();
 
 		Update();
 		_Scene->OnUpdate(deltaTime);
-		_Scene->OnEditorUpdate(deltaTime);
 
 		_camera->update();
+
 		ecs::ECSEngine::Get().Update(deltaTime);
 
 		_ui->update();
@@ -106,8 +106,6 @@ int Engine::Run()
 
 		_display->update();
 		_display->updateInputs();
-
-		// glClear(GL_COLOR_BUFFER_BIT);
 	}
 	_Scene->OnStop();
 
