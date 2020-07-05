@@ -67,7 +67,6 @@ private:
 	PlayState _isPlaying;
 
 	std::unique_ptr<Scene> _Scene;
-	std::unique_ptr<ImguiSystem> _editor;
 
 private:
 	Engine();

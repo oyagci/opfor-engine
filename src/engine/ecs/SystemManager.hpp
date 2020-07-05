@@ -4,6 +4,7 @@
 #include <vector>
 #include <type_traits>
 #include "System.hpp"
+#include "Logger.hpp"
 
 namespace ecs {
 
@@ -16,7 +17,7 @@ class SystemManager_Impl
 private:
 	SystemManager_Impl(EntityManager *mgr) : Systems{}, EntityMgr(mgr) {}
 
-	std::vector<std::unique_ptr<ISystemBase>> Systems;
+	std::unordered_map<TypeIndex, std::unique_ptr<ISystemBase>> Systems;
 	EntityManager *EntityMgr;
 
 	template <typename T>
@@ -26,16 +27,35 @@ private:
 					 !std::is_same<ISystemBase, T>::value,
 					  "T must be derived from ISystemBase");
 
+		if (Systems.find(GetTypeIndex<T>()) != Systems.end()) {
+			Logger::Warn("System already exists (Name: {})\n", typeid(T).name());
+			return ;
+		}
+
 		auto newSystem = std::make_unique<T>();
 		newSystem->EntityMgr = EntityMgr;
 
-		Systems.push_back(std::move(newSystem));
+		Systems[GetTypeIndex<T>()] = std::move(newSystem);
+	}
+
+	template <typename T>
+	void DeleteSystem()
+	{
+		static_assert(std::is_base_of<ISystemBase, T>::value &&
+					 !std::is_same<ISystemBase, T>::value,
+					  "T must be derived from ISystemBase");
+
+		auto system = Systems.find(GetTypeIndex<T>());
+
+		if (system != Systems.end()) {
+			Systems.erase(system);
+		}
 	}
 
 	void Update(float deltaTime)
 	{
 		for (auto &s : Systems) {
-			s->OnUpdate(deltaTime);
+			s.second->OnUpdate(deltaTime);
 		}
 	}
 };
@@ -55,6 +75,12 @@ public:
 	void InstantiateSystem()
 	{
 		Manager.InstantiateSystem<T>();
+	}
+
+	template <typename T>
+	void DeleteSystem()
+	{
+		Manager.DeleteSystem<T>();
 	}
 
 	void Update(float deltaTime)

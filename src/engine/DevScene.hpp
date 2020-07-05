@@ -58,15 +58,15 @@ public:
 		// Camera
 		// ======
 
-		_PlayerCamera = ECS().EntityManager->CreateEntity<PlayerCameraComponent, TransformComponent>();
-		auto &camera = _PlayerCamera->Get<PlayerCameraComponent>();
-			camera.projection = glm::perspective(glm::radians(90.0f), 16.0f / 9.0f, 0.1f, 1000.0f);
-			camera.model = glm::mat4(1.0f);
-			camera.view = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, 0.0f));
-			camera.viewProjection = camera.projection * camera.view;
-			camera.exposure = 2.0f;
-		_PlayerCamera->Get<TransformComponent>().position = { 0.0f, 0.0f, 0.0f };
-		_PlayerCamera->SetName("Editor Camera");
+		//_PlayerCamera = ECS().EntityManager->CreateEntity<PlayerCameraComponent, TransformComponent>();
+		//auto &camera = _PlayerCamera->Get<PlayerCameraComponent>();
+		//	camera.projection = glm::perspective(glm::radians(90.0f), 16.0f / 9.0f, 0.1f, 1000.0f);
+		//	camera.model = glm::mat4(1.0f);
+		//	camera.view = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, 0.0f));
+		//	camera.viewProjection = camera.projection * camera.view;
+		//	camera.exposure = 2.0f;
+		//_PlayerCamera->Get<TransformComponent>().position = { 0.0f, 0.0f, 0.0f };
+		//_PlayerCamera->SetName("Editor Camera");
 
 		// Wall
 		// ====

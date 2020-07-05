@@ -6,6 +6,11 @@
 #include <fmt/format.h>
 #include <cassert>
 
+#include "components/PlayerCameraComponent.hpp"
+#include "components/TransformComponent.hpp"
+
+#include "systems/CameraMovementSystem.hpp"
+
 // Scene State
 // =============================================================================
 // Describes the different state transitions the state machine has
@@ -83,9 +88,15 @@ private:
 	std::unique_ptr<SceneState> State;
 	ecs::ECSEngine::Instance *EcsInstance;
 
+	bool _IsPlaying;
+
+	ecs::ECSEngine::Instance *_EditorEcs;
+	ecs::IEntityBase *_EditorCamera;
+
 public:
-	Scene() : State(std::make_unique<SceneState_Stopped>()), EcsInstance(ecs::ECSEngine::Get().CreateInstance())
+	Scene() : State(std::make_unique<SceneState_Stopped>()), EcsInstance(ecs::ECSEngine::Get().CreateInstance()), _IsPlaying(false)
 	{
+		assert(EcsInstance);
 	}
 
 	virtual ~Scene()
@@ -103,6 +114,7 @@ public:
 		}
 
 		Play();
+		_IsPlaying = true;
 	}
 
 	void OnStop()
@@ -115,6 +127,8 @@ public:
 
 	void OnUpdate(float deltaTime)
 	{
+		if (!_IsPlaying) { return; }
+
 		State->OnUpdate(deltaTime);
 		EcsInstance->SystemManager->Update(deltaTime);
 
@@ -124,6 +138,36 @@ public:
 	void OnSetup()
 	{
 		Setup();
+	}
+
+	void OnEditorStart()
+	{
+		_EditorEcs = ecs::ECSEngine::Get().CreateInstance();
+
+		_EditorEcs->SystemManager->InstantiateSystem<CameraMovementSystem>();
+		_EditorEcs->EntityManager->CreateEntity<PlayerCameraComponent, TransformComponent>();
+
+		_EditorCamera = _EditorEcs->EntityManager->CreateEntity<PlayerCameraComponent, TransformComponent>();
+		auto &camera = _EditorCamera->Get<PlayerCameraComponent>();
+			camera.projection = glm::perspective(glm::radians(90.0f), 16.0f / 9.0f, 0.1f, 1000.0f);
+			camera.model = glm::mat4(1.0f);
+			camera.view = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, 0.0f));
+			camera.viewProjection = camera.projection * camera.view;
+			camera.exposure = 2.0f;
+		_EditorCamera->Get<TransformComponent>().position = { 200.0f, 200.0f, 200.0f };
+		_EditorCamera->SetName("Editor Camera");
+	}
+
+	void OnEditorUpdate(float deltaTime)
+	{
+		//_EditorEcs->SystemManager->Update(deltaTime);
+	}
+
+	void OnEditorStop()
+	{
+		_EditorEcs->EntityManager->DeleteEntity(_EditorCamera->GetId());
+		_EditorEcs->SystemManager->DeleteSystem<CameraMovementSystem>();
+		// TODO: Delete _EditorEcs
 	}
 
 	ecs::ECSEngine::Instance &ECS() { return *EcsInstance; }
@@ -139,5 +183,4 @@ public:
 	/// Called every frame while playing.
 	/// This is where you should update the logic of your scene
 	virtual void Update(float /* deltaTime */) {};
-
 };

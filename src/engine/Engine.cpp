@@ -30,7 +30,6 @@ Engine::Engine()
 	_camera->setProjection(glm::radians(80.0f), 0.1f, 1000.0f);
 
 	_ui = std::make_unique<UI>(_display->getWidth(), _display->getHeight());
-	_editor = std::make_unique<ImguiSystem>();
 
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -89,18 +88,18 @@ int Engine::Run()
 	Settings::instance().load("config.ini");
 
 	_Scene = std::make_unique<DevScene>();
-	_Scene->OnPlay();
+	_Scene->OnSetup();
+	_Scene->OnEditorStart();
 	while (!_display->isClosed())
 	{
 		float deltaTime = Time::instance().getDeltaTime();
 
 		Update();
 		_Scene->OnUpdate(deltaTime);
+		_Scene->OnEditorUpdate(deltaTime);
 
 		_camera->update();
 		ecs::ECSEngine::Get().Update(deltaTime);
-
-		_editor->OnUpdate(deltaTime);
 
 		_ui->update();
 		_ui->render();
