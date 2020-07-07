@@ -8,7 +8,7 @@ void TextureManager::createTexture(std::string const &name, std::string const &p
 
 	_textures[name] = std::make_unique<Texture>(name, target);
 
-	_textures[name]->bind(GL_TEXTURE0);
+	_textures[name]->bind(0);
 	for (auto const &p : parameters) {
 		_textures[name]->setParameter(GL_TEXTURE_2D, p.first, p.second);
 	}

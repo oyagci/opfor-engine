@@ -577,8 +577,8 @@ public:
 		InitDepthCubemap();
 
 		TextureManager::instance().createTexture("light_bulb_icon", "./img/light_bulb_icon.png", {
-			{ GL_TEXTURE_WRAP_R, GL_WRAP_BORDER },
-			{ GL_TEXTURE_WRAP_S, GL_WRAP_BORDER },
+			{ GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE },
+			{ GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE },
 			{ GL_TEXTURE_MIN_FILTER, GL_NEAREST },
 			{ GL_TEXTURE_MAG_FILTER, GL_NEAREST },
 		}, GL_TEXTURE_2D);
