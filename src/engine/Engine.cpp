@@ -17,16 +17,16 @@ unsigned int Engine::_nextMaterialId = 0;
 
 Engine::Engine()
 {
-	_display = std::make_unique<Display>("3D Engine", 1920, 1080);
+	_display = std::make_unique<lazy::graphics::Display>("3D Engine", 1920, 1080);
 	_display->enableCap(GL_DEPTH_TEST);
 	_display->enableCap(GL_CULL_FACE);
 	_display->enableCap(GL_BLEND);
 	_display->setFullscreen(false);
-	_display->showCursor(true);
+	_display->showCursor(false);
 	glEnable(GL_DEBUG_OUTPUT);
 
-	maths::transform t = { glm::vec3(32, 64, 32), glm::quat(), glm::vec3(1), nullptr };
-	_camera = std::make_unique<Camera>(*_display, t);
+	lazy::maths::transform t = { glm::vec3(32, 64, 32), glm::quat(), glm::vec3(1), nullptr };
+	_camera = std::make_unique<lazy::graphics::Camera>(*_display, t);
 	_camera->setProjection(glm::radians(80.0f), 0.1f, 1000.0f);
 
 	_ui = std::make_unique<UI>(_display->getWidth(), _display->getHeight());

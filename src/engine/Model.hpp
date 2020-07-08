@@ -12,8 +12,7 @@ namespace engine {
 class Model
 {
 private:
-	unsigned int _id;
-	std::vector<unsigned int> _meshes;
+	std::vector<unsigned int> _meshes{};
 
 	std::optional<std::vector<unsigned int>> TinyProcessNode(tinygltf::Node const &node, tinygltf::Model const &model, std::vector<std::string> const &materials)
 	{
@@ -36,6 +35,7 @@ private:
 					auto const &attribute = primitive.attributes.find(attributeName);
 
 					if (attribute == primitive.attributes.end()) {
+						fmt::print("{}: {} attribute not found\n", mesh.name, attributeName);
 						return ret;
 					}
 
@@ -115,7 +115,10 @@ private:
 				}
 
 				current.build();
-				current.SetPbrMaterial(materials[primitive.material]);
+				if (primitive.material >= 0) {
+					if (primitive.material > materials.size()) abort();
+					current.SetPbrMaterial(materials[primitive.material]);
+				}
 
 				// Register this mesh to the engine and save its index
 				allMeshes.push_back(engine::Engine::Instance().AddMesh(std::move(current)));
@@ -280,7 +283,9 @@ private:
 	}
 
 public:
-	Model() = default;
+	Model()
+	{
+	};
 
 	bool LoadFromGLTF(std::string const &path)
 	{
@@ -295,7 +300,7 @@ public:
 		return meshes.has_value();
 	}
 
-	auto const &GetMeshes()
+	auto const &GetMeshes() const
 	{
 		return _meshes;
 	}

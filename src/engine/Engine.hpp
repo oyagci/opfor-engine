@@ -15,11 +15,6 @@
 #include "Action.hpp"
 #include "Scene.hpp"
 
-using namespace lazy;
-using namespace graphics;
-using namespace inputs;
-using namespace utils;
-
 namespace ecs
 {
 	class SystemManager;
@@ -39,8 +34,8 @@ class Model;
 class Engine
 {
 private:
-	std::unique_ptr<Display> _display;
-	std::unique_ptr<Camera> _camera;
+	std::unique_ptr<lazy::graphics::Display> _display;
+	std::unique_ptr<lazy::graphics::Camera> _camera;
 	std::unique_ptr<UI> _ui;
 
 	ecs::ECSEngine::Instance *_ecs;
@@ -139,10 +134,13 @@ public:
 
 	unsigned int AddMesh(Mesh mesh)
 	{
+		auto id = _nextId;
 		auto to_ptr = std::make_unique<Mesh>(std::move(mesh));
-		_meshes[_nextId] = std::move(to_ptr);
+		_meshes[id] = std::move(to_ptr);
 
-		return _nextId++;
+		_nextId++;
+
+		return id;
 	}
 
 	IDrawable *GetMesh(unsigned int id)

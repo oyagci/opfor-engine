@@ -4,17 +4,16 @@
 
 namespace engine
 {
-	Mesh::Mesh() : vao(0), ibo(0), objectBuffer(0), lightMap(0)
+	Mesh::Mesh() : vao(0), ibo(0), objectBuffer(0)
 	{
 		addTexture("prototype_tile_8", TextureType::TT_Diffuse);
 	}
 
 	Mesh::~Mesh()
 	{
-		glDeleteBuffers(1, &ibo);
-		glDeleteBuffers(1, &objectBuffer);
-		glDeleteVertexArrays(1, &vao);
-		glDeleteTextures(1, &lightMap);
+		if (ibo > 0) { glDeleteBuffers(1, &ibo); }
+		if (objectBuffer > 0) { glDeleteBuffers(1, &objectBuffer); }
+		if (vao > 0) { glDeleteVertexArrays(1, &vao); }
 	}
 
 	Mesh::Mesh(Mesh &&m)
@@ -28,18 +27,14 @@ namespace engine
 		_material = std::move(m._material);
 
 		vao = m.vao;
-		m.vao = 0;
-
 		objectBuffer = m.objectBuffer;
-		m.objectBuffer = 0;
-
 		ibo = m.ibo;
-		m.ibo = 0;
-
-		lightMap = m.lightMap;
-		m.lightMap = 0;
 
 		_pbrMaterial = std::move(m._pbrMaterial);
+
+		m.vao = 0;
+		m.objectBuffer = 0;
+		m.ibo = 0;
 		m._pbrMaterial.reset();
 	}
 
@@ -47,9 +42,9 @@ namespace engine
 	{
 		if (this != &rhs)
 		{
-			glDeleteVertexArrays(1, &vao);
-			glDeleteBuffers(1, &objectBuffer);
-			glDeleteTextures(1, &lightMap);
+			if (ibo != 0) { glDeleteBuffers(1, &ibo); }
+			if (objectBuffer != 0) { glDeleteBuffers(1, &objectBuffer); }
+			if (vao != 0) { glDeleteVertexArrays(1, &vao); }
 
 			vPositions = std::move(rhs.vPositions);
 			vNormals = std::move(rhs.vNormals);
@@ -60,18 +55,13 @@ namespace engine
 			_material = std::move(rhs._material);
 
 			vao = rhs.vao;
-			rhs.vao = 0;
-
 			objectBuffer = rhs.objectBuffer;
-			rhs.objectBuffer = 0;
-
 			ibo = rhs.ibo;
-			rhs.ibo = 0;
-
-			lightMap = rhs.lightMap;
-			rhs.lightMap = 0;
-
 			_pbrMaterial = rhs._pbrMaterial;
+
+			rhs.vao = 0;
+			rhs.objectBuffer = 0;
+			rhs.ibo = 0;
 			rhs._pbrMaterial.reset();
 		}
 		return *this;
@@ -160,6 +150,7 @@ namespace engine
 		glGenBuffers(1, &objectBuffer);
 		glBindBuffer(GL_ARRAY_BUFFER, objectBuffer);
 		glBufferData(GL_ARRAY_BUFFER, bufferSize, nullptr, GL_STATIC_DRAW);
+
 		if (vPositions.size() > 0) {
 			glBufferSubData(GL_ARRAY_BUFFER, offset, vPositions.size() * sizeof(GLfloat), vPositions.data());
 			glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), reinterpret_cast<void*>(offset));
@@ -208,15 +199,4 @@ namespace engine
 
 		return ids;
 	}
-
-	void Mesh::InitLightmap()
-	{
-		const glm::uvec2 LightmapSize{ 1024, 1024 };
-
-		glGenTextures(1, &lightMap);
-		glBindTexture(GL_TEXTURE_2D, lightMap);
-
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, LightmapSize.x, LightmapSize.y, 0, GL_RED, GL_FLOAT, nullptr);
-	}
-	
 }

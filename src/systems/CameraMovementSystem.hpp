@@ -11,7 +11,7 @@ public:
 	void OnUpdate(float __unused deltaTime) override
 	{
 		UpdateLook();
-		UpdateMovement();
+		UpdateMovement(deltaTime);
 	}
 
 	void UpdateLook()
@@ -36,6 +36,9 @@ public:
 		transform.yaw += -vel.x;
 		transform.pitch += vel.y;
 
+		transform.yaw = 0;
+		transform.pitch = 0;
+
 		if (transform.pitch >= 89.0f)
 			transform.pitch = 89.0f;
 		else if (transform.pitch <= -89.0f)
@@ -51,7 +54,7 @@ public:
 		playerCamera[0]->Set(transform);
 	}
 
-	void UpdateMovement()
+	void UpdateMovement(float deltaTime)
 	{
 		auto playerCamera = GetEntities<PlayerCameraComponent, TransformComponent>();
 
@@ -73,10 +76,12 @@ public:
 		bool rgt = lazy::inputs::input::getKeyboard().getKey(GLFW_KEY_D);
 		bool lft = lazy::inputs::input::getKeyboard().getKey(GLFW_KEY_A);
 
-		transform.position += fwd * 1.0f * front;
-		transform.position += bck * 1.0f * -front;
-		transform.position += rgt * 1.0f * right;
-		transform.position += lft * 1.0f * -right;
+		float speed = 300.0f;
+
+		transform.position += fwd * speed * deltaTime * front;
+		transform.position += bck * speed * deltaTime * -front;
+		transform.position += rgt * speed * deltaTime * right;
+		transform.position += lft * speed * deltaTime * -right;
 		playerCamera[0]->Set(transform);
 	}
 };

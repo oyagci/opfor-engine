@@ -21,7 +21,7 @@ Texture::Texture(Texture &&rhs)
 
 Texture::~Texture()
 {
-	glDeleteTextures(1, &_glId);
+	if (_glId) { glDeleteTextures(1, &_glId); }
 }
 
 bool Texture::load(std::string const &path)

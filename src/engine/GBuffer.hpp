@@ -81,12 +81,12 @@ public:
 
 	~GBuffer()
 	{
-		glDeleteFramebuffers(1, &_gBuffer);
-		glDeleteTextures(1, &_gPosition);
-		glDeleteTextures(1, &_gNormal);
-		glDeleteTextures(1, &_gAlbedoSpec);
-		glDeleteTextures(1, &_gDepth);
-		glDeleteTextures(1, &_gMetallicRoughness);
+		if (_gBuffer) { glDeleteFramebuffers(1, &_gBuffer); }
+		if (_gPosition) { glDeleteTextures(1, &_gPosition); }
+		if (_gNormal) { glDeleteTextures(1, &_gNormal); }
+		if (_gAlbedoSpec) { glDeleteTextures(1, &_gAlbedoSpec); }
+		if (_gDepth) { glDeleteTextures(1, &_gDepth); }
+		if (_gMetallicRoughness) { glDeleteTextures(1, &_gMetallicRoughness); }
 	}
 
 	void Bind()

@@ -39,7 +39,7 @@ float CalcShadow(vec3 lightPos, vec3 fragPos)
 	float far_plane = 10000.0;
 	vec3 fragToLight = fragPos - lightPos;
 	float currentDepth = length(fragToLight);
-	float bias = 1.0;
+	float bias = 2.3;
 	float shadow = 0.0;
 
 	// PCF 
@@ -139,9 +139,11 @@ vec3 CalcPbr()
 		Lo += ((kd * fragColor / PI + specular) * radiance * NdotL);
 	}
 
-	float shadow = CalcShadow(pointLight[0].position, fragPos);
+	//float shadow = CalcShadow(pointLight[0].position, fragPos);
+	float shadow = 0.0;
 
-	vec3 color = Lo;
+	vec3 ambient = vec3(0.03) * fragColor;
+	vec3 color = ambient + Lo;
 
 	color = color * (1.0 - shadow);
 

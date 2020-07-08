@@ -22,6 +22,8 @@ public:
 
 	TextureAutoBind(GLenum unit, GLenum target, GLuint id)
 	{
+		assert(unit >= GL_TEXTURE0 && unit <= GL_TEXTURE31);
+
 		_unit = unit;
 		_target = target;
 		_texture = id;

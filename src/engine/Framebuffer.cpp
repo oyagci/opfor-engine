@@ -25,7 +25,7 @@ Framebuffer::Framebuffer(Framebuffer_Type type)
 
 Framebuffer::~Framebuffer()
 {
-	glDeleteFramebuffers(1, &_id);
+	if (_id > 0) { glDeleteFramebuffers(1, &_id); }
 }
 
 void Framebuffer::Bind()

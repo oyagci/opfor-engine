@@ -33,7 +33,6 @@ private:
 	GLuint vao;
 	GLuint ibo;
 	GLuint objectBuffer;
-	GLuint lightMap;
 
 	std::string _material;
 	std::optional<std::string> _pbrMaterial;
@@ -60,7 +59,6 @@ public:
 	std::vector<GLfloat> const &GetTangents() const { return vTangents; }
 	std::vector<GLuint>  const &GetIndices() const { return indices; }
 	std::vector<GLuint>  const GetTextureIDs() const;
-	GLuint GetLightmap() const { return lightMap; }
 
 	void SetMaterial(std::string name) { _material = name; }
 	std::string GetMaterial() const { return _material; }
