@@ -29,6 +29,7 @@ class DevScene : public Scene
 	std::vector<TileEnt> _unusedTiles;
 
 	float _levelOffset = 0.0f;
+	float _newRowOffset = 0.0f;
 
 	engine::Model _DoorModel;
 	engine::Model _WallModel;
@@ -70,20 +71,28 @@ class DevScene : public Scene
 		if (tileInfo != tileList.end()) {
 
 			auto const &model = tileInfo->second;
-			auto tile = ECS().EntityManager->CreateEntity<ModelComponent, TransformComponent>();
+
+			TileEnt tile = nullptr;
+
+			if (!_unusedTiles.empty()) {
+				tile = _unusedTiles.back();
+				_unusedTiles.pop_back();
+			}
+			else {
+				tile = ECS().EntityManager->CreateEntity<ModelComponent, TransformComponent>();
+			}
 
 			auto &trans = tile->Get<TransformComponent>();
 				trans.position = position;
 				trans.scale = scale;
 
-			auto modelComp = tile->Get<ModelComponent>();
+			ModelComponent modelComp{};
 
 			auto const &meshes = model.GetMeshes();
 				modelComp.Meshes.insert(modelComp.Meshes.begin(), meshes.begin(), meshes.end());
 				modelComp.Shader = _MeshShader;
 
 			tile->Set(modelComp);
-			tile->SetName("Wall");
 
 			newTile = tile;
 		}
@@ -137,42 +146,7 @@ class DevScene : public Scene
 		// ====
 
 		for (int i = 0; i < 10; i++) {
-
-			std::vector<TileEnt> row;
-
-			row.push_back(MakeTile(Tile::WindowLeftCeiling, { 200.0f * i, 0.0f, -400.0f }).value());
-			row.push_back(MakeTile(Tile::WindowLeft, { 200.0f * i, 0.0f, -400.0f }).value());
-
-			row.push_back(MakeTile(Tile::WindowLeft, { 200.0f * i, 0.0f, 400.0f }, { -1.0f, 1.0f, -1.0f }).value());
-			row.push_back(MakeTile(Tile::WindowLeftCeiling, { 200.0f * i, 0.0f, 400.0f }, { -1.0f, 1.0f, -1.0f }).value());
-
-			if (i % 4 == 0) {
-				row.push_back(MakeTile(Tile::WallCeiling, { 200.0f * i, 200.0f, 0.0f }).value());
-				row.push_back(MakeTile(Tile::Door, { 200.0f * i, 0.0f, 0.0f }).value());
-				row.push_back(MakeTile(Tile::Floor, { 200.0f * i, 0.0f, 0.0f }).value());
-
-				row.push_back(MakeTile(Tile::WallCeiling, { 200.0f * i, 200.0f, 200.0f }).value());
-				row.push_back(MakeTile(Tile::Wall, { 200.0f * i, 0.0f, 200.0f }).value());
-				row.push_back(MakeTile(Tile::Floor, { 200.0f * i, 0.0f, 200.0f }).value());
-
-				row.push_back(MakeTile(Tile::WallCeiling, { 200.0f * i, 200.0f, -200.0f }).value());
-				row.push_back(MakeTile(Tile::Wall, { 200.0f * i, 0.0f, -200.0f }).value());
-				row.push_back(MakeTile(Tile::Floor, { 200.0f * i, 0.0f, -200.0f }).value());
-			}
-			else {
-				row.push_back(MakeTile(Tile::Ceiling, { 200.0f * i, 200.0f, 0.0f }).value());
-				row.push_back(MakeTile(Tile::Floor, { 200.0f * i, 0.0f, 0.0f }).value());
-
-				row.push_back(MakeTile(Tile::Ceiling, { 200.0f * i, 200.0f, 200.0f }).value());
-				row.push_back(MakeTile(Tile::Desk, { 200.0f * i, 0.0f, 200.0f }).value());
-				row.push_back(MakeTile(Tile::Floor, { 200.0f * i, 0.0f, 200.0f }).value());
-
-				row.push_back(MakeTile(Tile::Ceiling, { 200.0f * i, 200.0f, -200.0f }).value());
-				row.push_back(MakeTile(Tile::Desk, { 200.0f * i, 0.0f, -200.0f }).value());
-				row.push_back(MakeTile(Tile::Floor, { 200.0f * i, 0.0f, -200.0f }).value());
-			}
-
-			_levelRows.push_back(row);
+			GenerateRow();
 		}
 	}
 
@@ -180,7 +154,12 @@ class DevScene : public Scene
 	{
 		std::vector<TileRow> updatedRowList;
 
+		float speed = 100.0f;
+		float dist = speed * deltaTime;
+
 		updatedRowList.reserve(_levelRows.size());
+
+		_newRowOffset -= dist;
 
 		for (auto const &row: _levelRows) {
 
@@ -189,11 +168,12 @@ class DevScene : public Scene
 			for (auto const &tile : row) {
 
 				auto &tr = tile->Get<TransformComponent>();
-				tr.position.x = tr.position.x - 100.0f * deltaTime;
+				tr.position.x = tr.position.x - dist;
 
 				// If the tile moved out of the world
 				// mark the row as out of view.
 				if (tr.position.x <= -200.0f) {
+					tr.position.x = -200.0f;
 					tr.position.y = -400.0f;
 					outOfView = true;
 				}
@@ -213,22 +193,40 @@ class DevScene : public Scene
 		_levelRows = updatedRowList;
 	}
 
-	void GenerateNewTiles()
+	void GenerateRow()
 	{
-//		if (_levelTiles.size() >= 10) { return ; }
-//
-//		float newTileOffset = 200.0f * _levelTiles.size();
-//
-//		_levelTiles.push_back(MakeTile(Tile::Ceiling, { 200.0f * newTileOffset, 200.0f, 0.0f }).value());
-//		_levelTiles.push_back(MakeTile(Tile::Floor, { 200.0f * newTileOffset, 0.0f, 0.0f }).value());
-//
-//		_levelTiles.push_back(MakeTile(Tile::Ceiling, { 200.0f * newTileOffset, 200.0f, 200.0f }).value());
-//		_levelTiles.push_back(MakeTile(Tile::Desk, { 200.0f * newTileOffset, 0.0f, 200.0f }).value());
-//		_levelTiles.push_back(MakeTile(Tile::Floor, { 200.0f * newTileOffset, 0.0f, 200.0f }).value());
-//
-//		_levelTiles.push_back(MakeTile(Tile::Ceiling, { 200.0f * newTileOffset, 200.0f, -200.0f }).value());
-//		_levelTiles.push_back(MakeTile(Tile::Desk, { 200.0f * newTileOffset, 0.0f, -200.0f }).value());
-//		_levelTiles.push_back(MakeTile(Tile::Floor, { 200.0f * newTileOffset, 0.0f, -200.0f }).value());
+		if (_levelRows.size() >= 10) { return ; }
+
+		std::vector<TileEnt> row;
+
+		glm::vec3 newRowOff = { _newRowOffset, 0.0f, 0.0f };
+
+		fmt::print("GenerateRow {{ {}, {}, {} }}\n", newRowOff.x, newRowOff.y, newRowOff.z);
+
+		// Left Window
+		row.push_back(MakeTile(Tile::WindowLeftCeiling, glm::vec3(200.0f, 0.0f, -400.0f) + newRowOff).value());
+		row.push_back(MakeTile(Tile::WindowLeft,		glm::vec3(200.0f, 0.0f, -400.0f) + newRowOff).value());
+
+		// Right Window
+		row.push_back(MakeTile(Tile::WindowLeftCeiling, glm::vec3(200.0f, 0.0f,  400.0f) + newRowOff, { -1.0f, 1.0f, -1.0f }).value());
+		row.push_back(MakeTile(Tile::WindowLeft,		glm::vec3(200.0f, 0.0f,  400.0f) + newRowOff, { -1.0f, 1.0f, -1.0f }).value());
+
+		// Left Row
+		row.push_back(MakeTile(Tile::Ceiling, glm::vec3(200.0f, 200.0f,  200.0f) + newRowOff).value());
+		row.push_back(MakeTile(Tile::Desk,    glm::vec3(200.0f, 000.0f,  200.0f) + newRowOff).value());
+		row.push_back(MakeTile(Tile::Floor,   glm::vec3(200.0f, 000.0f,  200.0f) + newRowOff).value());
+
+		// Middle Row
+		row.push_back(MakeTile(Tile::Ceiling, glm::vec3(200.0f, 200.0f,  000.0f) + newRowOff).value());
+		row.push_back(MakeTile(Tile::Floor,   glm::vec3(200.0f, 000.0f,  000.0f) + newRowOff).value());
+
+		// Right Row
+		row.push_back(MakeTile(Tile::Ceiling, glm::vec3(200.0f, 200.0f, -200.0f) + newRowOff).value());
+		row.push_back(MakeTile(Tile::Desk,    glm::vec3(200.0f, 000.0f, -200.0f) + newRowOff).value());
+		row.push_back(MakeTile(Tile::Floor,   glm::vec3(200.0f, 000.0f, -200.0f) + newRowOff).value());
+
+		_levelRows.push_back(row);
+		_newRowOffset += 200.0f;
 	}
 
 public:
@@ -276,6 +274,6 @@ public:
 		_levelOffset += 300.0f * deltaTime;
 
 		UpdateTiles(deltaTime);
-		GenerateNewTiles();
+		GenerateRow();
 	}
 };
