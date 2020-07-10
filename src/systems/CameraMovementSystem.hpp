@@ -54,34 +54,31 @@ public:
 		playerCamera[0]->Set(transform);
 	}
 
-	void UpdateMovement(float deltaTime)
+	void UpdateMovement(float)
 	{
-		auto playerCamera = GetEntities<PlayerCameraComponent, TransformComponent>();
+		//auto playerCamera = GetEntities<PlayerComponent, PlayerCameraComponent, TransformComponent>();
 
-		if (playerCamera.size() == 0) {
-			return ;
-		}
+		//if (playerCamera.size() == 0) {
+		//	return ;
+		//}
 
-		PlayerCameraComponent camera = playerCamera[0]->Get<PlayerCameraComponent>();
-		TransformComponent transform = playerCamera[0]->Get<TransformComponent>();
+		//PlayerCameraComponent &camera = playerCamera[0]->Get<PlayerCameraComponent>();
+		//TransformComponent &transform = playerCamera[0]->Get<TransformComponent>();
+		//auto &player = playerCamera[0]->Get<PlayerComponent>();
 
-		if (camera.useInput == false)
-			return ;
+		//if (camera.useInput == false)
+		//	return ;
 
-		glm::vec3 front(glm::normalize(transform.direction));
-		glm::vec3 right(glm::normalize(glm::cross(front, glm::vec3(0.0f, 1.0f, 0.0f))));
+		//glm::vec3 front(glm::normalize(transform.direction));
+		//glm::vec3 right(glm::normalize(glm::cross(front, glm::vec3(0.0f, 1.0f, 0.0f))));
 
-		bool fwd = lazy::inputs::input::getKeyboard().getKey(GLFW_KEY_W);
-		bool bck = lazy::inputs::input::getKeyboard().getKey(GLFW_KEY_S);
-		bool rgt = lazy::inputs::input::getKeyboard().getKey(GLFW_KEY_D);
-		bool lft = lazy::inputs::input::getKeyboard().getKey(GLFW_KEY_A);
+		//bool fwd = lazy::inputs::input::getKeyboard().getKey(GLFW_KEY_W);
+		//bool bck = lazy::inputs::input::getKeyboard().getKey(GLFW_KEY_S);
+		//bool rgt = lazy::inputs::input::getKeyboard().getKey(GLFW_KEY_D);
+		//bool lft = lazy::inputs::input::getKeyboard().getKey(GLFW_KEY_A);
 
-		float speed = 300.0f;
-
-		transform.position += fwd * speed * deltaTime * front;
-		transform.position += bck * speed * deltaTime * -front;
-		transform.position += rgt * speed * deltaTime * right;
-		transform.position += lft * speed * deltaTime * -right;
-		playerCamera[0]->Set(transform);
+		//player.CurrentPosition != PlayerComponent::Position::Right;
+		//player.CurrentPosition != PlayerComponent::Position::Middle;
+		//player.CurrentPosition != PlayerComponent::Position::Right;
 	}
 };

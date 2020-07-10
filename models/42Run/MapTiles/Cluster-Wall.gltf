@@ -9,7 +9,8 @@
         {
             "name" : "Scene",
             "nodes" : [
-                0
+                0,
+                1
             ]
         }
     ],
@@ -17,6 +18,10 @@
         {
             "mesh" : 0,
             "name" : "Wall"
+        },
+        {
+            "mesh" : 1,
+            "name" : "Cube.003"
         }
     ],
     "materials" : [
@@ -43,6 +48,30 @@
                     "texCoord" : 0
                 }
             }
+        },
+        {
+            "doubleSided" : true,
+            "emissiveFactor" : [
+                0,
+                0,
+                0
+            ],
+            "name" : "Painted_Metal_Door_2x1_ugzobcglw",
+            "normalTexture" : {
+                "index" : 3,
+                "texCoord" : 0
+            },
+            "pbrMetallicRoughness" : {
+                "baseColorTexture" : {
+                    "index" : 4,
+                    "texCoord" : 0
+                },
+                "metallicFactor" : 1,
+                "metallicRoughnessTexture" : {
+                    "index" : 5,
+                    "texCoord" : 0
+                }
+            }
         }
     ],
     "meshes" : [
@@ -60,6 +89,21 @@
                     "material" : 0
                 }
             ]
+        },
+        {
+            "name" : "Cube.011",
+            "primitives" : [
+                {
+                    "attributes" : {
+                        "POSITION" : 5,
+                        "NORMAL" : 6,
+                        "TANGENT" : 7,
+                        "TEXCOORD_0" : 8
+                    },
+                    "indices" : 9,
+                    "material" : 1
+                }
+            ]
         }
     ],
     "textures" : [
@@ -71,6 +115,15 @@
         },
         {
             "source" : 2
+        },
+        {
+            "source" : 3
+        },
+        {
+            "source" : 4
+        },
+        {
+            "source" : 5
         }
     ],
     "images" : [
@@ -88,6 +141,21 @@
             "mimeType" : "image/jpeg",
             "name" : "shkaaafc_2K_Roughness",
             "uri" : "textures/shkaaafc_2K_Roughness.jpg"
+        },
+        {
+            "mimeType" : "image/jpeg",
+            "name" : "ugzobcglw_2K_Normal",
+            "uri" : "textures/ugzobcglw_2K_Normal.jpg"
+        },
+        {
+            "mimeType" : "image/jpeg",
+            "name" : "ugzobcglw_2K_Albedo",
+            "uri" : "textures/ugzobcglw_2K_Albedo.jpg"
+        },
+        {
+            "mimeType" : "image/jpeg",
+            "name" : "ugzobcglw_2K_Roughness",
+            "uri" : "textures/ugzobcglw_2K_Roughness.jpg"
         }
     ],
     "accessors" : [
@@ -97,7 +165,7 @@
             "count" : 44,
             "max" : [
                 9.99998950958252,
-                200,
+                300,
                 100
             ],
             "min" : [
@@ -130,6 +198,46 @@
             "componentType" : 5123,
             "count" : 66,
             "type" : "SCALAR"
+        },
+        {
+            "bufferView" : 5,
+            "componentType" : 5126,
+            "count" : 4,
+            "max" : [
+                100,
+                290,
+                100
+            ],
+            "min" : [
+                -100,
+                290,
+                -100
+            ],
+            "type" : "VEC3"
+        },
+        {
+            "bufferView" : 6,
+            "componentType" : 5126,
+            "count" : 4,
+            "type" : "VEC3"
+        },
+        {
+            "bufferView" : 7,
+            "componentType" : 5126,
+            "count" : 4,
+            "type" : "VEC4"
+        },
+        {
+            "bufferView" : 8,
+            "componentType" : 5126,
+            "count" : 4,
+            "type" : "VEC2"
+        },
+        {
+            "bufferView" : 9,
+            "componentType" : 5123,
+            "count" : 6,
+            "type" : "SCALAR"
         }
     ],
     "bufferViews" : [
@@ -157,11 +265,36 @@
             "buffer" : 0,
             "byteLength" : 132,
             "byteOffset" : 2112
+        },
+        {
+            "buffer" : 0,
+            "byteLength" : 48,
+            "byteOffset" : 2244
+        },
+        {
+            "buffer" : 0,
+            "byteLength" : 48,
+            "byteOffset" : 2292
+        },
+        {
+            "buffer" : 0,
+            "byteLength" : 64,
+            "byteOffset" : 2340
+        },
+        {
+            "buffer" : 0,
+            "byteLength" : 32,
+            "byteOffset" : 2404
+        },
+        {
+            "buffer" : 0,
+            "byteLength" : 12,
+            "byteOffset" : 2436
         }
     ],
     "buffers" : [
         {
-            "byteLength" : 2244,
+            "byteLength" : 2448,
             "uri" : "Cluster-Wall.bin"
         }
     ]

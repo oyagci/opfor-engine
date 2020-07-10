@@ -11,7 +11,8 @@
             "nodes" : [
                 0,
                 1,
-                2
+                2,
+                3
             ]
         }
     ],
@@ -27,6 +28,10 @@
         {
             "mesh" : 2,
             "name" : "Door-Right"
+        },
+        {
+            "mesh" : 3,
+            "name" : "Cube.007"
         }
     ],
     "materials" : [
@@ -77,6 +82,30 @@
                     "texCoord" : 0
                 }
             }
+        },
+        {
+            "doubleSided" : true,
+            "emissiveFactor" : [
+                0,
+                0,
+                0
+            ],
+            "name" : "Painted_Metal_Door_2x1_ugzobcglw",
+            "normalTexture" : {
+                "index" : 6,
+                "texCoord" : 0
+            },
+            "pbrMetallicRoughness" : {
+                "baseColorTexture" : {
+                    "index" : 7,
+                    "texCoord" : 0
+                },
+                "metallicFactor" : 1,
+                "metallicRoughnessTexture" : {
+                    "index" : 8,
+                    "texCoord" : 0
+                }
+            }
         }
     ],
     "meshes" : [
@@ -124,6 +153,21 @@
                     "material" : 1
                 }
             ]
+        },
+        {
+            "name" : "Cube.022",
+            "primitives" : [
+                {
+                    "attributes" : {
+                        "POSITION" : 15,
+                        "NORMAL" : 16,
+                        "TANGENT" : 17,
+                        "TEXCOORD_0" : 18
+                    },
+                    "indices" : 19,
+                    "material" : 2
+                }
+            ]
         }
     ],
     "textures" : [
@@ -144,6 +188,15 @@
         },
         {
             "source" : 5
+        },
+        {
+            "source" : 6
+        },
+        {
+            "source" : 7
+        },
+        {
+            "source" : 8
         }
     ],
     "images" : [
@@ -176,6 +229,21 @@
             "mimeType" : "image/jpeg",
             "name" : "udemeefv_2K_Roughness",
             "uri" : "textures/udemeefv_2K_Roughness.jpg"
+        },
+        {
+            "mimeType" : "image/jpeg",
+            "name" : "ugzobcglw_2K_Normal",
+            "uri" : "textures/ugzobcglw_2K_Normal.jpg"
+        },
+        {
+            "mimeType" : "image/jpeg",
+            "name" : "ugzobcglw_2K_Albedo",
+            "uri" : "textures/ugzobcglw_2K_Albedo.jpg"
+        },
+        {
+            "mimeType" : "image/jpeg",
+            "name" : "ugzobcglw_2K_Roughness",
+            "uri" : "textures/ugzobcglw_2K_Roughness.jpg"
         }
     ],
     "accessors" : [
@@ -185,7 +253,7 @@
             "count" : 52,
             "max" : [
                 10,
-                200,
+                300,
                 100
             ],
             "min" : [
@@ -298,6 +366,46 @@
             "componentType" : 5123,
             "count" : 264,
             "type" : "SCALAR"
+        },
+        {
+            "bufferView" : 15,
+            "componentType" : 5126,
+            "count" : 4,
+            "max" : [
+                100,
+                290,
+                100
+            ],
+            "min" : [
+                -100,
+                290,
+                -100
+            ],
+            "type" : "VEC3"
+        },
+        {
+            "bufferView" : 16,
+            "componentType" : 5126,
+            "count" : 4,
+            "type" : "VEC3"
+        },
+        {
+            "bufferView" : 17,
+            "componentType" : 5126,
+            "count" : 4,
+            "type" : "VEC4"
+        },
+        {
+            "bufferView" : 18,
+            "componentType" : 5126,
+            "count" : 4,
+            "type" : "VEC2"
+        },
+        {
+            "bufferView" : 19,
+            "componentType" : 5123,
+            "count" : 6,
+            "type" : "SCALAR"
         }
     ],
     "bufferViews" : [
@@ -375,11 +483,36 @@
             "buffer" : 0,
             "byteLength" : 528,
             "byteOffset" : 20076
+        },
+        {
+            "buffer" : 0,
+            "byteLength" : 48,
+            "byteOffset" : 20604
+        },
+        {
+            "buffer" : 0,
+            "byteLength" : 48,
+            "byteOffset" : 20652
+        },
+        {
+            "buffer" : 0,
+            "byteLength" : 64,
+            "byteOffset" : 20700
+        },
+        {
+            "buffer" : 0,
+            "byteLength" : 32,
+            "byteOffset" : 20764
+        },
+        {
+            "buffer" : 0,
+            "byteLength" : 12,
+            "byteOffset" : 20796
         }
     ],
     "buffers" : [
         {
-            "byteLength" : 20604,
+            "byteLength" : 20808,
             "uri" : "Cluster-Door.bin"
         }
     ]
