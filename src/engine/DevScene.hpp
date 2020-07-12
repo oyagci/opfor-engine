@@ -10,12 +10,14 @@
 #include "components/PointLightComponent.hpp"
 #include "components/MeshComponent.hpp"
 #include "components/Run42Player.hpp"
+#include "components/BoxColliderComponent.hpp"
 
 #include "systems/LuaSystem.hpp"
 #include "systems/MeshRendererSystem.hpp"
 #include "systems/CameraMovementSystem.hpp"
 #include "systems/SkyboxRendererSystem.hpp"
 #include "systems/Run42PlayerSystem.hpp"
+#include "systems/Collision2DSystem.hpp"
 
 #include <random>
 
@@ -26,11 +28,11 @@ class DevScene : public Scene
 	ecs::IEntityBase *_PlayerCamera;
 	ecs::IEntityBase *_PointLight;
 
-	using PlayerEnt = ecs::IEntity<ModelComponent, TransformComponent, Run42PlayerComponent>;
+	using PlayerEnt = ecs::IEntity<ModelComponent, TransformComponent, Run42PlayerComponent, BoxCollider2DComponent>;
 
 	PlayerEnt *_Player;
 
-	using TileEnt = ecs::IEntity<ModelComponent, TransformComponent>*;
+	using TileEnt = ecs::IEntity<ModelComponent, TransformComponent, BoxCollider2DComponent>*;
 	using TileRow = std::vector<TileEnt>;
 
 	std::vector<TileRow> _levelRows;
@@ -40,6 +42,8 @@ class DevScene : public Scene
 
 	float _levelOffset = 0.0f;
 	float _newRowOffset = 0.0f;
+
+	unsigned int _totalNumberOfRows = 0;
 
 	// Random value generator for the level generator
 	std::random_device _RandomDevice;
@@ -66,25 +70,26 @@ class DevScene : public Scene
 		Pillar,
 	};
 
-	std::optional<ecs::IEntity<ModelComponent, TransformComponent>*> MakeTile(Tile type,
+	std::optional<TileEnt> MakeTile(Tile type,
 		glm::vec3 position = { 0.0f, 0.0f, 0.0f }, glm::vec3 scale = { 1.0f, 1.0f, 1.0f })
 	{
-		std::optional<ecs::IEntity<ModelComponent, TransformComponent>*> newTile;
-		std::unordered_map<Tile, engine::Model&> const tileList = {
-			{ Tile::Floor, _FloorModel },
-			{ Tile::Desk,  _DeskModel },
-			{ Tile::Wall,  _WallModel },
-			{ Tile::Door,  _DoorModel },
-			{ Tile::WindowLeft, _WindowLeft },
-			{ Tile::WindowLeftCeiling, _WindowLeftCeiling },
-			{ Tile::Pillar, _PillarModel },
-			{ Tile::None, _Empty },
+		std::optional<TileEnt> newTile;
+		std::unordered_map<Tile, std::tuple<engine::Model&, std::optional<glm::vec4>>> const tileList = {
+            // Tile Type               // 3D Model           // Optional 2D Collider (x, y, w, h)
+			{ Tile::Floor,             { _FloorModel,        std::nullopt } },
+			{ Tile::Desk,              { _DeskModel,         glm::vec4(-30.0f, -100.0f, 60.0f, 200.0f) } },
+			{ Tile::Wall,              { _WallModel,         glm::vec4(-10.0f, -100.0f, 20.0f, 200.0f) } },
+			{ Tile::Door,              { _DoorModel,         std::nullopt } },
+			{ Tile::WindowLeft,        { _WindowLeft,        std::nullopt } },
+			{ Tile::WindowLeftCeiling, { _WindowLeftCeiling, std::nullopt } },
+			{ Tile::Pillar,            { _PillarModel,       glm::vec4(-40.0f, -40.0f, 80.0f, 80.0f) } },
+			{ Tile::None,	           { _Empty,             std::nullopt } },
 		};
 
 		auto tileInfo = tileList.find(type);
 		if (tileInfo != tileList.end()) {
 
-			auto const &model = tileInfo->second;
+			auto const &model = std::get<0>(tileInfo->second);
 
 			TileEnt tile = nullptr;
 
@@ -95,7 +100,7 @@ class DevScene : public Scene
 				_unusedTiles.pop_back();
 			}
 			else {
-				tile = ECS().EntityManager->CreateEntity<ModelComponent, TransformComponent>();
+				tile = ECS().EntityManager->CreateEntity<ModelComponent, TransformComponent, BoxCollider2DComponent>();
 			}
 
 			auto &trans = tile->Get<TransformComponent>();
@@ -107,6 +112,18 @@ class DevScene : public Scene
 			auto const &meshes = model.GetMeshes();
 				modelComp.Meshes.insert(modelComp.Meshes.begin(), meshes.begin(), meshes.end());
 				modelComp.Shader = _MeshShader;
+
+			if (tile->HasComponents<BoxCollider2DComponent>()) {
+				tile->DeleteComponents<BoxCollider2DComponent>();
+			}
+
+			if (std::get<1>(tileInfo->second).has_value()) {
+				tile->AddComponents<BoxCollider2DComponent>();
+				auto collider = BoxCollider2DComponent::New(
+					glm::vec2(std::get<1>(tileInfo->second).value().x, std::get<1>(tileInfo->second).value().y),
+					glm::vec2(std::get<1>(tileInfo->second).value().z, std::get<1>(tileInfo->second).value().w));
+				tile->Set(collider);
+			}
 
 			tile->Set(modelComp);
 
@@ -152,13 +169,15 @@ class DevScene : public Scene
 
 		_Marvin.LoadFromGLTF("models/42Run/Marvin/scene.gltf");
 
-		_Player = ECS().EntityManager->CreateEntity<ModelComponent, TransformComponent, Run42PlayerComponent>();
+		_Player = ECS().EntityManager->CreateEntity<ModelComponent, TransformComponent, Run42PlayerComponent, BoxCollider2DComponent>();
 		auto &model = _Player->Get<ModelComponent>();
 			model.Meshes.reserve(_Marvin.GetMeshes().size());
 			model.Meshes.insert(model.Meshes.begin(), _Marvin.GetMeshes().begin(), _Marvin.GetMeshes().end());
 		auto &playerTrans = _Player->Get<TransformComponent>();
 			playerTrans.position = { 0.0f, 0.0f, 0.0f };
 			playerTrans.scale = { 0.1f, 0.1f, 0.1f };
+
+		_Player->Set(BoxCollider2DComponent::New({ -10.0f, -10.0f }, { 20.0f, 20.0f }));
 
 		for (int i = 0; i < 10; i++) {
 			GenerateRow();
@@ -230,14 +249,10 @@ class DevScene : public Scene
 			{ Tile::None,   Tile::None,   Tile::Pillar },
 		};
 
+		static constexpr std::array<Tile, 3> startRow = { Tile::None, Tile::None, Tile::None };
+
 		// Guard: Maximum number of rows present at the same time
 		if (_levelRows.size() >= 10) { return ; }
-
-		// Choose a row layout randomly
-		std::uniform_int_distribution<unsigned int>	random(0, layouts.size() - 1);
-		unsigned int randomIndex = random(_RandomEngine);
-
-		auto layout = layouts[randomIndex];
 
 		std::vector<TileEnt> row;
 
@@ -252,22 +267,54 @@ class DevScene : public Scene
 		row.push_back(MakeTile(Tile::WindowLeftCeiling, glm::vec3(0.0f, 0.0f,  400.0f) + newRowOff, { -1.0f, 1.0f, -1.0f }).value());
 		row.push_back(MakeTile(Tile::WindowLeft,		glm::vec3(0.0f, 0.0f,  400.0f) + newRowOff, { -1.0f, 1.0f, -1.0f }).value());
 
-		// Left Row
-		row.push_back(MakeTile(Tile::Floor, glm::vec3(0.0f, 000.0f,  200.0f) + newRowOff).value());
-		row.push_back(MakeTile(layout[0],   glm::vec3(0.0f, 000.0f,  200.0f) + newRowOff).value());
+		if (_totalNumberOfRows < 10) {
 
-		// Middle Row
-		row.push_back(MakeTile(Tile::Floor, glm::vec3(0.0f, 000.0f,  000.0f) + newRowOff).value());
-		row.push_back(MakeTile(layout[1],   glm::vec3(0.0f, 000.0f,  000.0f) + newRowOff).value());
+			_totalNumberOfRows += 1;
 
-		// Right Row
-		row.push_back(MakeTile(Tile::Floor, glm::vec3(0.0f, 000.0f, -200.0f) + newRowOff).value());
-		row.push_back(MakeTile(layout[2],   glm::vec3(0.0f, 000.0f, -200.0f) + newRowOff).value());
+			row.push_back(MakeTile(Tile::Floor, glm::vec3(0.0f, 000.0f,  200.0f) + newRowOff).value());
+			row.push_back(MakeTile(startRow[0], glm::vec3(0.0f, 000.0f,  200.0f) + newRowOff).value());
+
+			row.push_back(MakeTile(Tile::Floor, glm::vec3(0.0f, 000.0f,  000.0f) + newRowOff).value());
+			row.push_back(MakeTile(startRow[1], glm::vec3(0.0f, 000.0f,  000.0f) + newRowOff).value());
+
+			row.push_back(MakeTile(Tile::Floor, glm::vec3(0.0f, 000.0f, -200.0f) + newRowOff).value());
+			row.push_back(MakeTile(startRow[2], glm::vec3(0.0f, 000.0f, -200.0f) + newRowOff).value());
+		}
+		else {
+
+			// Choose a row layout randomly
+			std::uniform_int_distribution<unsigned int>	random(0, layouts.size() - 1);
+			unsigned int randomIndex = random(_RandomEngine);
+
+			auto layout = layouts[randomIndex];
+
+			// Left Row
+			row.push_back(MakeTile(Tile::Floor, glm::vec3(0.0f, 000.0f,  200.0f) + newRowOff).value());
+			row.push_back(MakeTile(layout[0],   glm::vec3(0.0f, 000.0f,  200.0f) + newRowOff).value());
+
+			// Middle Row
+			row.push_back(MakeTile(Tile::Floor, glm::vec3(0.0f, 000.0f,  000.0f) + newRowOff).value());
+			row.push_back(MakeTile(layout[1],   glm::vec3(0.0f, 000.0f,  000.0f) + newRowOff).value());
+
+			// Right Row
+			row.push_back(MakeTile(Tile::Floor, glm::vec3(0.0f, 000.0f, -200.0f) + newRowOff).value());
+			row.push_back(MakeTile(layout[2],   glm::vec3(0.0f, 000.0f, -200.0f) + newRowOff).value());
+		}
 
 		_levelRows.push_back(row);
 
 		// Since we've added a new row the end of the level is further away now
 		_newRowOffset += 200.0f;
+	}
+
+	void CheckCollision()
+	{
+		auto const &collider = _Player->Get<BoxCollider2DComponent>();
+		static int index = 0;
+
+		if (collider.IsColliding == true) {
+			fmt::print("[{}] Player Is Colliding!\n", index++);
+		}
 	}
 
 public:
@@ -296,6 +343,7 @@ public:
 		ECS().SystemManager->InstantiateSystem<LuaSystem>();
 		ECS().SystemManager->InstantiateSystem<CameraMovementSystem>();
 		ECS().SystemManager->InstantiateSystem<Run42PlayerSystem>();
+		ECS().SystemManager->InstantiateSystem<Collision2DSystem>();
 
 		SetupLevel();
 	}
@@ -319,5 +367,6 @@ public:
 
 		UpdateTiles(deltaTime);
 		GenerateRow();
+		CheckCollision();
 	}
 };
