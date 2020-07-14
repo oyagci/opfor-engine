@@ -8,6 +8,7 @@
 #include "engine/Model.hpp"
 #include "systems/ImguiSystem.hpp"
 #include "DevScene.hpp"
+#include "scenes/PlayScene.hpp"
 
 namespace engine
 {
@@ -87,7 +88,7 @@ int Engine::Run()
 {
 	Settings::instance().load("config.ini");
 
-	_Scene = std::make_unique<DevScene>();
+	_Scene = std::make_unique<PlayScene>();
 	_Scene->OnSetup();
 	_Scene->OnPlay();
 	while (!_display->isClosed())
