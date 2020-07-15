@@ -68,6 +68,7 @@ class PlayScene : public Scene
 	engine::Model _WindowLeft;
 	engine::Model _WindowLeftCeiling;
 	engine::Model _Empty;
+	engine::Model _Transhcans;
 	engine::Model _Marvin;
 
 	ecs::IEntity<TextComponent> *_ScoreText;
@@ -81,6 +82,7 @@ class PlayScene : public Scene
 		WindowLeft,
 		WindowLeftCeiling,
 		Pillar,
+		Trashcans,
 	};
 
 	static constexpr char const *formatStr = "Score: {} | Speed: {:.2} m/s | High Score {}";
@@ -98,6 +100,7 @@ class PlayScene : public Scene
 			{ Tile::WindowLeft,        { _WindowLeft,        std::nullopt } },
 			{ Tile::WindowLeftCeiling, { _WindowLeftCeiling, std::nullopt } },
 			{ Tile::Pillar,            { _PillarModel,       BoxCollider3DComponent::New(glm::vec3(-40.0f, 0.0f, -40.0f), glm::vec3(80.0f, 200.0f, 80.0f)) } },
+			{ Tile::Trashcans,         { _Transhcans,        BoxCollider3DComponent::New(glm::vec3(-30.0f, 0.0f, -30.0f), glm::vec3(60.0f, 30.0f,  60.0f)) } },
 			{ Tile::None,	           { _Empty,             std::nullopt } },
 		};
 
@@ -156,6 +159,7 @@ class PlayScene : public Scene
 		_WindowLeft.LoadFromGLTF("models/42Run/MapTiles/Cluster-Window.gltf");
 		_WindowLeftCeiling.LoadFromGLTF("models/42Run/MapTiles/Cluster-Window-Ceiling.gltf");
 		_Empty.LoadFromGLTF("models/42Run/MapTiles/Cluster-Empty.gltf");
+		_Transhcans.LoadFromGLTF("models/42Run/MapTiles/Cluster-Trashcans.gltf");
 	}
 
 	void SetupLevel()
@@ -244,22 +248,26 @@ class PlayScene : public Scene
 	{
 		// List of all the possible row layouts
 		static const std::vector<std::array<Tile, 3>> layouts = {
-			  // Left       // Middle     // Right
-			{ Tile::None,   Tile::Desk,   Tile::Desk },
-			{ Tile::Desk,   Tile::None,   Tile::Desk },
-			{ Tile::Desk,   Tile::Desk,   Tile::None },
+			  // Left          // Middle        // Right
+			{ Tile::None,      Tile::Desk,      Tile::Desk },
+			{ Tile::Desk,      Tile::None,      Tile::Desk },
+			{ Tile::Desk,      Tile::Desk,      Tile::None },
 
-			{ Tile::Wall,   Tile::Door,   Tile::Wall },
+			{ Tile::Wall,      Tile::Door,      Tile::Wall },
 
-			{ Tile::Pillar, Tile::None,   Tile::Pillar },
-			{ Tile::Pillar, Tile::Desk,   Tile::None },
-			{ Tile::Pillar, Tile::None,   Tile::Desk },
+			{ Tile::Pillar,    Tile::None,      Tile::Pillar },
+			{ Tile::Pillar,    Tile::Desk,      Tile::None },
+			{ Tile::Pillar,    Tile::None,      Tile::Desk },
 
-			{ Tile::Desk,   Tile::None,   Tile::Pillar },
-			{ Tile::None,   Tile::Desk,   Tile::Pillar },
+			{ Tile::Desk,      Tile::None,      Tile::Pillar },
+			{ Tile::None,      Tile::Desk,      Tile::Pillar },
 
-			{ Tile::None,   Tile::Desk,   Tile::None },
-			{ Tile::None,   Tile::None,   Tile::Pillar },
+			{ Tile::None,      Tile::Desk,      Tile::None },
+			{ Tile::None,      Tile::None,      Tile::Pillar },
+
+			{ Tile::Trashcans, Tile::Desk,      Tile::Desk },
+			{ Tile::Desk,      Tile::Trashcans, Tile::Desk },
+			{ Tile::Desk,      Tile::Desk,      Tile::Trashcans },
 		};
 
 		static constexpr std::array<Tile, 3> startRow = { Tile::None, Tile::None, Tile::None };
