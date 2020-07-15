@@ -11,6 +11,7 @@
 #include "components/MeshComponent.hpp"
 #include "components/Run42Player.hpp"
 #include "components/BoxColliderComponent.hpp"
+#include "components/TextComponent.hpp"
 
 #include "systems/LuaSystem.hpp"
 #include "systems/MeshRendererSystem.hpp"
@@ -18,11 +19,18 @@
 #include "systems/SkyboxRendererSystem.hpp"
 #include "systems/Run42PlayerSystem.hpp"
 #include "systems/Collision2DSystem.hpp"
+#include "systems/TextRendererSystem.hpp"
 
 #include <random>
 
 class PlayScene : public Scene
 {
+	enum class SceneState {
+		Stopped,
+		Playing,
+		Paused,
+	} _State = SceneState::Stopped;
+
 	unsigned int _MeshShader;
 
 	ecs::IEntityBase *_PlayerCamera;
@@ -43,6 +51,9 @@ class PlayScene : public Scene
 	float _levelOffset = 0.0f;
 	float _newRowOffset = 0.0f;
 
+	float _distanceTraveled = 0;
+	size_t _highScore = 0.0f;
+
 	unsigned int _totalNumberOfRows = 0;
 
 	// Random value generator for the level generator
@@ -59,6 +70,8 @@ class PlayScene : public Scene
 	engine::Model _Empty;
 	engine::Model _Marvin;
 
+	ecs::IEntity<TextComponent> *_ScoreText;
+
 	enum class Tile {
 		None,
 		Floor,
@@ -69,6 +82,8 @@ class PlayScene : public Scene
 		WindowLeftCeiling,
 		Pillar,
 	};
+
+	static constexpr char const *formatStr = "Score: {} | Speed: {:.2} m/s | High Score {}";
 
 	std::optional<TileEnt> MakeTile(Tile type,
 		glm::vec3 position = { 0.0f, 0.0f, 0.0f }, glm::vec3 scale = { 1.0f, 1.0f, 1.0f })
@@ -267,7 +282,7 @@ class PlayScene : public Scene
 		row.push_back(MakeTile(Tile::WindowLeftCeiling, glm::vec3(0.0f, 0.0f,  400.0f) + newRowOff, { -1.0f, 1.0f, -1.0f }).value());
 		row.push_back(MakeTile(Tile::WindowLeft,		glm::vec3(0.0f, 0.0f,  400.0f) + newRowOff, { -1.0f, 1.0f, -1.0f }).value());
 
-		if (_totalNumberOfRows < 10) {
+		if (_totalNumberOfRows < 3) {
 
 			_totalNumberOfRows += 1;
 
@@ -314,7 +329,35 @@ class PlayScene : public Scene
 
 		if (collider.IsColliding == true) {
 			fmt::print("[{}] Player Is Colliding!\n", index++);
+			_State = SceneState::Stopped;
+			if (_distanceTraveled > _highScore) {
+				_highScore = _distanceTraveled / 100;
+			}
+			ResetLevel();
 		}
+	}
+
+	void ResetLevel()
+	{
+		for (auto &row : _levelRows) {
+			for (auto &tile : row) {
+				_unusedTiles.push_back(tile);
+			}
+			row.clear();
+		}
+		_levelRows.clear();
+
+		_distanceTraveled = 0.0f;
+		_levelOffset = 0.0f;
+		_newRowOffset = 0.0f;
+		_totalNumberOfRows = 0;
+		_moveSpeed = 200.0f;
+
+		for (int i = 0; i < 10; i++) {
+			GenerateRow();
+		}
+
+		_State = SceneState::Stopped;
 	}
 
 public:
@@ -339,11 +382,18 @@ public:
 
 	void Setup() override
 	{
+		ECS().SystemManager->InstantiateSystem<TextRendererSystem>();
 		ECS().SystemManager->InstantiateSystem<MeshRendererSystem>();
 		ECS().SystemManager->InstantiateSystem<LuaSystem>();
 		ECS().SystemManager->InstantiateSystem<CameraMovementSystem>();
 		ECS().SystemManager->InstantiateSystem<Run42PlayerSystem>();
 		ECS().SystemManager->InstantiateSystem<Collision2DSystem>();
+
+		_ScoreText = ECS().EntityManager->CreateEntity<TextComponent>();
+
+		auto text = TextComponent::New(fmt::format(formatStr, static_cast<size_t>(_distanceTraveled / 100), _moveSpeed / 100, _highScore));
+
+		_ScoreText->Set(text);
 
 		SetupLevel();
 	}
@@ -365,8 +415,37 @@ public:
 
 		_levelOffset += 300.0f * deltaTime;
 
-		UpdateTiles(deltaTime);
-		GenerateRow();
-		CheckCollision();
+		auto &kbd = lazy::inputs::input::getKeyboard();
+
+		// TODO: FSM!
+		if (_State == SceneState::Playing) {
+
+			UpdateTiles(deltaTime);
+			GenerateRow();
+			CheckCollision();
+
+			_moveSpeed += 1.0f * deltaTime;
+			_distanceTraveled += 300.0f * deltaTime;
+
+			auto text = TextComponent::New(fmt::format(formatStr, static_cast<size_t>(_distanceTraveled / 100), _moveSpeed / 100, _highScore));
+
+			_ScoreText->Set(text);
+
+			if (kbd.getKeyDown(GLFW_KEY_ESCAPE)) {
+				_State = SceneState::Paused;
+			}
+		}
+		else if (_State == SceneState::Stopped) {
+
+			if (kbd.getKeyDown(GLFW_KEY_ENTER)) {
+				_State = SceneState::Playing;
+			}
+		}
+		else if (_State == SceneState::Paused) {
+
+			if (kbd.getKeyDown(GLFW_KEY_ESCAPE)) {
+				_State = SceneState::Playing;
+			}
+		}
 	}
 };
