@@ -18,7 +18,7 @@
 #include "systems/CameraMovementSystem.hpp"
 #include "systems/SkyboxRendererSystem.hpp"
 #include "systems/Run42PlayerSystem.hpp"
-#include "systems/Collision2DSystem.hpp"
+#include "systems/Collision3DSystem.hpp"
 #include "systems/TextRendererSystem.hpp"
 
 #include <random>
@@ -36,11 +36,11 @@ class PlayScene : public Scene
 	ecs::IEntityBase *_PlayerCamera;
 	ecs::IEntityBase *_PointLight;
 
-	using PlayerEnt = ecs::IEntity<ModelComponent, TransformComponent, Run42PlayerComponent, BoxCollider2DComponent>;
+	using PlayerEnt = ecs::IEntity<ModelComponent, TransformComponent, Run42PlayerComponent, BoxCollider3DComponent>;
 
 	PlayerEnt *_Player;
 
-	using TileEnt = ecs::IEntity<ModelComponent, TransformComponent, BoxCollider2DComponent>*;
+	using TileEnt = ecs::IEntity<ModelComponent, TransformComponent, BoxCollider3DComponent>*;
 	using TileRow = std::vector<TileEnt>;
 
 	std::vector<TileRow> _levelRows;
@@ -89,15 +89,15 @@ class PlayScene : public Scene
 		glm::vec3 position = { 0.0f, 0.0f, 0.0f }, glm::vec3 scale = { 1.0f, 1.0f, 1.0f })
 	{
 		std::optional<TileEnt> newTile;
-		std::unordered_map<Tile, std::tuple<engine::Model&, std::optional<glm::vec4>>> const tileList = {
+		std::unordered_map<Tile, std::tuple<engine::Model&, std::optional<BoxCollider3DComponent>>> const tileList = {
             // Tile Type               // 3D Model           // Optional 2D Collider (x, y, w, h)
 			{ Tile::Floor,             { _FloorModel,        std::nullopt } },
-			{ Tile::Desk,              { _DeskModel,         glm::vec4(-30.0f, -100.0f, 60.0f, 200.0f) } },
-			{ Tile::Wall,              { _WallModel,         glm::vec4(-10.0f, -100.0f, 20.0f, 200.0f) } },
+			{ Tile::Desk,              { _DeskModel,         BoxCollider3DComponent::New(glm::vec3(-30.0f, 0.0f, -100.0f), glm::vec3(60.0f, 200.0f, 200.0f)) } },
+			{ Tile::Wall,              { _WallModel,         BoxCollider3DComponent::New(glm::vec3(-10.0f, 0.0f, -100.0f), glm::vec3(20.0f, 200.0f, 200.0f)) } },
 			{ Tile::Door,              { _DoorModel,         std::nullopt } },
 			{ Tile::WindowLeft,        { _WindowLeft,        std::nullopt } },
 			{ Tile::WindowLeftCeiling, { _WindowLeftCeiling, std::nullopt } },
-			{ Tile::Pillar,            { _PillarModel,       glm::vec4(-40.0f, -40.0f, 80.0f, 80.0f) } },
+			{ Tile::Pillar,            { _PillarModel,       BoxCollider3DComponent::New(glm::vec3(-40.0f, 0.0f, -40.0f), glm::vec3(80.0f, 200.0f, 80.0f)) } },
 			{ Tile::None,	           { _Empty,             std::nullopt } },
 		};
 
@@ -115,7 +115,7 @@ class PlayScene : public Scene
 				_unusedTiles.pop_back();
 			}
 			else {
-				tile = ECS().EntityManager->CreateEntity<ModelComponent, TransformComponent, BoxCollider2DComponent>();
+				tile = ECS().EntityManager->CreateEntity<ModelComponent, TransformComponent, BoxCollider3DComponent>();
 			}
 
 			auto &trans = tile->Get<TransformComponent>();
@@ -128,15 +128,13 @@ class PlayScene : public Scene
 				modelComp.Meshes.insert(modelComp.Meshes.begin(), meshes.begin(), meshes.end());
 				modelComp.Shader = _MeshShader;
 
-			if (tile->HasComponents<BoxCollider2DComponent>()) {
-				tile->DeleteComponents<BoxCollider2DComponent>();
+			if (tile->HasComponents<BoxCollider3DComponent>()) {
+				tile->DeleteComponents<BoxCollider3DComponent>();
 			}
 
 			if (std::get<1>(tileInfo->second).has_value()) {
-				tile->AddComponents<BoxCollider2DComponent>();
-				auto collider = BoxCollider2DComponent::New(
-					glm::vec2(std::get<1>(tileInfo->second).value().x, std::get<1>(tileInfo->second).value().y),
-					glm::vec2(std::get<1>(tileInfo->second).value().z, std::get<1>(tileInfo->second).value().w));
+				tile->AddComponents<BoxCollider3DComponent>();
+				auto collider = std::get<1>(tileInfo->second).value();
 				tile->Set(collider);
 			}
 
@@ -184,7 +182,7 @@ class PlayScene : public Scene
 
 		_Marvin.LoadFromGLTF("models/42Run/Marvin/scene.gltf");
 
-		_Player = ECS().EntityManager->CreateEntity<ModelComponent, TransformComponent, Run42PlayerComponent, BoxCollider2DComponent>();
+		_Player = ECS().EntityManager->CreateEntity<ModelComponent, TransformComponent, Run42PlayerComponent, BoxCollider3DComponent>();
 		auto &model = _Player->Get<ModelComponent>();
 			model.Meshes.reserve(_Marvin.GetMeshes().size());
 			model.Meshes.insert(model.Meshes.begin(), _Marvin.GetMeshes().begin(), _Marvin.GetMeshes().end());
@@ -192,7 +190,7 @@ class PlayScene : public Scene
 			playerTrans.position = { 0.0f, 0.0f, 0.0f };
 			playerTrans.scale = { 0.1f, 0.1f, 0.1f };
 
-		_Player->Set(BoxCollider2DComponent::New({ -10.0f, -10.0f }, { 20.0f, 20.0f }));
+		_Player->Set(BoxCollider3DComponent::New({ -10.0f, 0.0f, -10.0f }, { 20.0f, 100.0f, 20.0f }));
 
 		for (int i = 0; i < 10; i++) {
 			GenerateRow();
@@ -324,7 +322,7 @@ class PlayScene : public Scene
 
 	void CheckCollision()
 	{
-		auto const &collider = _Player->Get<BoxCollider2DComponent>();
+		auto const &collider = _Player->Get<BoxCollider3DComponent>();
 		static int index = 0;
 
 		if (collider.IsColliding == true) {
@@ -387,7 +385,7 @@ public:
 		ECS().SystemManager->InstantiateSystem<LuaSystem>();
 		ECS().SystemManager->InstantiateSystem<CameraMovementSystem>();
 		ECS().SystemManager->InstantiateSystem<Run42PlayerSystem>();
-		ECS().SystemManager->InstantiateSystem<Collision2DSystem>();
+		ECS().SystemManager->InstantiateSystem<Collision3DSystem>();
 
 		_ScoreText = ECS().EntityManager->CreateEntity<TextComponent>();
 
