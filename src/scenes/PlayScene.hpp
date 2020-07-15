@@ -429,7 +429,10 @@ public:
 			UpdateTiles(deltaTime);
 			GenerateRow();
 			CheckCollision();
+			
+			auto &player = _Player->Get<Run42PlayerComponent>();
 
+			player.Speed += 1.0f * deltaTime;
 			_moveSpeed += 1.0f * deltaTime;
 			_distanceTraveled += 300.0f * deltaTime;
 
