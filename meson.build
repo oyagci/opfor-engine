@@ -28,6 +28,8 @@ incdirs += include_directories('thirdparty/tinygltf')
 incdirs += include_directories('thirdparty/lua-5.3.5/src')
 incdirs += include_directories('thirdparty/nativefiledialog/src/include')
 incdirs += include_directories('thirdparty/stduuid/include')
+incdirs += include_directories('thirdparty/glew/include')
+incdirs += include_directories('thirdparty/glm')
 
 srcs = [
   'src/main.cpp',
@@ -45,7 +47,6 @@ srcs = [
   'src/engine/ui/UI.cpp',
   'src/engine/ui/SceneComponent.cpp',
   'src/engine/ui/UIScene.cpp',
-  'src/engine/assimp/Model.cpp',
   'src/engine/Framebuffer.cpp',
   'src/engine/Mesh.cpp',
   'src/engine/Batch.cpp',
@@ -78,22 +79,26 @@ nativefiledialog_src = [
   'thirdparty/nativefiledialog/src/nfd_gtk.c'
 ]
 
+glew_src = [
+  'thirdparty/glew/src/glew.c'
+]
+
 srcs += imgui
 srcs += imgui_guizmo
 srcs += tinygltf_src
 srcs += nativefiledialog_src
+srcs += glew_src
 
 cmake = import('cmake')
 lazyGL = cmake.subproject('LazyGL')
 json = cmake.subproject('json')
-#assimp = cmake.subproject('assimp-5.0.1')
+glfw = cmake.subproject('glfw')
 
 # Lua
 lua_src = [
   'thirdparty/lua-5.3.5/src/lfunc.c',
   'thirdparty/lua-5.3.5/src/lopcodes.c',
   'thirdparty/lua-5.3.5/src/lauxlib.c',
-  #  'thirdparty/lua-5.3.5/src/luac.c',
   'thirdparty/lua-5.3.5/src/ltm.c',
   'thirdparty/lua-5.3.5/src/lbitlib.c',
   'thirdparty/lua-5.3.5/src/ldo.c',
@@ -134,13 +139,11 @@ lib_lua = library('lua', lua_src, include_directories: lua_inc, dependencies: lu
 deps = [
   lazyGL.dependency('LazyGL'),
   json.dependency('nlohmann_json'),
-  dependency('glew', required : true),
-  dependency('glfw3', required : true),
+  glfw.dependency('glfw'),
   dependency('threads', required : true),
   dependency('GL', required : true),
-  dependency('openal', required : true),
-  dependency('assimp', required: true),
   dependency('fmt', required: true),
+  dependency('uuid', required: true),
   meson.get_compiler('cpp').find_library('dl'),
   meson.get_compiler('cpp').find_library('m'),
 ]
@@ -153,7 +156,6 @@ if build_machine.system() == 'linux'
 	dependency('xi', required : true),
 	dependency('xrandr', required : true),
 	dependency('gtk+-3.0', required: true),
-	dependency('uuid', required: true),
 	meson.get_compiler('cpp').find_library('freetype'),
   ]
   deps += deps_linux

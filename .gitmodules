@@ -7,9 +7,18 @@
 [submodule "thirdparty/nativefiledialog"]
 	path = thirdparty/nativefiledialog
 	url = https://github.com/oyagci/nativefiledialog
-[submodule "subprojects/stduuid"]
-	path = thirdparty/stduuid
-	url = https://github.com/mariusbancila/stduuid.git
 [submodule "thirdparty/stduuid"]
 	path = thirdparty/stduuid
 	url = https://github.com/mariusbancila/stduuid.git
+[submodule "subprojects/glfw"]
+	path = subprojects/glfw
+	url = https://github.com/oyagci/glfw
+	branch = latest
+[submodule "thirdparty/glew"]
+	path = thirdparty/glew
+	url = https://github.com/oyagci/glew
+	branch = latest
+[submodule "thirdparty/glm"]
+	path = thirdparty/glm
+	url = https://github.com/oyagci/glm
+	branch = latest
