@@ -6,7 +6,7 @@
 
 namespace ecs { class ECSEngine; }
 
-namespace engine
+namespace opfor
 {
 
 ///

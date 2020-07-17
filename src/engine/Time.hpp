@@ -1,6 +1,6 @@
 #include <GLFW/glfw3.h>
 
-namespace engine
+namespace opfor
 {
 
 class Time {

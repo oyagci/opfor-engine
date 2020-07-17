@@ -10,7 +10,7 @@ private:
 	lazy::graphics::Mesh _quad;
 	lazy::graphics::Shader _shader;
 
-	engine::Framebuffer _framebuffer;
+	opfor::Framebuffer _framebuffer;
 
 	void initQuad()
 	{
@@ -30,7 +30,7 @@ private:
 	}
 
 public:
-	FramebufferRendererSystem() : _framebuffer(engine::Framebuffer_Type::RW)
+	FramebufferRendererSystem() : _framebuffer(opfor::Framebuffer_Type::RW)
 	{
 		initQuad();
 		_shader.addVertexShader("shaders/fb.vs.glsl")

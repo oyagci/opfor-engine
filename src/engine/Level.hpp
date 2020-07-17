@@ -16,7 +16,7 @@
 
 using json = nlohmann::json;
 
-class Level : public engine::ILevel
+class Level : public opfor::ILevel
 {
 	unsigned int _meshShader;
 	std::unordered_map<uuids::uuid, ecs::IEntityBase *> _entities;
@@ -54,7 +54,7 @@ public:
 
 		for (auto const &model : levelJson["models"]) {
 			ModelComponent component{};
-			engine::Model engineModel;
+			opfor::Model engineModel;
 
 			auto uuidstr = model["uuid"].get<std::string>();
 			auto uuid = uuids::uuid::from_string(uuidstr).value();
@@ -123,7 +123,7 @@ public:
 		_isLoaded = false;
 
 		for (auto &entity : _entities) {
-			engine::Engine::Instance().DeleteEntity(entity.second->GetId());
+			opfor::Engine::Instance().DeleteEntity(entity.second->GetId());
 		}
 		_entities.clear();
 		_models.clear();
@@ -139,7 +139,7 @@ public:
 	///
 	ecs::IEntityBase *CreateEntity() override
 	{
-		auto entity = engine::Engine::Instance().CreateEntity<TransformComponent>();
+		auto entity = opfor::Engine::Instance().CreateEntity<TransformComponent>();
 		_entities[entity->GetUuid()] = entity;
 		return entity;
 	}

@@ -29,7 +29,7 @@ namespace ecs
 struct ModelComponent;
 struct LuaScriptComponent;
 
-namespace engine
+namespace opfor
 {
 
 class Model;
@@ -48,7 +48,7 @@ private:
 
 	std::vector<std::unique_ptr<EngineObject>> _engineObjects;
 
-	std::unordered_map<unsigned int, std::unique_ptr<engine::Model>> _models;
+	std::unordered_map<unsigned int, std::unique_ptr<opfor::Model>> _models;
 	std::unordered_map<unsigned int, std::unique_ptr<IDrawable>> _meshes;
 	std::unordered_map<unsigned int, std::unique_ptr<Batch>> _batches;
 	std::unique_ptr<ILevel> _currentLevel;
@@ -311,8 +311,8 @@ public:
 		glfwSetWindowShouldClose(_display->getWindow(), GLFW_TRUE);
 	}
 
-	unsigned int RegisterModel(engine::Model model);
-	std::optional<engine::Model const *> GetModel(unsigned int id) const;
+	unsigned int RegisterModel(opfor::Model model);
+	std::optional<opfor::Model const *> GetModel(unsigned int id) const;
 	void RemoveModel(unsigned int id);
 
 	void LoadLevel(std::string const &path)

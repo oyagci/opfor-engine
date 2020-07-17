@@ -3,7 +3,7 @@
 #include "lazy.hpp"
 #include "IDrawable.hpp"
 
-namespace engine {
+namespace opfor {
 
 ///
 /// Group together (batch) multiple meshes that can be rendered in a single drawcall

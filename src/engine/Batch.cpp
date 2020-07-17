@@ -1,7 +1,7 @@
 #include "Batch.hpp"
 #include "Engine.hpp"
 
-namespace engine {
+namespace opfor {
 
 Batch::Batch() : _vao(0), _ibo(0)
 {
@@ -75,7 +75,7 @@ void Batch::Build()
 	std::vector<GLfloat> _materialIds{};
 	_materialIds.reserve(_materials.size());
 	std::transform(_materials.begin(), _materials.end(), _materialIds.begin(),
-		[] (std::string const &m) -> GLfloat { return engine::Engine::Instance().GetMaterialId(m); });
+		[] (std::string const &m) -> GLfloat { return opfor::Engine::Instance().GetMaterialId(m); });
 
 	glGenBuffers(1, &_ibo);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _ibo);

@@ -5,7 +5,7 @@
 #include "IDrawable.hpp"
 #include "Material.hpp"
 
-namespace engine
+namespace opfor
 {
 
 class Mesh : public IDrawable

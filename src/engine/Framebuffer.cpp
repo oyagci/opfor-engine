@@ -1,7 +1,7 @@
 #include "Framebuffer.hpp"
 #include "Engine.hpp"
 
-namespace engine {
+namespace opfor {
 
 Framebuffer::Framebuffer(Framebuffer_Type type)
 {

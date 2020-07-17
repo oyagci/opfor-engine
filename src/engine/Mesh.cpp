@@ -2,7 +2,7 @@
 #include <fmt/format.h>
 #include "TextureManager.hpp"
 
-namespace engine
+namespace opfor
 {
 	Mesh::Mesh() : vao(0), ibo(0), objectBuffer(0), lightMap(0)
 	{

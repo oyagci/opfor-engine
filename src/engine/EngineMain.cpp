@@ -2,6 +2,6 @@
 
 int EngineMain()
 {
-	engine::Engine::Instance().Run();
+	opfor::Engine::Instance().Run();
 	return 0;
 }

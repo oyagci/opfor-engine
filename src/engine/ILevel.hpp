@@ -6,7 +6,7 @@ namespace ecs {
 	class IEntityBase;
 }
 
-namespace engine {
+namespace opfor {
 
 class ILevel
 {

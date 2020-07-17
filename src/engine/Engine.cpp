@@ -8,7 +8,7 @@
 #include "engine/Model.hpp"
 #include "Level.hpp"
 
-namespace engine
+namespace opfor
 {
 
 unsigned int Engine::_nextId = 0;

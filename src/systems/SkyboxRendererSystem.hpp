@@ -35,7 +35,7 @@ public:
 
 		auto cameraData = camera[0]->Get<PlayerCameraComponent>();
 		auto [ meshComponent, _ ] = skybox[0]->GetAll();
-		auto mesh = engine::Engine::Instance().GetMesh(meshComponent.Id);
+		auto mesh = opfor::Engine::Instance().GetMesh(meshComponent.Id);
 
 		_shader.bind();
 		_shader.setUniform4x4f("viewMatrix", glm::mat4(glm::mat3(cameraData.view)));

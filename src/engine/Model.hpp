@@ -7,7 +7,7 @@
 #include "Mesh.hpp"
 #include "TextureManager.hpp"
 
-namespace engine {
+namespace opfor {
 
 class Model
 {
@@ -22,7 +22,7 @@ private:
 		if (node.mesh >= 0) {
 
 			auto const &mesh = model.meshes[node.mesh];
-			engine::Mesh current;
+			opfor::Mesh current;
 
 			for (auto const &primitive : mesh.primitives) {
 
@@ -118,7 +118,7 @@ private:
 				current.SetPbrMaterial(materials[primitive.material]);
 
 				// Register this mesh to the engine and save its index
-				allMeshes.push_back(engine::Engine::Instance().AddMesh(std::move(current)));
+				allMeshes.push_back(opfor::Engine::Instance().AddMesh(std::move(current)));
 			}
 		}
 
@@ -226,7 +226,7 @@ private:
 			//fmt::print("{}\n", pbrMaterial);
 
 			pbrMaterials.push_back(pbrMaterial.Name);
-			engine::Engine::Instance().AddPbrMaterial(pbrMaterial);
+			opfor::Engine::Instance().AddPbrMaterial(pbrMaterial);
 
 			currentMaterialIndex++;
 		}

@@ -2,7 +2,7 @@
 
 #include "lazy.hpp"
 
-namespace engine {
+namespace opfor {
 
 enum class Framebuffer_Type {
 	R,
