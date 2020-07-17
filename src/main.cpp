@@ -1,37 +1,17 @@
-#include "Engine.hpp"
-#include "engine/Model.hpp"
-#include "systems/CameraMovementSystem.hpp"
-#include "systems/MeshRendererSystem.hpp"
-#include "systems/SkyboxRendererSystem.hpp"
-#include "systems/ImguiSystem.hpp"
-#include "systems/LuaSystem.hpp"
-#include "components/PlayerCameraComponent.hpp"
-#include "components/TransformComponent.hpp"
-#include "components/SkyboxComponent.hpp"
-#include "components/SelectedComponent.hpp"
-#include "components/BatchComponent.hpp"
-#include "components/LuaScriptComponent.hpp"
-#include "stb_image.h"
-#include "lazy.hpp"
-#include "ShaderManager.hpp"
 #include <fmt/format.h>
 #include <utility>
 #include <string>
-#include <optional>
-#include <utility>
-#include "LuaRuntime.hpp"
 
-#include "lazy.hpp"
-#include "stb_image.h"
-#include "Logger.hpp"
-#include "tiny_gltf.h"
 #include "Engine.hpp"
-#include "Model.hpp"
+#include "stb_image.h"
+#include "lazy.hpp"
+#include "Logger.hpp"
 
 #include "systems/CameraMovementSystem.hpp"
-#include "systems/MeshRendererSystem.hpp"
 #include "systems/SkyboxRendererSystem.hpp"
+#include "systems/MeshRendererSystem.hpp"
 #include "systems/ImguiSystem.hpp"
+#include "systems/LuaSystem.hpp"
 
 using namespace opfor;
 
