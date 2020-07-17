@@ -1,4 +1,5 @@
-# 3D Engine
+# OPFOR Engine
+
 Game Engine in C++ and OpenGL.
 
 Notable Features:
