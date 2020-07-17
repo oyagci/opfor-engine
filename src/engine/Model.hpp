@@ -197,7 +197,7 @@ private:
 			if (baseColorTexture >= 0) {
 				pbrMaterial.Albedo = model.images[model.textures[baseColorTexture].source].uri;
 
-				TextureManager::instance().createTexture(pbrMaterial.Albedo.value(), directory + pbrMaterial.Albedo.value(), {
+				TextureManager::Get().createTexture(pbrMaterial.Albedo.value(), directory + pbrMaterial.Albedo.value(), {
 					{ GL_TEXTURE_MAG_FILTER, GL_LINEAR },
 					{ GL_TEXTURE_MIN_FILTER, GL_LINEAR },
 					{ GL_TEXTURE_WRAP_S, GL_REPEAT },
@@ -244,7 +244,7 @@ private:
 			if (t.sampler >= 0) {
 				auto const &sampler = model.samplers[t.sampler];
 
-				TextureManager::instance().createTexture(name, path, {
+				TextureManager::Get().createTexture(name, path, {
 					{ GL_TEXTURE_MAG_FILTER, sampler.magFilter },
 					{ GL_TEXTURE_MIN_FILTER, sampler.minFilter },
 					{ GL_TEXTURE_WRAP_S, sampler.wrapS },
@@ -252,7 +252,7 @@ private:
 				}, GL_TEXTURE_2D);
 			}
 			else {
-				TextureManager::instance().createTexture(name, path, {
+				TextureManager::Get().createTexture(name, path, {
 					{ GL_TEXTURE_MAG_FILTER, GL_LINEAR },
 					{ GL_TEXTURE_MIN_FILTER, GL_LINEAR },
 					{ GL_TEXTURE_WRAP_S, GL_REPEAT },

@@ -42,7 +42,7 @@ public:
 		_shader.setUniform4x4f("projectionMatrix", cameraData.projection);
 
 		glDepthMask(GL_FALSE);
-		TextureManager::instance().bind("skybox-cubemap", 0);
+		TextureManager::Get().bind("skybox-cubemap", 0);
 		mesh->Draw();
 		glDepthMask(GL_TRUE);
 

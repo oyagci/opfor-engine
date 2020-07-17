@@ -314,7 +314,7 @@ private:
 				auto const mesh = opfor::Engine::Get().GetMesh(meshId);
 				auto const shaderId = model.Shader;
 
-				auto shaderOpt = ShaderManager::instance().Get(shaderId);
+				auto shaderOpt = ShaderManager::Get().Get(shaderId);
 
 				if (!shaderOpt.has_value()) {
 					Logger::Warn("Shader {} does not exist\n", shaderId);
@@ -355,7 +355,7 @@ private:
 
 							if (m->Albedo.has_value()) {
 								auto albedo = m->Albedo.value();
-								auto texture = TextureManager::instance().get(albedo);
+								auto texture = TextureManager::Get().get(albedo);
 
 								shader->setUniform1i("material.hasAlbedo", 1);
 								textureBindings.push_back(TextureAutoBind(GL_TEXTURE0, GL_TEXTURE_2D, texture));
@@ -366,7 +366,7 @@ private:
 
 							if (m->MetallicRoughness.has_value()) {
 								auto metallicRoughness = m->MetallicRoughness.value();
-								auto texture = TextureManager::instance().get(metallicRoughness);
+								auto texture = TextureManager::Get().get(metallicRoughness);
 
 								shader->setUniform1i("material.hasMetallicRoughness", 1);
 								textureBindings.push_back(TextureAutoBind(GL_TEXTURE1, GL_TEXTURE_2D, texture));
@@ -377,12 +377,12 @@ private:
 
 							if (m->Normal.has_value()) {
 								auto normal = m->Normal.value();
-								auto texture = TextureManager::instance().get(normal);
+								auto texture = TextureManager::Get().get(normal);
 
 								textureBindings.push_back(TextureAutoBind(GL_TEXTURE2, GL_TEXTURE_2D, texture));
 							}
 							else {
-								auto const defaultNormal = TextureManager::instance().get("default_normal");
+								auto const defaultNormal = TextureManager::Get().get("default_normal");
 								textureBindings.push_back(TextureAutoBind(GL_TEXTURE2, GL_TEXTURE_2D, defaultNormal));
 							}
 						}
@@ -405,14 +405,14 @@ private:
 		auto [ meshComponent, _ ] = skybox[0]->GetAll();
 		auto mesh = opfor::Engine::Get().GetMesh(meshComponent.Id);
 
-		auto shader = ShaderManager::instance().Get(meshComponent.Shader).value();
+		auto shader = ShaderManager::Get().Get(meshComponent.Shader).value();
 
 		shader->bind();
 		shader->setUniform4x4f("viewMatrix", glm::mat4(glm::mat3(camera.view)));
 		shader->setUniform4x4f("projectionMatrix", camera.projection);
 
 		glDepthMask(GL_FALSE);
-		TextureManager::instance().bind("skybox-cubemap", 0);
+		TextureManager::Get().bind("skybox-cubemap", 0);
 		mesh->Draw();
 		glDepthMask(GL_TRUE);
 
@@ -467,7 +467,7 @@ private:
 			_billboard.setUniform4x4f("projectionMatrix", camera.projection);
 			_billboard.setUniform3f("particlePosition", transform.position);
 
-			TextureManager::instance().bind("light_bulb_icon", 0);
+			TextureManager::Get().bind("light_bulb_icon", 0);
 			_quad.Draw();
 
 			_billboard.unbind();
@@ -576,7 +576,7 @@ public:
 		InitSSAO();
 		InitDepthCubemap();
 
-		TextureManager::instance().createTexture("light_bulb_icon", "./img/light_bulb_icon.png", {
+		TextureManager::Get().createTexture("light_bulb_icon", "./img/light_bulb_icon.png", {
 			{ GL_TEXTURE_WRAP_R, GL_WRAP_BORDER },
 			{ GL_TEXTURE_WRAP_S, GL_WRAP_BORDER },
 			{ GL_TEXTURE_MIN_FILTER, GL_NEAREST },

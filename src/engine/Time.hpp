@@ -5,7 +5,7 @@ namespace opfor
 
 class Time {
 public:
-	static Time &instance()
+	static Time &Get()
 	{
 		static Time t;
 

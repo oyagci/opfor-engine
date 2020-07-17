@@ -213,11 +213,11 @@ public:
 
 		if (material.Albedo.has_value()) {
 			glActiveTexture(GL_TEXTURE0);
-			glBindTexture(GL_TEXTURE_2D, TextureManager::instance().get(material.Albedo.value()));
+			glBindTexture(GL_TEXTURE_2D, TextureManager::Get().get(material.Albedo.value()));
 		}
 		if (material.Normal.has_value()) {
 			glActiveTexture(GL_TEXTURE2);
-			glBindTexture(GL_TEXTURE_2D, TextureManager::instance().get(material.Normal.value()));
+			glBindTexture(GL_TEXTURE_2D, TextureManager::Get().get(material.Normal.value()));
 		}
 	}
 

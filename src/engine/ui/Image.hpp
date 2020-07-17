@@ -16,7 +16,7 @@ public:
 
 	void setImage(float width, float height, std::string const &path)
 	{
-		TextureManager::instance().createTexture(path, path, {
+		TextureManager::Get().createTexture(path, path, {
 			{ GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE },
 			{ GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE },
 			{ GL_TEXTURE_MIN_FILTER, GL_NEAREST },
@@ -55,7 +55,7 @@ public:
 
 	void draw(Shader &shader) override
 	{
-		TextureManager::instance().bind(_textureName, GL_TEXTURE0);
+		TextureManager::Get().bind(_textureName, GL_TEXTURE0);
 		_quad.draw();
 	}
 

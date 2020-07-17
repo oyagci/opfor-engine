@@ -462,7 +462,7 @@ private:
 
 			if (ImGui::BeginPopupContextItem("add_component_popup")) {
 				if (ImGui::MenuItem("Mesh")) {
-					auto [ shaderId, shader ] = ShaderManager::instance().Create();
+					auto [ shaderId, shader ] = ShaderManager::Get().Create();
 						shader.addVertexShader("shaders/basic.vs.glsl")
 							.addFragmentShader("shaders/basic.fs.glsl")
 							.link();

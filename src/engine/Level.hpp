@@ -35,7 +35,7 @@ public:
 			Unload();
 		}
 
-		auto [ shaderId, meshShader ] = ShaderManager::instance().Create();
+		auto [ shaderId, meshShader ] = ShaderManager::Get().Create();
 		meshShader.addVertexShader("./shaders/basic.vs.glsl")
 			.addFragmentShader("./shaders/basic.fs.glsl")
 			.link();
@@ -128,7 +128,7 @@ public:
 		_entities.clear();
 		_models.clear();
 
-		ShaderManager::instance().Delete(_meshShader);
+		ShaderManager::Get().Delete(_meshShader);
 
 		_meshShader = 0;
 	}

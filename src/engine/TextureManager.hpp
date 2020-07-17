@@ -8,7 +8,7 @@
 class TextureManager
 {
 public:
-	static TextureManager &instance() {
+	static TextureManager &Get() {
 		static TextureManager manager;
 		return manager;
 	}

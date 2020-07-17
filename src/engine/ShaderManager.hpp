@@ -7,7 +7,7 @@
 class ShaderManager
 {
 public:
-	static ShaderManager &instance() {
+	static ShaderManager &Get() {
 		static ShaderManager manager;
 		return manager;
 	}

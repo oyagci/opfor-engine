@@ -10,13 +10,13 @@ Button::Button(IUIScene *scene) : ASceneComponent(scene)
 
 void Button::setup(glm::vec2 size, Anchor anchorPoint)
 {
-	TextureManager::instance().createTexture("Button", "img/button.png", {
+	TextureManager::Get().createTexture("Button", "img/button.png", {
 		{ GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE },
 		{ GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE },
 		{ GL_TEXTURE_MIN_FILTER, GL_NEAREST },
 		{ GL_TEXTURE_MAG_FILTER, GL_NEAREST }
 	}, GL_TEXTURE_2D);
-	TextureManager::instance().createTexture("ButtonHovering", "img/button_hover.png", {
+	TextureManager::Get().createTexture("ButtonHovering", "img/button_hover.png", {
 		{ GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE },
 		{ GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE },
 		{ GL_TEXTURE_MIN_FILTER, GL_NEAREST },
@@ -83,10 +83,10 @@ void Button::update()
 void Button::draw(Shader &shader)
 {
 	if (_isHovering) {
-		TextureManager::instance().bind("ButtonHovering", GL_TEXTURE0);
+		TextureManager::Get().bind("ButtonHovering", GL_TEXTURE0);
 	}
 	else {
-		TextureManager::instance().bind("Button", GL_TEXTURE0);
+		TextureManager::Get().bind("Button", GL_TEXTURE0);
 	}
 	_mesh.draw();
 }

@@ -73,11 +73,11 @@ Engine::~Engine() = default;
 
 int Engine::Run()
 {
-	Settings::instance().load("config.ini");
+	Settings::Get().load("config.ini");
 
 	while (!_display->isClosed())
 	{
-		float deltaTime = Time::instance().getDeltaTime();
+		float deltaTime = Time::Get().getDeltaTime();
 
 		Update();
 

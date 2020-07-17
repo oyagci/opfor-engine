@@ -15,7 +15,7 @@ public:
 
 	void draw(Shader &shader) override
 	{
-		TextureManager::instance().bind("MenuBackground", GL_TEXTURE0);
+		TextureManager::Get().bind("MenuBackground", GL_TEXTURE0);
 		_background.draw();
 	}
 

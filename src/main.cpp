@@ -74,7 +74,7 @@ MeshComponent initSkybox()
 	glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
 
 	Texture texture(textureId, "skybox-cubemap", 0, 0, 0, GL_TEXTURE_CUBE_MAP);
-	TextureManager::instance().add("skybox-cubemap", std::move(texture));
+	TextureManager::Get().add("skybox-cubemap", std::move(texture));
 
 	const glm::vec3 verts[] = {
 		glm::vec3(-1.0, -1.0,  1.0),
@@ -257,7 +257,7 @@ std::vector<unsigned int> LoadMesh(std::string const &path, std::string const &n
 	for (auto const &[type, texture] : model.getTextures()) {
 		for (auto const &t : texture) {
 			Logger::Verbose("Loading texture {} into memory\n", t.name);
-			TextureManager::instance().createTexture(t.name, t.path, {
+			TextureManager::Get().createTexture(t.name, t.path, {
 				{ GL_TEXTURE_MAG_FILTER, GL_LINEAR },
 				{ GL_TEXTURE_MIN_FILTER, GL_LINEAR },
 				{ GL_TEXTURE_WRAP_S, GL_REPEAT },
@@ -276,13 +276,13 @@ std::vector<unsigned int> LoadMesh(std::string const &path, std::string const &n
 
 		mat.shininess = 32.0f;
 		if (mesh.DiffuseMaps.size() > 0) {
-			mat.diffuse = TextureManager::instance().get(mesh.DiffuseMaps[0]);
+			mat.diffuse = TextureManager::Get().get(mesh.DiffuseMaps[0]);
 		}
 		if (mesh.NormalMaps.size() > 0) {
-			mat.normal = TextureManager::instance().get(mesh.NormalMaps[0]);
+			mat.normal = TextureManager::Get().get(mesh.NormalMaps[0]);
 		}
 		if (mesh.SpecularMaps.size() > 0) {
-			mat.specular = TextureManager::instance().get(mesh.SpecularMaps[0]);
+			mat.specular = TextureManager::Get().get(mesh.SpecularMaps[0]);
 		}
 		
 		auto checkMaterialExists = [&] (std::vector<Material> &materials, Material &rhs) -> std::optional<size_t> {
@@ -338,14 +338,14 @@ int main()
 	engine.CreateComponentSystem<ImguiSystem>();
 	engine.CreateComponentSystem<LuaSystem>();
 
-	TextureManager::instance().createTexture("prototype_tile_8", "./img/prototype_tile_8.png", {
+	TextureManager::Get().createTexture("prototype_tile_8", "./img/prototype_tile_8.png", {
 		{ GL_TEXTURE_MAG_FILTER, GL_LINEAR },
 		{ GL_TEXTURE_MIN_FILTER, GL_LINEAR },
 		{ GL_TEXTURE_WRAP_R, GL_REPEAT },
 		{ GL_TEXTURE_WRAP_S, GL_REPEAT },
 	}, GL_TEXTURE_2D);
 
-	TextureManager::instance().createTexture("default_normal", "./img/default_normal.png", {
+	TextureManager::Get().createTexture("default_normal", "./img/default_normal.png", {
 		{ GL_TEXTURE_MAG_FILTER, GL_NEAREST },
 		{ GL_TEXTURE_MIN_FILTER, GL_NEAREST },
 		{ GL_TEXTURE_WRAP_R, GL_REPEAT },

@@ -202,7 +202,7 @@ namespace opfor
 		std::vector<GLuint> ids(textures.size());
 
 		for (auto const &t : textures) {
-			GLuint id = TextureManager::instance().get(t.name);
+			GLuint id = TextureManager::Get().get(t.name);
 			ids.push_back(id);
 		}
 

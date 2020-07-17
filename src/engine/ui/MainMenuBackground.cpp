@@ -2,7 +2,7 @@
 #include "UIScene.hpp"
 
 MainMenuBackground::MainMenuBackground(IUIScene *parent) : ASceneComponent(parent) {
-	TextureManager::instance().createTexture("MenuBackground", "img/bg.png", {
+	TextureManager::Get().createTexture("MenuBackground", "img/bg.png", {
 		{ GL_TEXTURE_WRAP_S, GL_REPEAT },
 		{ GL_TEXTURE_WRAP_T, GL_REPEAT },
 		{ GL_TEXTURE_MAG_FILTER, GL_NEAREST },

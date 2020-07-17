@@ -14,7 +14,7 @@ private:
 		STRING
 	};
 public:
-	static Settings &instance() {
+	static Settings &Get() {
 		static Settings s;
 		return s;
 	}
