@@ -56,7 +56,10 @@ srcs = [
 
   'src/engine/core/Window.cpp',
   'src/engine/core/Input.cpp',
+  'src/engine/renderer/Renderer.cpp',
+  'src/engine/renderer/Buffer.cpp',
   'src/engine/platform/opengl/OpenGLContext.cpp',
+  'src/engine/platform/opengl/OpenGLBuffer.cpp',
   'src/engine/platform/linux/LinuxWindow.cpp',
   'src/engine/platform/linux/LinuxInput.cpp',
 ]
