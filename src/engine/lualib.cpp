@@ -3,6 +3,7 @@
 #include <fmt/format.h>
 #include "Engine.hpp"
 #include "components/TransformComponent.hpp"
+#include <glm/vec3.hpp>
 
 static int Engine_setPosition(lua_State *L)
 {

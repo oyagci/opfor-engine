@@ -2,8 +2,9 @@
 
 #include "ecs/Component.hpp"
 #include "lazy.hpp"
+#include "engine/core/Window.hpp"
 
 struct DisplayComponent : ecs::IComponentBase
 {
-	lazy::graphics::Display *display;
+	opfor::IWindow *window;
 };

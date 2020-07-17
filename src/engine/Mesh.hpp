@@ -1,6 +1,6 @@
 #pragma once
 
-#include "lazy.hpp"
+#include <lazy.hpp>
 #include <vector>
 #include "IDrawable.hpp"
 #include "Material.hpp"
@@ -51,7 +51,7 @@ public:
 	Mesh &addUv(const glm::vec2 &v);
 	Mesh &addTangent(const glm::vec4 &v);
 	Mesh &addIndex(const int index);
-	Mesh &addTriangle(const glm::u32vec3 &triangle);
+	Mesh &addTriangle(const glm::uvec3 &triangle);
 	Mesh &addTexture(std::string const &name, TextureType type);
 
 	std::vector<GLfloat> const &GetPositions() const { return vPositions; }

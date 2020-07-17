@@ -25,10 +25,12 @@
 #include "ShaderManager.hpp"
 #include "nfd.hpp"
 
+#include "engine/core/Window.hpp"
+
 class ImguiSystem : public ecs::ComponentSystem
 {
 private:
-	lazy::graphics::Display *_display;
+	opfor::IWindow *_window;
 
 	bool _logAutoScroll;
 	ecs::IEntityBase *_currentEntity;
@@ -516,7 +518,7 @@ private:
 	}
 
 public:
-	ImguiSystem() : _display(nullptr), _logAutoScroll(true), _currentEntity(nullptr)
+	ImguiSystem() : _window(nullptr), _logAutoScroll(true), _currentEntity(nullptr)
 	{
 		IMGUI_CHECKVERSION();
 		ImGui::CreateContext();
@@ -538,10 +540,11 @@ public:
 
 	void OnUpdate(float __unused deltaTime) override
 	{
-		if (!_display) {
+		if (!_window) {
 			auto displays = GetEntities<DisplayComponent>();
-			_display = displays[0]->Get<DisplayComponent>().display;
-			ImGui_ImplGlfw_InitForOpenGL(_display->getWindow(), true);
+			_window = displays[0]->Get<DisplayComponent>().window;
+			// FIXME: Call the right implementation based on renderer context
+			ImGui_ImplGlfw_InitForOpenGL(reinterpret_cast<GLFWwindow*>(_window->GetRawHandle()), true);
 			ImGui_ImplOpenGL3_Init("#version 450");
 		}
 
@@ -574,7 +577,7 @@ public:
 				playerEnts[0]->Set(camera);
 
 				// Enable/Switch cursor
-				display.display->showCursor(!camera.useInput);
+				display.window->HideCursor(camera.useInput);
 				displayEnt->Set(display);
 			}
 		}

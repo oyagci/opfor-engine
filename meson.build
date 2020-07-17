@@ -9,6 +9,8 @@ project('ft_vox', 'cpp',
 	  'werror=false',
 	  'optimization=2'])
 
+add_project_arguments('-DOP4_PLATFORM_LINUX', language: 'cpp')
+
 conf_data = configuration_data()
 conf_data.set('version', 'v0.0.2')
 configure_inc = '.'
@@ -51,6 +53,10 @@ srcs = [
   'src/engine/Mesh.cpp',
   'src/engine/Batch.cpp',
   'src/engine/lualib.cpp',
+
+  'src/engine/core/Window.cpp',
+  'src/engine/platform/opengl/OpenGLContext.cpp',
+  'src/engine/platform/linux/LinuxWindow.cpp',
 ]
 
 imgui = [

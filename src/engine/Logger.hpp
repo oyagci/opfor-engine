@@ -69,6 +69,8 @@ private:
 				_lineOffsets.push_back(oldSize + 1);
 			}
 		}
+
+		fmt::print("{}", finalString);
 	}
 
 public:

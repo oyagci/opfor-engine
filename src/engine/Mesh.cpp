@@ -1,6 +1,9 @@
+#include <lazy.hpp>
 #include "Mesh.hpp"
 #include <fmt/format.h>
 #include "TextureManager.hpp"
+#include <glm/vec3.hpp>
+#include <glm/vec2.hpp>
 
 namespace opfor
 {
@@ -120,7 +123,7 @@ namespace opfor
 		return *this;
 	}
 
-	Mesh &Mesh::addTriangle(const glm::u32vec3 &triangle)
+	Mesh &Mesh::addTriangle(const glm::uvec3 &triangle)
 	{
 		indices.push_back(triangle.x);
 		indices.push_back(triangle.y);

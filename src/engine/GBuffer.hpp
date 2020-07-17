@@ -15,8 +15,8 @@ private:
 
 	void Init()
 	{
-		auto display = opfor::Engine::Get().GetDisplay();
-		auto [ width, height ] = std::tuple(display->getWidth(), display->getHeight());
+		auto display = opfor::Engine::Get().GetWindow();
+		auto [ width, height ] = std::tuple(display->GetWidth(), display->GetHeight());
 
 		glGenFramebuffers(1, &_gBuffer);
 		glBindFramebuffer(GL_FRAMEBUFFER, _gBuffer);

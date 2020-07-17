@@ -7,6 +7,7 @@
 #include "components/LuaScriptComponent.hpp"
 #include "engine/Model.hpp"
 #include "Level.hpp"
+#include "engine/platform/opengl/OpenGLContext.hpp"
 
 namespace opfor
 {
@@ -16,19 +17,11 @@ unsigned int Engine::_nextMaterialId = 0;
 
 Engine::Engine()
 {
-	_display = std::make_unique<Display>("3D Engine", 1920, 1080);
-	_display->enableCap(GL_DEPTH_TEST);
-	_display->enableCap(GL_CULL_FACE);
-	_display->enableCap(GL_BLEND);
-	_display->setFullscreen(false);
-	_display->showCursor(false);
-	glEnable(GL_DEBUG_OUTPUT);
+	_window = IWindow::Create({ "OPFOR - Untitled Project", 1920, 1080 });
+	_context = MakeUnique<OpenGLContext>(reinterpret_cast<GLFWwindow*>(_window->GetRawHandle()));
+	_context->Init();
 
-	maths::transform t = { glm::vec3(32, 64, 32), glm::quat(), glm::vec3(1), nullptr };
-	_camera = std::make_unique<Camera>(*_display, t);
-	_camera->setProjection(glm::radians(80.0f), 0.1f, 1000.0f);
-
-	_ui = std::make_unique<UI>(_display->getWidth(), _display->getHeight());
+	_ui = std::make_unique<UI>(_window->GetWidth(), _window->GetHeight());
 
 	_systemManager = _ecs.GetSystemManager();
 	_entityManager = _ecs.GetEntityManager();
@@ -75,17 +68,15 @@ int Engine::Run()
 {
 	Settings::Get().load("config.ini");
 
-	while (!_display->isClosed())
+	while (!_window->IsClosed())
 	{
 		float deltaTime = Time::Get().getDeltaTime();
 
 		Update();
 
-		_camera->update();
 		_ecs.Update(deltaTime);
 
-		_display->update();
-		_display->updateInputs();
+		_context->SwapBuffers();
 
 		_ui->update();
 		_ui->render();

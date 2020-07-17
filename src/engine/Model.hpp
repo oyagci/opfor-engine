@@ -6,6 +6,7 @@
 #include "tinygltf/tiny_gltf.h"
 #include "Mesh.hpp"
 #include "TextureManager.hpp"
+#include <glm/vec3.hpp>
 
 namespace opfor {
 

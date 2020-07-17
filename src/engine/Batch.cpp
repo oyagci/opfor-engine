@@ -1,3 +1,4 @@
+#include <lazy.hpp>
 #include "Batch.hpp"
 #include "Engine.hpp"
 

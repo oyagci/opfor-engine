@@ -103,10 +103,10 @@ int main()
 	fmt::print("{} - {}\n", LUA_COPYRIGHT, LUA_AUTHORS);
 
 	auto &engine = Engine::Get();
-	engine.CreateComponentSystem<CameraMovementSystem>();
+//	engine.CreateComponentSystem<CameraMovementSystem>();
 	engine.CreateComponentSystem<SkyboxRendererSystem>();
 	engine.CreateComponentSystem<MeshRendererSystem>();
-	engine.CreateComponentSystem<ImguiSystem>();
+//	engine.CreateComponentSystem<ImguiSystem>();
 	engine.CreateComponentSystem<LuaSystem>();
 
 	TextureManager::Get().createTexture("prototype_tile_8", "./img/prototype_tile_8.png", {
@@ -141,7 +141,7 @@ int main()
 
 	auto display = engine.CreateEntity<DisplayComponent>();
 	DisplayComponent d;
-	d.display = engine.GetDisplay();
+	d.window = engine.GetWindow();
 	display->Set(d);
 	display->SetName("Display");
 

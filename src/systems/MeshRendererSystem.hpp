@@ -90,8 +90,8 @@ private:
 
 	void UnbindShadowMap()
 	{
-		auto display = opfor::Engine::Get().GetDisplay();
-		auto [ width, height ] = std::tuple(display->getWidth(), display->getHeight());
+		auto display = opfor::Engine::Get().GetWindow();
+		auto [ width, height ] = std::tuple(display->GetWidth(), display->GetHeight());
 
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		glViewport(0, 0, width, height);
@@ -138,8 +138,8 @@ private:
 
 	void InitSSAO()
 	{
-		auto display = opfor::Engine::Get().GetDisplay();
-		auto [ width, height ] = std::tuple(display->getWidth(), display->getHeight());
+		auto display = opfor::Engine::Get().GetWindow();
+		auto [ width, height ] = std::tuple(display->GetWidth(), display->GetHeight());
 
 		_ssaoShader.addVertexShader("shaders/ssao.vs.glsl")
 			.addFragmentShader("shaders/ssao.fs.glsl")
@@ -597,8 +597,8 @@ public:
 	void OnUpdate(float __unused deltaTime) override
 	{
 		auto player = GetEntities<PlayerCameraComponent, TransformComponent>();
-		auto display = opfor::Engine::Get().GetDisplay();
-		auto [ width, height ] = std::tuple(display->getWidth(), display->getHeight());
+		auto display = opfor::Engine::Get().GetWindow();
+		auto [ width, height ] = std::tuple(display->GetWidth(), display->GetHeight());
 
 		if (player.size() == 0) { return ; }
 

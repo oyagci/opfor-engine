@@ -1,3 +1,4 @@
+#include <lazy.hpp>
 #include "Texture.hpp"
 #include "stb_image.h"
 #include <fmt/format.h>

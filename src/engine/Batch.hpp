@@ -1,7 +1,8 @@
 #pragma once
 #include <vector>
-#include "lazy.hpp"
+#include <lazy.hpp>
 #include "IDrawable.hpp"
+#include <string>
 
 namespace opfor {
 

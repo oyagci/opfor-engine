@@ -51,8 +51,8 @@ bool Framebuffer::IsComplete()
 
 void Framebuffer::AttachColorBuffer()
 {
-	int width = Engine::Get().GetDisplay()->getWidth();
-	int height = Engine::Get().GetDisplay()->getHeight();
+	int width = Engine::Get().GetWindow()->GetWidth();
+	int height = Engine::Get().GetWindow()->GetHeight();
 
 	glGenTextures(1, &_texture);
 	glActiveTexture(GL_TEXTURE0);
@@ -68,8 +68,8 @@ void Framebuffer::AttachColorBuffer()
 
 void Framebuffer::AttachDepthBuffer()
 {
-	int width = Engine::Get().GetDisplay()->getWidth();
-	int height = Engine::Get().GetDisplay()->getHeight();
+	int width = Engine::Get().GetWindow()->GetWidth();
+	int height = Engine::Get().GetWindow()->GetHeight();
 
 	glGenRenderbuffers(1, &_depth);
 	glBindRenderbuffer(GL_RENDERBUFFER, _depth);

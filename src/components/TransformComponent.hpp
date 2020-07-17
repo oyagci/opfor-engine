@@ -1,7 +1,7 @@
 #pragma once
 
-#include "lazy.hpp"
 #include "ecs/Component.hpp"
+#include <glm/vec3.hpp>
 
 struct TransformComponent : ecs::IComponentBase
 {

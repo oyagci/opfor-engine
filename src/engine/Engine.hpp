@@ -1,11 +1,9 @@
 #pragma once
 
 #include <memory>
-#include "lazy.hpp"
 #include "ui/UI.hpp"
 #include "ecs/ecs.hpp"
 #include "EngineObject.hpp"
-#include "assimp/Model.hpp"
 #include "Mesh.hpp"
 #include "Batch.hpp"
 #include <unordered_map>
@@ -14,6 +12,9 @@
 #include "Logger.hpp"
 #include "Action.hpp"
 #include "ILevel.hpp"
+#include "engine/core/base.hpp"
+#include "engine/core/Window.hpp"
+#include "engine/renderer/Context.hpp"
 
 using namespace lazy;
 using namespace graphics;
@@ -37,8 +38,10 @@ class Model;
 class Engine
 {
 private:
-	std::unique_ptr<Display> _display;
-	std::unique_ptr<Camera> _camera;
+
+	UniquePtr<IWindow> _window;
+	UniquePtr<IRendererContext> _context;
+
 	std::unique_ptr<UI> _ui;
 
 	ecs::ECSEngine _ecs;
@@ -132,7 +135,7 @@ public:
 	void UpdateObjects();
 	void UpdateSubobjects(std::vector<EngineObject*> subobjects);
 
-	lazy::graphics::Display *GetDisplay() { return _display.get(); }
+	IWindow *GetWindow() { return _window.get(); }
 
 	template <typename T, typename ... ArgTypes>
 	[[nodiscard]] T *CreateEngineObject(ArgTypes... args)
@@ -308,7 +311,7 @@ public:
 
 	void Close()
 	{
-		glfwSetWindowShouldClose(_display->getWindow(), GLFW_TRUE);
+		_window->Close();
 	}
 
 	unsigned int RegisterModel(opfor::Model model);

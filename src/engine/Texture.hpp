@@ -1,7 +1,7 @@
 #pragma once
 
 #include <string>
-#include "lazy.hpp"
+#include <lazy.hpp>
 
 class Texture
 {
