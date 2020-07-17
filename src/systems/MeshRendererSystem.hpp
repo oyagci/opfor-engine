@@ -90,7 +90,7 @@ private:
 
 	void UnbindShadowMap()
 	{
-		auto display = opfor::Engine::Instance().GetDisplay();
+		auto display = opfor::Engine::Get().GetDisplay();
 		auto [ width, height ] = std::tuple(display->getWidth(), display->getHeight());
 
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -138,7 +138,7 @@ private:
 
 	void InitSSAO()
 	{
-		auto display = opfor::Engine::Instance().GetDisplay();
+		auto display = opfor::Engine::Get().GetDisplay();
 		auto [ width, height ] = std::tuple(display->getWidth(), display->getHeight());
 
 		_ssaoShader.addVertexShader("shaders/ssao.vs.glsl")
@@ -288,7 +288,7 @@ private:
 
 			for (auto const meshId : model.Meshes) {
 
-				auto const *mesh = opfor::Engine::Instance().GetMesh(meshId);
+				auto const *mesh = opfor::Engine::Get().GetMesh(meshId);
 
 				glm::mat4 model(1.0f);
 				model = glm::translate(model, transform.position);
@@ -311,7 +311,7 @@ private:
 
 			for (auto const meshId : model.Meshes) {
 
-				auto const mesh = opfor::Engine::Instance().GetMesh(meshId);
+				auto const mesh = opfor::Engine::Get().GetMesh(meshId);
 				auto const shaderId = model.Shader;
 
 				auto shaderOpt = ShaderManager::instance().Get(shaderId);
@@ -343,7 +343,7 @@ private:
 				if (meshCast != nullptr) {
 					if (meshCast->GetPbrMaterial().has_value()) {
 
-						auto material = opfor::Engine::Instance().GetPbrMaterial(
+						auto material = opfor::Engine::Get().GetPbrMaterial(
 							meshCast->GetPbrMaterial().value());
 
 						if (material.has_value()) {
@@ -403,7 +403,7 @@ private:
 		if (skybox.size() == 0) { return ; }
 
 		auto [ meshComponent, _ ] = skybox[0]->GetAll();
-		auto mesh = opfor::Engine::Instance().GetMesh(meshComponent.Id);
+		auto mesh = opfor::Engine::Get().GetMesh(meshComponent.Id);
 
 		auto shader = ShaderManager::instance().Get(meshComponent.Shader).value();
 
@@ -569,7 +569,7 @@ public:
 	MeshRendererSystem()
 	{
 		buildShadowMap = [this] { BakeShadowMap(); };
-		opfor::Engine::Instance().OnBuildLighting += buildShadowMap;
+		opfor::Engine::Get().OnBuildLighting += buildShadowMap;
 
 		InitFramebuffer();
 		InitBillboard();
@@ -591,13 +591,13 @@ public:
 
 	~MeshRendererSystem()
 	{
-		opfor::Engine::Instance().OnBuildLighting -= buildShadowMap;
+		opfor::Engine::Get().OnBuildLighting -= buildShadowMap;
 	}
 
 	void OnUpdate(float __unused deltaTime) override
 	{
 		auto player = GetEntities<PlayerCameraComponent, TransformComponent>();
-		auto display = opfor::Engine::Instance().GetDisplay();
+		auto display = opfor::Engine::Get().GetDisplay();
 		auto [ width, height ] = std::tuple(display->getWidth(), display->getHeight());
 
 		if (player.size() == 0) { return ; }

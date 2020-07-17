@@ -75,7 +75,7 @@ void Batch::Build()
 	std::vector<GLfloat> _materialIds{};
 	_materialIds.reserve(_materials.size());
 	std::transform(_materials.begin(), _materials.end(), _materialIds.begin(),
-		[] (std::string const &m) -> GLfloat { return opfor::Engine::Instance().GetMaterialId(m); });
+		[] (std::string const &m) -> GLfloat { return opfor::Engine::Get().GetMaterialId(m); });
 
 	glGenBuffers(1, &_ibo);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _ibo);

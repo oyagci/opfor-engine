@@ -118,7 +118,7 @@ private:
 				current.SetPbrMaterial(materials[primitive.material]);
 
 				// Register this mesh to the engine and save its index
-				allMeshes.push_back(opfor::Engine::Instance().AddMesh(std::move(current)));
+				allMeshes.push_back(opfor::Engine::Get().AddMesh(std::move(current)));
 			}
 		}
 
@@ -226,7 +226,7 @@ private:
 			//fmt::print("{}\n", pbrMaterial);
 
 			pbrMaterials.push_back(pbrMaterial.Name);
-			opfor::Engine::Instance().AddPbrMaterial(pbrMaterial);
+			opfor::Engine::Get().AddPbrMaterial(pbrMaterial);
 
 			currentMaterialIndex++;
 		}

@@ -117,8 +117,8 @@ public:
 		_cbStart = Callback<>([&] { OnStart(); });
 		_cbStop = Callback<>([&] { OnStop(); });
 
-		opfor::Engine::Instance().OnStartPlaying += _cbStart;
-		opfor::Engine::Instance().OnStopPlaying += _cbStop;
+		opfor::Engine::Get().OnStartPlaying += _cbStart;
+		opfor::Engine::Get().OnStopPlaying += _cbStop;
 
 		_current = std::make_unique<LuaSystemState_Start>();
 	}

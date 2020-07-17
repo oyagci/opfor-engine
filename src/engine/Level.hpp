@@ -123,7 +123,7 @@ public:
 		_isLoaded = false;
 
 		for (auto &entity : _entities) {
-			opfor::Engine::Instance().DeleteEntity(entity.second->GetId());
+			opfor::Engine::Get().DeleteEntity(entity.second->GetId());
 		}
 		_entities.clear();
 		_models.clear();
@@ -139,7 +139,7 @@ public:
 	///
 	ecs::IEntityBase *CreateEntity() override
 	{
-		auto entity = opfor::Engine::Instance().CreateEntity<TransformComponent>();
+		auto entity = opfor::Engine::Get().CreateEntity<TransformComponent>();
 		_entities[entity->GetUuid()] = entity;
 		return entity;
 	}

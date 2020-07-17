@@ -114,7 +114,7 @@ MeshComponent initSkybox()
 	for (const auto &i : indices) { mesh.addTriangle(i); }
 	mesh.build();
 
-	meshComponent.Id = Engine::Instance().AddMesh(std::move(mesh));
+	meshComponent.Id = Engine::Get().AddMesh(std::move(mesh));
 
 	return meshComponent;
 }
@@ -141,7 +141,7 @@ MeshComponent initSkybox()
 // 			modelComponent.Meshes.reserve(model.GetMeshes().size());
 // 			modelComponent.Meshes.insert(modelComponent.Meshes.begin(), model.GetMeshes().begin(), model.GetMeshes().end());
 // 
-// 		auto entity = opfor::Engine::Instance().CreateEntity<ModelComponent, TransformComponent, LuaScriptComponent>();
+// 		auto entity = opfor::Engine::Get().CreateEntity<ModelComponent, TransformComponent, LuaScriptComponent>();
 // 			entity->Set(modelComponent);
 // 			entity->SetName(name);
 // 
@@ -169,7 +169,7 @@ MeshComponent initSkybox()
 // 	lua_Number y = lua_tonumber(L, 3);
 // 	lua_Number z = lua_tonumber(L, 4);
 // 
-// 	auto const entity = opfor::Engine::Instance().GetEntity(modelId);
+// 	auto const entity = opfor::Engine::Get().GetEntity(modelId);
 // 	if (entity.has_value() && entity.value()->HasComponents<TransformComponent>()) {
 // 
 // 		auto transform = entity.value()->Get<TransformComponent>();
@@ -198,7 +198,7 @@ MeshComponent initSkybox()
 // 
 // 	lua_Number intensity = luaL_checknumber(L, 4);
 // 
-// 	auto pointLight = opfor::Engine::Instance().CreateEntity<PointLightComponent, TransformComponent>();
+// 	auto pointLight = opfor::Engine::Get().CreateEntity<PointLightComponent, TransformComponent>();
 // 
 // 	PointLightComponent pt;
 // 		pt.Color = color;
@@ -309,7 +309,7 @@ std::vector<unsigned int> LoadMesh(std::string const &path, std::string const &n
 			std::string materialName(name + std::to_string(matIndex++));
 			mat.name = materialName;
 			materials.push_back(mat);
-			opfor::Engine::Instance().AddMaterial(materialName, mat);
+			opfor::Engine::Get().AddMaterial(materialName, mat);
 			materialNames.push_back(materialName);
 			meshes[i].SetMaterial(materialName);
 			Logger::Verbose("Create material {} {}", materialName, mat);
@@ -320,7 +320,7 @@ std::vector<unsigned int> LoadMesh(std::string const &path, std::string const &n
 
 	std::vector<unsigned int> meshIds;
 	for (auto &m : meshes) {
-		meshIds.push_back(opfor::Engine::Instance().AddMesh(std::move(m)));
+		meshIds.push_back(opfor::Engine::Get().AddMesh(std::move(m)));
 	}
 
 	return meshIds;
@@ -331,7 +331,7 @@ int main()
 	Logger::Verbose("Hello World\n");
 	fmt::print("{} - {}\n", LUA_COPYRIGHT, LUA_AUTHORS);
 
-	auto &engine = Engine::Instance();
+	auto &engine = Engine::Get();
 	engine.CreateComponentSystem<CameraMovementSystem>();
 	engine.CreateComponentSystem<SkyboxRendererSystem>();
 	engine.CreateComponentSystem<MeshRendererSystem>();
@@ -374,5 +374,5 @@ int main()
 	display->Set(d);
 	display->SetName("Display");
 
-	return opfor::Engine::Instance().Run();
+	return opfor::Engine::Get().Run();
 }

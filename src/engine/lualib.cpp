@@ -14,7 +14,7 @@ static int Engine_setPosition(lua_State *L)
 
 	luaL_checktype(L, 1, LUA_TTABLE);
 
-	auto entity = opfor::Engine::Instance().GetEntity(entityId);
+	auto entity = opfor::Engine::Get().GetEntity(entityId);
 
 	if (!entity.has_value()) { return 0; }
 	if (!entity.value()->HasComponents<TransformComponent>()) { return 0; }
@@ -45,7 +45,7 @@ static int Engine_setScale(lua_State *L)
 
 	luaL_checktype(L, 1, LUA_TTABLE);
 
-	auto entity = opfor::Engine::Instance().GetEntity(entityId);
+	auto entity = opfor::Engine::Get().GetEntity(entityId);
 
 	if (!entity.has_value()) { return 0; }
 	if (!entity.value()->HasComponents<TransformComponent>()) { return 0; }

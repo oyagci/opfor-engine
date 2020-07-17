@@ -121,7 +121,7 @@ public:
 	Engine(Engine const &) = delete;
 	void operator=(Engine const &) = delete;
 
-	static Engine &Instance()
+	static Engine &Get()
 	{
 		static Engine engine;
 		return engine;

@@ -143,7 +143,7 @@ private:
 		if (ImGui::BeginMainMenuBar()) {
 			if (ImGui::BeginMenu("File")) {
 				if (ImGui::MenuItem("Close")) {
-					opfor::Engine::Instance().Close();
+					opfor::Engine::Get().Close();
 				}
 
 				ImGui::Separator();
@@ -154,7 +154,7 @@ private:
 					char *outPath = nullptr;
 					NFD_OpenDialog(nullptr, getcwd(nullptr, 0), &outPath);
 					if (outPath) {
-						opfor::Engine::Instance().LoadLevel(outPath);
+						opfor::Engine::Get().LoadLevel(outPath);
 					}
 				}
 				if (ImGui::MenuItem("Save Level")) {
@@ -169,7 +169,7 @@ private:
 			if (ImGui::BeginMenu("Lighting")) {
 				if (ImGui::MenuItem("Build")) {
 					/* Build Lighting for the Level */
-					opfor::Engine::Instance().OnBuildLighting();
+					opfor::Engine::Get().OnBuildLighting();
 				}
 				ImGui::EndMenu();
 			}
@@ -179,7 +179,7 @@ private:
 
 	void Materials()
 	{
-		auto materialList = opfor::Engine::Instance().GetMaterialList();
+		auto materialList = opfor::Engine::Get().GetMaterialList();
 		std::sort(materialList.begin(), materialList.end());
 		ImGui::Begin("Materials");
 		if (ImGui::TreeNode("Materials")) {
@@ -259,11 +259,11 @@ private:
 		if (ImGui::BeginPopup("hierarchy_popup_menu")) {
 			if (ImGui::BeginMenu("Add...")) {
 				if (ImGui::MenuItem("Entity")) {
-					auto ent = opfor::Engine::Instance().GetCurrentLevel()->CreateEntity();
+					auto ent = opfor::Engine::Get().GetCurrentLevel()->CreateEntity();
 					(void)ent;
 				}
 				if (ImGui::MenuItem("Point Light")) {
-					auto ent = opfor::Engine::Instance().GetCurrentLevel()->CreateEntity();
+					auto ent = opfor::Engine::Get().GetCurrentLevel()->CreateEntity();
 					ent->AddComponents<PointLightComponent>();
 					(void)ent;
 				}
@@ -283,7 +283,7 @@ private:
 					itemIndex, selectedItem, allEnts[itemIndex]->GetId());
 				selectedItem = itemIndex;
 				_currentEntity = allEnts[itemIndex];
-				opfor::Engine::Instance().OnSelectItem(selectedItem);
+				opfor::Engine::Get().OnSelectItem(selectedItem);
 			}
 			itemIndex++;
 		}
@@ -349,7 +349,7 @@ private:
 			if (NFD_OpenDialog(nullptr, getcwd(nullptr, 0), &newPath) == NFD_OKAY
 				&& newPath) {
 				model.Path = std::string(newPath);
-				opfor::Engine::Instance().OnRebuildModel(model);
+				opfor::Engine::Get().OnRebuildModel(model);
 			}
 		}
 
@@ -429,7 +429,7 @@ private:
 			if (NFD_OpenDialog(nullptr, getcwd(nullptr, 0), &newPath) != NFD_CANCEL &&
 				newPath != nullptr) {
 				luaScript.Path = std::string(newPath);
-				opfor::Engine::Instance().OnReloadScript(luaScript);
+				opfor::Engine::Get().OnReloadScript(luaScript);
 				luaScript.Runtime.PushGlobal("__ENTITY_ID__", _currentEntity->GetId());
 			}
 		}
@@ -497,17 +497,17 @@ private:
 	{
 		if (ImGui::Begin("Editor Actions")) {
 			ImGui::PushItemWidth(-1);
-			if (opfor::Engine::Instance().IsPlaying()) {
+			if (opfor::Engine::Get().IsPlaying()) {
 				if (ImGui::Button("Pause")) {
 				}
 				ImGui::SameLine();
 				if (ImGui::Button("Stop")) {
-					opfor::Engine::Instance().StopPlaying();
+					opfor::Engine::Get().StopPlaying();
 				}
 			}
 			else {
 				if (ImGui::Button("Play")) {
-					opfor::Engine::Instance().StartPlaying();
+					opfor::Engine::Get().StartPlaying();
 				}
 			}
 			ImGui::PopItemWidth();
