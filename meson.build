@@ -55,8 +55,10 @@ srcs = [
   'src/engine/lualib.cpp',
 
   'src/engine/core/Window.cpp',
+  'src/engine/core/Input.cpp',
   'src/engine/platform/opengl/OpenGLContext.cpp',
   'src/engine/platform/linux/LinuxWindow.cpp',
+  'src/engine/platform/linux/LinuxInput.cpp',
 ]
 
 imgui = [

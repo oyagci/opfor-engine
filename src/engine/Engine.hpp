@@ -20,6 +20,7 @@ using namespace lazy;
 using namespace graphics;
 using namespace inputs;
 using namespace utils;
+#include "engine/core/Input.hpp"
 
 namespace ecs
 {

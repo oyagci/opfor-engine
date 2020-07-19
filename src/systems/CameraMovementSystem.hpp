@@ -4,17 +4,18 @@
 #include "lazy.hpp"
 #include "components/PlayerCameraComponent.hpp"
 #include "components/TransformComponent.hpp"
+#include "engine/core/Input.hpp"
 
 class CameraMovementSystem : public ecs::ComponentSystem
 {
 public:
 	void OnUpdate(float __unused deltaTime) override
 	{
-		UpdateLook();
-		UpdateMovement();
+		UpdateLook(deltaTime);
+		UpdateMovement(deltaTime);
 	}
 
-	void UpdateLook()
+	void UpdateLook(float dt)
 	{
 		auto playerCamera = GetEntities<PlayerCameraComponent, TransformComponent>();
 
@@ -28,7 +29,7 @@ public:
 		if (camera.useInput == false)
 			return ;
 
-		glm::vec2 vel = lazy::inputs::input::getMouse().getVelocity() / 10.0f;
+		glm::vec2 vel = opfor::Input::GetMouseRelativePosition() * dt * 10.0f;
 
 		glm::vec3 up(0.0f, 1.0f, 0.0f);
 		glm::mat4 view = glm::lookAt(transform.position, transform.position + transform.direction, up);
@@ -51,7 +52,7 @@ public:
 		playerCamera[0]->Set(transform);
 	}
 
-	void UpdateMovement()
+	void UpdateMovement(float dt)
 	{
 		auto playerCamera = GetEntities<PlayerCameraComponent, TransformComponent>();
 
@@ -68,15 +69,15 @@ public:
 		glm::vec3 front(glm::normalize(transform.direction));
 		glm::vec3 right(glm::normalize(glm::cross(front, glm::vec3(0.0f, 1.0f, 0.0f))));
 
-		bool fwd = lazy::inputs::input::getKeyboard().getKey(GLFW_KEY_W);
-		bool bck = lazy::inputs::input::getKeyboard().getKey(GLFW_KEY_S);
-		bool rgt = lazy::inputs::input::getKeyboard().getKey(GLFW_KEY_D);
-		bool lft = lazy::inputs::input::getKeyboard().getKey(GLFW_KEY_A);
+		bool fwd = opfor::Input::GetKey(opfor::KeyCode::W) == opfor::KeyStatus::Pressed;
+		bool lft = opfor::Input::GetKey(opfor::KeyCode::A) == opfor::KeyStatus::Pressed;
+		bool bck = opfor::Input::GetKey(opfor::KeyCode::S) == opfor::KeyStatus::Pressed;
+		bool rgt = opfor::Input::GetKey(opfor::KeyCode::D) == opfor::KeyStatus::Pressed;
 
-		transform.position += fwd * 1.0f * front;
-		transform.position += bck * 1.0f * -front;
-		transform.position += rgt * 1.0f * right;
-		transform.position += lft * 1.0f * -right;
+		transform.position += fwd * dt * 100.0f * front;
+		transform.position += bck * dt * 100.0f * -front;
+		transform.position += rgt * dt * 100.0f * right;
+		transform.position += lft * dt * 100.0f * -right;
 		playerCamera[0]->Set(transform);
 	}
 };

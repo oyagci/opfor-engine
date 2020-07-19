@@ -8,6 +8,7 @@
 #include "engine/Model.hpp"
 #include "Level.hpp"
 #include "engine/platform/opengl/OpenGLContext.hpp"
+#include "engine/platform/linux/LinuxInput.hpp"
 
 namespace opfor
 {
@@ -80,6 +81,7 @@ int Engine::Run()
 
 		_ui->update();
 		_ui->render();
+		Input::Flush();
 	}
 
 	return 0;

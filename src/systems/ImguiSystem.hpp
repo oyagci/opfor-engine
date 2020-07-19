@@ -563,9 +563,7 @@ public:
 		EndDockspace();
 		EndFrame();
 
-		auto &kbd = lazy::inputs::input::getKeyboard();
-
-		if (kbd.getKeyDown(GLFW_KEY_ESCAPE)) {
+		if (opfor::Input::GetKeyDown(opfor::KeyCode::Escape)) {
 			auto playerEnts = GetEntities<PlayerCameraComponent>();
 			if (playerEnts.size() > 0) {
 				auto camera = playerEnts[0]->Get<PlayerCameraComponent>();
