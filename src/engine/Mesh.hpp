@@ -2,11 +2,21 @@
 
 #include <lazy.hpp>
 #include <vector>
+#include <list>
 #include "IDrawable.hpp"
 #include "Material.hpp"
+#include "engine/renderer/Buffer.hpp"
 
 namespace opfor
 {
+
+struct MeshVertexData
+{
+	std::array<float, 3> Position;
+	std::array<float, 3> Normal;
+	std::array<float, 2> Uv;
+	std::array<float, 4> Tangent;
+};
 
 class Mesh : public IDrawable
 {
@@ -23,22 +33,20 @@ public:
 	};
 
 private:
-	std::vector<GLfloat> vPositions;
-	std::vector<GLfloat> vNormals;
-	std::vector<GLfloat> vUvs;
-	std::vector<GLfloat> vTangents;
+	std::list<std::array<float, 3>> vPositions;
+	std::list<std::array<float, 3>> vNormals;
+	std::list<std::array<float, 2>> vUvs;
+	std::list<std::array<float, 4>> vTangents;
 	std::vector<GLuint> indices;
 	std::vector<Texture> textures;
 
 	GLuint vao;
-	GLuint ibo;
-	GLuint objectBuffer;
-	GLuint lightMap;
+
+	UniquePtr<VertexBuffer> _vertexBuffer;
+	UniquePtr<IndexBuffer> _indexBuffer;
 
 	std::string _material;
 	std::optional<std::string> _pbrMaterial;
-
-	void InitLightmap();
 
 public:
 	Mesh();
@@ -54,13 +62,12 @@ public:
 	Mesh &addTriangle(const glm::uvec3 &triangle);
 	Mesh &addTexture(std::string const &name, TextureType type);
 
-	std::vector<GLfloat> const &GetPositions() const { return vPositions; }
-	std::vector<GLfloat> const &GetNormals() const { return vNormals; }
-	std::vector<GLfloat> const &GetUVs() const { return vUvs; }
-	std::vector<GLfloat> const &GetTangents() const { return vTangents; }
-	std::vector<GLuint>  const &GetIndices() const { return indices; }
-	std::vector<GLuint>  const GetTextureIDs() const;
-	GLuint GetLightmap() const { return lightMap; }
+	auto const &GetPositions() const { return vPositions; }
+	auto const &GetNormals() const { return vNormals; }
+	auto const &GetUVs() const { return vUvs; }
+	auto const &GetTangents() const { return vTangents; }
+	auto const &GetIndices() const { return indices; }
+	auto GetTextureIDs() const;
 
 	void SetMaterial(std::string name) { _material = name; }
 	std::string GetMaterial() const { return _material; }

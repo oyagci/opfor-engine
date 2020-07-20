@@ -1,23 +1,21 @@
 #include <lazy.hpp>
 #include "Mesh.hpp"
-#include <fmt/format.h>
 #include "TextureManager.hpp"
 #include <glm/vec3.hpp>
 #include <glm/vec2.hpp>
+#include "engine/renderer/Buffer.hpp"
 
 namespace opfor
 {
-	Mesh::Mesh() : vao(0), ibo(0), objectBuffer(0), lightMap(0)
+
+	Mesh::Mesh() : vao(0)
 	{
 		addTexture("prototype_tile_8", TextureType::TT_Diffuse);
 	}
 
 	Mesh::~Mesh()
 	{
-		glDeleteBuffers(1, &ibo);
-		glDeleteBuffers(1, &objectBuffer);
 		glDeleteVertexArrays(1, &vao);
-		glDeleteTextures(1, &lightMap);
 	}
 
 	Mesh::Mesh(Mesh &&m)
@@ -33,14 +31,8 @@ namespace opfor
 		vao = m.vao;
 		m.vao = 0;
 
-		objectBuffer = m.objectBuffer;
-		m.objectBuffer = 0;
-
-		ibo = m.ibo;
-		m.ibo = 0;
-
-		lightMap = m.lightMap;
-		m.lightMap = 0;
+		_indexBuffer = std::move(m._indexBuffer);
+		_vertexBuffer = std::move(m._vertexBuffer);
 
 		_pbrMaterial = std::move(m._pbrMaterial);
 		m._pbrMaterial.reset();
@@ -51,8 +43,6 @@ namespace opfor
 		if (this != &rhs)
 		{
 			glDeleteVertexArrays(1, &vao);
-			glDeleteBuffers(1, &objectBuffer);
-			glDeleteTextures(1, &lightMap);
 
 			vPositions = std::move(rhs.vPositions);
 			vNormals = std::move(rhs.vNormals);
@@ -65,14 +55,8 @@ namespace opfor
 			vao = rhs.vao;
 			rhs.vao = 0;
 
-			objectBuffer = rhs.objectBuffer;
-			rhs.objectBuffer = 0;
-
-			ibo = rhs.ibo;
-			rhs.ibo = 0;
-
-			lightMap = rhs.lightMap;
-			rhs.lightMap = 0;
+			_indexBuffer = std::move(rhs._indexBuffer);
+			_vertexBuffer = std::move(rhs._vertexBuffer);
 
 			_pbrMaterial = rhs._pbrMaterial;
 			rhs._pbrMaterial.reset();
@@ -82,36 +66,28 @@ namespace opfor
 
 	Mesh &Mesh::addPosition(const glm::vec3 &v)
 	{
-		vPositions.push_back(v.x);
-		vPositions.push_back(v.y);
-		vPositions.push_back(v.z);
+		vPositions.push_back({ v.x, v.y, v.z });
 
 		return *this;
 	}
 
 	Mesh &Mesh::addNormal(const glm::vec3 &v)
 	{
-		vNormals.push_back(v.x);
-		vNormals.push_back(v.y);
-		vNormals.push_back(v.z);
+		vNormals.push_back({ v.x, v.y, v.z });
 
 		return *this;
 	}
 
 	Mesh &Mesh::addUv(const glm::vec2 &v)
 	{
-		vUvs.push_back(v.x);
-		vUvs.push_back(v.y);
+		vUvs.push_back({ v.x, v.y });
 
 		return *this;
 	}
 
 	Mesh &Mesh::addTangent(const glm::vec4 &v)
 	{
-		vTangents.push_back(v.x);
-		vTangents.push_back(v.y);
-		vTangents.push_back(v.z);
-		vTangents.push_back(v.w);
+		vTangents.push_back({ v.x, v.y, v.z, v.w });
 
 		return *this;
 	}
@@ -149,44 +125,65 @@ namespace opfor
 		glGenVertexArrays(1, &vao);
 		glBindVertexArray(vao);
 
-		glEnableVertexAttribArray(0);
-		glEnableVertexAttribArray(1);
-		glEnableVertexAttribArray(2);
-		glEnableVertexAttribArray(3);
+		if (vPositions.size() > vNormals.size()) vNormals.resize(vPositions.size(), { 0.0f, 0.0f, 1.0f });
+		if (vPositions.size() > vUvs.size()) vUvs.resize(vPositions.size());
+		if (vPositions.size() > vTangents.size()) vTangents.resize(vPositions.size());
 
-		const size_t bufferSize = (vPositions.size()
-								  + vNormals.size()
-								  + vUvs.size()
-								  + vTangents.size()) * sizeof(GLfloat);
-		size_t offset = 0;
+		OP4_CORE_ASSERT(vPositions.size() == vNormals.size() &&
+						vPositions.size() == vUvs.size() &&
+						vPositions.size() == vTangents.size(),
+			"Vertex Data is incomplete\n");
 
-		glGenBuffers(1, &objectBuffer);
-		glBindBuffer(GL_ARRAY_BUFFER, objectBuffer);
-		glBufferData(GL_ARRAY_BUFFER, bufferSize, nullptr, GL_STATIC_DRAW);
-		if (vPositions.size() > 0) {
-			glBufferSubData(GL_ARRAY_BUFFER, offset, vPositions.size() * sizeof(GLfloat), vPositions.data());
-			glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), reinterpret_cast<void*>(offset));
-			offset += vPositions.size() * sizeof(GLfloat);
-		}
-		if (vNormals.size() > 0) {
-			glBufferSubData(GL_ARRAY_BUFFER, offset, vNormals.size() * sizeof(GLfloat), vNormals.data());
-			glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), reinterpret_cast<void*>(offset));
-			offset += vNormals.size() * sizeof(GLfloat);
-		}
-		if (vUvs.size() > 0) {
-			glBufferSubData(GL_ARRAY_BUFFER, offset, vUvs.size() * sizeof(GLfloat), vUvs.data());
-			glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(GLfloat), reinterpret_cast<void*>(offset));
-			offset += vUvs.size() * sizeof(GLfloat);
-		}
-		if (vTangents.size() > 0) {
-			glBufferSubData(GL_ARRAY_BUFFER, offset, vTangents.size() * sizeof(GLfloat), vTangents.data());
-			glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), reinterpret_cast<void*>(offset));
-			offset += vTangents.size() * sizeof(GLfloat);
+		std::vector<MeshVertexData> vertices;
+
+		const size_t count = vPositions.size();
+		vertices.reserve(count);
+
+		for (size_t i = 0; i < count; i++) {
+
+			auto const &position = vPositions.front();
+			auto const &normal = vNormals.front();
+			auto const &tex_coord = vUvs.front();
+			auto const &tangent = vTangents.front();
+
+			MeshVertexData vertexData = { position, normal, tex_coord, tangent };
+
+			vertices.push_back(vertexData);
+
+			vPositions.pop_front();
+			vNormals.pop_front();
+			vUvs.pop_front();
+			vTangents.pop_front();
 		}
 
-		glGenBuffers(1, &ibo);
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
-		glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLuint) * indices.size(), &indices[0], GL_STATIC_DRAW);
+		_vertexBuffer = VertexBuffer::Create(reinterpret_cast<float*>(vertices.data()), sizeof(MeshVertexData) * vertices.size());
+		_indexBuffer = IndexBuffer::Create(reinterpret_cast<uint32_t*>(indices.data()), indices.size());
+
+		{
+			BufferLayout layout = {
+				{ ShaderDataType::Float3, "in_position" },
+				{ ShaderDataType::Float3, "in_normal"   },
+				{ ShaderDataType::Float2, "tex_coords"  },
+				{ ShaderDataType::Float4, "in_tangent"  },
+			};
+
+			_vertexBuffer->SetLayout(layout);
+		}
+
+		_vertexBuffer->Bind();
+		_indexBuffer->Bind();
+
+		auto const &layout = _vertexBuffer->GetLayout();
+		auto elements = _vertexBuffer->GetLayout().GetElements();
+
+		for (size_t i = 0; i < elements.size(); i++) {
+
+			auto const &elem = elements[i];
+
+			glEnableVertexAttribArray(i);
+			glVertexAttribPointer(i, elem.GetComponentCount(), ShaderDataTypeToOpenGLBase(elem.Type), elem.Normalized,
+				layout.GetStride(), reinterpret_cast<void*>(elem.Offset));
+		}
 
 		glBindVertexArray(0);
 
@@ -196,11 +193,11 @@ namespace opfor
 	void Mesh::Draw() const
 	{
 		glBindVertexArray(vao);
-		glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, nullptr);
+		glDrawElements(GL_TRIANGLES, _indexBuffer->GetCount(), GL_UNSIGNED_INT, nullptr);
 		glBindVertexArray(0);
 	}
 
-	std::vector<GLuint> const Mesh::GetTextureIDs() const
+	auto Mesh::GetTextureIDs() const
 	{
 		std::vector<GLuint> ids(textures.size());
 
@@ -211,15 +208,4 @@ namespace opfor
 
 		return ids;
 	}
-
-	void Mesh::InitLightmap()
-	{
-		const glm::uvec2 LightmapSize{ 1024, 1024 };
-
-		glGenTextures(1, &lightMap);
-		glBindTexture(GL_TEXTURE_2D, lightMap);
-
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, LightmapSize.x, LightmapSize.y, 0, GL_RED, GL_FLOAT, nullptr);
-	}
-	
 }

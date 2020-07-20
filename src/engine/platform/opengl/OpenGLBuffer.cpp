@@ -30,6 +30,15 @@ void OpenGLVertexBuffer::Unbind() const
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
+void OpenGLVertexBuffer::SetLayout(BufferLayout layout)
+{
+	_Layout = layout;
+}
+
+BufferLayout const &OpenGLVertexBuffer::GetLayout() const
+{
+	return _Layout;
+}
 
 // OpenGLIndexBuffer
 // =================
