@@ -10,6 +10,7 @@ project('ft_vox', 'cpp',
 	  'optimization=2'])
 
 add_project_arguments('-DOP4_PLATFORM_LINUX', language: 'cpp')
+add_project_arguments('-DOP4_PLATFORM_OPENGL', language: 'cpp')
 
 conf_data = configuration_data()
 conf_data.set('version', 'v0.0.2')
@@ -62,10 +63,12 @@ srcs = [
   'src/engine/renderer/Buffer.cpp',
   'src/engine/renderer/RendererAPI.cpp',
   'src/engine/renderer/RenderCommand.cpp',
+  'src/engine/renderer/Texture.cpp',
   'src/engine/platform/opengl/OpenGLContext.cpp',
   'src/engine/platform/opengl/OpenGLVertexArray.cpp',
   'src/engine/platform/opengl/OpenGLBuffer.cpp',
   'src/engine/platform/opengl/OpenGLRendererAPI.cpp',
+  'src/engine/platform/opengl/OpenGLTexture.cpp',
   'src/engine/platform/linux/LinuxWindow.cpp',
   'src/engine/platform/linux/LinuxInput.cpp',
 ]

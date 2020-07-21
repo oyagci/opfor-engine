@@ -2,16 +2,17 @@
 
 #include "lazy.hpp"
 #include "Engine.hpp"
+#include "engine/renderer/Texture.hpp"
 
 class GBuffer
 {
 private:
 	GLuint _gBuffer;
-	GLuint _gPosition;
-	GLuint _gNormal;
-	GLuint _gAlbedoSpec;
 	GLuint _gDepth;
-	GLuint _gMetallicRoughness;
+	opfor::UniquePtr<opfor::Texture> _gPosition;
+	opfor::UniquePtr<opfor::Texture> _gNormal;
+	opfor::UniquePtr<opfor::Texture> _gAlbedoSpec;
+	opfor::UniquePtr<opfor::Texture> _gMetallicRoughness;
 
 	void Init()
 	{
@@ -21,37 +22,32 @@ private:
 		glGenFramebuffers(1, &_gBuffer);
 		glBindFramebuffer(GL_FRAMEBUFFER, _gBuffer);
 
-		glGenTextures(1, &_gPosition);
-		glBindTexture(GL_TEXTURE_2D, _gPosition);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, width, height, 0, GL_RGBA, GL_FLOAT, nullptr);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
-		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, _gPosition, 0);
+		using namespace opfor;
 
-		glGenTextures(1, &_gNormal);
-		glBindTexture(GL_TEXTURE_2D, _gNormal);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, width, height, 0, GL_RGBA, GL_FLOAT, nullptr);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, _gNormal, 0);
+		TextureParameterList const params = {
+			{ TextureParameterType::MignifyFilter, TextureParameterValue::Nearest },
+			{ TextureParameterType::MagnifyFilter, TextureParameterValue::Nearest },
+			{ TextureParameterType::WrapR,         TextureParameterValue::ClampToEdge },
+			{ TextureParameterType::WrapS,         TextureParameterValue::ClampToEdge },
+			{ TextureParameterType::MagnifyFilter, TextureParameterValue::Nearest },
+		};
 
-		glGenTextures(1, &_gAlbedoSpec);
-		glBindTexture(GL_TEXTURE_2D, _gAlbedoSpec);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, width, height, 0, GL_RGBA, GL_FLOAT, nullptr);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, GL_TEXTURE_2D, _gAlbedoSpec, 0);
+		_gPosition = opfor::Texture::Create(TextureType::Tex2D, params, DataFormat::RGBA16F,
+				DataFormat::RGBA, DataType::Float, width, height, 0, nullptr);
 
-		glGenTextures(1, &_gMetallicRoughness);
-		glBindTexture(GL_TEXTURE_2D, _gMetallicRoughness);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, width, height, 0, GL_RGBA, GL_FLOAT, nullptr);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT3, GL_TEXTURE_2D, _gMetallicRoughness, 0);
+		_gNormal = opfor::Texture::Create(TextureType::Tex2D, params, DataFormat::RGBA16F,
+				DataFormat::RGBA, DataType::Float, width, height, 0, nullptr);
 
-		glBindTexture(GL_TEXTURE_2D, 0);
+		_gAlbedoSpec = opfor::Texture::Create(TextureType::Tex2D, params, DataFormat::RGBA16F,
+				DataFormat::RGBA, DataType::Float, width, height, 0, nullptr);
+
+		_gMetallicRoughness = opfor::Texture::Create(TextureType::Tex2D, params, DataFormat::RGBA16F,
+				DataFormat::RGBA, DataType::Float, width, height, 0, nullptr);
+
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, _gPosition->GetRawHandle(), 0);
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, _gNormal->GetRawHandle(), 0);
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, GL_TEXTURE_2D, _gAlbedoSpec->GetRawHandle(), 0);
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT3, GL_TEXTURE_2D, _gMetallicRoughness->GetRawHandle(), 0);
 
 		glGenRenderbuffers(1, &_gDepth);
 		glBindRenderbuffer(GL_RENDERBUFFER, _gDepth);
@@ -82,11 +78,7 @@ public:
 	~GBuffer()
 	{
 		glDeleteFramebuffers(1, &_gBuffer);
-		glDeleteTextures(1, &_gPosition);
-		glDeleteTextures(1, &_gNormal);
-		glDeleteTextures(1, &_gAlbedoSpec);
 		glDeleteTextures(1, &_gDepth);
-		glDeleteTextures(1, &_gMetallicRoughness);
 	}
 
 	void Bind()
@@ -100,9 +92,9 @@ public:
 	}
 
 	GLuint GetFramebufferId() const { return _gBuffer; }
-	GLuint GetPositionTex() const { return _gPosition; }
-	GLuint GetNormalTex() const { return _gNormal; }
-	GLuint GetAlbedoSpecTex() const { return _gAlbedoSpec; }
 	GLuint GetDepthTex() const { return _gDepth; }
-	GLuint GetMetallicRoughnessTex() const { return _gMetallicRoughness; }
+	GLuint GetPositionTex() const { return _gPosition->GetRawHandle(); }
+	GLuint GetNormalTex() const { return _gNormal->GetRawHandle(); }
+	GLuint GetAlbedoSpecTex() const { return _gAlbedoSpec->GetRawHandle(); }
+	GLuint GetMetallicRoughnessTex() const { return _gMetallicRoughness->GetRawHandle(); }
 };
