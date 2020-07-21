@@ -3,16 +3,17 @@
 #include "lazy.hpp"
 #include "Engine.hpp"
 #include "engine/renderer/Texture.hpp"
+#include "engine/renderer/Renderbuffer.hpp"
 
 class GBuffer
 {
 private:
 	GLuint _gBuffer;
-	GLuint _gDepth;
 	opfor::UniquePtr<opfor::Texture> _gPosition;
 	opfor::UniquePtr<opfor::Texture> _gNormal;
 	opfor::UniquePtr<opfor::Texture> _gAlbedoSpec;
 	opfor::UniquePtr<opfor::Texture> _gMetallicRoughness;
+	opfor::UniquePtr<opfor::Renderbuffer> _gDepth;
 
 	void Init()
 	{
@@ -49,11 +50,9 @@ private:
 		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, GL_TEXTURE_2D, _gAlbedoSpec->GetRawHandle(), 0);
 		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT3, GL_TEXTURE_2D, _gMetallicRoughness->GetRawHandle(), 0);
 
-		glGenRenderbuffers(1, &_gDepth);
-		glBindRenderbuffer(GL_RENDERBUFFER, _gDepth);
-		glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, width, height);
-		glBindRenderbuffer(GL_RENDERBUFFER, 0);
-		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, _gDepth);
+		_gDepth = Renderbuffer::Create();
+		_gDepth->AttachDepthComponent({ static_cast<uint32_t>(width), static_cast<uint32_t>(height) });
+		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, _gDepth->GetRawHandle());
 
 		GLuint st = glCheckFramebufferStatus(GL_FRAMEBUFFER);
 		assert(st == GL_FRAMEBUFFER_COMPLETE);
@@ -78,7 +77,6 @@ public:
 	~GBuffer()
 	{
 		glDeleteFramebuffers(1, &_gBuffer);
-		glDeleteTextures(1, &_gDepth);
 	}
 
 	void Bind()
@@ -92,9 +90,9 @@ public:
 	}
 
 	GLuint GetFramebufferId() const { return _gBuffer; }
-	GLuint GetDepthTex() const { return _gDepth; }
 	GLuint GetPositionTex() const { return _gPosition->GetRawHandle(); }
 	GLuint GetNormalTex() const { return _gNormal->GetRawHandle(); }
 	GLuint GetAlbedoSpecTex() const { return _gAlbedoSpec->GetRawHandle(); }
+	GLuint GetDepthTex() const { return _gDepth->GetRawHandle(); }
 	GLuint GetMetallicRoughnessTex() const { return _gMetallicRoughness->GetRawHandle(); }
 };

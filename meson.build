@@ -64,11 +64,13 @@ srcs = [
   'src/engine/renderer/RendererAPI.cpp',
   'src/engine/renderer/RenderCommand.cpp',
   'src/engine/renderer/Texture.cpp',
+  'src/engine/renderer/Renderbuffer.cpp',
   'src/engine/platform/opengl/OpenGLContext.cpp',
   'src/engine/platform/opengl/OpenGLVertexArray.cpp',
   'src/engine/platform/opengl/OpenGLBuffer.cpp',
   'src/engine/platform/opengl/OpenGLRendererAPI.cpp',
   'src/engine/platform/opengl/OpenGLTexture.cpp',
+  'src/engine/platform/opengl/OpenGLRenderbuffer.cpp',
   'src/engine/platform/linux/LinuxWindow.cpp',
   'src/engine/platform/linux/LinuxInput.cpp',
 ]
