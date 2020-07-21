@@ -7,10 +7,10 @@ namespace opfor {
 UniquePtr<VertexArray> VertexArray::Create()
 {
 	switch (Renderer::GetAPI()) {
-		case RendererAPI::None:
+		case RendererAPI::API::None:
 			OP4_CORE_EXPECT(false, "RendererAPI::None is not supported!\n");
 			break ;
-		case RendererAPI::OpenGL:
+		case RendererAPI::API::OpenGL:
 			return MakeUnique<OpenGLVertexArray>();
 	}
 

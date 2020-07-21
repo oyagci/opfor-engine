@@ -41,7 +41,7 @@ private:
 	std::vector<GLuint> indices;
 	std::vector<Texture> textures;
 
-	UniquePtr<VertexArray> _vertexArray;
+	SharedPtr<VertexArray> _vertexArray;
 
 	std::string _material;
 	std::optional<std::string> _pbrMaterial;
@@ -68,7 +68,7 @@ public:
 	auto const &GetTangents() const { return vTangents; }
 	auto const &GetIndices() const { return indices; }
 	auto GetTextureIDs() const;
-	auto const *GetVertexArray() { return _vertexArray.get(); }
+	auto const &GetVertexArray() const { return _vertexArray; }
 
 	void SetMaterial(std::string name) { _material = name; }
 	std::string GetMaterial() const { return _material; }

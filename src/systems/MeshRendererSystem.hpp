@@ -19,6 +19,7 @@
 #include <random>
 #include "GBuffer.hpp"
 #include "TextureAutoBind.hpp"
+#include "engine/renderer/Renderer.hpp"
 
 class MeshRendererSystem : public ecs::ComponentSystem
 {
@@ -254,7 +255,8 @@ private:
 
 		_ssaoShader.setUniform4x4f("projectionMatrix", camera.projection);
 		_ssaoShader.setUniform4x4f("viewMatrix", camera.view);
-		_quad.Draw();
+
+		opfor::Renderer::Submit(_quad.GetVertexArray());
 
 		glActiveTexture(GL_TEXTURE0);
 			glBindTexture(GL_TEXTURE_2D, 0);
@@ -295,7 +297,7 @@ private:
 				model = glm::scale(model, transform.scale);
 				_shadow.setUniform4x4f("modelMatrix", model);
 
-				mesh->Draw();
+				opfor::Renderer::Submit(reinterpret_cast<opfor::Mesh const*>(mesh)->GetVertexArray());
 			}
 
 		}
@@ -389,7 +391,8 @@ private:
 					}
 				}
 
-				mesh->Draw();
+
+				opfor::Renderer::Submit(reinterpret_cast<opfor::Mesh const*>(mesh)->GetVertexArray());
 				shader->unbind();
 			}
 
@@ -413,7 +416,7 @@ private:
 
 		glDepthMask(GL_FALSE);
 		TextureManager::Get().bind("skybox-cubemap", 0);
-		mesh->Draw();
+		opfor::Renderer::Submit(reinterpret_cast<opfor::Mesh const*>(mesh)->GetVertexArray());
 		glDepthMask(GL_TRUE);
 
 		shader->unbind();
@@ -468,7 +471,7 @@ private:
 			_billboard.setUniform3f("particlePosition", transform.position);
 
 			TextureManager::Get().bind("light_bulb_icon", 0);
-			_quad.Draw();
+			opfor::Renderer::Submit(_quad.GetVertexArray());
 
 			_billboard.unbind();
 		}
@@ -503,7 +506,7 @@ private:
 			glActiveTexture(GL_TEXTURE5);
 				glBindTexture(GL_TEXTURE_2D, _gBuffer.GetMetallicRoughnessTex());
 
-			_quad.Draw();
+			opfor::Renderer::Submit(_quad.GetVertexArray());
 
 			// Unbind Textures
 			glActiveTexture(GL_TEXTURE0);
@@ -604,18 +607,26 @@ public:
 
 		auto [ playerCamera, playerTransform ] = player[0]->GetAll();
 
+		opfor::Renderer::BeginScene();
+
+		opfor::Renderer::SetClearColor({ 0.0f, 0.0f, 0.0f, 1.0f });
+		opfor::Renderer::Clear();
+
 		BakeShadowMap();
 
 		_gBuffer.Bind();
-			glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-			glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
+			opfor::Renderer::SetClearColor({ 0.0f, 0.0f, 0.0f, 1.0f });
+			opfor::Renderer::Clear();
+
 			glEnable(GL_DEPTH_TEST);
-			RenderMeshes(playerCamera, playerTransform);
+				RenderMeshes(playerCamera, playerTransform);
 			glDisable(GL_DEPTH_TEST);
+
 		_gBuffer.Unbind();
 
-		glClearColor(0.0f, 0.0, 0.0f, 1.0f);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		opfor::Renderer::SetClearColor({ 0.0f, 0.0f, 0.0f, 1.0f });
+		opfor::Renderer::Clear();
+
 		RenderLight(playerTransform.position, playerCamera.exposure);
 
 		// Copy depth buffer to default framebuffer to enable depth testing with billboard
@@ -632,5 +643,7 @@ public:
 			RenderLightBillboard(playerCamera);
 		glDisable(GL_DEPTH_TEST);
 		glDisable(GL_BLEND);
+
+		opfor::Renderer::EndScene();
 	}
 };

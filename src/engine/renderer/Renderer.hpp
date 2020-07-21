@@ -1,19 +1,27 @@
 #pragma once
 
+#include "RenderCommand.hpp"
+
 namespace opfor {
 
-enum class RendererAPI {
-	None = 0,
-	OpenGL = 1,
+enum class ClearFlags
+{
+	ColorBit,
+	DepthBit,
 };
 
 class Renderer
 {
-private:
-	static RendererAPI _RendererAPI;
-
 public:
-	static RendererAPI GetAPI() { return _RendererAPI; }
+	static void BeginScene();
+	static void EndScene();
+
+	static void SetClearColor(std::array<float, 4> const &color);
+	static void Clear();
+
+	static void Submit(SharedPtr<VertexArray> const &);
+
+	static RendererAPI::API GetAPI() { return RendererAPI::GetAPI(); }
 };
 
 }
