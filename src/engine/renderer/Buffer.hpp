@@ -26,22 +26,6 @@ static uint32_t GetShaderDataTypeSize(ShaderDataType type)
 	};
 }
 
-inline GLenum ShaderDataTypeToOpenGLBase(ShaderDataType type)
-{
-	switch (type)
-	{
-		case ShaderDataType::Int:    return GL_UNSIGNED_INT;
-		case ShaderDataType::Int2:   return GL_UNSIGNED_INT;
-		case ShaderDataType::Int3:   return GL_UNSIGNED_INT;
-		case ShaderDataType::Int4:   return GL_UNSIGNED_INT;
-		case ShaderDataType::Float:  return GL_FLOAT;
-		case ShaderDataType::Float2: return GL_FLOAT;
-		case ShaderDataType::Float3: return GL_FLOAT;
-		case ShaderDataType::Float4: return GL_FLOAT;
-		default: OP4_CORE_EXPECT(false, "Unknown ShaderDataType value!\n");
-	};
-}
-
 struct BufferElement
 {
 	std::string Name;

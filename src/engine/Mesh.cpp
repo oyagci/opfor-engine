@@ -8,60 +8,39 @@
 namespace opfor
 {
 
-	Mesh::Mesh() : vao(0)
+	Mesh::Mesh()
 	{
 		addTexture("prototype_tile_8", TextureType::TT_Diffuse);
 	}
 
-	Mesh::~Mesh()
+	Mesh::Mesh(Mesh &&other)
 	{
-		glDeleteVertexArrays(1, &vao);
-	}
-
-	Mesh::Mesh(Mesh &&m)
-	{
-		vPositions = std::move(m.vPositions);
-		vNormals = std::move(m.vNormals);
-		vUvs = std::move(m.vUvs);
-		vTangents = std::move(m.vTangents);
-		indices = std::move(m.indices);
-		textures = std::move(m.textures);
-		_material = std::move(m._material);
-
-		vao = m.vao;
-		m.vao = 0;
-
-		_indexBuffer = std::move(m._indexBuffer);
-		_vertexBuffer = std::move(m._vertexBuffer);
-
-		_pbrMaterial = std::move(m._pbrMaterial);
-		m._pbrMaterial.reset();
+		Move(std::forward<Mesh>(other));
 	}
 
 	Mesh &Mesh::operator=(Mesh &&rhs)
 	{
 		if (this != &rhs)
 		{
-			glDeleteVertexArrays(1, &vao);
-
-			vPositions = std::move(rhs.vPositions);
-			vNormals = std::move(rhs.vNormals);
-			vUvs = std::move(rhs.vUvs);
-			vTangents = std::move(rhs.vTangents);
-			indices = std::move(rhs.indices);
-			textures = std::move(rhs.textures);
-			_material = std::move(rhs._material);
-
-			vao = rhs.vao;
-			rhs.vao = 0;
-
-			_indexBuffer = std::move(rhs._indexBuffer);
-			_vertexBuffer = std::move(rhs._vertexBuffer);
-
-			_pbrMaterial = rhs._pbrMaterial;
-			rhs._pbrMaterial.reset();
+			Move(std::forward<Mesh>(rhs));
 		}
 		return *this;
+	}
+
+	void Mesh::Move(Mesh &&other)
+	{
+		vPositions = std::move(other.vPositions);
+		vNormals = std::move(other.vNormals);
+		vUvs = std::move(other.vUvs);
+		vTangents = std::move(other.vTangents);
+		indices = std::move(other.indices);
+		textures = std::move(other.textures);
+		_material = std::move(other._material);
+
+		_vertexArray = std::move(other._vertexArray);
+
+		_pbrMaterial = other._pbrMaterial;
+		other._pbrMaterial.reset();
 	}
 
 	Mesh &Mesh::addPosition(const glm::vec3 &v)
@@ -122,8 +101,8 @@ namespace opfor
 
 	Mesh &Mesh::build()
 	{
-		glGenVertexArrays(1, &vao);
-		glBindVertexArray(vao);
+		_vertexArray = VertexArray::Create();
+		_vertexArray->Bind();
 
 		if (vPositions.size() > vNormals.size()) vNormals.resize(vPositions.size(), { 0.0f, 0.0f, 1.0f });
 		if (vPositions.size() > vUvs.size()) vUvs.resize(vPositions.size());
@@ -156,45 +135,30 @@ namespace opfor
 			vTangents.pop_front();
 		}
 
-		_vertexBuffer = VertexBuffer::Create(reinterpret_cast<float*>(vertices.data()), sizeof(MeshVertexData) * vertices.size());
-		_indexBuffer = IndexBuffer::Create(reinterpret_cast<uint32_t*>(indices.data()), indices.size());
+		auto vertexBuffer = VertexBuffer::Create(reinterpret_cast<float*>(vertices.data()), sizeof(MeshVertexData) * vertices.size());
+		auto indexBuffer = IndexBuffer::Create(reinterpret_cast<uint32_t*>(indices.data()), indices.size());
 
-		{
-			BufferLayout layout = {
-				{ ShaderDataType::Float3, "in_position" },
-				{ ShaderDataType::Float3, "in_normal"   },
-				{ ShaderDataType::Float2, "tex_coords"  },
-				{ ShaderDataType::Float4, "in_tangent"  },
-			};
+		BufferLayout layout = {
+			{ ShaderDataType::Float3, "in_position" },
+			{ ShaderDataType::Float3, "in_normal"   },
+			{ ShaderDataType::Float2, "tex_coords"  },
+			{ ShaderDataType::Float4, "in_tangent"  },
+		};
+		vertexBuffer->SetLayout(layout);
 
-			_vertexBuffer->SetLayout(layout);
-		}
+		_vertexArray->AddVertexBuffer(std::move(vertexBuffer));
+		_vertexArray->SetIndexBuffer(std::move(indexBuffer));
 
-		_vertexBuffer->Bind();
-		_indexBuffer->Bind();
-
-		auto const &layout = _vertexBuffer->GetLayout();
-		auto elements = _vertexBuffer->GetLayout().GetElements();
-
-		for (size_t i = 0; i < elements.size(); i++) {
-
-			auto const &elem = elements[i];
-
-			glEnableVertexAttribArray(i);
-			glVertexAttribPointer(i, elem.GetComponentCount(), ShaderDataTypeToOpenGLBase(elem.Type), elem.Normalized,
-				layout.GetStride(), reinterpret_cast<void*>(elem.Offset));
-		}
-
-		glBindVertexArray(0);
+		_vertexArray->Unbind();
 
 		return *this;
 	}
 
 	void Mesh::Draw() const
 	{
-		glBindVertexArray(vao);
-		glDrawElements(GL_TRIANGLES, _indexBuffer->GetCount(), GL_UNSIGNED_INT, nullptr);
-		glBindVertexArray(0);
+		_vertexArray->Bind();
+		glDrawElements(GL_TRIANGLES, _vertexArray->GetIndexBuffer()->GetCount(), GL_UNSIGNED_INT, nullptr);
+		_vertexArray->Unbind();
 	}
 
 	auto Mesh::GetTextureIDs() const

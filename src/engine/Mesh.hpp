@@ -6,6 +6,7 @@
 #include "IDrawable.hpp"
 #include "Material.hpp"
 #include "engine/renderer/Buffer.hpp"
+#include "engine/renderer/VertexArray.hpp"
 
 namespace opfor
 {
@@ -40,17 +41,16 @@ private:
 	std::vector<GLuint> indices;
 	std::vector<Texture> textures;
 
-	GLuint vao;
-
-	UniquePtr<VertexBuffer> _vertexBuffer;
-	UniquePtr<IndexBuffer> _indexBuffer;
+	UniquePtr<VertexArray> _vertexArray;
 
 	std::string _material;
 	std::optional<std::string> _pbrMaterial;
 
+	void Move(Mesh &&other);
+
 public:
 	Mesh();
-	~Mesh();
+	~Mesh() = default;
 	Mesh(Mesh &&);
 	Mesh &operator=(Mesh &&);
 
@@ -68,6 +68,7 @@ public:
 	auto const &GetTangents() const { return vTangents; }
 	auto const &GetIndices() const { return indices; }
 	auto GetTextureIDs() const;
+	auto const *GetVertexArray() { return _vertexArray.get(); }
 
 	void SetMaterial(std::string name) { _material = name; }
 	std::string GetMaterial() const { return _material; }
