@@ -547,9 +547,9 @@ private:
 
 		BindShadowMap();
 
-		glDisable(GL_BLEND);
-		glEnable(GL_DEPTH_TEST);
-		glClear(GL_DEPTH_BUFFER_BIT);
+		opfor::Renderer::PushCapability(opfor::RendererCaps::Blend, false);
+		opfor::Renderer::PushCapability(opfor::RendererCaps::DepthTest, true);
+			glClear(GL_DEPTH_BUFFER_BIT);
 
 		_shadow.bind();
 		_shadow.setUniform4x4f("model", glm::mat4(1.0f));
@@ -564,7 +564,8 @@ private:
 
 		UnbindShadowMap();
 
-		//Logger::Info("Done building shadow map\n");
+		opfor::Renderer::PopCapability(opfor::RendererCaps::DepthTest);
+		opfor::Renderer::PopCapability(opfor::RendererCaps::Blend);
 	}
 
 public:
@@ -613,15 +614,15 @@ public:
 
 		BakeShadowMap();
 
-		_gBuffer.Bind();
+		opfor::Renderer::PushFramebuffer(_gBuffer.GetFramebuffer());
 			opfor::Renderer::SetClearColor({ 0.0f, 0.0f, 0.0f, 1.0f });
 			opfor::Renderer::Clear();
 
-			glEnable(GL_DEPTH_TEST);
+			opfor::Renderer::PushCapability(opfor::RendererCaps::DepthTest, true);
 				RenderMeshes(playerCamera, playerTransform);
-			glDisable(GL_DEPTH_TEST);
+			opfor::Renderer::PopCapability(opfor::RendererCaps::DepthTest);
 
-		_gBuffer.Unbind();
+		opfor::Renderer::PopFramebuffer();
 
 		opfor::Renderer::SetClearColor({ 0.0f, 0.0f, 0.0f, 1.0f });
 		opfor::Renderer::Clear();
@@ -630,17 +631,15 @@ public:
 
 		// Copy depth buffer to default framebuffer to enable depth testing with billboard
 		// and other shaders
-		_gBuffer.GetFramebuffer()->CopyToDefault(opfor::CopyTarget::DepthBufferBit);
+		opfor::Renderer::CopyFramebufferToDefaultFramebuffer(_gBuffer.GetFramebuffer(), opfor::CopyTarget::DepthBufferBit);
 
-		_gBuffer.Unbind();
-
-		glEnable(GL_BLEND);
-		glEnable(GL_DEPTH_TEST);
+		opfor::Renderer::PushCapability(opfor::RendererCaps::Blend, true);
+		opfor::Renderer::PushCapability(opfor::RendererCaps::DepthTest, true);
 			RenderSkybox(playerCamera);
 //			RenderSSAO(playerCamera);
 			RenderLightBillboard(playerCamera);
-		glDisable(GL_DEPTH_TEST);
-		glDisable(GL_BLEND);
+		opfor::Renderer::PopCapability(opfor::RendererCaps::DepthTest);
+		opfor::Renderer::PopCapability(opfor::RendererCaps::Blend);
 
 		opfor::Renderer::EndScene();
 	}

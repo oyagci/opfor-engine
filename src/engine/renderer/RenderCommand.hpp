@@ -24,6 +24,36 @@ class RenderCommand
 		{
 			_API->DrawIndexed(std::forward<decltype(vertexArray)>(vertexArray));
 		}
+
+		static inline void PushFramebuffer(SharedPtr<Framebuffer> const &fb)
+		{
+			_API->PushFramebuffer(fb);
+		}
+
+		static inline void PopFramebuffer()
+		{
+			_API->PopFramebuffer();
+		}
+
+		static inline void CopyFramebufferToDefaultFramebuffer(SharedPtr<Framebuffer> fb, CopyTarget target)
+		{
+			_API->CopyFramebufferToDefaultFramebuffer(fb, target);
+		}
+
+		static inline void CopyFramebufferToFramebuffer(SharedPtr<Framebuffer> dst, SharedPtr<Framebuffer> src, CopyTarget target)
+		{
+			_API->CopyFramebufferToFramebuffer(dst, src, target);
+		}
+
+		static inline void PushCapability(RendererCaps cap, bool enable)
+		{
+			_API->PushCapability(cap, enable);
+		}
+
+		static inline void PopCapability(RendererCaps cap)
+		{
+			_API->PopCapability(cap);
+		}
 };
 
 }

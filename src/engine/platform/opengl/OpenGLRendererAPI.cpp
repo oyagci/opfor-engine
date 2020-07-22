@@ -1,4 +1,7 @@
 #include "OpenGLRendererAPI.hpp"
+#include "engine/renderer/VertexArray.hpp"
+#include "engine/renderer/Framebuffer.hpp"
+#include "lazy.hpp"
 
 namespace opfor {
 
@@ -18,4 +21,68 @@ namespace opfor {
 			GL_UNSIGNED_INT, nullptr);
 	}
 
+	void OpenGLRendererAPI::PushFramebuffer(SharedPtr<Framebuffer> const &fb)
+	{
+		int32_t prevRead = 0;
+		int32_t prevDraw = 0;
+
+		// Save previous read/draw buffers
+		glGetIntegerv(GL_READ_FRAMEBUFFER_BINDING, &prevRead);
+		glGetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING, &prevDraw);
+
+		_prevReadBuffers.push_back(prevRead);
+		_prevDrawBuffers.push_back(prevDraw);
+
+		glBindFramebuffer(GL_FRAMEBUFFER, fb->GetRawHandle());
+	}
+
+	void OpenGLRendererAPI::PopFramebuffer()
+	{
+		uint32_t prevRead = _prevReadBuffers.back();
+		uint32_t prevDraw = _prevDrawBuffers.back();
+
+		glBindFramebuffer(GL_READ_FRAMEBUFFER, prevRead);
+		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, prevDraw);
+
+		_prevDrawBuffers.pop_back();
+		_prevReadBuffers.pop_back();
+	}
+
+	void OpenGLRendererAPI::CopyFramebufferToDefaultFramebuffer(SharedPtr<Framebuffer> const &src, CopyTarget target) const
+	{
+		src->CopyToDefault(target);
+	}
+
+	void OpenGLRendererAPI::CopyFramebufferToFramebuffer(SharedPtr<Framebuffer> const &dst, SharedPtr<Framebuffer> &src, CopyTarget target) const
+	{
+		src->CopyTo(target, *dst);
+	}
+
+	void OpenGLRendererAPI::PushCapability(RendererCaps cap, bool enable)
+	{
+		if (enable) {
+			glEnable((GLenum)cap);
+		}
+		else {
+			glDisable((GLenum)cap);
+		}
+
+		_capStates[cap].push_back(enable);
+	}
+
+	void OpenGLRendererAPI::PopCapability(RendererCaps cap)
+	{
+		if (_capStates[cap].size() > 0) {
+			int32_t prevState = _capStates[cap].back();
+
+			if (prevState) {
+				glEnable((GLenum)cap);
+			}
+			else {
+				glDisable((GLenum)cap);
+			}
+
+			_capStates[cap].pop_back();
+		}
+	}
 }

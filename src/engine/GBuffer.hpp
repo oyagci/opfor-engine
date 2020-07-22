@@ -9,7 +9,7 @@
 class GBuffer
 {
 private:
-	opfor::UniquePtr<opfor::Framebuffer> _gBuffer;
+	opfor::SharedPtr<opfor::Framebuffer> _gBuffer;
 	opfor::SharedPtr<opfor::Texture> _gPosition;
 	opfor::SharedPtr<opfor::Texture> _gNormal;
 	opfor::SharedPtr<opfor::Texture> _gAlbedoSpec;

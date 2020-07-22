@@ -2,9 +2,17 @@
 
 #include <array>
 #include "engine/core/base.hpp"
-#include "engine/renderer/VertexArray.hpp"
 
 namespace opfor {
+
+// Forward Declarations
+// ====================
+class VertexArray;
+class Framebuffer;
+
+enum class RendererCaps;
+enum class CopyTarget;
+
 
 class RendererAPI
 {
@@ -24,6 +32,15 @@ public:
 	virtual void SetClearColor(std::array<float, 4>) = 0;
 
 	virtual void DrawIndexed(SharedPtr<VertexArray> const &) = 0;
+
+	virtual void PushFramebuffer(SharedPtr<Framebuffer> const &) = 0;
+	virtual void PopFramebuffer() = 0;
+
+	virtual void CopyFramebufferToDefaultFramebuffer(SharedPtr<Framebuffer> const &, CopyTarget) const = 0 ;
+	virtual void CopyFramebufferToFramebuffer(SharedPtr<Framebuffer> const &dst, SharedPtr<Framebuffer> &src, CopyTarget) const = 0;
+
+	virtual void PushCapability(RendererCaps, bool enable) = 0;
+	virtual void PopCapability(RendererCaps) = 0;
 
 	inline static API GetAPI() { return _API; }
 };
