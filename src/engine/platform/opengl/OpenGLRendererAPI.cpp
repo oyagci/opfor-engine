@@ -1,6 +1,7 @@
 #include "OpenGLRendererAPI.hpp"
 #include "engine/renderer/VertexArray.hpp"
 #include "engine/renderer/Framebuffer.hpp"
+#include "engine/renderer/Texture.hpp"
 #include "lazy.hpp"
 
 namespace opfor {
@@ -85,4 +86,26 @@ namespace opfor {
 			_capStates[cap].pop_back();
 		}
 	}
+
+	void OpenGLRendererAPI::PushTexture(SharedPtr<Texture> const &texture, TextureUnit unit)
+	{
+		int32_t prevTexture = 0;
+
+		glActiveTexture((GLenum)unit);
+		glGetIntegerv(GL_TEXTURE_BINDING_2D, &prevTexture);
+		_prevTextureUnits[unit].push_back(prevTexture);
+
+		glBindTexture(GL_TEXTURE_2D, texture->GetRawHandle());
+	}
+
+	void OpenGLRendererAPI::PopTexture(TextureUnit unit)
+	{
+		auto prevTexture = _prevTextureUnits[unit].back();
+
+		glActiveTexture((GLenum)unit);
+		glBindTexture(GL_TEXTURE_2D, prevTexture);
+
+		_prevTextureUnits[unit].pop_back();
+	}
+
 }

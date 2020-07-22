@@ -13,9 +13,11 @@ enum class ClearFlags
 
 enum class RendererCaps
 {
+#ifdef OP4_PLATFORM_OPENGL
 	DepthTest = GL_DEPTH_TEST,
 	CullFace = GL_CULL_FACE,
 	Blend = GL_BLEND,
+#endif
 };
 
 enum class RendererCaps;
@@ -39,6 +41,9 @@ public:
 
 	static void PushCapability(RendererCaps, bool);
 	static void PopCapability(RendererCaps);
+
+	static void PushTexture(SharedPtr<Texture>, TextureUnit);
+	static void PopTexture(TextureUnit);
 
 	static RendererAPI::API GetAPI() { return RendererAPI::GetAPI(); }
 };

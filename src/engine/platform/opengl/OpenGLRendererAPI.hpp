@@ -13,6 +13,9 @@ private:
 	using CapState = std::unordered_map<RendererCaps, std::vector<bool>>;
 	CapState _capStates;
 
+	using TextureUnits = std::unordered_map<TextureUnit, std::vector<uint32_t>>;
+	TextureUnits _prevTextureUnits;
+
 public:
 	void Clear() override;
 	void SetClearColor(std::array<float, 4> const) override;
@@ -27,6 +30,10 @@ public:
 
 	void PushCapability(RendererCaps, bool enable) override;
 	void PopCapability(RendererCaps) override;
+
+	void PushTexture(SharedPtr<Texture> const &, TextureUnit) override;
+	void PopTexture(TextureUnit) override;
+
 };
 
 }

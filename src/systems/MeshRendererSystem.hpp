@@ -245,10 +245,10 @@ private:
 		_ssaoShader.setUniform1i("texNoise", 2);
 
 		glClear(GL_COLOR_BUFFER_BIT);
-		glActiveTexture(GL_TEXTURE0);
-			glBindTexture(GL_TEXTURE_2D, _gBuffer.GetPositionTex());
-		glActiveTexture(GL_TEXTURE1);
-			glBindTexture(GL_TEXTURE_2D, _gBuffer.GetNormalTex());
+		// glActiveTexture(GL_TEXTURE0);
+			// glBindTexture(GL_TEXTURE_2D, _gBuffer.GetPositionTex());
+		// glActiveTexture(GL_TEXTURE1);
+		// 	glBindTexture(GL_TEXTURE_2D, _gBuffer.GetNormalTex());
 		glActiveTexture(GL_TEXTURE2);
 			glBindTexture(GL_TEXTURE_2D, _ssaoNoiseTex);
 
@@ -491,35 +491,35 @@ private:
 			_light.setUniform1f("exposure", exposure);
 
 			// Bind GBuffer Textures
-			glActiveTexture(GL_TEXTURE0);
-				glBindTexture(GL_TEXTURE_2D, _gBuffer.GetPositionTex());
-			glActiveTexture(GL_TEXTURE1);
-				glBindTexture(GL_TEXTURE_2D, _gBuffer.GetNormalTex());
-			glActiveTexture(GL_TEXTURE2);
-				glBindTexture(GL_TEXTURE_2D, _gBuffer.GetAlbedoSpecTex());
+
+			opfor::Renderer::PushTexture(_gBuffer.GetPositionTex(),   opfor::TextureUnit::Texture0);
+			opfor::Renderer::PushTexture(_gBuffer.GetNormalTex(),     opfor::TextureUnit::Texture1);
+			opfor::Renderer::PushTexture(_gBuffer.GetAlbedoSpecTex(), opfor::TextureUnit::Texture2);
+
 			glActiveTexture(GL_TEXTURE3);
 				//glBindTexture(GL_TEXTURE_2D, _ssaoBlurTex);
 				glBindTexture(GL_TEXTURE_2D, _ssaoColorBuf);
+
 			glActiveTexture(GL_TEXTURE4);
 				glBindTexture(GL_TEXTURE_CUBE_MAP, _depthCubemap);
-			glActiveTexture(GL_TEXTURE5);
-				glBindTexture(GL_TEXTURE_2D, _gBuffer.GetMetallicRoughnessTex());
+
+			opfor::Renderer::PushTexture(_gBuffer.GetMetallicRoughnessTex(), opfor::TextureUnit::Texture5);
 
 			opfor::Renderer::Submit(_quad.GetVertexArray());
 
 			// Unbind Textures
-			glActiveTexture(GL_TEXTURE0);
-				glBindTexture(GL_TEXTURE_2D, 0);
-			glActiveTexture(GL_TEXTURE1);
-				glBindTexture(GL_TEXTURE_2D, 0);
-			glActiveTexture(GL_TEXTURE2);
-				glBindTexture(GL_TEXTURE_2D, 0);
-			glActiveTexture(GL_TEXTURE3);
-				glBindTexture(GL_TEXTURE_2D, 0);
+
+			opfor::Renderer::PopTexture(opfor::TextureUnit::Texture5);
+
 			glActiveTexture(GL_TEXTURE4);
 				glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
-			glActiveTexture(GL_TEXTURE5);
+			glActiveTexture(GL_TEXTURE3);
 				glBindTexture(GL_TEXTURE_2D, 0);
+
+			opfor::Renderer::PopTexture(opfor::TextureUnit::Texture2);
+			opfor::Renderer::PopTexture(opfor::TextureUnit::Texture1);
+			opfor::Renderer::PopTexture(opfor::TextureUnit::Texture0);
+
 		_light.unbind();
 	}
 

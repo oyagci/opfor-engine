@@ -60,4 +60,14 @@ void Renderer::CopyFramebufferToDefaultFramebuffer(SharedPtr<Framebuffer> src, C
 	RenderCommand::CopyFramebufferToDefaultFramebuffer(src, target);
 }
 
+void Renderer::PushTexture(SharedPtr<Texture> texture, TextureUnit unit)
+{
+	RenderCommand::PushTexture(texture, unit);
+}
+
+void Renderer::PopTexture(TextureUnit unit)
+{
+	RenderCommand::PopTexture(unit);
+}
+
 }

@@ -9,9 +9,11 @@ namespace opfor {
 // ====================
 class VertexArray;
 class Framebuffer;
+class Texture;
 
 enum class RendererCaps;
 enum class CopyTarget;
+enum class TextureUnit;
 
 
 class RendererAPI
@@ -41,6 +43,9 @@ public:
 
 	virtual void PushCapability(RendererCaps, bool enable) = 0;
 	virtual void PopCapability(RendererCaps) = 0;
+
+	virtual void PushTexture(SharedPtr<Texture> const &, TextureUnit) = 0;
+	virtual void PopTexture(TextureUnit) = 0;
 
 	inline static API GetAPI() { return _API; }
 };

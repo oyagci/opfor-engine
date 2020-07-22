@@ -54,6 +54,16 @@ class RenderCommand
 		{
 			_API->PopCapability(cap);
 		}
+
+		static inline void PushTexture(SharedPtr<Texture> texture, TextureUnit unit)
+		{
+			_API->PushTexture(texture, unit);
+		}
+
+		static inline void PopTexture(TextureUnit unit)
+		{
+			_API->PopTexture(unit);
+		}
 };
 
 }

@@ -80,10 +80,9 @@ public:
 	}
 
 	auto const &GetFramebuffer() { return _gBuffer; }
-	GLuint GetFramebufferId() const { return _gBuffer->GetRawHandle(); }
-	GLuint GetPositionTex() const { return _gPosition->GetRawHandle(); }
-	GLuint GetNormalTex() const { return _gNormal->GetRawHandle(); }
-	GLuint GetAlbedoSpecTex() const { return _gAlbedoSpec->GetRawHandle(); }
+	auto &GetPositionTex() const { return _gPosition; }
+	auto &GetNormalTex() const { return _gNormal; }
+	auto &GetAlbedoSpecTex() const { return _gAlbedoSpec; }
 	GLuint GetDepthTex() const { return _gDepth->GetRawHandle(); }
-	GLuint GetMetallicRoughnessTex() const { return _gMetallicRoughness->GetRawHandle(); }
+	auto &GetMetallicRoughnessTex() const { return _gMetallicRoughness; }
 };
