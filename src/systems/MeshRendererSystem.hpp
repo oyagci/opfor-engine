@@ -630,10 +630,9 @@ public:
 
 		// Copy depth buffer to default framebuffer to enable depth testing with billboard
 		// and other shaders
-		glBindFramebuffer(GL_READ_FRAMEBUFFER, _gBuffer.GetFramebufferId());
-		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
-		glBlitFramebuffer(0, 0, width, height, 0, 0, width, height, GL_DEPTH_BUFFER_BIT, GL_NEAREST);
-		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		_gBuffer.GetFramebuffer()->CopyToDefault(opfor::CopyTarget::DepthBufferBit);
+
+		_gBuffer.Unbind();
 
 		glEnable(GL_BLEND);
 		glEnable(GL_DEPTH_TEST);

@@ -29,6 +29,9 @@ public:
 	uint32_t GetRawHandle() const override { return _RendererID; }
 
 	bool IsComplete() const override;
+
+	void CopyToDefault(CopyTarget target) override;
+	void CopyTo(CopyTarget target, Framebuffer &dst) override;
 };
 
 }

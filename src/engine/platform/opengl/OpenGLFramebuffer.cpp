@@ -2,6 +2,7 @@
 #include "engine/renderer/Texture.hpp"
 #include "engine/renderer/Framebuffer.hpp"
 #include "engine/renderer/Renderbuffer.hpp"
+#include "engine/Engine.hpp"
 
 namespace opfor {
 
@@ -60,6 +61,54 @@ void OpenGLFramebuffer::UpdateDrawBuffers() const
 bool OpenGLFramebuffer::IsComplete() const
 {
 	return glCheckFramebufferStatus(GL_FRAMEBUFFER);
+}
+
+void OpenGLFramebuffer::CopyToDefault(CopyTarget target)
+{
+	GLint readBuffer  = 0;
+	GLint drawBuffer = 0;
+
+	// Save currently bound framebuffers
+	glGetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING, &readBuffer);
+	glGetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING, &drawBuffer);
+
+	if (target == CopyTarget::DepthBufferBit) {
+
+		int width = Engine::Get().GetWindow()->GetWidth();
+		int height = Engine::Get().GetWindow()->GetHeight();
+
+		glBindFramebuffer(GL_READ_FRAMEBUFFER, _RendererID);
+		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+		glBlitFramebuffer(0, 0, width, height, 0, 0, width, height, GL_DEPTH_BUFFER_BIT, GL_NEAREST);
+	}
+
+	// Restore framebuffers
+	glBindFramebuffer(GL_READ_FRAMEBUFFER, readBuffer);
+	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, drawBuffer);
+}
+
+void OpenGLFramebuffer::CopyTo(CopyTarget target, Framebuffer &dst)
+{
+	GLint readBuffer  = 0;
+	GLint drawBuffer = 0;
+
+	// Save currently bound framebuffers
+	glGetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING, &readBuffer);
+	glGetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING, &drawBuffer);
+
+	if (target == CopyTarget::DepthBufferBit) {
+
+		int width = Engine::Get().GetWindow()->GetWidth();
+		int height = Engine::Get().GetWindow()->GetHeight();
+
+		glBindFramebuffer(GL_READ_FRAMEBUFFER, _RendererID);
+		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, dst.GetRawHandle());
+		glBlitFramebuffer(0, 0, width, height, 0, 0, width, height, GL_DEPTH_BUFFER_BIT, GL_NEAREST);
+	}
+
+	// Restore framebuffers
+	glBindFramebuffer(GL_READ_FRAMEBUFFER, readBuffer);
+	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, drawBuffer);
 }
 
 }

@@ -38,6 +38,15 @@ enum class RenderbufferAttachment
 #endif
 };
 
+enum class CopyTarget
+{
+#ifdef OP4_PLATFORM_OPENGL
+	ColorBufferBit = GL_COLOR_BUFFER_BIT,
+	DepthBufferBit = GL_DEPTH_BUFFER_BIT,
+	StencilBufferBit = GL_STENCIL_BUFFER_BIT,
+#endif
+};
+
 class Framebuffer
 {
 private:
@@ -53,6 +62,9 @@ public:
 	virtual uint32_t GetRawHandle() const = 0;
 
 	virtual bool IsComplete() const = 0;
+
+	virtual void CopyToDefault(CopyTarget target) = 0;
+	virtual void CopyTo(CopyTarget target, Framebuffer &dst) = 0;
 
 	static UniquePtr<Framebuffer> Create();
 };
