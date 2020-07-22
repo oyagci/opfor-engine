@@ -11,7 +11,6 @@
 #include "components/DirectionalLightComponent.hpp"
 #include "components/ModelComponent.hpp"
 #include "Engine.hpp"
-#include "Framebuffer.hpp"
 #include "ShaderManager.hpp"
 #include <fmt/format.h>
 #include <glm/gtx/projection.hpp>
