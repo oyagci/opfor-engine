@@ -2,22 +2,33 @@
 
 namespace opfor {
 
-OpenGLTexture::OpenGLTexture(TextureType type, DataFormat input, DataFormat output,
-	DataType dataType, size_t width, size_t height, void *data)
-	: _Type(type)
+void OpenGLTexture::Build()
 {
-	glGenTextures(1, &_RendererID);
-
-	switch (type) {
+	switch (GetTextureType()) {
 		case TextureType::Tex2D:
 			glBindTexture(GL_TEXTURE_2D, _RendererID);
-			glTexImage2D(GL_TEXTURE_2D, 0, (GLint)input, width, height, 0, (GLint)output,
-				(GLenum)dataType, data);
+			glTexImage2D(GL_TEXTURE_2D, 0, (GLint)GetInputFormat(), GetSize().x, GetSize().y, 0, (GLint)GetOutputFormat(),
+				(GLenum)GetDataType(), GetTextureData());
 			break ;
+		case TextureType::TexCubemap:
+			glBindTexture(GL_TEXTURE_CUBE_MAP, _RendererID);
+			for (size_t face = 0; face < 6; face++) {
+				glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + face, 0,
+					(GLint)GetInputFormat(), GetSize().x, GetSize().y, 0,
+					(GLint)GetOutputFormat(), (GLenum)GetDataType(), GetTextureData());
+			}
+			glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
+			break ;
+
 		default:
 			OP4_CORE_ASSERT(false, "Wrong/Unsupported TextureType given!\n");
 			return ;
 	};
+}
+
+OpenGLTexture::OpenGLTexture()
+{
+	glGenTextures(1, &_RendererID);
 }
 
 OpenGLTexture::~OpenGLTexture()
@@ -28,7 +39,7 @@ OpenGLTexture::~OpenGLTexture()
 void OpenGLTexture::Bind(TextureUnit unit)
 {
 	glActiveTexture((GLenum)unit);
-	glBindTexture((GLenum)_Type, (GLuint)_RendererID);
+	glBindTexture((GLenum)GetTextureType(), (GLuint)_RendererID);
 	_BoundUnit = unit;
 }
 
@@ -36,25 +47,9 @@ void OpenGLTexture::Unbind()
 {
 	if (_BoundUnit) {
 		glActiveTexture((GLenum)_BoundUnit.value());
-		glBindTexture((GLenum)_Type, 0);
+		glBindTexture((GLenum)GetTextureType(), 0);
 		_BoundUnit.reset();
 	}
-}
-
-void OpenGLTexture::SetParameter(TextureParameter param)
-{
-	glBindTexture((GLenum)_Type, _RendererID);
-	glTexParameteri((GLenum)_Type, (GLenum)param.first, (GLint)param.second);
-	glBindTexture((GLenum)_Type, _RendererID);
-}
-
-void OpenGLTexture::SetParameters(TextureParameterList params)
-{
-	glBindTexture((GLenum)_Type, _RendererID);
-	for (auto const &p : params) {
-		glTexParameteri((GLenum)_Type, (GLenum)p.first, (GLint)p.second);
-	}
-	glBindTexture((GLenum)_Type, _RendererID);
 }
 
 }

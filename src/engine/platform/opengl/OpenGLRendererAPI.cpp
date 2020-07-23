@@ -91,12 +91,26 @@ namespace opfor {
 	void OpenGLRendererAPI::PushTexture(SharedPtr<Texture> const &texture, TextureUnit unit)
 	{
 		int32_t prevTexture = 0;
+		TextureType type = texture->GetType();
 
 		glActiveTexture((GLenum)unit);
-		glGetIntegerv(GL_TEXTURE_BINDING_2D, &prevTexture);
-		_prevTextureUnits[unit].push_back(prevTexture);
 
-		glBindTexture(GL_TEXTURE_2D, texture->GetRawHandle());
+		if (type == TextureType::Tex1D) {
+			glGetIntegerv(GL_TEXTURE_BINDING_1D, &prevTexture);
+		}
+		else if (type == TextureType::Tex2D) {
+			glGetIntegerv(GL_TEXTURE_BINDING_2D, &prevTexture);
+		}
+		else if (type == TextureType::Tex3D) {
+			glGetIntegerv(GL_TEXTURE_BINDING_3D, &prevTexture);
+		}
+		else if (type == TextureType::TexCubemap) {
+			glGetIntegerv(GL_TEXTURE_BINDING_CUBE_MAP, &prevTexture);
+		}
+
+		_prevTextureUnits[unit].push_back({ type, prevTexture });
+
+		glBindTexture((GLenum)type, texture->GetRawHandle());
 	}
 
 	void OpenGLRendererAPI::PopTexture(TextureUnit unit)
@@ -104,7 +118,7 @@ namespace opfor {
 		auto prevTexture = _prevTextureUnits[unit].back();
 
 		glActiveTexture((GLenum)unit);
-		glBindTexture(GL_TEXTURE_2D, prevTexture);
+		glBindTexture((GLenum)prevTexture.first, (GLuint)prevTexture.second);
 
 		_prevTextureUnits[unit].pop_back();
 	}

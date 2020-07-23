@@ -34,17 +34,41 @@ private:
 			{ TextureParameterType::MagnifyFilter, TextureParameterValue::Nearest },
 		};
 
-		_gPosition = opfor::Texture::Create(TextureType::Tex2D, params, DataFormat::RGBA16F,
-				DataFormat::RGBA, DataType::Float, width, height, 0, nullptr);
+		_gPosition = opfor::Texture::Create();
+			_gPosition->SetTextureType(TextureType::Tex2D);
+			_gPosition->SetTextureParameters(params);
+			_gPosition->SetInputFormat(DataFormat::RGBA16F);
+			_gPosition->SetOutputFormat(DataFormat::RGBA);
+			_gPosition->SetDataType(DataType::Float);
+			_gPosition->SetSize(width, height);
+			_gPosition->Build();
 
-		_gNormal = opfor::Texture::Create(TextureType::Tex2D, params, DataFormat::RGBA16F,
-				DataFormat::RGBA, DataType::Float, width, height, 0, nullptr);
+		_gNormal = opfor::Texture::Create();
+			_gNormal->SetTextureType(TextureType::Tex2D);
+			_gNormal->SetTextureParameters(params);
+			_gNormal->SetInputFormat(DataFormat::RGBA16F);
+			_gNormal->SetOutputFormat(DataFormat::RGBA);
+			_gNormal->SetDataType(DataType::Float);
+			_gNormal->SetSize(width, height);
+			_gNormal->Build();
 
-		_gAlbedoSpec = opfor::Texture::Create(TextureType::Tex2D, params, DataFormat::RGBA16F,
-				DataFormat::RGBA, DataType::Float, width, height, 0, nullptr);
+		_gAlbedoSpec = opfor::Texture::Create();
+			_gAlbedoSpec->SetTextureType(TextureType::Tex2D);
+			_gAlbedoSpec->SetTextureParameters(params);
+			_gAlbedoSpec->SetInputFormat(DataFormat::RGBA16F);
+			_gAlbedoSpec->SetOutputFormat(DataFormat::RGBA);
+			_gAlbedoSpec->SetDataType(DataType::Float);
+			_gAlbedoSpec->SetSize(width, height);
+			_gAlbedoSpec->Build();
 
-		_gMetallicRoughness = opfor::Texture::Create(TextureType::Tex2D, params, DataFormat::RGBA16F,
-				DataFormat::RGBA, DataType::Float, width, height, 0, nullptr);
+		_gMetallicRoughness = opfor::Texture::Create();
+			_gMetallicRoughness->SetTextureType(TextureType::Tex2D);
+			_gMetallicRoughness->SetTextureParameters(params);
+			_gMetallicRoughness->SetInputFormat(DataFormat::RGBA16F);
+			_gMetallicRoughness->SetOutputFormat(DataFormat::RGBA);
+			_gMetallicRoughness->SetDataType(DataType::Float);
+			_gMetallicRoughness->SetSize(width, height);
+			_gMetallicRoughness->Build();
 
 		_gDepth = Renderbuffer::Create();
 		_gDepth->AttachDepthComponent({ static_cast<uint32_t>(width), static_cast<uint32_t>(height) });

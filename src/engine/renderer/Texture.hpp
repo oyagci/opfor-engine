@@ -11,6 +11,7 @@ enum class TextureType
 	Tex1D = GL_TEXTURE_1D,
 	Tex2D = GL_TEXTURE_2D,
 	Tex3D = GL_TEXTURE_3D,
+	TexCubemap = GL_TEXTURE_CUBE_MAP,
 #endif
 };
 
@@ -21,16 +22,17 @@ enum class DataFormat
 	RGBA    = GL_RGBA,
 	RGBA16F = GL_RGBA16F,
 	RGB16F  = GL_RGB16F,
+	Depth   = GL_DEPTH_COMPONENT,
 #endif
 };
 
 enum class DataType
 {
 #ifdef OP4_PLATFORM_OPENGL
-	Int          = GL_INT,
-	Float        = GL_FLOAT,
-	UnsignedByte = GL_UNSIGNED_BYTE,
-	UnsignedInt  = GL_UNSIGNED_INT,
+	Int            = GL_INT,
+	Float          = GL_FLOAT,
+	UnsignedByte   = GL_UNSIGNED_BYTE,
+	UnsignedInt    = GL_UNSIGNED_INT,
 #endif
 };
 
@@ -86,20 +88,50 @@ using TextureParameterList = std::vector<TextureParameter>;
 
 class Texture
 {
+private:
+	DataFormat _InputFormat = DataFormat::RGB;
+	DataFormat _OutputFormat = DataFormat::RGB;
+	DataType _DataType = DataType::Int;
+	TextureParameterList _Parameters;
+	glm::vec3 _Size;
+
+	bool _HasAlpha = false;
+	bool _IsSRGB = false;
+
+	TextureType _Type = TextureType::Tex2D;
+	void *_Data = nullptr;
+
 public:
 	virtual ~Texture() {}
 
 	virtual void Bind(TextureUnit) = 0;
 	virtual void Unbind() = 0;
 
-	virtual void SetParameter(TextureParameter) = 0;
-	virtual void SetParameters(TextureParameterList) = 0;
-
 	virtual uint32_t GetRawHandle() const = 0;
 
-	static UniquePtr<Texture> Create(TextureType type, TextureParameterList,
-		DataFormat inputFormat, DataFormat outputFormat, DataType, size_t width, size_t height,
-		size_t depth, void *data);
+	virtual void Build() = 0;
+
+	void SetInputFormat(DataFormat input) { _InputFormat = input; }
+	void SetOutputFormat(DataFormat output) { _OutputFormat = output; }
+	void SetDataType(DataType dataType) { _DataType = dataType; }
+	void SetHasAlpha(bool alpha) { _HasAlpha = alpha; }
+	void SetIsSRGB(bool srgb) { _IsSRGB = srgb; }
+	void SetTextureData(void *data) { _Data = data; }
+	void SetTextureType(TextureType type) { _Type = type; }
+	void SetTextureParameters(TextureParameterList paramList) { _Parameters = paramList; }
+	void SetSize(float width, float height = 0, float depth = 0);
+
+	auto GetInputFormat() const { return _InputFormat; }
+	auto GetOutputFormat() const { return _OutputFormat; }
+	auto GetDataType() const { return _DataType; }
+	auto HasAlpha() const { return _HasAlpha; }
+	auto IsSRGB() const { return _IsSRGB; }
+	auto GetTextureData() const { return _Data; }
+	auto const &GetTextureParameters() const { return _Parameters; }
+	auto GetSize() const { return _Size; }
+	auto GetTextureType() const { return _Type; }
+
+	static UniquePtr<Texture> Create();
 };
 
 }

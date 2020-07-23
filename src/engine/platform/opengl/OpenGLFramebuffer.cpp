@@ -29,10 +29,36 @@ void OpenGLFramebuffer::Unbind()
 void OpenGLFramebuffer::AttachTexture(SharedPtr<Texture> texture, FramebufferAttachment attachment)
 {
 	glBindFramebuffer(GL_FRAMEBUFFER, _RendererID);
-	glFramebufferTexture2D(GL_FRAMEBUFFER, (GLenum)attachment, GL_TEXTURE_2D, texture->GetRawHandle(), 0);
 
-	_Attachments.insert(attachment);
-	UpdateDrawBuffers();
+	switch (attachment) {
+		case FramebufferAttachment::ColorAttachment0:
+		case FramebufferAttachment::ColorAttachment1:
+		case FramebufferAttachment::ColorAttachment2:
+		case FramebufferAttachment::ColorAttachment3:
+		case FramebufferAttachment::ColorAttachment4:
+		case FramebufferAttachment::ColorAttachment5:
+		case FramebufferAttachment::ColorAttachment6:
+		case FramebufferAttachment::ColorAttachment7:
+		case FramebufferAttachment::ColorAttachment8:
+		case FramebufferAttachment::ColorAttachment9:
+		case FramebufferAttachment::ColorAttachment10:
+		case FramebufferAttachment::ColorAttachment11:
+		case FramebufferAttachment::ColorAttachment12:
+		case FramebufferAttachment::ColorAttachment13:
+		case FramebufferAttachment::ColorAttachment14:
+		case FramebufferAttachment::ColorAttachment15:
+			glFramebufferTexture2D(GL_FRAMEBUFFER, (GLenum)attachment, GL_TEXTURE_2D, texture->GetRawHandle(), 0);
+			_Attachments.insert(attachment);
+			UpdateDrawBuffers();
+			break ;
+		case FramebufferAttachment::DepthAttachment:
+			glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, texture->GetRawHandle(), 0);
+			glReadBuffer(GL_NONE);
+			glDrawBuffer(GL_NONE);
+			break ;
+	}
+
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 	_Textures.push_back(texture);
 }
@@ -52,10 +78,13 @@ void OpenGLFramebuffer::UpdateDrawBuffers() const
 	attachments.reserve(_Attachments.size());
 
 	for (auto const &attach : _Attachments) {
-		attachments.push_back((GLuint)attach);
+		if (attach >= FramebufferAttachment::ColorAttachment0 && attach <= FramebufferAttachment::ColorAttachment15)
+			attachments.push_back((GLuint)attach);
 	}
 
-	glDrawBuffers(attachments.size(), attachments.data());
+	if (attachments.size() > 0) {
+		glDrawBuffers(attachments.size(), attachments.data());
+	}
 }
 
 bool OpenGLFramebuffer::IsComplete() const

@@ -27,6 +27,7 @@ enum class FramebufferAttachment
 	ColorAttachment13 = GL_COLOR_ATTACHMENT13,
 	ColorAttachment14 = GL_COLOR_ATTACHMENT14,
 	ColorAttachment15 = GL_COLOR_ATTACHMENT15,
+	DepthAttachment   = GL_DEPTH_ATTACHMENT,
 #endif
 };
 

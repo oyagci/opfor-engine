@@ -4,6 +4,8 @@
 
 namespace opfor {
 
+enum class TextureType;
+
 class OpenGLRendererAPI : public RendererAPI
 {
 private:
@@ -13,7 +15,7 @@ private:
 	using CapState = std::unordered_map<RendererCaps, std::vector<bool>>;
 	CapState _capStates;
 
-	using TextureUnits = std::unordered_map<TextureUnit, std::vector<uint32_t>>;
+	using TextureUnits = std::unordered_map<TextureUnit, std::vector<std::pair<TextureType, uint32_t>>>;
 	TextureUnits _prevTextureUnits;
 
 	std::vector<uint32_t> _prevShaders;
