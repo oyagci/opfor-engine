@@ -19,13 +19,14 @@
 #include "GBuffer.hpp"
 #include "TextureAutoBind.hpp"
 #include "engine/renderer/Renderer.hpp"
+#include "engine/renderer/Shader.hpp"
 
 class MeshRendererSystem : public ecs::ComponentSystem
 {
 private:
-	lazy::graphics::Shader _billboard;
-	lazy::graphics::Shader _light;
-	lazy::graphics::Shader _shadow;
+	opfor::UniquePtr<opfor::Shader> _billboard;
+	opfor::UniquePtr<opfor::Shader> _light;
+	opfor::UniquePtr<opfor::Shader> _shadow;
 	opfor::Mesh _quad;
 
 	GLuint _ssaoFb;
@@ -33,8 +34,8 @@ private:
 	GLuint _ssaoColorBuf;
 	GLuint _ssaoNoiseTex;
 	GLuint _ssaoBlurTex;
-	lazy::graphics::Shader _ssaoShader;
-	lazy::graphics::Shader _ssaoBlurShader;
+	opfor::UniquePtr<opfor::Shader> _ssaoShader;
+	opfor::UniquePtr<opfor::Shader> _ssaoBlurShader;
 
 	GBuffer _gBuffer;
 
@@ -49,13 +50,11 @@ private:
 
 	void InitDepthCubemap()
 	{
-		_shadow.addVertexShader("shaders/shadow.vs.glsl")
-			.addFragmentShader("shaders/shadow.fs.glsl")
-			.addGeometryShader("shaders/shadow.gs.glsl")
-			.link();
-		assert(_shadow.isValid());
-
-		_shadow.bind();
+		_shadow = opfor::Shader::Create();
+		_shadow->AddVertexShader("shaders/shadow.vs.glsl");
+		_shadow->AddFragmentShader("shaders/shadow.fs.glsl");
+		_shadow->AddGeometryShader("shaders/shadow.gs.glsl");
+		_shadow->Link();
 
 		float aspect = static_cast<float>(ShadowWidth) / static_cast<float>(ShadowHeight);
 		float near = 1.0f;
@@ -131,9 +130,10 @@ private:
 
 	void InitBillboard()
 	{
-		_billboard.addVertexShader("shaders/billboard.vs.glsl")
-			.addFragmentShader("shaders/billboard.fs.glsl")
-			.link();
+		_billboard = opfor::Shader::Create();
+		_billboard->AddVertexShader("shaders/billboard.vs.glsl");
+		_billboard->AddFragmentShader("shaders/billboard.fs.glsl");
+		_billboard->Link();
 	}
 
 	void InitSSAO()
@@ -141,10 +141,10 @@ private:
 		auto display = opfor::Engine::Get().GetWindow();
 		auto [ width, height ] = std::tuple(display->GetWidth(), display->GetHeight());
 
-		_ssaoShader.addVertexShader("shaders/ssao.vs.glsl")
-			.addFragmentShader("shaders/ssao.fs.glsl")
-			.link();
-		assert(_ssaoShader.isValid());
+		_ssaoShader = opfor::Shader::Create();
+		_ssaoShader->AddVertexShader("shaders/ssao.vs.glsl");
+		_ssaoShader->AddFragmentShader("shaders/ssao.fs.glsl");
+		_ssaoShader->Link();
 
 		glGenFramebuffers(1, &_ssaoFb);
 		glBindFramebuffer(GL_FRAMEBUFFER, _ssaoFb);
@@ -162,17 +162,20 @@ private:
 
 		GenSSAOKernel();
 
-		_ssaoShader.bind();
-		_ssaoShader.setUniform1i("gPosition", 0);
-		_ssaoShader.setUniform1i("gNormal", 1);
-		_ssaoShader.setUniform1i("texNoise", 2);
-		_ssaoShader.unbind();
+		_ssaoShader->Bind();
+		_ssaoShader->SetUniform("gPosition", 0);
+		_ssaoShader->SetUniform("gNormal", 1);
+		_ssaoShader->SetUniform("texNoise", 2);
+		_ssaoShader->Unbind();
 
-		_ssaoBlurShader.addVertexShader("shaders/ssao.vs.glsl")
-			.addFragmentShader("shaders/ssaoblur.fs.glsl")
-			.link();
-		_ssaoBlurShader.bind();
-		_ssaoBlurShader.setUniform1i("ssaoInput", 0);
+		_ssaoBlurShader = opfor::Shader::Create();
+		_ssaoBlurShader->AddVertexShader("shaders/ssao.vs.glsl");
+		_ssaoBlurShader->AddFragmentShader("shaders/ssaoblur.fs.glsl");
+		_ssaoBlurShader->Link();
+
+		_ssaoBlurShader->Bind();
+		_ssaoBlurShader->SetUniform("ssaoInput", 0);
+		_ssaoBlurShader->Unbind();
 
 		glGenFramebuffers(1, &_ssaoBlurFb);
 		glBindFramebuffer(GL_FRAMEBUFFER, _ssaoBlurFb);
@@ -227,22 +230,18 @@ private:
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 		glBindTexture(GL_TEXTURE_2D, 0);
 
-		_ssaoShader.bind();
-//		GLuint sampleLoc = _ssaoShader.getUniformLocation("samples");
-		for (size_t i = 0; i < 64; i++) {
-			_ssaoShader.setUniform3f("samples[" + std::to_string(i) + "]", ssaoKernel[i]);
-		}
-//		glUniform3fv(sampleLoc, 64, &ssaoKernel[0][0]);
-		_ssaoShader.unbind();
+		_ssaoShader->Bind();
+		_ssaoShader->SetUniform("samples", ssaoKernel, 64);
+		_ssaoShader->Unbind();
 	}
 
 	void RenderSSAO(PlayerCameraComponent const &camera)
 	{
 		glBindFramebuffer(GL_FRAMEBUFFER, _ssaoFb);
-		_ssaoShader.bind();
-		_ssaoShader.setUniform1i("gPosition", 0);
-		_ssaoShader.setUniform1i("gNormal", 1);
-		_ssaoShader.setUniform1i("texNoise", 2);
+		_ssaoShader->Bind();
+		_ssaoShader->SetUniform("gPosition", 0);
+		_ssaoShader->SetUniform("gNormal", 1);
+		_ssaoShader->SetUniform("texNoise", 2);
 
 		glClear(GL_COLOR_BUFFER_BIT);
 		// glActiveTexture(GL_TEXTURE0);
@@ -252,8 +251,8 @@ private:
 		glActiveTexture(GL_TEXTURE2);
 			glBindTexture(GL_TEXTURE_2D, _ssaoNoiseTex);
 
-		_ssaoShader.setUniform4x4f("projectionMatrix", camera.projection);
-		_ssaoShader.setUniform4x4f("viewMatrix", camera.view);
+		_ssaoShader->SetUniform("projectionMatrix", camera.projection);
+		_ssaoShader->SetUniform("viewMatrix", camera.view);
 
 		opfor::Renderer::Submit(_quad.GetVertexArray());
 
@@ -263,7 +262,7 @@ private:
 			glBindTexture(GL_TEXTURE_2D, 0);
 		glActiveTexture(GL_TEXTURE2);
 			glBindTexture(GL_TEXTURE_2D, 0);
-		_ssaoShader.unbind();
+		_ssaoShader->Unbind();
 
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 //		glBindFramebuffer(GL_FRAMEBUFFER, _ssaoBlurFb);
@@ -294,7 +293,7 @@ private:
 				glm::mat4 model(1.0f);
 				model = glm::translate(model, transform.position);
 				model = glm::scale(model, transform.scale);
-				_shadow.setUniform4x4f("modelMatrix", model);
+				_shadow->SetUniform("modelMatrix", model);
 
 				opfor::Renderer::Submit(reinterpret_cast<opfor::Mesh const*>(mesh)->GetVertexArray());
 			}
@@ -330,7 +329,7 @@ private:
 				shader->setUniform4x4f("projectionMatrix", camera.projection);
 				shader->setUniform3f("viewPos", playerTransform.position);
 
-				UpdateLight(*shader);
+				//UpdateLight(*shader);
 
 				glm::mat4 modelMatrix(1.0f);
 				modelMatrix = glm::translate(modelMatrix, transform.position);
@@ -421,36 +420,36 @@ private:
 		shader->unbind();
 	}
 
-	void UpdateLight(lazy::graphics::Shader &shader)
+	void UpdateLight(opfor::UniquePtr<opfor::Shader> &shader)
 	{
 		auto lights = GetEntities<PointLightComponent, TransformComponent>();
 
 		if (lights.size() == 0) { return ; }
 
-		shader.setUniform1i("pointLightCount", lights.size());
+		shader->SetUniform("pointLightCount", lights.size());
 
 		for (size_t i = 0; i < lights.size(); i++) {
 			auto [ light, transform ] = lights[i]->GetAll();
 
 			std::string pointLight = "pointLight[" + std::to_string(i) + "]";
 
-			shader.setUniform3f(pointLight + ".position", transform.position);
-			shader.setUniform3f(pointLight + ".color", light.Color);
-			shader.setUniform1f(pointLight + ".intensity", light.Intensity);
+			shader->SetUniform(pointLight + ".position", transform.position);
+			shader->SetUniform(pointLight + ".color", light.Color);
+			shader->SetUniform(pointLight + ".intensity", light.Intensity);
 		}
 
 		auto dirLights = GetEntities<DirectionalLightComponent>();
 
-		shader.setUniform1i("directionalLightCount", dirLights.size());
+		shader->SetUniform("directionalLightCount", dirLights.size());
 
 		for (size_t i = 0; i < dirLights.size(); i++) {
 			auto [ light ] = dirLights[i]->GetAll();
 
 			std::string directionalLight = "directionalLights[" + std::to_string(i) + "]";
 
-			shader.setUniform3f(directionalLight + ".direction", light.Direction);
-			shader.setUniform3f(directionalLight + ".color", light.Color);
-			shader.setUniform1f(directionalLight + ".intensity", light.Intensity);
+			shader->SetUniform(directionalLight + ".direction", light.Direction);
+			shader->SetUniform(directionalLight + ".color", light.Color);
+			shader->SetUniform(directionalLight + ".intensity", light.Intensity);
 		}
 	}
 
@@ -463,32 +462,32 @@ private:
 		for (auto const &lightEnt : lights) {
 			auto [ light, transform ] = lightEnt->GetAll();
 
-			_billboard.bind();
-			_billboard.setUniform4x4f("viewMatrix", camera.view);
-			_billboard.setUniform4x4f("viewProjectionMatrix", camera.viewProjection);
-			_billboard.setUniform4x4f("projectionMatrix", camera.projection);
-			_billboard.setUniform3f("particlePosition", transform.position);
+			_billboard->Bind();
+			_billboard->SetUniform("viewMatrix", camera.view);
+			_billboard->SetUniform("viewProjectionMatrix", camera.viewProjection);
+			_billboard->SetUniform("projectionMatrix", camera.projection);
+			_billboard->SetUniform("particlePosition", transform.position);
 
 			TextureManager::Get().bind("light_bulb_icon", 0);
 			opfor::Renderer::Submit(_quad.GetVertexArray());
 
-			_billboard.unbind();
+			_billboard->Unbind();
 		}
 	}
 
 	void RenderLight(glm::vec3 const &viewPos, float const exposure)
 	{
 		// Lighting pass
-		_light.bind();
+		_light->Bind();
 			UpdateLight(_light);
-			_light.setUniform1i("gPosition", 0);
-			_light.setUniform1i("gNormal", 1);
-			_light.setUniform1i("gAlbedoSpec", 2);
-			_light.setUniform1i("gSSAO", 3);
-			_light.setUniform1i("gMetallicRoughness", 5);
-			_light.setUniform1i("depthMap", 4);
-			_light.setUniform3f("viewPos", viewPos);
-			_light.setUniform1f("exposure", exposure);
+			_light->SetUniform("gPosition", 0);
+			_light->SetUniform("gNormal", 1);
+			_light->SetUniform("gAlbedoSpec", 2);
+			_light->SetUniform("gSSAO", 3);
+			_light->SetUniform("gMetallicRoughness", 5);
+			_light->SetUniform("depthMap", 4);
+			_light->SetUniform("viewPos", viewPos);
+			_light->SetUniform("exposure", exposure);
 
 			// Bind GBuffer Textures
 
@@ -520,7 +519,7 @@ private:
 			opfor::Renderer::PopTexture(opfor::TextureUnit::Texture1);
 			opfor::Renderer::PopTexture(opfor::TextureUnit::Texture0);
 
-		_light.unbind();
+		_light->Unbind();
 	}
 
 	void BakeShadowMap()
@@ -536,7 +535,7 @@ private:
 		auto playerTransform = players[0]->Get<TransformComponent>();
 		auto lightPos = lights[0]->Get<TransformComponent>().position;
 
-		std::array<glm::mat4, 6> shadowTransforms = {
+		std::vector<glm::mat4> shadowTransforms = {
 			_shadowProjection * glm::lookAt(lightPos, lightPos + glm::vec3( 1.0, 0.0, 0.0), glm::vec3(0.0,-1.0, 0.0)),
 			_shadowProjection * glm::lookAt(lightPos, lightPos + glm::vec3(-1.0, 0.0, 0.0), glm::vec3(0.0,-1.0, 0.0)),
 			_shadowProjection * glm::lookAt(lightPos, lightPos + glm::vec3( 0.0, 1.0, 0.0), glm::vec3(0.0, 0.0, 1.0)),
@@ -551,16 +550,15 @@ private:
 		opfor::Renderer::PushCapability(opfor::RendererCaps::DepthTest, true);
 			glClear(GL_DEPTH_BUFFER_BIT);
 
-		_shadow.bind();
-		_shadow.setUniform4x4f("model", glm::mat4(1.0f));
-		glUniformMatrix4fv(_shadow.getUniformLocation("shadowMatrices"), 6, GL_FALSE,
-			(float *)shadowTransforms.data());
-		_shadow.setUniform1f("far_plane", 10000.0f);
-		_shadow.setUniform3f("lightPos", lightPos);
+		_shadow->Bind();
+		_shadow->SetUniform("model", glm::mat4(1.0f));
+		_shadow->SetUniform("shadowMatrices", shadowTransforms);
+		_shadow->SetUniform("far_plane", 10000.0f);
+		_shadow->SetUniform("lightPos", lightPos);
 
 			RenderShadowMeshes();
 
-		_shadow.unbind();
+		_shadow->Unbind();
 
 		UnbindShadowMap();
 
@@ -586,10 +584,11 @@ public:
 			{ GL_TEXTURE_MAG_FILTER, GL_NEAREST },
 		}, GL_TEXTURE_2D);
 
-		_light.addVertexShader("shaders/light.vs.glsl")
-			.addFragmentShader("shaders/light.fs.glsl")
-			.link();
-//		assert(_light.isValid());
+		_light = opfor::Shader::Create();
+
+		_light->AddVertexShader("shaders/light.vs.glsl");
+		_light->AddFragmentShader("shaders/light.fs.glsl");
+		_light->Link();
 	}
 
 	~MeshRendererSystem()
