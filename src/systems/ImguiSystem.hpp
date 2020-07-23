@@ -465,16 +465,16 @@ private:
 			if (ImGui::BeginPopupContextItem("add_component_popup")) {
 				if (ImGui::MenuItem("Mesh")) {
 					auto [ shaderId, shader ] = ShaderManager::Get().Create();
-						shader.addVertexShader("shaders/basic.vs.glsl")
-							.addFragmentShader("shaders/basic.fs.glsl")
-							.link();
+						shader.AddVertexShader("shaders/basic.vs.glsl");
+						shader.AddFragmentShader("shaders/basic.fs.glsl");
+						shader.Link();
 
 					// TODO: Recycle existing shaders
-					shader.bind();
-					shader.setUniform1i("material.albedo", 0);
-					shader.setUniform1i("material.metallicRoughness", 1);
-					shader.setUniform1i("material.normal", 2);
-					shader.unbind();
+					shader.Bind();
+					shader.SetUniform("material.albedo", 0);
+					shader.SetUniform("material.metallicRoughness", 1);
+					shader.SetUniform("material.normal", 2);
+					shader.Unbind();
 
 					_currentEntity->AddComponents<ModelComponent>();
 

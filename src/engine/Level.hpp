@@ -36,17 +36,17 @@ public:
 		}
 
 		auto [ shaderId, meshShader ] = ShaderManager::Get().Create();
-		meshShader.addVertexShader("./shaders/basic.vs.glsl")
-			.addFragmentShader("./shaders/basic.fs.glsl")
-			.link();
+		meshShader.AddVertexShader("./shaders/basic.vs.glsl");
+		meshShader.AddFragmentShader("./shaders/basic.fs.glsl");
+		meshShader.Link();
 
-		meshShader.bind();
-		meshShader.setUniform1i("material.albedo", 0);
-		meshShader.setUniform1i("material.metallicRoughness", 1);
-		meshShader.setUniform1i("material.normal", 2);
-		meshShader.setUniform1f("material.metallicFactor", 1.0f);
-		meshShader.setUniform1f("material.roughnessFactor", 1.0f);
-		meshShader.unbind();
+		meshShader.Bind();
+		meshShader.SetUniform("material.albedo", 0);
+		meshShader.SetUniform("material.metallicRoughness", 1);
+		meshShader.SetUniform("material.normal", 2);
+		meshShader.SetUniform("material.metallicFactor", 1.0f);
+		meshShader.SetUniform("material.roughnessFactor", 1.0f);
+		meshShader.Unbind();
 		_meshShader = shaderId;
 
 		std::string const levelJsonFile = lazy::utils::LoadFile(path);

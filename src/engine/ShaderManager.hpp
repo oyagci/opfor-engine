@@ -3,6 +3,7 @@
 #include "lazy.hpp"
 #include <memory>
 #include <unordered_map>
+#include "engine/renderer/Shader.hpp"
 
 class ShaderManager
 {
@@ -14,9 +15,9 @@ public:
 	ShaderManager(ShaderManager const &) = delete;
 	void operator=(ShaderManager const &) = delete;
 
-	std::tuple<unsigned int, lazy::graphics::Shader&> Create()
+	std::tuple<unsigned int, opfor::Shader&> Create()
 	{
-		auto shader = std::make_unique<lazy::graphics::Shader>();
+		auto shader = opfor::Shader::Create();
 		auto shaderId = _nextId++;
 
 		_shaders[shaderId] = std::move(shader);
@@ -24,7 +25,7 @@ public:
 		return { shaderId, *_shaders[shaderId] };
 	}
 
-	std::optional<lazy::graphics::Shader*> Get(unsigned int id)
+	std::optional<opfor::Shader*> Get(unsigned int id)
 	{
 		if (_shaders.find(id) != _shaders.end()) {
 			return std::make_optional(_shaders[id].get());
@@ -41,7 +42,7 @@ public:
 	}
 
 private:
-	std::unordered_map<unsigned int, std::unique_ptr<lazy::graphics::Shader>> _shaders;
+	std::unordered_map<unsigned int, std::unique_ptr<opfor::Shader>> _shaders;
 
 	unsigned int _nextId = 0;
 

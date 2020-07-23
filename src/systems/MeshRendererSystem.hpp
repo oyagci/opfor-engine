@@ -323,18 +323,18 @@ private:
 
 				auto &shader = shaderOpt.value();
 
-				shader->bind();
-				shader->setUniform4x4f("viewProjectionMatrix", camera.viewProjection);
-				shader->setUniform4x4f("viewMatrix", camera.view);
-				shader->setUniform4x4f("projectionMatrix", camera.projection);
-				shader->setUniform3f("viewPos", playerTransform.position);
+				shader->Bind();
+				shader->SetUniform("viewProjectionMatrix", camera.viewProjection);
+				shader->SetUniform("viewMatrix", camera.view);
+				shader->SetUniform("projectionMatrix", camera.projection);
+				shader->SetUniform("viewPos", playerTransform.position);
 
 				//UpdateLight(*shader);
 
 				glm::mat4 modelMatrix(1.0f);
 				modelMatrix = glm::translate(modelMatrix, transform.position);
 				modelMatrix = glm::scale(modelMatrix, transform.scale);
-				shader->setUniform4x4f("modelMatrix", modelMatrix);
+				shader->SetUniform("modelMatrix", modelMatrix);
 
 				std::vector<TextureAutoBind> textureBindings;
 
@@ -349,30 +349,30 @@ private:
 						if (material.has_value()) {
 							auto m = material.value();
 
-							shader->setUniform4f("material.baseColor", m->BaseColor);
-							shader->setUniform1f("material.metallicFactor", m->MetallicFactor);
-							shader->setUniform1f("material.roughnessFactor", m->RoughnessFactor);
+							shader->SetUniform("material.baseColor", m->BaseColor);
+							shader->SetUniform("material.metallicFactor", m->MetallicFactor);
+							shader->SetUniform("material.roughnessFactor", m->RoughnessFactor);
 
 							if (m->Albedo.has_value()) {
 								auto albedo = m->Albedo.value();
 								auto texture = TextureManager::Get().get(albedo);
 
-								shader->setUniform1i("material.hasAlbedo", 1);
+								shader->SetUniform("material.hasAlbedo", 1);
 								textureBindings.push_back(TextureAutoBind(GL_TEXTURE0, GL_TEXTURE_2D, texture));
 							}
 							else {
-								shader->setUniform1i("material.hasAlbedo", 0);
+								shader->SetUniform("material.hasAlbedo", 0);
 							}
 
 							if (m->MetallicRoughness.has_value()) {
 								auto metallicRoughness = m->MetallicRoughness.value();
 								auto texture = TextureManager::Get().get(metallicRoughness);
 
-								shader->setUniform1i("material.hasMetallicRoughness", 1);
+								shader->SetUniform("material.hasMetallicRoughness", 1);
 								textureBindings.push_back(TextureAutoBind(GL_TEXTURE1, GL_TEXTURE_2D, texture));
 							}
 							else {
-								shader->setUniform1i("material.hasMetallicRoughness", 0);
+								shader->SetUniform("material.hasMetallicRoughness", 0);
 							}
 
 							if (m->Normal.has_value()) {
@@ -391,7 +391,7 @@ private:
 
 
 				opfor::Renderer::Submit(reinterpret_cast<opfor::Mesh const*>(mesh)->GetVertexArray());
-				shader->unbind();
+				shader->Unbind();
 			}
 
 		}
@@ -408,16 +408,16 @@ private:
 
 		auto shader = ShaderManager::Get().Get(meshComponent.Shader).value();
 
-		shader->bind();
-		shader->setUniform4x4f("viewMatrix", glm::mat4(glm::mat3(camera.view)));
-		shader->setUniform4x4f("projectionMatrix", camera.projection);
+		shader->Bind();
+		shader->SetUniform("viewMatrix", glm::mat4(glm::mat3(camera.view)));
+		shader->SetUniform("projectionMatrix", camera.projection);
 
 		glDepthMask(GL_FALSE);
 		TextureManager::Get().bind("skybox-cubemap", 0);
 		opfor::Renderer::Submit(reinterpret_cast<opfor::Mesh const*>(mesh)->GetVertexArray());
 		glDepthMask(GL_TRUE);
 
-		shader->unbind();
+		shader->Unbind();
 	}
 
 	void UpdateLight(opfor::UniquePtr<opfor::Shader> &shader)
@@ -599,8 +599,8 @@ public:
 	void OnUpdate(float __unused deltaTime) override
 	{
 		auto player = GetEntities<PlayerCameraComponent, TransformComponent>();
-		auto display = opfor::Engine::Get().GetWindow();
-		auto [ width, height ] = std::tuple(display->GetWidth(), display->GetHeight());
+		//auto display = opfor::Engine::Get().GetWindow();
+		//auto [ width, height ] = std::tuple(display->GetWidth(), display->GetHeight());
 
 		if (player.size() == 0) { return ; }
 
