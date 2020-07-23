@@ -5,6 +5,18 @@
 
 namespace opfor {
 
+ClearFlag operator|(ClearFlag lhs, ClearFlag rhs) {
+	return static_cast<ClearFlag>(
+			static_cast<unsigned int>(lhs) |
+			static_cast<unsigned int>(rhs));
+}
+
+ClearFlag operator&(ClearFlag lhs, ClearFlag rhs) {
+	return static_cast<ClearFlag>(
+			static_cast<unsigned int>(lhs) &
+			static_cast<unsigned int>(rhs));
+}
+
 void Renderer::BeginScene()
 {
 }
@@ -18,9 +30,9 @@ void Renderer::SetClearColor(std::array<float, 4> const &color)
 	RenderCommand::SetClearColor(std::forward<decltype(color)>(color));
 }
 
-void Renderer::Clear()
+void Renderer::Clear(ClearFlag flag)
 {
-	RenderCommand::Clear();
+	RenderCommand::Clear(flag);
 }
 
 void Renderer::Submit(SharedPtr<VertexArray> const &vertexArray)

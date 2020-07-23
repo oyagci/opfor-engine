@@ -16,6 +16,7 @@ class Shader;
 enum class RendererCaps;
 enum class CopyTarget;
 enum class TextureUnit;
+enum class ClearFlag;
 
 
 class RendererAPI
@@ -32,7 +33,7 @@ private:
 public:
 	virtual ~RendererAPI() = default;
 
-	virtual void Clear() = 0;
+	virtual void Clear(ClearFlag) = 0;
 	virtual void SetClearColor(std::array<float, 4>) = 0;
 
 	virtual void DrawIndexed(SharedPtr<VertexArray> const &) = 0;

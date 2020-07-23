@@ -83,21 +83,6 @@ private:
 		_depthmap->Unbind();
 	}
 
-	void BindShadowMap()
-	{
-		glViewport(0, 0, ShadowWidth, ShadowHeight);
-		_depthmap->Bind();
-	}
-
-	void UnbindShadowMap()
-	{
-		auto display = opfor::Engine::Get().GetWindow();
-		auto [ width, height ] = std::tuple(display->GetWidth(), display->GetHeight());
-
-		_depthmap->Unbind();
-		glViewport(0, 0, width, height);
-	}
-
 	void InitQuad()
 	{
 		std::array<glm::vec3, 4> pos = {
@@ -535,11 +520,15 @@ private:
 			_shadowProjection * glm::lookAt(lightPos, lightPos + glm::vec3( 0.0, 0.0,-1.0), glm::vec3(0.0,-1.0, 0.0)),
 		};
 
-		BindShadowMap();
+		glViewport(0, 0, ShadowWidth, ShadowHeight);
+		opfor::Renderer::PushFramebuffer(_depthmap);
+
+		opfor::Renderer::SetClearColor({ 0.0f, 0.0f, 0.0f, 1.0f });
+		opfor::Renderer::Clear(opfor::ClearFlag::ColorBit | opfor::ClearFlag::DepthBit);
 
 		opfor::Renderer::PushCapability(opfor::RendererCaps::Blend, false);
 		opfor::Renderer::PushCapability(opfor::RendererCaps::DepthTest, true);
-			glClear(GL_DEPTH_BUFFER_BIT);
+		opfor::Renderer::Clear(opfor::ClearFlag::DepthBit);
 
 		opfor::Renderer::Shader::Push(_shadow);
 			opfor::Renderer::Shader::SetUniform("model", glm::mat4(1.0f));
@@ -551,7 +540,11 @@ private:
 
 		opfor::Renderer::Shader::Pop();
 
-		UnbindShadowMap();
+		auto display = opfor::Engine::Get().GetWindow();
+		auto [ width, height ] = std::tuple(display->GetWidth(), display->GetHeight());
+
+		opfor::Renderer::PopFramebuffer();
+		glViewport(0, 0, width, height);
 
 		opfor::Renderer::PopCapability(opfor::RendererCaps::DepthTest);
 		opfor::Renderer::PopCapability(opfor::RendererCaps::Blend);
@@ -608,14 +601,11 @@ public:
 
 		opfor::Renderer::BeginScene();
 
-		opfor::Renderer::SetClearColor({ 0.0f, 0.0f, 0.0f, 1.0f });
-		opfor::Renderer::Clear();
-
 		BakeShadowMap();
 
 		opfor::Renderer::PushFramebuffer(_gBuffer.GetFramebuffer());
 			opfor::Renderer::SetClearColor({ 0.0f, 0.0f, 0.0f, 1.0f });
-			opfor::Renderer::Clear();
+			opfor::Renderer::Clear(opfor::ClearFlag::ColorBit | opfor::ClearFlag::DepthBit);
 
 			opfor::Renderer::PushCapability(opfor::RendererCaps::DepthTest, true);
 				RenderMeshes(playerCamera, playerTransform);
@@ -624,7 +614,7 @@ public:
 		opfor::Renderer::PopFramebuffer();
 
 		opfor::Renderer::SetClearColor({ 0.0f, 0.0f, 0.0f, 1.0f });
-		opfor::Renderer::Clear();
+		opfor::Renderer::Clear(opfor::ClearFlag::ColorBit);
 
 		RenderLight(playerTransform.position, playerCamera.exposure);
 

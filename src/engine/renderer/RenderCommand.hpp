@@ -15,9 +15,9 @@ class RenderCommand
 			_API->SetClearColor(std::forward<decltype(color)>(color));
 		}
 
-		static inline void Clear()
+		static inline void Clear(ClearFlag flag)
 		{
-			_API->Clear();
+			_API->Clear(flag);
 		}
 
 		static inline void DrawIndexed(SharedPtr<VertexArray> const &vertexArray)

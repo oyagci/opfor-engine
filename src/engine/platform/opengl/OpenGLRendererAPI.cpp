@@ -3,13 +3,28 @@
 #include "engine/renderer/Framebuffer.hpp"
 #include "engine/renderer/Texture.hpp"
 #include "engine/renderer/Shader.hpp"
+#include "engine/renderer/Renderer.hpp"
 #include "lazy.hpp"
 
 namespace opfor {
 
-	void OpenGLRendererAPI::Clear()
+	static GLbitfield ClearFlagToOpenGLBit(ClearFlag flag)
 	{
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		uint32_t flags = 0;
+
+		if ((flag & ClearFlag::ColorBit) != ClearFlag::None) {
+			flags |= GL_COLOR_BUFFER_BIT;
+		}
+		if ((flag & ClearFlag::DepthBit) != ClearFlag::None) {
+			flags |= GL_DEPTH_BUFFER_BIT;
+		}
+
+		return flags;
+	}
+
+	void OpenGLRendererAPI::Clear(ClearFlag flag)
+	{
+		glClear(ClearFlagToOpenGLBit(flag));
 	}
 
 	void OpenGLRendererAPI::SetClearColor(std::array<float, 4> const color)

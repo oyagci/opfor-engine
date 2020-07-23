@@ -5,11 +5,16 @@
 
 namespace opfor {
 
-enum class ClearFlags
+enum class ClearFlag
 {
-	ColorBit,
-	DepthBit,
+	None     = 0,
+	ColorBit = 1 << 0,
+	DepthBit = 1 << 1,
+
 };
+
+ClearFlag operator|(ClearFlag lhs, ClearFlag rhs);
+ClearFlag operator&(ClearFlag lhs, ClearFlag rhs);
 
 enum class RendererCaps
 {
@@ -29,7 +34,7 @@ public:
 	static void EndScene();
 
 	static void SetClearColor(std::array<float, 4> const &color);
-	static void Clear();
+	static void Clear(ClearFlag);
 
 	static void Submit(SharedPtr<VertexArray> const &);
 

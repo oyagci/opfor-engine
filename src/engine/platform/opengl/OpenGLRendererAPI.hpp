@@ -25,7 +25,7 @@ private:
 	uint32_t FindUniformLocation(std::string name);
 
 public:
-	void Clear() override;
+	void Clear(ClearFlag) override;
 	void SetClearColor(std::array<float, 4> const) override;
 
 	void DrawIndexed(SharedPtr<VertexArray> const &) override;
