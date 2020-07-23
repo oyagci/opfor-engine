@@ -65,6 +65,7 @@ srcs = [
   'src/engine/renderer/Texture.cpp',
   'src/engine/renderer/Renderbuffer.cpp',
   'src/engine/renderer/Framebuffer.cpp',
+  'src/engine/renderer/Shader.cpp',
   'src/engine/platform/opengl/OpenGLContext.cpp',
   'src/engine/platform/opengl/OpenGLVertexArray.cpp',
   'src/engine/platform/opengl/OpenGLBuffer.cpp',
@@ -72,6 +73,7 @@ srcs = [
   'src/engine/platform/opengl/OpenGLTexture.cpp',
   'src/engine/platform/opengl/OpenGLRenderbuffer.cpp',
   'src/engine/platform/opengl/OpenGLFramebuffer.cpp',
+  'src/engine/platform/opengl/OpenGLShader.cpp',
   'src/engine/platform/linux/LinuxWindow.cpp',
   'src/engine/platform/linux/LinuxInput.cpp',
 ]
