@@ -24,9 +24,9 @@
 class MeshRendererSystem : public ecs::ComponentSystem
 {
 private:
-	opfor::UniquePtr<opfor::Shader> _billboard;
-	opfor::UniquePtr<opfor::Shader> _light;
-	opfor::UniquePtr<opfor::Shader> _shadow;
+	opfor::SharedPtr<opfor::Shader> _billboard;
+	opfor::SharedPtr<opfor::Shader> _light;
+	opfor::SharedPtr<opfor::Shader> _shadow;
 	opfor::Mesh _quad;
 
 	GLuint _ssaoFb;
@@ -34,8 +34,8 @@ private:
 	GLuint _ssaoColorBuf;
 	GLuint _ssaoNoiseTex;
 	GLuint _ssaoBlurTex;
-	opfor::UniquePtr<opfor::Shader> _ssaoShader;
-	opfor::UniquePtr<opfor::Shader> _ssaoBlurShader;
+	opfor::SharedPtr<opfor::Shader> _ssaoShader;
+	opfor::SharedPtr<opfor::Shader> _ssaoBlurShader;
 
 	GBuffer _gBuffer;
 
@@ -420,36 +420,36 @@ private:
 		shader->Unbind();
 	}
 
-	void UpdateLight(opfor::UniquePtr<opfor::Shader> &shader)
+	void UpdateLight(opfor::Shader &shader)
 	{
 		auto lights = GetEntities<PointLightComponent, TransformComponent>();
 
 		if (lights.size() == 0) { return ; }
 
-		shader->SetUniform("pointLightCount", lights.size());
+		shader.SetUniform("pointLightCount", lights.size());
 
 		for (size_t i = 0; i < lights.size(); i++) {
 			auto [ light, transform ] = lights[i]->GetAll();
 
 			std::string pointLight = "pointLight[" + std::to_string(i) + "]";
 
-			shader->SetUniform(pointLight + ".position", transform.position);
-			shader->SetUniform(pointLight + ".color", light.Color);
-			shader->SetUniform(pointLight + ".intensity", light.Intensity);
+			shader.SetUniform(pointLight + ".position", transform.position);
+			shader.SetUniform(pointLight + ".color", light.Color);
+			shader.SetUniform(pointLight + ".intensity", light.Intensity);
 		}
 
 		auto dirLights = GetEntities<DirectionalLightComponent>();
 
-		shader->SetUniform("directionalLightCount", dirLights.size());
+		shader.SetUniform("directionalLightCount", dirLights.size());
 
 		for (size_t i = 0; i < dirLights.size(); i++) {
 			auto [ light ] = dirLights[i]->GetAll();
 
 			std::string directionalLight = "directionalLights[" + std::to_string(i) + "]";
 
-			shader->SetUniform(directionalLight + ".direction", light.Direction);
-			shader->SetUniform(directionalLight + ".color", light.Color);
-			shader->SetUniform(directionalLight + ".intensity", light.Intensity);
+			shader.SetUniform(directionalLight + ".direction", light.Direction);
+			shader.SetUniform(directionalLight + ".color", light.Color);
+			shader.SetUniform(directionalLight + ".intensity", light.Intensity);
 		}
 	}
 
@@ -479,7 +479,7 @@ private:
 	{
 		// Lighting pass
 		_light->Bind();
-			UpdateLight(_light);
+			UpdateLight(*_light);
 			_light->SetUniform("gPosition", 0);
 			_light->SetUniform("gNormal", 1);
 			_light->SetUniform("gAlbedoSpec", 2);
@@ -550,6 +550,7 @@ private:
 		opfor::Renderer::PushCapability(opfor::RendererCaps::DepthTest, true);
 			glClear(GL_DEPTH_BUFFER_BIT);
 
+		opfor::Renderer::Shader::Push(_shadow);
 		_shadow->Bind();
 		_shadow->SetUniform("model", glm::mat4(1.0f));
 		_shadow->SetUniform("shadowMatrices", shadowTransforms);
@@ -558,7 +559,7 @@ private:
 
 			RenderShadowMeshes();
 
-		_shadow->Unbind();
+		opfor::Renderer::Shader::Pop();
 
 		UnbindShadowMap();
 

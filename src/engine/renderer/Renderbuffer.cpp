@@ -12,6 +12,8 @@ UniquePtr<Renderbuffer> Renderbuffer::Create()
 		case RendererAPI::API::OpenGL:
 			return MakeUnique<OpenGLRenderbuffer>();
 	};
+
+	OP4_CORE_UNREACHABLE("{}\n", __PRETTY_FUNCTION__);
 }
 
 }

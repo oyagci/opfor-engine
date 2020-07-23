@@ -1,5 +1,3 @@
-#pragma once
-
 #include "Framebuffer.hpp"
 #include "RendererAPI.hpp"
 #include "engine/platform/opengl/OpenGLFramebuffer.hpp"

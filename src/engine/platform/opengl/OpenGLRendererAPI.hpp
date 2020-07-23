@@ -16,6 +16,12 @@ private:
 	using TextureUnits = std::unordered_map<TextureUnit, std::vector<uint32_t>>;
 	TextureUnits _prevTextureUnits;
 
+	std::vector<uint32_t> _prevShaders;
+
+	std::unordered_map<std::string, uint32_t> _UniformLocations;
+
+	uint32_t FindUniformLocation(std::string name);
+
 public:
 	void Clear() override;
 	void SetClearColor(std::array<float, 4> const) override;
@@ -34,6 +40,19 @@ public:
 	void PushTexture(SharedPtr<Texture> const &, TextureUnit) override;
 	void PopTexture(TextureUnit) override;
 
+	void PushShader(SharedPtr<Shader> const &) override;
+	void PopShader() override;
+
+	void SetUniform(std::string const &name, size_t value) override;
+	void SetUniform(std::string const &name, int32_t value) override;
+	void SetUniform(std::string const &name, uint32_t value) override;
+	void SetUniform(std::string const &name, float value) override;
+	void SetUniform(std::string const &name, glm::vec3 value) override;
+	void SetUniform(std::string const &name, glm::vec4 value) override;
+	void SetUniform(std::string const &name, glm::mat3 value) override;
+	void SetUniform(std::string const &name, glm::mat4 value) override;
+	void SetUniform(std::string const &name, std::vector<glm::mat4> matrices, std::optional<size_t> size = std::nullopt) override;
+	void SetUniform(std::string const &name, std::vector<glm::vec3> vectors, std::optional<size_t> size = std::nullopt) override;
 };
 
 }

@@ -46,6 +46,24 @@ public:
 	static void PopTexture(TextureUnit);
 
 	static RendererAPI::API GetAPI() { return RendererAPI::GetAPI(); }
+
+	class Shader
+	{
+	public:
+		static void Push(SharedPtr<opfor::Shader>);
+		static void Pop();
+
+		static void SetUniform(std::string const &name, size_t value);
+		static void SetUniform(std::string const &name, int32_t value);
+		static void SetUniform(std::string const &name, uint32_t value);
+		static void SetUniform(std::string const &name, float value);
+		static void SetUniform(std::string const &name, glm::vec3 value);
+		static void SetUniform(std::string const &name, glm::vec4 value);
+		static void SetUniform(std::string const &name, glm::mat3 value);
+		static void SetUniform(std::string const &name, glm::mat4 value);
+		static void SetUniform(std::string const &name, std::vector<glm::mat4> matrices, std::optional<size_t> size = std::nullopt);
+		static void SetUniform(std::string const &name, std::vector<glm::vec3> vectors, std::optional<size_t> size = std::nullopt);
+	};
 };
 
 }

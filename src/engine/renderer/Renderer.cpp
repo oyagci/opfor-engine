@@ -70,4 +70,68 @@ void Renderer::PopTexture(TextureUnit unit)
 	RenderCommand::PopTexture(unit);
 }
 
+// Shader
+// ======
+
+void Renderer::Shader::Push(SharedPtr<opfor::Shader> shader)
+{
+	RenderCommand::PushShader(shader);
+}
+
+void Renderer::Shader::Pop()
+{
+	RenderCommand::PopShader();
+}
+
+void Renderer::Shader::SetUniform(std::string const &name, size_t value)
+{
+	RenderCommand::SetUniform(name, value);
+}
+
+void Renderer::Shader::SetUniform(std::string const &name, int32_t value)
+{
+	RenderCommand::SetUniform(name, value);
+}
+
+void Renderer::Shader::SetUniform(std::string const &name, uint32_t value)
+{
+	RenderCommand::SetUniform(name, value);
+}
+
+void Renderer::Shader::SetUniform(std::string const &name, float value)
+{
+	RenderCommand::SetUniform(name, value);
+}
+
+void Renderer::Shader::SetUniform(std::string const &name, glm::vec3 value)
+{
+	RenderCommand::SetUniform(name, value);
+}
+
+void Renderer::Shader::SetUniform(std::string const &name, glm::vec4 value)
+{
+	RenderCommand::SetUniform(name, value);
+}
+
+void Renderer::Shader::SetUniform(std::string const &name, glm::mat3 value)
+{
+	RenderCommand::SetUniform(name, value);
+}
+
+void Renderer::Shader::SetUniform(std::string const &name, glm::mat4 value)
+{
+	RenderCommand::SetUniform(name, value);
+}
+
+void Renderer::Shader::SetUniform(std::string const &name, std::vector<glm::mat4> matrices, std::optional<size_t> size)
+{
+	RenderCommand::SetUniform(name, matrices, size);
+}
+
+void Renderer::Shader::SetUniform(std::string const &name, std::vector<glm::vec3> vectors, std::optional<size_t> size)
+{
+	RenderCommand::SetUniform(name, vectors, size);
+}
+
+
 }

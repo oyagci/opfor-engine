@@ -64,6 +64,67 @@ class RenderCommand
 		{
 			_API->PopTexture(unit);
 		}
+
+		static inline void PushShader(SharedPtr<Shader> shader)
+		{
+			_API->PushShader(shader);
+		}
+
+		static inline void PopShader()
+		{
+			_API->PopShader();
+		}
+
+		static inline void SetUniform(std::string const &name, size_t value)
+		{
+			_API->SetUniform(name, value);
+		}
+
+		static inline void SetUniform(std::string const &name, int32_t value)
+		{
+			_API->SetUniform(name, value);
+		}
+
+		static inline void SetUniform(std::string const &name, uint32_t value)
+		{
+			_API->SetUniform(name, value);
+		}
+
+		static inline void SetUniform(std::string const &name, float value)
+		{
+			_API->SetUniform(name, value);
+		}
+
+		static inline void SetUniform(std::string const &name, glm::vec3 value)
+		{
+			_API->SetUniform(name, value);
+		}
+
+		static inline void SetUniform(std::string const &name, glm::vec4 value)
+		{
+			_API->SetUniform(name, value);
+		}
+
+		static inline void SetUniform(std::string const &name, glm::mat3 value)
+		{
+			_API->SetUniform(name, value);
+		}
+
+		static inline void SetUniform(std::string const &name, glm::mat4 value)
+		{
+			_API->SetUniform(name, value);
+		}
+
+		static inline void SetUniform(std::string const &name, std::vector<glm::mat4> matrices, std::optional<size_t> size = std::nullopt)
+		{
+			_API->SetUniform(name, matrices, size);
+		}
+
+		static inline void SetUniform(std::string const &name, std::vector<glm::vec3> vectors, std::optional<size_t> size = std::nullopt)
+		{
+			_API->SetUniform(name, vectors, size);
+		}
+
 };
 
 }
