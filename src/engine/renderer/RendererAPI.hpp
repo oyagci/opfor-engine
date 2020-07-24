@@ -33,6 +33,9 @@ private:
 public:
 	virtual ~RendererAPI() = default;
 
+	virtual void PushViewport(glm::uvec2 pos, glm::uvec2 size) = 0;
+	virtual void PopViewport() = 0;
+
 	virtual void Clear(ClearFlag) = 0;
 	virtual void SetClearColor(std::array<float, 4>) = 0;
 

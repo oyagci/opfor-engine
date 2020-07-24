@@ -25,6 +25,16 @@ void Renderer::EndScene()
 {
 }
 
+void Renderer::PushViewport(glm::uvec2 pos, glm::uvec2 size)
+{
+	RenderCommand::PushViewport(pos, size);
+}
+
+void Renderer::PopViewport()
+{
+	RenderCommand::PopViewport();
+}
+
 void Renderer::SetClearColor(std::array<float, 4> const &color)
 {
 	RenderCommand::SetClearColor(std::forward<decltype(color)>(color));

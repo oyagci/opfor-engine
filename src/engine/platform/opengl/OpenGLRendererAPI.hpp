@@ -22,9 +22,15 @@ private:
 
 	std::unordered_map<std::string, uint32_t> _UniformLocations;
 
+	std::vector<std::pair<glm::vec2, glm::vec2>> _prevViewports;
+
 	uint32_t FindUniformLocation(std::string name);
 
 public:
+
+	void PushViewport(glm::uvec2 pos, glm::uvec2 size) override;
+	void PopViewport() override;
+
 	void Clear(ClearFlag) override;
 	void SetClearColor(std::array<float, 4> const) override;
 

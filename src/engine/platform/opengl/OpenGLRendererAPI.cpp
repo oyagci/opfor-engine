@@ -8,6 +8,26 @@
 
 namespace opfor {
 
+	void OpenGLRendererAPI::PushViewport(glm::uvec2 pos, glm::uvec2 size)
+	{
+		std::array<GLint, 4> prevViewport{};
+
+		glGetIntegerv(GL_VIEWPORT, prevViewport.data());
+
+		_prevViewports.push_back({ { prevViewport[0], prevViewport[1] }, { prevViewport[2], prevViewport[3] } });
+
+		glViewport(pos.x, pos.y, size.x, size.y);
+	}
+
+	void OpenGLRendererAPI::PopViewport()
+	{
+		auto prevViewport = _prevViewports.back();
+
+		glViewport(prevViewport.first.x, prevViewport.first.y, prevViewport.second.x, prevViewport.second.y);
+
+		_prevViewports.pop_back();
+	}
+
 	static GLbitfield ClearFlagToOpenGLBit(ClearFlag flag)
 	{
 		uint32_t flags = 0;

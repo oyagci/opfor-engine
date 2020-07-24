@@ -10,6 +10,16 @@ class RenderCommand
 		static UniquePtr<RendererAPI> _API;
 
 	public:
+		static inline void PushViewport(glm::uvec2 pos, glm::uvec2 size)
+		{
+			_API->PushViewport(pos, size);
+		}
+
+		static inline void PopViewport()
+		{
+			_API->PopViewport();
+		}
+
 		static inline void SetClearColor(std::array<float, 4> const color)
 		{
 			_API->SetClearColor(std::forward<decltype(color)>(color));

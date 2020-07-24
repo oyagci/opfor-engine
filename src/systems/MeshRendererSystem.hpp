@@ -43,8 +43,6 @@ private:
 	opfor::SharedPtr<opfor::Texture> _depthCubemap;
 	glm::mat4 _shadowProjection;
 
-	Callback<> buildShadowMap;
-
 	static constexpr unsigned int ShadowWidth  = 2048;
 	static constexpr unsigned int ShadowHeight = 2048;
 
@@ -520,7 +518,7 @@ private:
 			_shadowProjection * glm::lookAt(lightPos, lightPos + glm::vec3( 0.0, 0.0,-1.0), glm::vec3(0.0,-1.0, 0.0)),
 		};
 
-		glViewport(0, 0, ShadowWidth, ShadowHeight);
+		opfor::Renderer::PushViewport({ 0, 0 }, { ShadowWidth, ShadowHeight });
 		opfor::Renderer::PushFramebuffer(_depthmap);
 
 		opfor::Renderer::SetClearColor({ 0.0f, 0.0f, 0.0f, 1.0f });
@@ -540,11 +538,8 @@ private:
 
 		opfor::Renderer::Shader::Pop();
 
-		auto display = opfor::Engine::Get().GetWindow();
-		auto [ width, height ] = std::tuple(display->GetWidth(), display->GetHeight());
-
 		opfor::Renderer::PopFramebuffer();
-		glViewport(0, 0, width, height);
+		opfor::Renderer::PopViewport();
 
 		opfor::Renderer::PopCapability(opfor::RendererCaps::DepthTest);
 		opfor::Renderer::PopCapability(opfor::RendererCaps::Blend);
@@ -553,9 +548,6 @@ private:
 public:
 	MeshRendererSystem()
 	{
-		buildShadowMap = [this] { BakeShadowMap(); };
-		opfor::Engine::Get().OnBuildLighting += buildShadowMap;
-
 		InitFramebuffer();
 		InitBillboard();
 		// InitSSAO();
@@ -586,7 +578,6 @@ public:
 
 	~MeshRendererSystem()
 	{
-		opfor::Engine::Get().OnBuildLighting -= buildShadowMap;
 	}
 
 	void OnUpdate(float __unused deltaTime) override
