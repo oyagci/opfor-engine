@@ -200,41 +200,6 @@ public:
 		_pbrMaterials[material.Name] = material;
 	}
 
-	void BindPbrMaterial(std::string const &name)
-	{
-		if (name.size() == 0) {
-			Logger::Warn("Material name not given\n");
-			return ;
-		}
-		if (_pbrMaterials.find(name) == _pbrMaterials.end()) {
-			Logger::Warn("Material not found ({})\n", name);
-			return ;
-		}
-
-		auto const &material = _pbrMaterials[name];
-
-		if (material.Albedo.has_value()) {
-			glActiveTexture(GL_TEXTURE0);
-			glBindTexture(GL_TEXTURE_2D, TextureManager::Get().get(material.Albedo.value()));
-		}
-		if (material.Normal.has_value()) {
-			glActiveTexture(GL_TEXTURE2);
-			glBindTexture(GL_TEXTURE_2D, TextureManager::Get().get(material.Normal.value()));
-		}
-	}
-
-	void UnbindPbrMaterial()
-	{
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, 0);
-
-		glActiveTexture(GL_TEXTURE1);
-		glBindTexture(GL_TEXTURE_2D, 0);
-
-		glActiveTexture(GL_TEXTURE2);
-		glBindTexture(GL_TEXTURE_2D, 0);
-	}
-
 	std::optional<PbrMaterial const *> GetPbrMaterial(std::string const &name)
 	{
 		if (_pbrMaterials.find(name) != _pbrMaterials.end()) {
