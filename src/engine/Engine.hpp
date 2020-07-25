@@ -43,8 +43,6 @@ private:
 	UniquePtr<IWindow> _window;
 	UniquePtr<IRendererContext> _context;
 
-	std::unique_ptr<UI> _ui;
-
 	ecs::ECSEngine _ecs;
 
 	ecs::EntityManager *_entityManager;

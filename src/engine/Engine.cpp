@@ -22,8 +22,6 @@ Engine::Engine()
 	_context = MakeUnique<OpenGLContext>(reinterpret_cast<GLFWwindow*>(_window->GetRawHandle()));
 	_context->Init();
 
-	_ui = std::make_unique<UI>(_window->GetWidth(), _window->GetHeight());
-
 	_systemManager = _ecs.GetSystemManager();
 	_entityManager = _ecs.GetEntityManager();
 
@@ -79,8 +77,6 @@ int Engine::Run()
 
 		_context->SwapBuffers();
 
-		_ui->update();
-		_ui->render();
 		Input::Flush();
 	}
 
