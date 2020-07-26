@@ -180,16 +180,21 @@ namespace opfor {
 
 	uint32_t OpenGLRendererAPI::FindUniformLocation(std::string name)
 	{
-		auto loc = _UniformLocations.find(name);
+		auto currentProgram = 0;
+		glGetIntegerv(GL_CURRENT_PROGRAM, &currentProgram);
 
-		if (loc != _UniformLocations.end()) {
+		auto loc = _UniformLocations[currentProgram].find(name);
+
+		if (loc != _UniformLocations[currentProgram].end()) {
 			return loc->second;
 		}
 		else {
-			auto currentProgram = 0;
-			glGetIntegerv(GL_CURRENT_PROGRAM, &currentProgram);
+
 			auto loc = glGetUniformLocation(currentProgram, name.c_str());
-			_UniformLocations[name] = loc;
+
+			if (loc != -1) {
+				_UniformLocations[currentProgram][name] = loc;
+			}
 
 			return loc;
 		}

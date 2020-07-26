@@ -20,7 +20,12 @@ private:
 
 	std::vector<uint32_t> _prevShaders;
 
-	std::unordered_map<std::string, uint32_t> _UniformLocations;
+	using ProgramID = uint32_t;
+	using UniformName = std::string;
+	using UniformLocations = std::unordered_map<UniformName, uint32_t>;
+	using ShaderUniformLocations = std::unordered_map<ProgramID, UniformLocations>;
+
+	ShaderUniformLocations _UniformLocations;
 
 	std::vector<std::pair<glm::vec2, glm::vec2>> _prevViewports;
 
