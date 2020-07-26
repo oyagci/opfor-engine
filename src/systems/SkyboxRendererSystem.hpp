@@ -13,20 +13,19 @@
 #include "stb_image.h"
 #include "engine/renderer/Renderer.hpp"
 #include "engine/renderer/Texture.hpp"
+#include "ImageLoader.hpp"
 
 using namespace std::placeholders;
 
 class SkyboxRendererSystem : public ecs::ComponentSystem
 {
 private:
-	opfor::UniquePtr<opfor::Shader> _shader;
-	opfor::SharedPtr<opfor::Texture> _SkyboxCubemap;
+	opfor::SharedPtr<opfor::Shader> _shader;
+	opfor::SharedPtr<opfor::TextureCubemap> _SkyboxCubemap;
 	opfor::Mesh _SkyboxCubeMesh;
 
 	void InitSkybox()
 	{
-		GLuint textureId;
-
 		const std::array<std::string, 6> paths = {
 			"./img/right.jpg",
 			"./img/left.jpg",
@@ -43,29 +42,29 @@ private:
 			{ opfor::TextureParameterType::WrapS,         opfor::TextureParameterValue::ClampToEdge },
 			{ opfor::TextureParameterType::WrapT,         opfor::TextureParameterValue::ClampToEdge },
 		};
-		_SkyboxCubemap = opfor::TextureCubemap::Create();
 
+		_SkyboxCubemap = opfor::TextureCubemap::Create();
 		_SkyboxCubemap->SetTextureParameters(params);
 		_SkyboxCubemap->SetInputFormat(opfor::DataFormat::RGB);
 		_SkyboxCubemap->SetOutputFormat(opfor::DataFormat::RGB);
 		_SkyboxCubemap->SetDataType(opfor::DataType::UnsignedByte);
 
-		glGenTextures(1, &textureId);
-		glBindTexture(GL_TEXTURE_CUBE_MAP, textureId);
+		stbi_set_flip_vertically_on_load(false);
+
+		constexpr std::array<opfor::CubemapFace, 6> faces {
+			opfor::CubemapFace::PositiveX, opfor::CubemapFace::NegativeX,
+			opfor::CubemapFace::PositiveY, opfor::CubemapFace::NegativeY,
+			opfor::CubemapFace::PositiveZ, opfor::CubemapFace::NegativeZ,
+		};
 
 		_SkyboxCubemap->Bind(opfor::TextureUnit::Texture0);
 
-		stbi_set_flip_vertically_on_load(false);
-		for (size_t i = 0; i < 6; i++) {
-			int w, h, nchannel;
-			unsigned char *data = stbi_load(paths[i].c_str(), &w, &h, &nchannel, 0);
-			if (!data) {
-				fmt::print(stderr, "WARNING::CUBEMAP::INIT::IMAGE_NOT_FOUND {}\n", paths[i]);
-			}
-			glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB,
-				w, h, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
-			stbi_image_free(data);
+		for (size_t i = 0; i < faces.size(); i++) {
+			opfor::ImageLoader::Image img = opfor::ImageLoader::Load(paths[i]);
+			_SkyboxCubemap->SetFaceData(faces[i], std::move(img));
 		}
+
+		_SkyboxCubemap->Build();
 
 		TextureManager::Get().Add("skybox-cubemap", _SkyboxCubemap);
 
@@ -129,16 +128,16 @@ public:
 
 		auto cameraData = camera[0]->Get<PlayerCameraComponent>();
 
-		_shader->Bind();
-		_shader->SetUniform("viewMatrix", glm::mat4(glm::mat3(cameraData.view)));
-		_shader->SetUniform("projectionMatrix", cameraData.projection);
+		opfor::Renderer::Shader::Push(_shader);
+		opfor::Renderer::Shader::SetUniform("viewMatrix", glm::mat4(glm::mat3(cameraData.view)));
+		opfor::Renderer::Shader::SetUniform("projectionMatrix", cameraData.projection);
 
-		glDepthMask(GL_FALSE);
-		TextureManager::Get().Get("skybox-cubemap")->Bind(opfor::TextureUnit::Texture0);
-		_SkyboxCubeMesh.Draw();
-		// TextureManager::Get().Get("skybox-cubemap")->Unbind();
-		glDepthMask(GL_TRUE);
+		opfor::Renderer::SetDepthMask(false);
+		opfor::Renderer::PushTexture(_SkyboxCubemap, opfor::TextureUnit::Texture0);
+		opfor::Renderer::Submit(_SkyboxCubeMesh.GetVertexArray());
+		opfor::Renderer::PopTexture(opfor::TextureUnit::Texture0);
+		opfor::Renderer::SetDepthMask(true);
 
-		_shader->Unbind();
+		opfor::Renderer::Shader::Pop();
 	}
 };

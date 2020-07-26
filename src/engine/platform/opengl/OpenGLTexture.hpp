@@ -36,6 +36,7 @@ public:
 	virtual ~OpenGLTextureCubemap();
 
 	void Bind(TextureUnit) override;
+	void SetFaceData(CubemapFace, ImageLoader::Image image) override;
 
 	uint32_t GetRawHandle() const override { return _RendererID; }
 

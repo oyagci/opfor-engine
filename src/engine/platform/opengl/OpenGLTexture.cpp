@@ -84,11 +84,6 @@ void OpenGLTextureCubemap::Bind(TextureUnit unit)
 void OpenGLTextureCubemap::Build()
 {
 	glBindTexture(GL_TEXTURE_CUBE_MAP, _RendererID);
-	for (size_t face = 0; face < 6; face++) {
-		glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + face, 0,
-			(GLint)GetInputFormat(), GetSize().x, GetSize().y, 0,
-			(GLint)GetOutputFormat(), (GLenum)GetDataType(), _TextureData);
-	}
 	ApplyParameters();
 	if (ShouldGenerateMipmap()) {
 		glGenerateMipmap((GLenum)GetTextureType());
@@ -101,6 +96,13 @@ void OpenGLTextureCubemap::ApplyParameters()
 	for (auto const &param : GetTextureParameters()) {
 		glTexParameteri(GL_TEXTURE_CUBE_MAP, (GLenum)param.first, (GLint)param.second);
 	}
+}
+
+void OpenGLTextureCubemap::SetFaceData(CubemapFace face, ImageLoader::Image image)
+{
+	glTexImage2D((GLenum)face, 0, (GLint)GetInputFormat(),
+		image.width, image.height, 0, (GLint)GetOutputFormat(), (GLenum)GetDataType(),
+		image.data.get());
 }
 
 }

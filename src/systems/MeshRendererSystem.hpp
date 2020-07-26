@@ -41,7 +41,7 @@ private:
 	GBuffer _gBuffer;
 
 	opfor::SharedPtr<opfor::Framebuffer> _depthmap;
-	opfor::SharedPtr<opfor::Texture> _depthCubemap;
+	opfor::SharedPtr<opfor::TextureCubemap> _depthCubemap;
 	glm::mat4 _shadowProjection;
 
 	static constexpr unsigned int ShadowWidth  = 2048;
@@ -73,6 +73,26 @@ private:
 		_depthCubemap->SetOutputFormat(opfor::DataFormat::Depth);
 		_depthCubemap->SetDataType(opfor::DataType::Float);
 		_depthCubemap->SetSize(ShadowWidth, ShadowHeight);
+
+		_depthCubemap->Bind(opfor::TextureUnit::Texture0);
+
+		constexpr std::array<opfor::CubemapFace, 6> faces {
+			opfor::CubemapFace::PositiveX, opfor::CubemapFace::NegativeX,
+			opfor::CubemapFace::PositiveY, opfor::CubemapFace::NegativeY,
+			opfor::CubemapFace::PositiveZ, opfor::CubemapFace::NegativeZ,
+		};
+
+		_depthCubemap->Bind(opfor::TextureUnit::Texture0);
+
+		for (size_t i = 0; i < faces.size(); i++) {
+			opfor::ImageLoader::Image img{};
+
+			img.width = ShadowWidth;
+			img.height = ShadowHeight;
+
+			_depthCubemap->SetFaceData(faces[i], std::move(img));
+		}
+
 		_depthCubemap->Build();
 
 		_depthmap = opfor::Framebuffer::Create();
@@ -596,8 +616,6 @@ public:
 
 		auto [ playerCamera, playerTransform ] = player[0]->GetAll();
 
-		opfor::Renderer::BeginScene();
-
 		BakeShadowMap();
 
 		opfor::Renderer::PushFramebuffer(_gBuffer.GetFramebuffer());
@@ -625,7 +643,5 @@ public:
 			RenderLightBillboard(playerCamera);
 		opfor::Renderer::PopCapability(opfor::RendererCaps::DepthTest);
 		opfor::Renderer::PopCapability(opfor::RendererCaps::Blend);
-
-		opfor::Renderer::EndScene();
 	}
 };

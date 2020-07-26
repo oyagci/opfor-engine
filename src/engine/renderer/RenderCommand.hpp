@@ -135,6 +135,11 @@ class RenderCommand
 			_API->SetUniform(name, vectors, size);
 		}
 
+		static inline void SetDepthMask(bool val)
+		{
+			_API->SetDepthMask(val);
+		}
+
 };
 
 }

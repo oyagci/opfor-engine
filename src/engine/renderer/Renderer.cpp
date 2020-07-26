@@ -141,6 +141,12 @@ void Renderer::PopTexture(TextureUnit unit)
 	);
 }
 
+void Renderer::SetDepthMask(bool val)
+{
+	_CallsStrings.push_back(__PRETTY_FUNCTION__);
+	_Calls.push_back(BIND(RenderCommand::SetDepthMask, val));
+}
+
 // Shader
 // ======
 

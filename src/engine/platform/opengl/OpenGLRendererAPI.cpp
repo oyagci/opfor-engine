@@ -200,6 +200,11 @@ namespace opfor {
 		}
 	}
 
+	void OpenGLRendererAPI::SetDepthMask(bool val)
+	{
+		glDepthMask(val == true ? GL_TRUE : GL_FALSE);
+	}
+
 	void OpenGLRendererAPI::SetUniform(std::string const &name, size_t value)
 	{
 		auto loc = FindUniformLocation(name);

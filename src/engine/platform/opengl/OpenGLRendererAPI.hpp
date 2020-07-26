@@ -56,6 +56,8 @@ public:
 	void PushShader(SharedPtr<Shader> const &) override;
 	void PopShader() override;
 
+	void SetDepthMask(bool val) override;
+
 	void SetUniform(std::string const &name, size_t value) override;
 	void SetUniform(std::string const &name, int32_t value) override;
 	void SetUniform(std::string const &name, uint32_t value) override;

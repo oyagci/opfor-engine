@@ -6,6 +6,8 @@
 #include "lazy.hpp"
 #include "Logger.hpp"
 
+#include "systems/BeginSceneSystem.hpp"
+#include "systems/EndSceneSystem.hpp"
 #include "systems/CameraMovementSystem.hpp"
 #include "systems/SkyboxRendererSystem.hpp"
 #include "systems/MeshRendererSystem.hpp"
@@ -21,8 +23,10 @@ int main()
 
 	auto &engine = Engine::Get();
 	engine.CreateComponentSystem<CameraMovementSystem>();
+	engine.CreateComponentSystem<BeginSceneSystem>();
 	engine.CreateComponentSystem<MeshRendererSystem>();
-	// engine.CreateComponentSystem<SkyboxRendererSystem>();
+	engine.CreateComponentSystem<SkyboxRendererSystem>();
+	engine.CreateComponentSystem<EndSceneSystem>();
 	engine.CreateComponentSystem<ImguiSystem>();
 	// engine.CreateComponentSystem<LuaSystem>();
 
@@ -62,7 +66,7 @@ int main()
 	auto player = engine.CreateEntity<PlayerCameraComponent, TransformComponent>();
 
 	PlayerCameraComponent p;
-		p.projection = glm::perspective(glm::radians(90.0f), 16.0f / 9.0f, 0.1f, 1000.0f);
+		p.projection = glm::perspective(glm::radians(90.0f), 16.0f / 9.0f, 0.1f, 10000.0f);
 		p.model = glm::mat4(1.0f);
 		p.view = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, 0.0f));
 		p.viewProjection = p.projection * p.view;
@@ -74,6 +78,8 @@ int main()
 		t.direction = glm::vec3(0.0f, 0.0f, 1.0f);
 		t.position = glm::vec3(0.0f, 18.0f, -0.5f);
 	player->Set(t);
+
+	auto __attribute__((unused)) skybox = engine.CreateEntity<SkyboxComponent>();
 
 	auto display = engine.CreateEntity<DisplayComponent>();
 	DisplayComponent d;

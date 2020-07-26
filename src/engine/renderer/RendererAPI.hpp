@@ -67,6 +67,8 @@ public:
 	virtual void SetUniform(std::string const &name, std::vector<glm::mat4> matrices, std::optional<size_t> size = std::nullopt) = 0;
 	virtual void SetUniform(std::string const &name, std::vector<glm::vec3> vectors, std::optional<size_t> size = std::nullopt) = 0;
 
+	virtual void SetDepthMask(bool val) = 0;
+
 	inline static API GetAPI() { return _API; }
 };
 

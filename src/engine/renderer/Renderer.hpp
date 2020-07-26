@@ -39,6 +39,8 @@ public:
 	static void BeginScene();
 	static void EndScene();
 
+	static void SetDepthMask(bool);
+
 	static void PushViewport(glm::uvec2 pos, glm::uvec2 size);
 	static void PopViewport();
 

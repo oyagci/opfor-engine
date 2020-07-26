@@ -2,8 +2,19 @@
 
 #include "lazy.hpp"
 #include "engine/core/base.hpp"
+#include "ImageLoader.hpp"
 
 namespace opfor {
+
+enum class CubemapFace
+{
+	PositiveX = GL_TEXTURE_CUBE_MAP_POSITIVE_X,
+	NegativeX = GL_TEXTURE_CUBE_MAP_NEGATIVE_X,
+	PositiveY = GL_TEXTURE_CUBE_MAP_POSITIVE_Y,
+	NegativeY = GL_TEXTURE_CUBE_MAP_NEGATIVE_Y,
+	PositiveZ = GL_TEXTURE_CUBE_MAP_POSITIVE_Z,
+	NegativeZ = GL_TEXTURE_CUBE_MAP_NEGATIVE_Z,
+};
 
 enum class TextureType
 {
@@ -153,6 +164,8 @@ class TextureCubemap : public Texture
 {
 public:
 	virtual ~TextureCubemap() {}
+
+	virtual void SetFaceData(CubemapFace face, ImageLoader::Image) = 0;
 
 	static UniquePtr<TextureCubemap> Create();
 };
