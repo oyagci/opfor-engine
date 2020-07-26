@@ -21,11 +21,10 @@ int main()
 
 	auto &engine = Engine::Get();
 	engine.CreateComponentSystem<CameraMovementSystem>();
-	engine.CreateComponentSystem<SkyboxRendererSystem>();
 	engine.CreateComponentSystem<MeshRendererSystem>();
+	// engine.CreateComponentSystem<SkyboxRendererSystem>();
 	engine.CreateComponentSystem<ImguiSystem>();
-	engine.CreateComponentSystem<LuaSystem>();
-
+	// engine.CreateComponentSystem<LuaSystem>();
 
 	opfor::TextureParameterList texParams = {
 		{ opfor::TextureParameterType::MignifyFilter, opfor::TextureParameterValue::Linear },
@@ -34,30 +33,30 @@ int main()
 		{ opfor::TextureParameterType::WrapS,         opfor::TextureParameterValue::Repeat },
 	};
 
-	auto prototype_tile = TextureManager::Get().Create("prototype_tile_8");
+	auto prototype_tile = TextureManager::Get().Create2D("prototype_tile_8");
 	auto img = opfor::ImageLoader::Load("./img/prototype_tile_8.png");
 
 	prototype_tile->SetDataType(opfor::DataType::UnsignedByte);
 	prototype_tile->SetHasAlpha(img.nchannel == 4);
 	prototype_tile->SetIsSRGB(true);
 	prototype_tile->SetInputFormat(img.nchannel == 4 ? opfor::DataFormat::RGBA : opfor::DataFormat::RGB);
-	prototype_tile->SetOutputFormat(opfor::DataFormat::RGBA);
+	prototype_tile->SetOutputFormat(img.nchannel == 4 ? opfor::DataFormat::RGBA : opfor::DataFormat::RGB);
 	prototype_tile->SetSize(img.width, img.height);
-	prototype_tile->SetTextureType(opfor::TextureType::Tex2D);
 	prototype_tile->SetTextureParameters(texParams);
+	prototype_tile->SetData(img.data.get());
 	prototype_tile->Build();
 
-	auto default_normal = TextureManager::Get().Create("default_normal");
+	auto default_normal = TextureManager::Get().Create2D("default_normal");
 	img = opfor::ImageLoader::Load("./img/default_normal.png");
 
 	default_normal->SetDataType(opfor::DataType::UnsignedByte);
 	default_normal->SetHasAlpha(img.nchannel == 4);
 	default_normal->SetIsSRGB(true);
 	default_normal->SetInputFormat(img.nchannel == 4 ? opfor::DataFormat::RGBA : opfor::DataFormat::RGB);
-	default_normal->SetOutputFormat(opfor::DataFormat::RGBA);
+	default_normal->SetOutputFormat(img.nchannel == 4 ? opfor::DataFormat::RGBA : opfor::DataFormat::RGB);
 	default_normal->SetSize(img.width, img.height);
-	default_normal->SetTextureType(opfor::TextureType::Tex2D);
 	default_normal->SetTextureParameters(texParams);
+	default_normal->SetData(img.data.get());
 	default_normal->Build();
 
 	auto player = engine.CreateEntity<PlayerCameraComponent, TransformComponent>();

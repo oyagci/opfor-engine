@@ -41,7 +41,7 @@ void Renderer::BeginScene()
 
 void Renderer::EndScene()
 {
-	PrintTree();
+	// PrintTree();
 	_CallsStrings.clear();
 
 	while (!_Calls.empty()) {

@@ -16,7 +16,7 @@ public:
 	TextureManager(TextureManager const &) = delete;
 	void operator=(TextureManager const &) = delete;
 
-	opfor::SharedPtr<opfor::Texture> Create(std::string const &name);
+	opfor::SharedPtr<opfor::Texture2D> Create2D(std::string const &name);
 	void Add(std::string const &name, opfor::SharedPtr<opfor::Texture> texture);
 	auto Get(std::string const &name) { return _textures[name]; }
 

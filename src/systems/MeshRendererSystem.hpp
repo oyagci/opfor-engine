@@ -60,9 +60,8 @@ private:
 		float far = 1000.0f;
 		_shadowProjection = glm::perspective(glm::radians(90.0f), aspect, near, far);
 
-		_depthCubemap = opfor::Texture::Create();
+		_depthCubemap = opfor::TextureCubemap::Create();
 
-		_depthCubemap->SetTextureType(opfor::TextureType::TexCubemap);
 		_depthCubemap->SetTextureParameters({
 			{ opfor::TextureParameterType::MagnifyFilter, opfor::TextureParameterValue::Nearest },
 			{ opfor::TextureParameterType::MignifyFilter, opfor::TextureParameterValue::Nearest },
@@ -362,7 +361,7 @@ private:
 								opfor::Renderer::PushTexture(texture, opfor::TextureUnit::Texture1);
 							}
 							else {
-								shader->SetUniform("material.hasMetallicRoughness", 0);
+								opfor::Renderer::Shader::SetUniform("material.hasMetallicRoughness", 0);
 							}
 
 							if (m->Normal.has_value()) {
@@ -546,7 +545,7 @@ public:
 		// InitSSAO();
 		InitDepthCubemap();
 
-		auto texture = TextureManager::Get().Create("light_bulb_icon");
+		auto texture = TextureManager::Get().Create2D("light_bulb_icon");
 		auto img = opfor::ImageLoader::Load("./img/light_bulb_icon.png");
 
 		opfor::TextureParameterList texParams = {
@@ -562,10 +561,9 @@ public:
 		texture->SetInputFormat(img.nchannel == 4 ? opfor::DataFormat::RGBA : opfor::DataFormat::RGB);
 		texture->SetOutputFormat(img.nchannel == 4 ? opfor::DataFormat::RGBA : opfor::DataFormat::RGB);
 		texture->SetSize(img.width, img.height);
-		texture->SetTextureType(opfor::TextureType::Tex2D);
 		texture->SetTextureParameters(texParams);
 		texture->SetGenerateMipmap(true);
-		texture->SetTextureData(img.data.get());
+		texture->SetData(img.data.get());
 		texture->Build();
 
 		_light = opfor::Shader::Create();

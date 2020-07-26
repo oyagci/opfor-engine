@@ -200,7 +200,7 @@ private:
 			if (baseColorTexture >= 0) {
 				pbrMaterial.Albedo = model.images[model.textures[baseColorTexture].source].uri;
 
-				auto texture = TextureManager::Get().Create(pbrMaterial.Albedo.value());
+				auto texture = TextureManager::Get().Create2D(pbrMaterial.Albedo.value());
 
 				opfor::TextureParameterList texParams = {
 					{ opfor::TextureParameterType::MignifyFilter, opfor::TextureParameterValue::LinearMipmapLinear },
@@ -224,9 +224,8 @@ private:
 					OP4_CORE_WARNING("img.nchannel = {} -- Not handled!\n", img.nchannel);
 				}
 				texture->SetDataType(opfor::DataType::UnsignedByte);
-				texture->SetTextureType(opfor::TextureType::Tex2D);
 				texture->SetIsSRGB(true);
-				texture->SetTextureData(img.data.get());
+				texture->SetData(img.data.get());
 				texture->SetSize(img.width, img.height);
 				texture->SetTextureParameters(texParams);
 				texture->SetGenerateMipmap(true);
@@ -292,7 +291,7 @@ private:
 
 			auto img = opfor::ImageLoader::Load(path);
 
-			auto texture = TextureManager::Get().Create(name);
+			auto texture = TextureManager::Get().Create2D(name);
 
 			if (img.nchannel == 3) {
 				texture->SetInputFormat(opfor::DataFormat::RGB);
@@ -307,8 +306,7 @@ private:
 				OP4_CORE_WARNING("img.nchannel = {} -- Not handled!\n", img.nchannel);
 			}
 			texture->SetDataType(opfor::DataType::UnsignedByte);
-			texture->SetTextureType(opfor::TextureType::Tex2D);
-			texture->SetTextureData(img.data.get());
+			texture->SetData(img.data.get());
 			texture->SetSize(img.width, img.height);
 			texture->SetTextureParameters(texParams);
 			texture->SetGenerateMipmap(true);

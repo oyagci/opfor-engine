@@ -34,8 +34,7 @@ private:
 			{ TextureParameterType::MagnifyFilter, TextureParameterValue::Nearest },
 		};
 
-		_gPosition = opfor::Texture::Create();
-			_gPosition->SetTextureType(TextureType::Tex2D);
+		_gPosition = opfor::Texture2D::Create();
 			_gPosition->SetTextureParameters(params);
 			_gPosition->SetInputFormat(DataFormat::RGBA16F);
 			_gPosition->SetOutputFormat(DataFormat::RGBA);
@@ -43,8 +42,7 @@ private:
 			_gPosition->SetSize(width, height);
 			_gPosition->Build();
 
-		_gNormal = opfor::Texture::Create();
-			_gNormal->SetTextureType(TextureType::Tex2D);
+		_gNormal = opfor::Texture2D::Create();
 			_gNormal->SetTextureParameters(params);
 			_gNormal->SetInputFormat(DataFormat::RGBA16F);
 			_gNormal->SetOutputFormat(DataFormat::RGBA);
@@ -52,8 +50,7 @@ private:
 			_gNormal->SetSize(width, height);
 			_gNormal->Build();
 
-		_gAlbedoSpec = opfor::Texture::Create();
-			_gAlbedoSpec->SetTextureType(TextureType::Tex2D);
+		_gAlbedoSpec = opfor::Texture2D::Create();
 			_gAlbedoSpec->SetTextureParameters(params);
 			_gAlbedoSpec->SetInputFormat(DataFormat::RGBA16F);
 			_gAlbedoSpec->SetOutputFormat(DataFormat::RGBA);
@@ -61,8 +58,7 @@ private:
 			_gAlbedoSpec->SetSize(width, height);
 			_gAlbedoSpec->Build();
 
-		_gMetallicRoughness = opfor::Texture::Create();
-			_gMetallicRoughness->SetTextureType(TextureType::Tex2D);
+		_gMetallicRoughness = opfor::Texture2D::Create();
 			_gMetallicRoughness->SetTextureParameters(params);
 			_gMetallicRoughness->SetInputFormat(DataFormat::RGBA16F);
 			_gMetallicRoughness->SetOutputFormat(DataFormat::RGBA);

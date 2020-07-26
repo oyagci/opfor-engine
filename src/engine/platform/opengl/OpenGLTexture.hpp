@@ -4,22 +4,38 @@
 
 namespace opfor {
 
-class OpenGLTexture : public Texture
+class OpenGLTexture2D : public Texture2D
 {
-private:
-	uint32_t _RendererID;
-
-	std::optional<TextureUnit> _BoundUnit;
-
 	void ApplyParameters();
 
-public:
-	OpenGLTexture();
+	uint32_t _RendererID = 0;
+	void *_TextureData = nullptr;
 
-	virtual ~OpenGLTexture();
+public:
+	OpenGLTexture2D();
+	virtual ~OpenGLTexture2D();
+
+	virtual void SetData(void *) override;
 
 	void Bind(TextureUnit) override;
-	void Unbind() override;
+
+	uint32_t GetRawHandle() const override { return _RendererID; }
+
+	void Build() override;
+};
+
+class OpenGLTextureCubemap : public TextureCubemap
+{
+	void ApplyParameters();
+
+	uint32_t _RendererID = 0;
+	void *_TextureData = nullptr;
+
+public:
+	OpenGLTextureCubemap();
+	virtual ~OpenGLTextureCubemap();
+
+	void Bind(TextureUnit) override;
 
 	uint32_t GetRawHandle() const override { return _RendererID; }
 

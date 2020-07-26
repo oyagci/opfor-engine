@@ -43,9 +43,8 @@ private:
 			{ opfor::TextureParameterType::WrapS,         opfor::TextureParameterValue::ClampToEdge },
 			{ opfor::TextureParameterType::WrapT,         opfor::TextureParameterValue::ClampToEdge },
 		};
-		_SkyboxCubemap = opfor::Texture::Create();
+		_SkyboxCubemap = opfor::TextureCubemap::Create();
 
-		_SkyboxCubemap->SetTextureType(opfor::TextureType::TexCubemap);
 		_SkyboxCubemap->SetTextureParameters(params);
 		_SkyboxCubemap->SetInputFormat(opfor::DataFormat::RGB);
 		_SkyboxCubemap->SetOutputFormat(opfor::DataFormat::RGB);
@@ -67,8 +66,6 @@ private:
 				w, h, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
 			stbi_image_free(data);
 		}
-
-		_SkyboxCubemap->Unbind();
 
 		TextureManager::Get().Add("skybox-cubemap", _SkyboxCubemap);
 
@@ -139,7 +136,7 @@ public:
 		glDepthMask(GL_FALSE);
 		TextureManager::Get().Get("skybox-cubemap")->Bind(opfor::TextureUnit::Texture0);
 		_SkyboxCubeMesh.Draw();
-		TextureManager::Get().Get("skybox-cubemap")->Unbind();
+		// TextureManager::Get().Get("skybox-cubemap")->Unbind();
 		glDepthMask(GL_TRUE);
 
 		_shader->Unbind();

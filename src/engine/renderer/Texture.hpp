@@ -102,13 +102,14 @@ private:
 	bool _GenMipmap = false;
 
 	TextureType _Type = TextureType::Tex2D;
-	void *_Data = nullptr;
+
+protected:
+	void SetTextureType(TextureType type) { _Type = type; }
 
 public:
 	virtual ~Texture() {}
 
 	virtual void Bind(TextureUnit) = 0;
-	virtual void Unbind() = 0;
 
 	virtual uint32_t GetRawHandle() const = 0;
 
@@ -119,8 +120,6 @@ public:
 	void SetDataType(DataType dataType) { _DataType = dataType; }
 	void SetHasAlpha(bool alpha) { _HasAlpha = alpha; }
 	void SetIsSRGB(bool srgb) { _IsSRGB = srgb; }
-	void SetTextureData(void *data) { _Data = data; }
-	void SetTextureType(TextureType type) { _Type = type; }
 	void SetTextureParameters(TextureParameterList paramList) { _Parameters = paramList; }
 	void SetSize(float width, float height = 0, float depth = 0) {
 		_Size.x = width;
@@ -134,13 +133,28 @@ public:
 	auto GetDataType() const { return _DataType; }
 	auto HasAlpha() const { return _HasAlpha; }
 	auto IsSRGB() const { return _IsSRGB; }
-	auto GetTextureData() const { return _Data; }
 	auto const &GetTextureParameters() const { return _Parameters; }
 	auto GetSize() const { return _Size; }
 	auto GetTextureType() const { return _Type; }
 	auto ShouldGenerateMipmap() { return _GenMipmap; }
+};
 
-	static UniquePtr<Texture> Create();
+class Texture2D : public Texture
+{
+public:
+	virtual ~Texture2D();
+
+	virtual void SetData(void *) = 0;
+
+	static UniquePtr<Texture2D> Create();
+};
+
+class TextureCubemap : public Texture
+{
+public:
+	virtual ~TextureCubemap() {}
+
+	static UniquePtr<TextureCubemap> Create();
 };
 
 }
