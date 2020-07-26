@@ -20,6 +20,7 @@
 #include "TextureAutoBind.hpp"
 #include "engine/renderer/Renderer.hpp"
 #include "engine/renderer/Shader.hpp"
+#include "engine/ImageLoader.hpp"
 
 class MeshRendererSystem : public ecs::ComponentSystem
 {
@@ -308,18 +309,20 @@ private:
 
 				auto &shader = shaderOpt.value();
 
-				shader->Bind();
-				shader->SetUniform("viewProjectionMatrix", camera.viewProjection);
-				shader->SetUniform("viewMatrix", camera.view);
-				shader->SetUniform("projectionMatrix", camera.projection);
-				shader->SetUniform("viewPos", playerTransform.position);
-
 				glm::mat4 modelMatrix(1.0f);
 				modelMatrix = glm::translate(modelMatrix, transform.position);
 				modelMatrix = glm::scale(modelMatrix, transform.scale);
-				shader->SetUniform("modelMatrix", modelMatrix);
 
-				std::vector<TextureAutoBind> textureBindings;
+				opfor::Renderer::Shader::Push(shader);
+				opfor::Renderer::Shader::SetUniform("viewProjectionMatrix", camera.viewProjection);
+				opfor::Renderer::Shader::SetUniform("viewMatrix", camera.view);
+				opfor::Renderer::Shader::SetUniform("projectionMatrix", camera.projection);
+				opfor::Renderer::Shader::SetUniform("viewPos", playerTransform.position);
+				opfor::Renderer::Shader::SetUniform("modelMatrix", modelMatrix);
+
+				bool popAlbedo = false;
+				bool popMetallic = false;
+				bool popNormal = false;
 
 				// Bind each texture
 				auto meshCast = dynamic_cast<opfor::Mesh*>(mesh);
@@ -332,27 +335,31 @@ private:
 						if (material.has_value()) {
 							auto m = material.value();
 
-							shader->SetUniform("material.baseColor", m->BaseColor);
-							shader->SetUniform("material.metallicFactor", m->MetallicFactor);
-							shader->SetUniform("material.roughnessFactor", m->RoughnessFactor);
+							opfor::Renderer::Shader::SetUniform("material.baseColor", m->BaseColor);
+							opfor::Renderer::Shader::SetUniform("material.metallicFactor", m->MetallicFactor);
+							opfor::Renderer::Shader::SetUniform("material.roughnessFactor", m->RoughnessFactor);
 
 							if (m->Albedo.has_value()) {
 								auto albedo = m->Albedo.value();
-								auto texture = TextureManager::Get().get(albedo);
+								auto texture = TextureManager::Get().Get(albedo);
 
-								shader->SetUniform("material.hasAlbedo", 1);
-								textureBindings.push_back(TextureAutoBind(GL_TEXTURE0, GL_TEXTURE_2D, texture));
+								popAlbedo = true;
+
+								opfor::Renderer::Shader::SetUniform("material.hasAlbedo", 1);
+								opfor::Renderer::PushTexture(texture, opfor::TextureUnit::Texture0);
 							}
 							else {
-								shader->SetUniform("material.hasAlbedo", 0);
+								opfor::Renderer::Shader::SetUniform("material.hasAlbedo", 0);
 							}
 
 							if (m->MetallicRoughness.has_value()) {
 								auto metallicRoughness = m->MetallicRoughness.value();
-								auto texture = TextureManager::Get().get(metallicRoughness);
+								auto texture = TextureManager::Get().Get(metallicRoughness);
 
-								shader->SetUniform("material.hasMetallicRoughness", 1);
-								textureBindings.push_back(TextureAutoBind(GL_TEXTURE1, GL_TEXTURE_2D, texture));
+								popMetallic = true;
+
+								opfor::Renderer::Shader::SetUniform("material.hasMetallicRoughness", 1);
+								opfor::Renderer::PushTexture(texture, opfor::TextureUnit::Texture1);
 							}
 							else {
 								shader->SetUniform("material.hasMetallicRoughness", 0);
@@ -360,47 +367,32 @@ private:
 
 							if (m->Normal.has_value()) {
 								auto normal = m->Normal.value();
-								auto texture = TextureManager::Get().get(normal);
+								auto texture = TextureManager::Get().Get(normal);
 
-								textureBindings.push_back(TextureAutoBind(GL_TEXTURE2, GL_TEXTURE_2D, texture));
+								popNormal = true;
+
+								opfor::Renderer::PushTexture(texture, opfor::TextureUnit::Texture2);
 							}
 							else {
-								auto const defaultNormal = TextureManager::Get().get("default_normal");
-								textureBindings.push_back(TextureAutoBind(GL_TEXTURE2, GL_TEXTURE_2D, defaultNormal));
+								auto const defaultNormal = TextureManager::Get().Get("default_normal");
+								opfor::Renderer::PushTexture(defaultNormal, opfor::TextureUnit::Texture2);
+
+								popNormal = true;
 							}
 						}
 					}
 				}
 
-
 				opfor::Renderer::Submit(reinterpret_cast<opfor::Mesh const*>(mesh)->GetVertexArray());
-				shader->Unbind();
+
+				popAlbedo   ? opfor::Renderer::PopTexture(opfor::TextureUnit::Texture0) : (void)0;
+				popMetallic ? opfor::Renderer::PopTexture(opfor::TextureUnit::Texture1) : (void)0;
+				popNormal   ? opfor::Renderer::PopTexture(opfor::TextureUnit::Texture2) : (void)0;
+
+				opfor::Renderer::Shader::Pop();
 			}
 
 		}
-	}
-
-	void RenderSkybox(PlayerCameraComponent const &camera)
-	{
-		auto skybox = GetEntities<MeshComponent, SkyboxComponent>();
-
-		if (skybox.size() == 0) { return ; }
-
-		auto [ meshComponent, _ ] = skybox[0]->GetAll();
-		auto mesh = opfor::Engine::Get().GetMesh(meshComponent.Id);
-
-		auto shader = ShaderManager::Get().Get(meshComponent.Shader).value();
-
-		shader->Bind();
-		shader->SetUniform("viewMatrix", glm::mat4(glm::mat3(camera.view)));
-		shader->SetUniform("projectionMatrix", camera.projection);
-
-		glDepthMask(GL_FALSE);
-		TextureManager::Get().bind("skybox-cubemap", 0);
-		opfor::Renderer::Submit(reinterpret_cast<opfor::Mesh const*>(mesh)->GetVertexArray());
-		glDepthMask(GL_TRUE);
-
-		shader->Unbind();
 	}
 
 	void UpdateLight()
@@ -445,16 +437,17 @@ private:
 		for (auto const &lightEnt : lights) {
 			auto [ light, transform ] = lightEnt->GetAll();
 
-			_billboard->Bind();
-			_billboard->SetUniform("viewMatrix", camera.view);
-			_billboard->SetUniform("viewProjectionMatrix", camera.viewProjection);
-			_billboard->SetUniform("projectionMatrix", camera.projection);
-			_billboard->SetUniform("particlePosition", transform.position);
+			opfor::Renderer::Shader::Push(_billboard);
+			opfor::Renderer::Shader::SetUniform("viewMatrix", camera.view);
+			opfor::Renderer::Shader::SetUniform("viewProjectionMatrix", camera.viewProjection);
+			opfor::Renderer::Shader::SetUniform("projectionMatrix", camera.projection);
+			opfor::Renderer::Shader::SetUniform("particlePosition", transform.position);
 
-			TextureManager::Get().bind("light_bulb_icon", 0);
+			opfor::Renderer::PushTexture(TextureManager::Get().Get("light_bulb_icon"), opfor::TextureUnit::Texture0);
 			opfor::Renderer::Submit(_quad.GetVertexArray());
+			opfor::Renderer::PopTexture(opfor::TextureUnit::Texture0);
 
-			_billboard->Unbind();
+			opfor::Renderer::Shader::Pop();
 		}
 	}
 
@@ -553,12 +546,27 @@ public:
 		// InitSSAO();
 		InitDepthCubemap();
 
-		TextureManager::Get().createTexture("light_bulb_icon", "./img/light_bulb_icon.png", {
-			{ GL_TEXTURE_WRAP_R, GL_WRAP_BORDER },
-			{ GL_TEXTURE_WRAP_S, GL_WRAP_BORDER },
-			{ GL_TEXTURE_MIN_FILTER, GL_NEAREST },
-			{ GL_TEXTURE_MAG_FILTER, GL_NEAREST },
-		}, GL_TEXTURE_2D);
+		auto texture = TextureManager::Get().Create("light_bulb_icon");
+		auto img = opfor::ImageLoader::Load("./img/light_bulb_icon.png");
+
+		opfor::TextureParameterList texParams = {
+			{ opfor::TextureParameterType::MignifyFilter, opfor::TextureParameterValue::LinearMipmapLinear },
+			{ opfor::TextureParameterType::MagnifyFilter, opfor::TextureParameterValue::Linear },
+			{ opfor::TextureParameterType::WrapT,         opfor::TextureParameterValue::ClampToEdge },
+			{ opfor::TextureParameterType::WrapS,         opfor::TextureParameterValue::ClampToEdge },
+		};
+
+		texture->SetDataType(opfor::DataType::UnsignedByte);
+		texture->SetHasAlpha(img.nchannel == 4);
+		texture->SetIsSRGB(true);
+		texture->SetInputFormat(img.nchannel == 4 ? opfor::DataFormat::RGBA : opfor::DataFormat::RGB);
+		texture->SetOutputFormat(img.nchannel == 4 ? opfor::DataFormat::RGBA : opfor::DataFormat::RGB);
+		texture->SetSize(img.width, img.height);
+		texture->SetTextureType(opfor::TextureType::Tex2D);
+		texture->SetTextureParameters(texParams);
+		texture->SetGenerateMipmap(true);
+		texture->SetTextureData(img.data.get());
+		texture->Build();
 
 		_light = opfor::Shader::Create();
 
@@ -615,7 +623,6 @@ public:
 
 		opfor::Renderer::PushCapability(opfor::RendererCaps::Blend, true);
 		opfor::Renderer::PushCapability(opfor::RendererCaps::DepthTest, true);
-			RenderSkybox(playerCamera);
 //			RenderSSAO(playerCamera);
 			RenderLightBillboard(playerCamera);
 		opfor::Renderer::PopCapability(opfor::RendererCaps::DepthTest);

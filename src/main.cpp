@@ -3,7 +3,6 @@
 #include <string>
 
 #include "Engine.hpp"
-#include "stb_image.h"
 #include "lazy.hpp"
 #include "Logger.hpp"
 
@@ -14,88 +13,6 @@
 #include "systems/LuaSystem.hpp"
 
 using namespace opfor;
-
-MeshComponent initSkybox()
-{
-	MeshComponent meshComponent;
-	opfor::Mesh mesh;
-	GLuint textureId;
-
-	const std::array<std::string, 6> paths = {
-		"./img/right.jpg",
-		"./img/left.jpg",
-		"./img/top.jpg",
-		"./img/bottom.jpg",
-		"./img/front.jpg",
-		"./img/back.jpg",
-	};
-
-	glGenTextures(1, &textureId);
-	glBindTexture(GL_TEXTURE_CUBE_MAP, textureId);
-
-	stbi_set_flip_vertically_on_load(false);
-	for (size_t i = 0; i < 6; i++) {
-		int w, h, nchannel;
-		unsigned char *data = stbi_load(paths[i].c_str(), &w, &h, &nchannel, 0);
-		if (!data) {
-			fmt::print(stderr, "WARNING::CUBEMAP::INIT::IMAGE_NOT_FOUND {}\n", paths[i]);
-		}
-		glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB,
-			w, h, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
-		stbi_image_free(data);
-	}
-	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
-	glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
-
-	::Texture texture(textureId, "skybox-cubemap", 0, 0, 0, GL_TEXTURE_CUBE_MAP);
-	TextureManager::Get().add("skybox-cubemap", std::move(texture));
-
-	const glm::vec3 verts[] = {
-		glm::vec3(-1.0, -1.0,  1.0),
-		glm::vec3( 1.0, -1.0,  1.0),
-		glm::vec3( 1.0,  1.0,  1.0),
-		glm::vec3(-1.0,  1.0,  1.0),
-
-		glm::vec3(-1.0, -1.0, -1.0),
-		glm::vec3( 1.0, -1.0, -1.0),
-		glm::vec3( 1.0,  1.0, -1.0),
-		glm::vec3(-1.0,  1.0, -1.0),
-	};
-
-	const glm::uvec3 indices[] = {
-		// front
-		glm::uvec3(0, 3, 1),
-		glm::uvec3(1, 3, 2),
-		// right
-		glm::uvec3(1, 2, 5),
-		glm::uvec3(2, 6, 5),
-		// back
-		glm::uvec3(4, 5, 6),
-		glm::uvec3(4, 6, 7),
-		// left
-		glm::uvec3(0, 4, 7),
-		glm::uvec3(0, 7, 3),
-		// bottom
-		glm::uvec3(0, 1, 4),
-		glm::uvec3(1, 5, 4),
-		// top
-		glm::uvec3(3, 7, 2),
-		glm::uvec3(2, 7, 6)
-	};
-
-	mesh.addTexture("skybox-cubemap", opfor::Mesh::TextureType::TT_Diffuse);
-	for (const auto &v : verts) { mesh.addPosition(v); }
-	for (const auto &i : indices) { mesh.addTriangle(i); }
-	mesh.build();
-
-	meshComponent.Id = Engine::Get().AddMesh(std::move(mesh));
-
-	return meshComponent;
-}
 
 int main()
 {
@@ -109,19 +26,39 @@ int main()
 	engine.CreateComponentSystem<ImguiSystem>();
 	engine.CreateComponentSystem<LuaSystem>();
 
-	TextureManager::Get().createTexture("prototype_tile_8", "./img/prototype_tile_8.png", {
-		{ GL_TEXTURE_MAG_FILTER, GL_LINEAR },
-		{ GL_TEXTURE_MIN_FILTER, GL_LINEAR },
-		{ GL_TEXTURE_WRAP_R, GL_REPEAT },
-		{ GL_TEXTURE_WRAP_S, GL_REPEAT },
-	}, GL_TEXTURE_2D);
 
-	TextureManager::Get().createTexture("default_normal", "./img/default_normal.png", {
-		{ GL_TEXTURE_MAG_FILTER, GL_NEAREST },
-		{ GL_TEXTURE_MIN_FILTER, GL_NEAREST },
-		{ GL_TEXTURE_WRAP_R, GL_REPEAT },
-		{ GL_TEXTURE_WRAP_S, GL_REPEAT },
-	}, GL_TEXTURE_2D);
+	opfor::TextureParameterList texParams = {
+		{ opfor::TextureParameterType::MignifyFilter, opfor::TextureParameterValue::Linear },
+		{ opfor::TextureParameterType::MagnifyFilter, opfor::TextureParameterValue::Linear },
+		{ opfor::TextureParameterType::WrapT,         opfor::TextureParameterValue::Repeat },
+		{ opfor::TextureParameterType::WrapS,         opfor::TextureParameterValue::Repeat },
+	};
+
+	auto prototype_tile = TextureManager::Get().Create("prototype_tile_8");
+	auto img = opfor::ImageLoader::Load("./img/prototype_tile_8.png");
+
+	prototype_tile->SetDataType(opfor::DataType::UnsignedByte);
+	prototype_tile->SetHasAlpha(img.nchannel == 4);
+	prototype_tile->SetIsSRGB(true);
+	prototype_tile->SetInputFormat(img.nchannel == 4 ? opfor::DataFormat::RGBA : opfor::DataFormat::RGB);
+	prototype_tile->SetOutputFormat(opfor::DataFormat::RGBA);
+	prototype_tile->SetSize(img.width, img.height);
+	prototype_tile->SetTextureType(opfor::TextureType::Tex2D);
+	prototype_tile->SetTextureParameters(texParams);
+	prototype_tile->Build();
+
+	auto default_normal = TextureManager::Get().Create("default_normal");
+	img = opfor::ImageLoader::Load("./img/default_normal.png");
+
+	default_normal->SetDataType(opfor::DataType::UnsignedByte);
+	default_normal->SetHasAlpha(img.nchannel == 4);
+	default_normal->SetIsSRGB(true);
+	default_normal->SetInputFormat(img.nchannel == 4 ? opfor::DataFormat::RGBA : opfor::DataFormat::RGB);
+	default_normal->SetOutputFormat(opfor::DataFormat::RGBA);
+	default_normal->SetSize(img.width, img.height);
+	default_normal->SetTextureType(opfor::TextureType::Tex2D);
+	default_normal->SetTextureParameters(texParams);
+	default_normal->Build();
 
 	auto player = engine.CreateEntity<PlayerCameraComponent, TransformComponent>();
 

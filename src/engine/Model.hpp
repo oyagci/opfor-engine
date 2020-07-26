@@ -8,6 +8,7 @@
 #include "TextureManager.hpp"
 #include "Engine.hpp"
 #include <glm/vec3.hpp>
+#include "engine/ImageLoader.hpp"
 
 namespace opfor {
 
@@ -199,12 +200,37 @@ private:
 			if (baseColorTexture >= 0) {
 				pbrMaterial.Albedo = model.images[model.textures[baseColorTexture].source].uri;
 
-				TextureManager::Get().createTexture(pbrMaterial.Albedo.value(), directory + pbrMaterial.Albedo.value(), {
-					{ GL_TEXTURE_MAG_FILTER, GL_LINEAR },
-					{ GL_TEXTURE_MIN_FILTER, GL_LINEAR },
-					{ GL_TEXTURE_WRAP_S, GL_REPEAT },
-					{ GL_TEXTURE_WRAP_T, GL_REPEAT },
-				}, GL_TEXTURE_2D, true);
+				auto texture = TextureManager::Get().Create(pbrMaterial.Albedo.value());
+
+				opfor::TextureParameterList texParams = {
+					{ opfor::TextureParameterType::MignifyFilter, opfor::TextureParameterValue::LinearMipmapLinear },
+					{ opfor::TextureParameterType::MagnifyFilter, opfor::TextureParameterValue::Linear },
+					{ opfor::TextureParameterType::WrapS,         opfor::TextureParameterValue::Repeat },
+					{ opfor::TextureParameterType::WrapT,         opfor::TextureParameterValue::Repeat },
+				};
+
+				opfor::ImageLoader::Image img = opfor::ImageLoader::Load(directory + pbrMaterial.Albedo.value());
+
+				if (img.nchannel == 3) {
+					texture->SetInputFormat(opfor::DataFormat::RGB);
+					texture->SetOutputFormat(opfor::DataFormat::RGB);
+				}
+				else if (img.nchannel == 4) {
+					texture->SetInputFormat(opfor::DataFormat::RGBA);
+					texture->SetOutputFormat(opfor::DataFormat::RGBA);
+					texture->SetHasAlpha(true);
+				}
+				else {
+					OP4_CORE_WARNING("img.nchannel = {} -- Not handled!\n", img.nchannel);
+				}
+				texture->SetDataType(opfor::DataType::UnsignedByte);
+				texture->SetTextureType(opfor::TextureType::Tex2D);
+				texture->SetIsSRGB(true);
+				texture->SetTextureData(img.data.get());
+				texture->SetSize(img.width, img.height);
+				texture->SetTextureParameters(texParams);
+				texture->SetGenerateMipmap(true);
+				texture->Build();
 			}
 
 			auto const normalTexture = material.normalTexture.index;
@@ -243,24 +269,50 @@ private:
 			std::string name = image.uri;
 			std::string path = directory + image.uri;
 
+			opfor::TextureParameterList texParams{};
+
 			if (t.sampler >= 0) {
 				auto const &sampler = model.samplers[t.sampler];
 
-				TextureManager::Get().createTexture(name, path, {
-					{ GL_TEXTURE_MAG_FILTER, sampler.magFilter },
-					{ GL_TEXTURE_MIN_FILTER, sampler.minFilter },
-					{ GL_TEXTURE_WRAP_S, sampler.wrapS },
-					{ GL_TEXTURE_WRAP_T, sampler.wrapT },
-				}, GL_TEXTURE_2D);
+				texParams = {
+					{ opfor::TextureParameterType::MignifyFilter, (opfor::TextureParameterValue)sampler.minFilter },
+					{ opfor::TextureParameterType::MagnifyFilter, (opfor::TextureParameterValue)sampler.magFilter },
+					{ opfor::TextureParameterType::WrapS,         (opfor::TextureParameterValue)sampler.wrapS },
+					{ opfor::TextureParameterType::WrapT,         (opfor::TextureParameterValue)sampler.wrapT },
+				};
 			}
 			else {
-				TextureManager::Get().createTexture(name, path, {
-					{ GL_TEXTURE_MAG_FILTER, GL_LINEAR },
-					{ GL_TEXTURE_MIN_FILTER, GL_LINEAR },
-					{ GL_TEXTURE_WRAP_S, GL_REPEAT },
-					{ GL_TEXTURE_WRAP_T, GL_REPEAT },
-				}, GL_TEXTURE_2D);
+				texParams = {
+					{ opfor::TextureParameterType::MignifyFilter, opfor::TextureParameterValue::Linear },
+					{ opfor::TextureParameterType::MagnifyFilter, opfor::TextureParameterValue::Linear },
+					{ opfor::TextureParameterType::WrapS,         opfor::TextureParameterValue::Repeat },
+					{ opfor::TextureParameterType::WrapT,         opfor::TextureParameterValue::Repeat },
+				};
 			}
+
+			auto img = opfor::ImageLoader::Load(path);
+
+			auto texture = TextureManager::Get().Create(name);
+
+			if (img.nchannel == 3) {
+				texture->SetInputFormat(opfor::DataFormat::RGB);
+				texture->SetOutputFormat(opfor::DataFormat::RGB);
+			}
+			else if (img.nchannel == 4) {
+				texture->SetInputFormat(opfor::DataFormat::RGBA);
+				texture->SetOutputFormat(opfor::DataFormat::RGBA);
+				texture->SetHasAlpha(true);
+			}
+			else {
+				OP4_CORE_WARNING("img.nchannel = {} -- Not handled!\n", img.nchannel);
+			}
+			texture->SetDataType(opfor::DataType::UnsignedByte);
+			texture->SetTextureType(opfor::TextureType::Tex2D);
+			texture->SetTextureData(img.data.get());
+			texture->SetSize(img.width, img.height);
+			texture->SetTextureParameters(texParams);
+			texture->SetGenerateMipmap(true);
+			texture->Build();
 		}
 
 		std::vector<unsigned int> meshes;

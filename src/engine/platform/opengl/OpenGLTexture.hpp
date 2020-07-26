@@ -11,6 +11,8 @@ private:
 
 	std::optional<TextureUnit> _BoundUnit;
 
+	void ApplyParameters();
+
 public:
 	OpenGLTexture();
 

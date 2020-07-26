@@ -1,10 +1,10 @@
 #pragma once
 
-#include <map>
+#include <unordered_map>
 #include <string>
 #include <memory>
 #include <vector>
-#include "Texture.hpp"
+#include "engine/renderer/Texture.hpp"
 
 class TextureManager
 {
@@ -16,14 +16,12 @@ public:
 	TextureManager(TextureManager const &) = delete;
 	void operator=(TextureManager const &) = delete;
 
-	void createTexture(std::string const &name, std::string const &path,
-		std::vector<std::pair<GLenum, GLenum>>, GLenum target, bool srgb = false);
-	void bind(std::string const &name, GLuint textureNumber);
-	void add(std::string const &name, Texture t);
-	GLuint get(std::string const &name) { return _textures[name]->id(); }
+	opfor::SharedPtr<opfor::Texture> Create(std::string const &name);
+	void Add(std::string const &name, opfor::SharedPtr<opfor::Texture> texture);
+	auto Get(std::string const &name) { return _textures[name]; }
 
 private:
-	std::map<std::string, std::unique_ptr<Texture>> _textures;
+	std::unordered_map<std::string, opfor::SharedPtr<opfor::Texture>> _textures;
 
 private:
 	TextureManager() {};

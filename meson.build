@@ -53,6 +53,7 @@ srcs = [
   'src/engine/Mesh.cpp',
   'src/engine/Batch.cpp',
   'src/engine/lualib.cpp',
+  'src/engine/ImageLoader.cpp',
 
   'src/engine/core/Window.cpp',
   'src/engine/core/Input.cpp',

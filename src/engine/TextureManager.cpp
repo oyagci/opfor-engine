@@ -1,31 +1,23 @@
 #include "TextureManager.hpp"
 #include <fmt/format.h>
 
-void TextureManager::createTexture(std::string const &name, std::string const &path,
-	std::vector<std::pair<GLenum, GLenum>> parameters, GLenum target, bool srgb)
+opfor::SharedPtr<opfor::Texture> TextureManager::Create(std::string const &name)
 {
-	if (_textures.find(name) != _textures.end()) { return ; }
-
-	_textures[name] = std::make_unique<Texture>(name, target);
-
-	_textures[name]->bind(GL_TEXTURE0);
-	for (auto const &p : parameters) {
-		_textures[name]->setParameter(GL_TEXTURE_2D, p.first, p.second);
+	if (_textures.find(name) != _textures.end()) {
+		OP4_CORE_WARNING("Texture named \"{}\" already exists!\n", name);
 	}
-	_textures[name]->setSRGB(srgb);
-	_textures[name]->load(path);
+
+	opfor::SharedPtr<opfor::Texture> texture = opfor::Texture::Create();
+	_textures[name] = texture;
+
+	return texture;
 }
 
-void TextureManager::bind(std::string const &name, GLuint textureNumber)
+void TextureManager::Add(std::string const &name, opfor::SharedPtr<opfor::Texture> texture)
 {
-	if (_textures.find(name) == _textures.end()) {
-		throw std::runtime_error("Texture does not exist");
+	if (_textures.find(name) != _textures.end()) {
+		OP4_CORE_WARNING("Texture named \"{}\" already exists!\n", name);
 	}
-	_textures[name]->bind(textureNumber);
-}
 
-void TextureManager::add(std::string const &name, Texture t)
-{
-	auto pTexture = std::make_unique<Texture>(std::move(t));
-	_textures[name] = std::move(pTexture);
+	_textures[name] = texture;
 }

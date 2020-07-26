@@ -55,9 +55,11 @@ enum class TextureParameterValue
 	NearestMipmapNearest = GL_NEAREST_MIPMAP_NEAREST,
 	NearestMipmapLinear  = GL_NEAREST_MIPMAP_LINEAR,
 	LinearMipmapNearest  = GL_LINEAR_MIPMAP_NEAREST,
-	LineraMipmapLinear   = GL_LINEAR_MIPMAP_LINEAR,
+	LinearMipmapLinear   = GL_LINEAR_MIPMAP_LINEAR,
 	ClampToEdge          = GL_CLAMP_TO_EDGE,
 	ClampToBorder        = GL_CLAMP_TO_BORDER,
+	Repeat               = GL_REPEAT,
+	MirroredRepeat       = GL_MIRRORED_REPEAT,
 #endif
 };
 
@@ -97,6 +99,7 @@ private:
 
 	bool _HasAlpha = false;
 	bool _IsSRGB = false;
+	bool _GenMipmap = false;
 
 	TextureType _Type = TextureType::Tex2D;
 	void *_Data = nullptr;
@@ -119,7 +122,12 @@ public:
 	void SetTextureData(void *data) { _Data = data; }
 	void SetTextureType(TextureType type) { _Type = type; }
 	void SetTextureParameters(TextureParameterList paramList) { _Parameters = paramList; }
-	void SetSize(float width, float height = 0, float depth = 0);
+	void SetSize(float width, float height = 0, float depth = 0) {
+		_Size.x = width;
+		_Size.y = height;
+		_Size.z = depth;
+	}
+	void SetGenerateMipmap(bool val) { _GenMipmap = val; }
 
 	auto GetInputFormat() const { return _InputFormat; }
 	auto GetOutputFormat() const { return _OutputFormat; }
@@ -130,6 +138,7 @@ public:
 	auto const &GetTextureParameters() const { return _Parameters; }
 	auto GetSize() const { return _Size; }
 	auto GetTextureType() const { return _Type; }
+	auto ShouldGenerateMipmap() { return _GenMipmap; }
 
 	static UniquePtr<Texture> Create();
 };

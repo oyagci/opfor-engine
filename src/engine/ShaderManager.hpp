@@ -25,10 +25,10 @@ public:
 		return { shaderId, *_shaders[shaderId] };
 	}
 
-	std::optional<opfor::Shader*> Get(unsigned int id)
+	std::optional<opfor::SharedPtr<opfor::Shader>> Get(unsigned int id)
 	{
 		if (_shaders.find(id) != _shaders.end()) {
-			return std::make_optional(_shaders[id].get());
+			return std::make_optional(_shaders[id]);
 		}
 
 		return std::nullopt;
@@ -42,7 +42,7 @@ public:
 	}
 
 private:
-	std::unordered_map<unsigned int, std::unique_ptr<opfor::Shader>> _shaders;
+	std::unordered_map<unsigned int, opfor::SharedPtr<opfor::Shader>> _shaders;
 
 	unsigned int _nextId = 0;
 

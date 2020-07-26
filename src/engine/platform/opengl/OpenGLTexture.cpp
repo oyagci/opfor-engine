@@ -4,11 +4,30 @@ namespace opfor {
 
 void OpenGLTexture::Build()
 {
+	auto loadTexture = [&] () {
+		GLint inputFormat = (GLint)GetInputFormat();
+
+		if (IsSRGB()) {
+			if (GetInputFormat() == DataFormat::RGB) {
+				inputFormat = GL_SRGB;
+			}
+			else if (GetInputFormat() == DataFormat::RGBA) {
+				inputFormat = GL_SRGB_ALPHA;
+			}
+		}
+		glTexImage2D(GL_TEXTURE_2D, 0, (GLint)inputFormat, GetSize().x, GetSize().y, 0, (GLint)GetOutputFormat(),
+			(GLenum)GetDataType(), GetTextureData());
+	};
+
 	switch (GetTextureType()) {
 		case TextureType::Tex2D:
 			glBindTexture(GL_TEXTURE_2D, _RendererID);
-			glTexImage2D(GL_TEXTURE_2D, 0, (GLint)GetInputFormat(), GetSize().x, GetSize().y, 0, (GLint)GetOutputFormat(),
-				(GLenum)GetDataType(), GetTextureData());
+			loadTexture();
+			ApplyParameters();
+			if (ShouldGenerateMipmap()) {
+				glGenerateMipmap((GLenum)GetTextureType());
+			}
+			glBindTexture(GL_TEXTURE_2D, 0);
 			break ;
 		case TextureType::TexCubemap:
 			glBindTexture(GL_TEXTURE_CUBE_MAP, _RendererID);
@@ -16,6 +35,10 @@ void OpenGLTexture::Build()
 				glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + face, 0,
 					(GLint)GetInputFormat(), GetSize().x, GetSize().y, 0,
 					(GLint)GetOutputFormat(), (GLenum)GetDataType(), GetTextureData());
+			}
+			ApplyParameters();
+			if (ShouldGenerateMipmap()) {
+				glGenerateMipmap((GLenum)GetTextureType());
 			}
 			glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
 			break ;
@@ -49,6 +72,13 @@ void OpenGLTexture::Unbind()
 		glActiveTexture((GLenum)_BoundUnit.value());
 		glBindTexture((GLenum)GetTextureType(), 0);
 		_BoundUnit.reset();
+	}
+}
+
+void OpenGLTexture::ApplyParameters()
+{
+	for (auto const &param : GetTextureParameters()) {
+		glTexParameteri((GLenum)GetTextureType(), (GLenum)param.first, (GLint)param.second);
 	}
 }
 

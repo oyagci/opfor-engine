@@ -126,7 +126,7 @@ namespace opfor {
 	void OpenGLRendererAPI::PushTexture(SharedPtr<Texture> const &texture, TextureUnit unit)
 	{
 		int32_t prevTexture = 0;
-		TextureType type = texture->GetType();
+		TextureType type = texture->GetTextureType();
 
 		glActiveTexture((GLenum)unit);
 
