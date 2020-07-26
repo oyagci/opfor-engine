@@ -2,6 +2,7 @@
 
 #include "RenderCommand.hpp"
 #include "lazy.hpp"
+#include <list>
 
 namespace opfor {
 
@@ -29,6 +30,11 @@ enum class RendererCaps;
 
 class Renderer
 {
+private:
+	static std::list<std::function<void()>> _Calls;
+
+	static void PrintTree(unsigned int offset = 0);
+
 public:
 	static void BeginScene();
 	static void EndScene();
