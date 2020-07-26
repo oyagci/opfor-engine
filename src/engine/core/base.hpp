@@ -23,8 +23,8 @@ namespace opfor {
 template <typename T>
 using SharedPtr = std::shared_ptr<T>;
 
-template <typename T>
-using UniquePtr = std::unique_ptr<T>;
+template <typename T, class Deleter = std::default_delete<T>>
+using UniquePtr = std::unique_ptr<T, Deleter>;
 
 template <typename T, typename ... Args>
 constexpr SharedPtr<T> MakeShared(Args&&... args)
