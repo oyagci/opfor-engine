@@ -35,10 +35,7 @@ public:
 			Unload();
 		}
 
-		auto [ shaderId, meshShader ] = ShaderManager::Get().Create();
-		meshShader.AddVertexShader("./shaders/basic.vs.glsl");
-		meshShader.AddFragmentShader("./shaders/basic.fs.glsl");
-		meshShader.Link();
+		auto [ shaderId, meshShader ] = ShaderManager::Get().Create("shaders/basic.glsl");
 
 		meshShader.Bind();
 		meshShader.SetUniform("material.albedo", 0);

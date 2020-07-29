@@ -1,3 +1,4 @@
+#vertex
 #version 450 core
 
 layout (location = 0) in vec3 in_position;
@@ -27,4 +28,18 @@ void main()
 //	gl_Position.xy += in_position.xy * vec2(-0.1, -0.1 * (16.0f / 9.0f));
 
 	TexCoords = in_tex_coord;
+}
+
+#fragment
+#version 450 core
+
+out vec4 frag_color;
+
+in vec2 TexCoords;
+
+uniform sampler2D diffuse;
+
+void main()
+{
+	frag_color = texture(diffuse, TexCoords);
 }

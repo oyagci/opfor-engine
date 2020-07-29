@@ -1,3 +1,4 @@
+#vertex
 #version 330 core
 
 layout (location = 0) in vec3 in_position;
@@ -11,4 +12,17 @@ void main()
 {
 	gl_Position = (projectionMatrix * viewMatrix * vec4(in_position, 1.0)).xyww;
 	TexCoords = in_position;
+}
+
+#fragment
+#version 330 core
+
+out vec4 frag_color;
+
+in vec3 TexCoords;
+uniform samplerCube cubemap;
+
+void main()
+{
+	frag_color = texture(cubemap, TexCoords);
 }

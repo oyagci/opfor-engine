@@ -15,9 +15,9 @@ public:
 	ShaderManager(ShaderManager const &) = delete;
 	void operator=(ShaderManager const &) = delete;
 
-	std::tuple<unsigned int, opfor::Shader&> Create()
+	std::tuple<unsigned int, opfor::Shader&> Create(std::string const &path)
 	{
-		auto shader = opfor::Shader::Create();
+		auto shader = opfor::Shader::Create(path);
 		auto shaderId = _nextId++;
 
 		_shaders[shaderId] = std::move(shader);

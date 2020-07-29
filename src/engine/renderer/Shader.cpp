@@ -4,11 +4,11 @@
 
 namespace opfor {
 
-UniquePtr<Shader> Shader::Create()
+UniquePtr<Shader> Shader::Create(std::string const &source)
 {
 	switch (RendererAPI::GetAPI()) {
 		case RendererAPI::API::OpenGL:
-			return MakeUnique<OpenGLShader>();
+			return MakeUnique<OpenGLShader>(source);
 		case RendererAPI::API::None:
 			OP4_CORE_ASSERT(false, "Unsupported platform!\n");
 	}

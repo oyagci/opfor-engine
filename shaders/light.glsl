@@ -1,3 +1,29 @@
+#vertex
+#version 450 core
+
+vec2 quad[4] = {
+	{ -1.0, -1.0 },
+	{  1.0, -1.0 },
+	{  1.0,  1.0 },
+	{ -1.0,  1.0 },
+};
+
+vec2 texCoords[4] = {
+	{ 0.0, 0.0 },
+	{ 1.0, 0.0 },
+	{ 1.0, 1.0 },
+	{ 0.0, 1.0 },
+};
+
+out vec2 TexCoords;
+
+void main()
+{
+	gl_Position = vec4(quad[gl_VertexID], 0.0, 1.0);
+	TexCoords = texCoords[gl_VertexID];
+}
+
+#fragment
 #version 450 core
 #define MAX_NUM_POINT_LIGHTS		16
 #define MAX_NUM_DIRECTIONAL_LIGHTS	1

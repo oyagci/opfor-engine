@@ -15,21 +15,32 @@ private:
 
 	std::optional<std::string> ReadShaderSource(std::string const &);
 
-	std::optional<uint32_t> CreateShader(std::string const &src, uint32_t shaderType);
+	std::optional<uint32_t> AddShaderFromPath(std::string const &path, uint32_t shaderType);
+	std::optional<uint32_t> AddShaderFromSource(std::string const &src, uint32_t shaderType);
 
 	std::unordered_map<std::string, uint32_t> _UniformLocations;
 
 	uint32_t FindUniformLocation(std::string);
 
+	enum class ShaderParserState {
+		Normal = 1,
+		PreprocessorStart,
+		PreprocessorKeyword,
+		PreprocessorStop,
+	};
+	enum class ShaderType {
+		Geometry = 1,
+		Vertex,
+		Fragment,
+		Compute,
+	};
+	std::unordered_map<ShaderType, std::string> ParseShaderSource(std::string const &src);
+
+	void Link();
+
 public:
-	OpenGLShader();
+	OpenGLShader(std::string shaderPath);
 	virtual ~OpenGLShader();
-
-	void AddGeometryShader(std::string const &) override;
-	void AddVertexShader(std::string const &) override;
-	void AddFragmentShader(std::string const &) override;
-
-	void Link() override;
 
 	void SetUniform(std::string const &name, size_t value) override;
 	void SetUniform(std::string const &name, int32_t value) override;

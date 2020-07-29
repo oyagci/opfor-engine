@@ -110,10 +110,7 @@ private:
 public:
 	SkyboxRendererSystem()
 	{
-		_shader = opfor::Shader::Create();
-		_shader->AddVertexShader("shaders/cubemap.vs.glsl");
-		_shader->AddFragmentShader("shaders/cubemap.fs.glsl");
-		_shader->Link();
+		_shader = opfor::Shader::Create("shaders/skybox.glsl");
 
 		InitSkybox();
 	}

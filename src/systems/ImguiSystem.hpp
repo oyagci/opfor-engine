@@ -464,10 +464,7 @@ private:
 
 			if (ImGui::BeginPopupContextItem("add_component_popup")) {
 				if (ImGui::MenuItem("Mesh")) {
-					auto [ shaderId, shader ] = ShaderManager::Get().Create();
-						shader.AddVertexShader("shaders/basic.vs.glsl");
-						shader.AddFragmentShader("shaders/basic.fs.glsl");
-						shader.Link();
+					auto [ shaderId, shader ] = ShaderManager::Get().Create("shaders/basic.glsl");
 
 					// TODO: Recycle existing shaders
 					shader.Bind();

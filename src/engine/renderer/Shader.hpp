@@ -11,11 +11,6 @@ class Shader
 public:
 	virtual ~Shader() {}
 
-	virtual void AddGeometryShader(std::string const &) = 0;
-	virtual void AddVertexShader(std::string const &) = 0;
-	virtual void AddFragmentShader(std::string const &) = 0;
-	virtual void Link() = 0;
-
 	virtual uint32_t GetRawHandle() const = 0;
 
 	virtual void SetUniform(std::string const &name, size_t value) = 0;
@@ -33,6 +28,7 @@ public:
 	virtual void Unbind() = 0;
 
 	static UniquePtr<Shader> Create();
+	static UniquePtr<Shader> Create(std::string const &source);
 };
 
 }

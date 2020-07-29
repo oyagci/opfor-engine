@@ -49,11 +49,7 @@ private:
 
 	void InitDepthCubemap()
 	{
-		_shadow = opfor::Shader::Create();
-		_shadow->AddVertexShader("shaders/shadow.vs.glsl");
-		_shadow->AddFragmentShader("shaders/shadow.fs.glsl");
-		_shadow->AddGeometryShader("shaders/shadow.gs.glsl");
-		_shadow->Link();
+		_shadow = opfor::Shader::Create("shaders/shadow.glsl");
 
 		float aspect = static_cast<float>(ShadowWidth) / static_cast<float>(ShadowHeight);
 		float near = 1.0f;
@@ -135,10 +131,7 @@ private:
 
 	void InitBillboard()
 	{
-		_billboard = opfor::Shader::Create();
-		_billboard->AddVertexShader("shaders/billboard.vs.glsl");
-		_billboard->AddFragmentShader("shaders/billboard.fs.glsl");
-		_billboard->Link();
+		_billboard = opfor::Shader::Create("shaders/billboard.glsl");
 	}
 
 	//void InitSSAO()
@@ -586,11 +579,7 @@ public:
 		texture->SetData(img.data.get());
 		texture->Build();
 
-		_light = opfor::Shader::Create();
-
-		_light->AddVertexShader("shaders/light.vs.glsl");
-		_light->AddFragmentShader("shaders/light.fs.glsl");
-		_light->Link();
+		_light = opfor::Shader::Create("shaders/light.glsl");
 
 		_light->Bind();
 		_light->SetUniform("gPosition", 0);
