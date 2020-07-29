@@ -5,12 +5,18 @@
 #include "components/PlayerCameraComponent.hpp"
 #include "components/TransformComponent.hpp"
 #include "engine/core/Input.hpp"
+#include "Engine.hpp"
 
 class CameraMovementSystem : public ecs::ComponentSystem
 {
 public:
 	void OnUpdate(float __unused deltaTime) override
 	{
+		auto mouse = opfor::Input::GetMouseButton(opfor::MouseButton::ButtonRight) == opfor::KeyStatus::Pressed;
+		if (!mouse) {
+			return ;
+		}
+
 		UpdateLook(deltaTime);
 		UpdateMovement(deltaTime);
 	}

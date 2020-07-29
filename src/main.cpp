@@ -86,5 +86,7 @@ int main()
 	display->Set(d);
 	display->SetName("Display");
 
+	opfor::Engine::Get().LoadLevel("levels/pbr.level");
+
 	return opfor::Engine::Get().Run();
 }

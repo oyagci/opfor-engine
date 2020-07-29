@@ -576,6 +576,14 @@ public:
 				displayEnt->Set(display);
 			}
 		}
+
+		auto mouse = opfor::Input::GetMouseButton(opfor::MouseButton::ButtonRight) == opfor::KeyStatus::Pressed;
+		if (mouse) {
+			opfor::Engine::Get().GetWindow()->HideCursor(true);
+		}
+		else {
+			opfor::Engine::Get().GetWindow()->HideCursor(false);
+		}
 	}
 
 //	void EditTransform(const glm::mat4 &view, const glm::mat4 &proj)

@@ -29,6 +29,7 @@ enum class TextureType
 enum class DataFormat
 {
 #ifdef OP4_PLATFORM_OPENGL
+	RG      = GL_RG,
 	RGB     = GL_RGB,
 	RGBA    = GL_RGBA,
 	RGBA16F = GL_RGBA16F,

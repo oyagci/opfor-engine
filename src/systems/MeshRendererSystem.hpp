@@ -480,18 +480,16 @@ private:
 			opfor::Renderer::PushTexture(_gBuffer.GetNormalTex(),     opfor::TextureUnit::Texture1);
 			opfor::Renderer::PushTexture(_gBuffer.GetAlbedoSpecTex(), opfor::TextureUnit::Texture2);
 			opfor::Renderer::PushTexture(_depthCubemap,               opfor::TextureUnit::Texture4);
-
-			// glActiveTexture(GL_TEXTURE3);
-				//glBindTexture(GL_TEXTURE_2D, _ssaoBlurTex);
-				// glBindTexture(GL_TEXTURE_2D, _ssaoColorBuf);
-
-			opfor::Renderer::PushTexture(_gBuffer.GetMetallicRoughnessTex(), opfor::TextureUnit::Texture5);
+			opfor::Renderer::PushTexture(_gBuffer.GetMetallicRoughnessTex(),         opfor::TextureUnit::Texture5);
+			opfor::Renderer::PushTexture(TextureManager::Get().Get("irradianceMap"), opfor::TextureUnit::Texture6);
+			opfor::Renderer::PushTexture(TextureManager::Get().Get("brdfLUT"),       opfor::TextureUnit::Texture7);
+			opfor::Renderer::PushTexture(TextureManager::Get().Get("prefilterMap"),  opfor::TextureUnit::Texture8);
 
 			opfor::Renderer::Submit(_quad.GetVertexArray());
 
-			// glActiveTexture(GL_TEXTURE3);
-				// glBindTexture(GL_TEXTURE_2D, 0);
-
+			opfor::Renderer::PopTexture(opfor::TextureUnit::Texture8);
+			opfor::Renderer::PopTexture(opfor::TextureUnit::Texture7);
+			opfor::Renderer::PopTexture(opfor::TextureUnit::Texture6);
 			opfor::Renderer::PopTexture(opfor::TextureUnit::Texture5);
 			opfor::Renderer::PopTexture(opfor::TextureUnit::Texture4);
 			opfor::Renderer::PopTexture(opfor::TextureUnit::Texture2);
@@ -586,8 +584,11 @@ public:
 		_light->SetUniform("gNormal", 1);
 		_light->SetUniform("gAlbedoSpec", 2);
 		_light->SetUniform("gSSAO", 3);
-		_light->SetUniform("gMetallicRoughness", 5);
 		_light->SetUniform("depthMap", 4);
+		_light->SetUniform("gMetallicRoughness", 5);
+		_light->SetUniform("irradianceMap", 6);
+		_light->SetUniform("brdfLUT", 7);
+		_light->SetUniform("prefilterMap", 8);
 		_light->Unbind();
 	}
 

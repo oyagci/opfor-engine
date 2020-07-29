@@ -16,6 +16,7 @@ public:
 	};
 public:
 	static Image Load(std::string const &path);
+	static Image LoadHDR(std::string const &path);
 };
 
 }

@@ -50,6 +50,9 @@ uniform sampler2D gAlbedoSpec;
 uniform sampler2D gSSAO;
 uniform sampler2D gMetallicRoughness;
 uniform samplerCube depthMap;
+uniform samplerCube irradianceMap;
+uniform samplerCube prefilterMap;
+uniform sampler2D brdfLUT;
 
 uniform float exposure;
 uniform PointLight pointLight[MAX_NUM_POINT_LIGHTS];
@@ -68,7 +71,7 @@ float CalcShadow(vec3 lightPos, vec3 fragPos)
 	float bias = 1.0;
 	float shadow = 0.0;
 
-	// PCF 
+	// PCF
 	float samples = 4.0;
 	float off = 0.2;
 	for (float x = -off; x < off; x += off / (samples * 0.5)) {
@@ -121,25 +124,31 @@ float GeometrySmith(vec3 N, vec3 V, vec3 L, float roughness)
 
 vec3 FresnelSchlick(float cosTheta, vec3 F0)
 {
-	return F0 + (1.0 - F0) * pow(1 - cosTheta, 5.0);
+	return F0 + (1.0 - F0) * pow(1.0 - cosTheta, 5.0);
+}
+
+vec3 FresnelSchlickRoughness(float cosTheta, vec3 F0, float roughness)
+{
+	return F0 + (max(vec3(1.0 - roughness), F0) - F0) * pow(1.0 - cosTheta, 5.0);
 }
 
 vec3 CalcPbr()
 {
-	vec3 fragPos = texture(gPosition, TexCoords).rgb;
-	vec3 fragColor = texture(gAlbedoSpec, TexCoords).rgb;
+	const vec3 fragPos = texture(gPosition, TexCoords).rgb;
+	const vec3 albedo = texture(gAlbedoSpec, TexCoords).rgb;
+	const float metallicFactor = texture(gMetallicRoughness, TexCoords).b;
+	float roughnessFactor = max(texture(gMetallicRoughness, TexCoords).g, 0.05);
 
 	vec3 N = texture(gNormal, TexCoords).rgb;
 	vec3 V = normalize(viewPos - fragPos).rgb;
-
-	const float metallicFactor = texture(gMetallicRoughness, TexCoords).b;
-	const float roughnessFactor = texture(gMetallicRoughness, TexCoords).g;
+	vec3 R = reflect(-V, N);
 
 	vec3 F0 = vec3(0.04);
-	F0 = mix(F0, fragColor, metallicFactor);
+	F0 = mix(F0, albedo, metallicFactor);
 
 	vec3 Lo = vec3(0.0);
 	for (int i = 0; i < pointLightCount; i++) {
+
 		vec3 L = normalize(pointLight[i].position - fragPos);
 		vec3 H = normalize(V + L);
 
@@ -153,26 +162,40 @@ vec3 CalcPbr()
 		float G = GeometrySmith(N, V, L, roughnessFactor);
 		vec3 F = FresnelSchlick(max(dot(H, V), 0.0), F0);
 
+		vec3 nominator = NDF * G * F;
+		float denominator = 4.0 * max(dot(N, V), 0.0) * max(dot(N, L), 0.0) + 0.001;
+		vec3 specular = nominator / denominator;
+
 		vec3 ks = F;
 		vec3 kd = vec3(1.0) - ks;
 		kd *= 1.0 - metallicFactor;
 
-		vec3 DFG = NDF * G * F;
-		float denom = 4.0 * max(dot(N, V), 0.0) * max(dot(N, L), 0.0);
-		vec3 specular = DFG / max(denom, 0.001);
-
 		float NdotL = max(dot(N, L), 0.0);
-		Lo += ((kd * fragColor / PI + specular) * radiance * NdotL);
+		Lo += (kd * albedo / PI + specular) * radiance * NdotL;
 	}
+
+	vec3 F = FresnelSchlickRoughness(max(dot(N, V), 0.0), F0, roughnessFactor);
+	vec3 ks = F;
+	vec3 kd = 1.0 - ks;
+	kd *= 1.0 - metallicFactor;
+
+	vec3 irradiance = texture(irradianceMap, N).rgb;
+	vec3 diffuse    = irradiance * albedo;
+
+	const float MAX_REFLECTION_LOD = 4.0;
+	vec3 prefilteredColor = textureLod(prefilterMap, R, roughnessFactor * MAX_REFLECTION_LOD).rgb;
+	vec2 envBRDF = texture(brdfLUT, vec2(max(dot(N, V), 0.0), roughnessFactor)).rg;
+	vec3 specular = prefilteredColor * (F * envBRDF.x + envBRDF.y);
+	vec3 ambient    = (kd * diffuse + specular) * 1.0f;
 
 	float shadow = CalcShadow(pointLight[0].position, fragPos);
 
-	vec3 color = Lo;
+	vec3 color = ambient + Lo;
 
-	color = color * (1.0 - shadow);
-
+	//color = color * (1.0 - shadow);
 	color = color / (color + vec3(1.0));
-	color = pow(color, vec3(1.0 / 2.2));
+	// color = pow(color, vec3(1.0 / 2.2));
+
 
 	return color;
 }
