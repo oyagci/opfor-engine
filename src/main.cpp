@@ -55,7 +55,6 @@ int main()
 
 	default_normal->SetDataType(opfor::DataType::UnsignedByte);
 	default_normal->SetHasAlpha(img.nchannel == 4);
-	default_normal->SetIsSRGB(true);
 	default_normal->SetInputFormat(img.nchannel == 4 ? opfor::DataFormat::RGBA : opfor::DataFormat::RGB);
 	default_normal->SetOutputFormat(img.nchannel == 4 ? opfor::DataFormat::RGBA : opfor::DataFormat::RGB);
 	default_normal->SetSize(img.width, img.height);
