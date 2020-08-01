@@ -1,6 +1,7 @@
 #pragma once
 
 #include "engine/core/base.hpp"
+#include "engine/core/events/Event.h"
 
 namespace opfor {
 
@@ -16,6 +17,9 @@ class IWindow
 private:
 
 public:
+	using EventCallbackFn = std::function<void(Event&)>;
+
+public:
 	virtual ~IWindow() {}
 
 	virtual void HideCursor(bool) const = 0;
@@ -26,6 +30,8 @@ public:
 	virtual int GetHeight() const = 0;
 
 	virtual bool IsClosed() const = 0;
+
+	virtual void SetEventCallback(const EventCallbackFn &) = 0;
 
 	static UniquePtr<IWindow> Create(const WindowProps &props);
 };

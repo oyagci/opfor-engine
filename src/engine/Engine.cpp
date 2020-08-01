@@ -16,11 +16,15 @@ namespace opfor
 unsigned int Engine::_nextId = 0;
 unsigned int Engine::_nextMaterialId = 0;
 
+#define BIND_EVENT_FN(x) std::bind(&Engine::x, this, std::placeholders::_1)
+
 Engine::Engine()
 {
 	_window = IWindow::Create({ "OPFOR - Untitled Project", 1920, 1080 });
 	_context = MakeUnique<OpenGLContext>(reinterpret_cast<GLFWwindow*>(_window->GetRawHandle()));
 	_context->Init();
+
+	_window->SetEventCallback(BIND_EVENT_FN(OnEvent));
 
 	_systemManager = _ecs.GetSystemManager();
 	_entityManager = _ecs.GetEntityManager();
@@ -175,6 +179,23 @@ void Engine::OnReloadScript(LuaScriptComponent &script)
 {
 	script.Runtime.Reset();
 	script.Runtime.Load(script.Path);
+}
+
+void Engine::OnEvent(Event &e)
+{
+	EventDispatcher dispatcher(e);
+	dispatcher.DispatchIf<WindowResizeEvent>(BIND_EVENT_FN(OnWindowResize));
+	dispatcher.DispatchIf<WindowCloseEvent>(BIND_EVENT_FN(OnWindowClose));
+}
+
+bool Engine::OnWindowResize(WindowResizeEvent &)
+{
+	return true;
+}
+
+bool Engine::OnWindowClose(WindowCloseEvent &)
+{
+	return true;
 }
 
 }

@@ -11,18 +11,31 @@ class LinuxWindow : public IWindow
 private:
 	GLFWwindow *_Window;
 
+	struct WindowData
+	{
+		std::string Title;
+		int Width;
+		int Height;
+
+		EventCallbackFn EventCallback;
+	};
+
+	WindowData _Data;
+
 public:
 	LinuxWindow() = delete;
 	LinuxWindow(const WindowProps &props);
 
-	void HideCursor(bool hide) const;
-	void *GetRawHandle() const;
-	void Close() const;
+	void HideCursor(bool hide) const override;
+	void *GetRawHandle() const override;
+	void Close() const override;
 
-	int GetWidth() const;
-	int GetHeight() const;
+	int GetWidth() const override;
+	int GetHeight() const override;
 
-	bool IsClosed() const;
+	bool IsClosed() const override;
+
+	void SetEventCallback(const EventCallbackFn &eventCallback) override { _Data.EventCallback = eventCallback; }
 };
 
 }

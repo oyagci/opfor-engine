@@ -18,6 +18,8 @@
 #define OP4_CORE_EXPECT(x, ...) { if (!(x)) { OP4_CORE_ERROR("Assertion Failed: {0}\n", __VA_ARGS__); OP4_ABORT(); } }
 #define OP4_CORE_UNREACHABLE(...) { OP4_CORE_ERROR("Unreachable: {0}\n"); OP4_ABORT(); }
 
+#define BIT(x) (1 << x)
+
 namespace opfor {
 
 template <typename T>

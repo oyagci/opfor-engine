@@ -1,4 +1,5 @@
 #include "LinuxWindow.hpp"
+#include "core/events/EngineEvents.hpp"
 
 #include <lazy.hpp>
 
@@ -19,9 +20,29 @@ LinuxWindow::LinuxWindow(const WindowProps &props)
 	_Window = glfwCreateWindow(props.width, props.height, props.title.c_str(),
 		nullptr, nullptr);
 
+	glfwSetWindowUserPointer(_Window, &_Data);
+
 	if (!_Window) {
 		throw std::runtime_error("Error: GLFW: Window creation failed!");
 	}
+
+	glfwSetWindowSizeCallback(_Window, [] (GLFWwindow *window, int width, int height)
+	{
+		WindowResizeEvent event(width, height);
+
+		WindowData *data = reinterpret_cast<WindowData*>(glfwGetWindowUserPointer(window));
+		data->EventCallback(event);
+		data->Width = width;
+		data->Height = height;
+	});
+
+	glfwSetWindowCloseCallback(_Window, [] (GLFWwindow *window)
+	{
+		WindowCloseEvent event;
+
+		WindowData *data = reinterpret_cast<WindowData*>(glfwGetWindowUserPointer(window));
+		data->EventCallback(event);
+	});
 }
 
 void LinuxWindow::HideCursor(bool hide) const

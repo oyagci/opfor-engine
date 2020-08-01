@@ -17,12 +17,13 @@
 #include "engine/renderer/Context.hpp"
 #include "engine/renderer/Framebuffer.hpp"
 #include "engine/renderer/Texture.hpp"
+#include "engine/core/events/EngineEvents.hpp"
+#include "engine/core/Input.hpp"
 
 using namespace lazy;
 using namespace graphics;
 using namespace inputs;
 using namespace utils;
-#include "engine/core/Input.hpp"
 
 namespace ecs
 {
@@ -310,6 +311,10 @@ public:
 
 	auto GetViewport() { return _viewportFramebuffer; }
 	auto GetViewportTexture() { return _viewportTexture; }
+
+	void OnEvent(Event &);
+	bool OnWindowResize(WindowResizeEvent &e);
+	bool OnWindowClose(WindowCloseEvent &e);
 };
 
 }
