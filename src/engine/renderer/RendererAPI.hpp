@@ -46,6 +46,7 @@ public:
 
 	virtual void CopyFramebufferToDefaultFramebuffer(SharedPtr<Framebuffer> const &, CopyTarget) const = 0 ;
 	virtual void CopyFramebufferToFramebuffer(SharedPtr<Framebuffer> const &dst, SharedPtr<Framebuffer> &src, CopyTarget) const = 0;
+	virtual void CopyDefaultFramebufferTo(SharedPtr<Framebuffer> const &, CopyTarget) const = 0 ;
 
 	virtual void PushCapability(RendererCaps, bool enable) = 0;
 	virtual void PopCapability(RendererCaps) = 0;

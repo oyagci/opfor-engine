@@ -66,6 +66,7 @@ public:
 
 	virtual void CopyToDefault(CopyTarget target) = 0;
 	virtual void CopyTo(CopyTarget target, Framebuffer &dst) = 0;
+	virtual void CopyDefault(CopyTarget target) = 0;
 
 	static UniquePtr<Framebuffer> Create();
 };

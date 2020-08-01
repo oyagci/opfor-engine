@@ -95,6 +95,11 @@ namespace opfor {
 		src->CopyTo(target, *dst);
 	}
 
+	void OpenGLRendererAPI::CopyDefaultFramebufferTo(SharedPtr<Framebuffer> const &dst, CopyTarget target) const
+	{
+		dst->CopyDefault(target);
+	}
+
 	void OpenGLRendererAPI::PushCapability(RendererCaps cap, bool enable)
 	{
 		if (enable) {

@@ -55,6 +55,11 @@ class RenderCommand
 			_API->CopyFramebufferToFramebuffer(dst, src, target);
 		}
 
+		static inline void CopyDefaultFramebufferTo(SharedPtr<Framebuffer> dst, CopyTarget target)
+		{
+			_API->CopyDefaultFramebufferTo(dst, target);
+		}
+
 		static inline void PushCapability(RendererCaps cap, bool enable)
 		{
 			_API->PushCapability(cap, enable);

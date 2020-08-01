@@ -46,6 +46,7 @@ public:
 
 	void CopyFramebufferToDefaultFramebuffer(SharedPtr<Framebuffer> const &, CopyTarget) const override;
 	void CopyFramebufferToFramebuffer(SharedPtr<Framebuffer> const &dst, SharedPtr<Framebuffer> &src, CopyTarget) const override;
+	void CopyDefaultFramebufferTo(SharedPtr<Framebuffer> const &, CopyTarget) const override;
 
 	void PushCapability(RendererCaps, bool enable) override;
 	void PopCapability(RendererCaps) override;

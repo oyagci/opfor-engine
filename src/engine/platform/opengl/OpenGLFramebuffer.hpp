@@ -32,6 +32,7 @@ public:
 
 	void CopyToDefault(CopyTarget target) override;
 	void CopyTo(CopyTarget target, Framebuffer &dst) override;
+	void CopyDefault(CopyTarget target) override;
 };
 
 }

@@ -140,4 +140,31 @@ void OpenGLFramebuffer::CopyTo(CopyTarget target, Framebuffer &dst)
 	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, drawBuffer);
 }
 
+void OpenGLFramebuffer::CopyDefault(CopyTarget target)
+{
+	GLint readBuffer  = 0;
+	GLint drawBuffer = 0;
+
+	// Save currently bound framebuffers
+	glGetIntegerv(GL_READ_FRAMEBUFFER_BINDING, &readBuffer);
+	glGetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING, &drawBuffer);
+
+	int width = Engine::Get().GetWindow()->GetWidth();
+	int height = Engine::Get().GetWindow()->GetHeight();
+
+	glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
+	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, _RendererID);
+
+	if (target == CopyTarget::DepthBufferBit) {
+		glBlitFramebuffer(0, 0, width, height, 0, 0, width, height, GL_DEPTH_BUFFER_BIT, GL_NEAREST);
+	}
+	else if (target == CopyTarget::ColorBufferBit) {
+		glBlitFramebuffer(0, 0, width, height, 0, 0, width, height, GL_COLOR_BUFFER_BIT, GL_NEAREST);
+	}
+
+	// Restore framebuffers
+	glBindFramebuffer(GL_READ_FRAMEBUFFER, readBuffer);
+	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, drawBuffer);
+}
+
 }

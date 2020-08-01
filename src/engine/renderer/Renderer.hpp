@@ -54,6 +54,7 @@ public:
 
 	static void CopyFramebufferToFramebuffer(SharedPtr<Framebuffer> dst, SharedPtr<Framebuffer> src, CopyTarget);
 	static void CopyFramebufferToDefaultFramebuffer(SharedPtr<Framebuffer> src, CopyTarget);
+	static void CopyDefaultFramebufferTo(SharedPtr<Framebuffer> dst, CopyTarget);
 
 	static void PushCapability(RendererCaps, bool);
 	static void PopCapability(RendererCaps);

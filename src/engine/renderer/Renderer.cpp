@@ -125,6 +125,14 @@ void Renderer::CopyFramebufferToDefaultFramebuffer(SharedPtr<Framebuffer> src, C
 	);
 }
 
+void Renderer::CopyDefaultFramebufferTo(SharedPtr<Framebuffer> dst, CopyTarget target)
+{
+	_CallsStrings.push_back(__PRETTY_FUNCTION__);
+	_Calls.push_back(
+		BIND(RenderCommand::CopyDefaultFramebufferTo, dst, target)
+	);
+}
+
 void Renderer::PushTexture(SharedPtr<Texture> texture, TextureUnit unit)
 {
 	_CallsStrings.push_back(__PRETTY_FUNCTION__);
