@@ -98,7 +98,7 @@ void OpenGLFramebuffer::CopyToDefault(CopyTarget target)
 	GLint drawBuffer = 0;
 
 	// Save currently bound framebuffers
-	glGetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING, &readBuffer);
+	glGetIntegerv(GL_READ_FRAMEBUFFER_BINDING, &readBuffer);
 	glGetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING, &drawBuffer);
 
 	if (target == CopyTarget::DepthBufferBit) {
@@ -122,7 +122,7 @@ void OpenGLFramebuffer::CopyTo(CopyTarget target, Framebuffer &dst)
 	GLint drawBuffer = 0;
 
 	// Save currently bound framebuffers
-	glGetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING, &readBuffer);
+	glGetIntegerv(GL_READ_FRAMEBUFFER_BINDING, &readBuffer);
 	glGetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING, &drawBuffer);
 
 	if (target == CopyTarget::DepthBufferBit) {
