@@ -267,6 +267,17 @@ public:
 	void PushOverlay(Layer *overlay);
 	void PopLayer(Layer *layer);
 	void PopOverlay(Layer *overlay);
+
+	template <typename ... ArgTypes>
+	inline std::vector<ecs::IEntity<ArgTypes...>*> GetEntities()
+	{
+		return _ecs.GetEntityManager()->GetEntities<ArgTypes...>();
+	}
+
+	inline std::vector<ecs::IEntityBase*> GetAllEntities()
+	{
+		return _ecs.GetEntityManager()->GetAllEntities();
+	}
 };
 
 UniquePtr<Application> CreateApplication();

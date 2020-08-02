@@ -1,17 +1,21 @@
 #pragma once
 
-#include <glm/gtx/matrix_decompose.hpp>
 #include <unistd.h>
 
+#include "Layer.hpp"
 #include "imgui.h"
 #include "examples/imgui_impl_opengl3.h"
 #include "examples/imgui_impl_glfw.h"
 #include "imgui/misc/cpp/imgui_stdlib.h"
 #include "ImGuizmo/ImGuizmo.h"
+#include "Application.hpp"
+#include "nfd.hpp"
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtx/quaternion.hpp>
+#include <glm/gtx/matrix_decompose.hpp>
+#include <string>
 
-#include "ecs/System.hpp"
-
-#include "components/DisplayComponent.hpp"
 #include "components/PlayerCameraComponent.hpp"
 #include "components/SelectedComponent.hpp"
 #include "components/TransformComponent.hpp"
@@ -19,28 +23,18 @@
 #include "components/ModelComponent.hpp"
 #include "components/LuaScriptComponent.hpp"
 
-#include "lazy.hpp"
-#include "Application.hpp"
-#include "Logger.hpp"
-#include "ShaderManager.hpp"
-#include "nfd.hpp"
-
-#include "opfor/core/Window.hpp"
-
-class ImguiSystem : public ecs::ComponentSystem
+class ImGuiLayer : public opfor::Layer
 {
 private:
-	opfor::IWindow *_window;
-
-	bool _logAutoScroll;
-	ecs::IEntityBase *_currentEntity;
 
 	ImVec2 _ViewportPosition;
 	ImVec2 _ViewportSize;
 
+	bool _logAutoScroll;
 	size_t _SelectedItem = 0;
 
-private:
+	ecs::IEntityBase *_currentEntity;
+
 	void BeginFrame()
 	{
         ImGui_ImplOpenGL3_NewFrame();
@@ -57,9 +51,9 @@ private:
 
 	void DrawGuizmoSelectedEnt()
 	{
-		auto cameraEnt = GetEntities<PlayerCameraComponent>()[0];
+		auto cameraEnt = opfor::Application::Get().GetEntities<PlayerCameraComponent>()[0];
 		auto camera = cameraEnt->Get<PlayerCameraComponent>();
-		auto selectedEnt = GetEntities<TransformComponent, SelectedComponent>();
+		auto selectedEnt = opfor::Application::Get().GetEntities<TransformComponent, SelectedComponent>();
 		if (selectedEnt.size() > 0) {
 
 			auto selected = selectedEnt[0]->Get<TransformComponent>();
@@ -278,7 +272,7 @@ private:
 			ImGui::EndPopup();
 		}
 
-		auto allEnts = GetAllEntities();
+		auto allEnts = opfor::Application::Get().GetAllEntities();
 
 		size_t itemIndex = 0;
 		for (auto const &ent : allEnts) {
@@ -642,7 +636,11 @@ private:
 	}
 
 public:
-	ImguiSystem() : _window(nullptr), _logAutoScroll(true), _currentEntity(nullptr)
+	ImGuiLayer()
+	{
+	}
+
+	void OnAttach() override
 	{
 		IMGUI_CHECKVERSION();
 		ImGui::CreateContext();
@@ -657,30 +655,22 @@ public:
 
 		ImFont *roboto = io.Fonts->AddFontFromFileTTF("opfor/thirdparty/imgui/misc/fonts/Roboto-Medium.ttf", 16);
 		io.FontDefault = roboto;
+
+		ImGui_ImplGlfw_InitForOpenGL(reinterpret_cast<GLFWwindow*>(opfor::Application::Get().GetWindow()->GetRawHandle()), true);
+		ImGui_ImplOpenGL3_Init("#version 450");
 	}
 
-	~ImguiSystem()
+	void OnDetach() override
 	{
-		ImGui::DestroyContext();
 	}
 
-	void OnUpdate(float __unused deltaTime) override
+	void OnUpdate(float) override
 	{
-		if (!_window) {
-			auto displays = GetEntities<DisplayComponent>();
-			_window = displays[0]->Get<DisplayComponent>().window;
-			// FIXME: Call the right implementation based on renderer context
-			ImGui_ImplGlfw_InitForOpenGL(reinterpret_cast<GLFWwindow*>(_window->GetRawHandle()), true);
-			ImGui_ImplOpenGL3_Init("#version 450");
-		}
-
-		bool b = true;
-
-		glm::mat4 transform(1.0f);
+		static bool show = true;
 
 		BeginFrame();
 		BeginDockspace();
-			ImGui::ShowDemoWindow(&b);
+			ImGui::ShowDemoWindow(&show);
 			Viewport();
 			MenuBar();
 			PlayMenu();
@@ -692,19 +682,16 @@ public:
 		EndFrame();
 
 		if (opfor::Input::GetKeyDown(opfor::KeyCode::Escape)) {
-			auto playerEnts = GetEntities<PlayerCameraComponent>();
+			auto playerEnts = opfor::Application::Get().GetEntities<PlayerCameraComponent>();
 			if (playerEnts.size() > 0) {
 				auto camera = playerEnts[0]->Get<PlayerCameraComponent>();
-				auto displayEnt = GetEntities<DisplayComponent>()[0];
-				auto display = displayEnt->Get<DisplayComponent>();
 
 				// Enable/Disable input for camera
 				camera.useInput = !camera.useInput;
 				playerEnts[0]->Set(camera);
 
-				// Enable/Switch cursor
-				display.window->HideCursor(camera.useInput);
-				displayEnt->Set(display);
+				// Enable/Disable cursor
+				opfor::Application::Get().GetWindow()->HideCursor(camera.useInput);
 			}
 		}
 
@@ -716,42 +703,4 @@ public:
 			opfor::Application::Get().GetWindow()->HideCursor(false);
 		}
 	}
-
-//	void EditTransform(const glm::mat4 &view, const glm::mat4 &proj)
-//	{
-//		glm::mat4 matrix(1.0f);
-//		static ImGuizmo::OPERATION mCurrentGizmoOperation(ImGuizmo::ROTATE);
-//		static ImGuizmo::MODE mCurrentGizmoMode(ImGuizmo::WORLD);
-//		if (ImGui::IsKeyPressed('t'))
-//			mCurrentGizmoOperation = ImGuizmo::TRANSLATE;
-//		if (ImGui::IsKeyPressed('e'))
-//			mCurrentGizmoOperation = ImGuizmo::ROTATE;
-//		if (ImGui::IsKeyPressed('r')) // r Key
-//			mCurrentGizmoOperation = ImGuizmo::SCALE;
-//		if (ImGui::RadioButton("Translate", mCurrentGizmoOperation == ImGuizmo::TRANSLATE))
-//			mCurrentGizmoOperation = ImGuizmo::TRANSLATE;
-//		ImGui::SameLine();
-//		if (ImGui::RadioButton("Rotate", mCurrentGizmoOperation == ImGuizmo::ROTATE))
-//			mCurrentGizmoOperation = ImGuizmo::ROTATE;
-//		ImGui::SameLine();
-//		if (ImGui::RadioButton("Scale", mCurrentGizmoOperation == ImGuizmo::SCALE))
-//			mCurrentGizmoOperation = ImGuizmo::SCALE;
-//
-//		if (mCurrentGizmoOperation != ImGuizmo::SCALE)
-//		{
-//			if (ImGui::RadioButton("Local", mCurrentGizmoMode == ImGuizmo::LOCAL))
-//				mCurrentGizmoMode = ImGuizmo::LOCAL;
-//			ImGui::SameLine();
-//			if (ImGui::RadioButton("World", mCurrentGizmoMode == ImGuizmo::WORLD))
-//				mCurrentGizmoMode = ImGuizmo::WORLD;
-//		}
-//		static bool useSnap(false);
-//		if (ImGui::IsKeyPressed(83))
-//			useSnap = !useSnap;
-//		ImGui::Checkbox("", &useSnap);
-//		ImGui::SameLine();
-//		ImGuiIO& io = ImGui::GetIO();
-//		ImGuizmo::SetRect(0, 0, io.DisplaySize.x, io.DisplaySize.y);
-//		ImGuizmo::Manipulate(&view[0][0], &proj[0][0], mCurrentGizmoOperation, mCurrentGizmoMode, &_guizmo[0][0], &_guizmo[0][0], nullptr);
-//	}
 };

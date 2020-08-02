@@ -5,7 +5,6 @@
 #include "systems/CameraMovementSystem.hpp"
 #include "systems/SkyboxRendererSystem.hpp"
 #include "systems/MeshRendererSystem.hpp"
-#include "systems/ImguiSystem.hpp"
 
 #include "components/PlayerCameraComponent.hpp"
 #include "components/TransformComponent.hpp"
@@ -13,49 +12,26 @@
 #include "components/SelectedComponent.hpp"
 #include "components/BatchComponent.hpp"
 
-class TestLayer : public opfor::Layer
-{
-public:
-	void OnAttach() override
-	{
-		OP4_CORE_DEBUG("Attach!\n");
-	}
-
-	void OnDetach() override
-	{
-		OP4_CORE_DEBUG("Detach!\n");
-	}
-
-	void OnUpdate(float dt) override
-	{
-		OP4_CORE_DEBUG("Update! {}\n", dt);
-	}
-
-	void OnEvent(opfor::Event &) override
-	{
-		OP4_CORE_DEBUG("Event!\n");
-	}
-};
+#include "opfor/layers/ImGuiLayer.hpp"
 
 class Sandbox : public opfor::Application
 {
 private:
-	opfor::UniquePtr<TestLayer> _TestLayer;
+	opfor::UniquePtr<ImGuiLayer> _ImGui;
 
 public:
 	Sandbox()
 	{
 		auto &engine = opfor::Application::Get();
 
-		_TestLayer = opfor::MakeUnique<TestLayer>();
-		engine.PushLayer(_TestLayer.get());
+		_ImGui = opfor::MakeUnique<ImGuiLayer>();
+		engine.PushOverlay(_ImGui.get());
 
 		engine.CreateComponentSystem<CameraMovementSystem>();
 		engine.CreateComponentSystem<BeginSceneSystem>();
 		engine.CreateComponentSystem<MeshRendererSystem>();
 		engine.CreateComponentSystem<SkyboxRendererSystem>();
 		engine.CreateComponentSystem<EndSceneSystem>();
-		engine.CreateComponentSystem<ImguiSystem>();
 
 		auto player = engine.CreateEntity<PlayerCameraComponent, TransformComponent>();
 
@@ -74,12 +50,6 @@ public:
 		player->Set(t);
 
 		auto __attribute__((unused)) skybox = engine.CreateEntity<SkyboxComponent>();
-
-		auto display = engine.CreateEntity<DisplayComponent>();
-		DisplayComponent d;
-		d.window = engine.GetWindow();
-		display->Set(d);
-		display->SetName("Display");
 
 		opfor::Application::Get().LoadLevel("levels/pbr.level");
 	}
