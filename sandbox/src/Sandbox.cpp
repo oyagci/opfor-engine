@@ -13,12 +13,42 @@
 #include "components/SelectedComponent.hpp"
 #include "components/BatchComponent.hpp"
 
+class TestLayer : public opfor::Layer
+{
+public:
+	void OnAttach() override
+	{
+		OP4_CORE_DEBUG("Attach!\n");
+	}
+
+	void OnDetach() override
+	{
+		OP4_CORE_DEBUG("Detach!\n");
+	}
+
+	void OnUpdate(float dt) override
+	{
+		OP4_CORE_DEBUG("Update! {}\n", dt);
+	}
+
+	void OnEvent(opfor::Event &) override
+	{
+		OP4_CORE_DEBUG("Event!\n");
+	}
+};
+
 class Sandbox : public opfor::Application
 {
+private:
+	opfor::UniquePtr<TestLayer> _TestLayer;
+
 public:
 	Sandbox()
 	{
 		auto &engine = opfor::Application::Get();
+
+		_TestLayer = opfor::MakeUnique<TestLayer>();
+		engine.PushLayer(_TestLayer.get());
 
 		engine.CreateComponentSystem<CameraMovementSystem>();
 		engine.CreateComponentSystem<BeginSceneSystem>();

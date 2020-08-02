@@ -18,6 +18,7 @@
 #include "opfor/renderer/Texture.hpp"
 #include "opfor/core/events/EngineEvents.hpp"
 #include "opfor/core/Input.hpp"
+#include "LayerStack.hpp"
 
 namespace ecs
 {
@@ -73,6 +74,8 @@ private:
 	PlayState _isPlaying;
 
 	Callback<size_t> _selectItem;
+
+	LayerStack _LayerStack;
 
 	void InitViewport();
 
@@ -309,6 +312,11 @@ public:
 	void OnEvent(Event &);
 	bool OnWindowResize(WindowResizeEvent &e);
 	bool OnWindowClose(WindowCloseEvent &e);
+
+	void PushLayer(Layer *layer);
+	void PushOverlay(Layer *overlay);
+	void PopLayer(Layer *layer);
+	void PopOverlay(Layer *overlay);
 };
 
 UniquePtr<Application> CreateApplication();

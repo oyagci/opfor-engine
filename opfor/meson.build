@@ -28,6 +28,7 @@ srcs = [
   'src/opfor/TextureManager.cpp',
   # 'src/opfor/Cubemap.cpp',
   'src/opfor/Application.cpp',
+  'src/opfor/LayerStack.cpp',
   'src/opfor/utils/Settings.cpp',
   'src/opfor/ecs/ECSEngine.cpp',
   'src/opfor/ecs/Entity.cpp',

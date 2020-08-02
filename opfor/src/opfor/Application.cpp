@@ -135,6 +135,10 @@ int Application::Run()
 
 		_ecs.Update(deltaTime);
 
+		for (auto layer : _LayerStack) {
+			layer->OnUpdate(deltaTime);
+		}
+
 		_context->SwapBuffers();
 
 		Input::Flush();
@@ -221,6 +225,13 @@ void Application::OnEvent(Event &e)
 	EventDispatcher dispatcher(e);
 	dispatcher.DispatchIf<WindowResizeEvent>(BIND_EVENT_FN(OnWindowResize));
 	dispatcher.DispatchIf<WindowCloseEvent>(BIND_EVENT_FN(OnWindowClose));
+
+	for (auto it = _LayerStack.rbegin(); it != _LayerStack.rend(); it++) {
+		(*it)->OnEvent(e);
+		if (e.Handled) {
+			break ;
+		}
+	}
 }
 
 bool Application::OnWindowResize(WindowResizeEvent &)
@@ -231,6 +242,30 @@ bool Application::OnWindowResize(WindowResizeEvent &)
 bool Application::OnWindowClose(WindowCloseEvent &)
 {
 	return true;
+}
+
+void Application::PushLayer(Layer *layer)
+{
+	_LayerStack.PushLayer(layer);
+	layer->OnAttach();
+}
+
+void Application::PushOverlay(Layer *overlay)
+{
+	_LayerStack.PushOverlay(overlay);
+	overlay->OnAttach();
+}
+
+void Application::PopLayer(Layer *layer)
+{
+	_LayerStack.PopLayer(layer);
+	layer->OnDetach();
+}
+
+void Application::PopOverlay(Layer *overlay)
+{
+	_LayerStack.PopOverlay(overlay);
+	overlay->OnDetach();
 }
 
 }
