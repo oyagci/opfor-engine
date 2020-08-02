@@ -18,7 +18,7 @@
 #include "opfor/renderer/Texture.hpp"
 #include "opfor/core/events/EngineEvents.hpp"
 #include "opfor/core/Input.hpp"
-#include "LayerStack.hpp"
+#include "layers/LayerStack.hpp"
 
 namespace ecs
 {
