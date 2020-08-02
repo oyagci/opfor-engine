@@ -213,56 +213,6 @@ public:
 		return std::nullopt;
 	}
 
-	void AddMaterial(std::string const &name, Material mat)
-	{
-		if (name.size() == 0) {
-			Logger::Warn("Warning: Creating a material without a name is illegal.\n");
-			return ;
-		}
-
-		mat.name = name;
-		_materials[name] = MaterialContainer(_nextMaterialId++, mat);
-	}
-
-	void BindMaterial(std::string const &name)
-	{
-		if (name.size() == 0) {
-			Logger::Warn("Material name not given\n");
-			return ;
-		}
-		if (_materials.find(name) == _materials.end()) {
-			Logger::Warn("Material not found ({})\n", name);
-			return ;
-		}
-
-		auto const &material = _materials[name].second;
-
-		if (material.diffuse > 0) {
-			glActiveTexture(GL_TEXTURE0);
-			glBindTexture(GL_TEXTURE_2D, material.diffuse);
-		}
-		if (material.specular > 0) {
-			glActiveTexture(GL_TEXTURE1);
-			glBindTexture(GL_TEXTURE_2D, material.specular);
-		}
-		if (material.normal > 0) {
-			glActiveTexture(GL_TEXTURE2);
-			glBindTexture(GL_TEXTURE_2D, material.normal);
-		}
-	}
-
-	void UnbindMaterial()
-	{
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, 0);
-
-		glActiveTexture(GL_TEXTURE1);
-		glBindTexture(GL_TEXTURE_2D, 0);
-
-		glActiveTexture(GL_TEXTURE2);
-		glBindTexture(GL_TEXTURE_2D, 0);
-	}
-
 	unsigned int GetMaterialId(std::string const &name)
 	{
 		return _materials[name].first;
