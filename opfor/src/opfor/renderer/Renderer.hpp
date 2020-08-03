@@ -48,6 +48,7 @@ public:
 	static void Clear(ClearFlag);
 
 	static void Submit(SharedPtr<VertexArray> const &);
+	static void Submit(std::function<void()> const &);
 
 	static void PushFramebuffer(SharedPtr<Framebuffer>);
 	static void PopFramebuffer();

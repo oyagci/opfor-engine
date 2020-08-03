@@ -19,6 +19,8 @@
 #include "opfor/core/events/EngineEvents.hpp"
 #include "opfor/core/Input.hpp"
 #include "layers/LayerStack.hpp"
+#include "renderer/SceneRenderer.hpp"
+#include "layers/ImGuiLayer.hpp"
 
 namespace ecs
 {
@@ -76,6 +78,9 @@ private:
 	Callback<size_t> _selectItem;
 
 	LayerStack _LayerStack;
+
+	UniquePtr<SceneRenderer> _SceneRenderer;
+	UniquePtr<ImGuiLayer> _ImGuiLayer;
 
 	void InitViewport();
 
@@ -278,6 +283,8 @@ public:
 	{
 		return _ecs.GetEntityManager()->GetAllEntities();
 	}
+
+	void RenderImgui();
 };
 
 UniquePtr<Application> CreateApplication();

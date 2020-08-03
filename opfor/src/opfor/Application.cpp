@@ -97,6 +97,11 @@ Application::Application()
 	default_normal->SetTextureParameters(texParams);
 	default_normal->SetData(img.data.get());
 	default_normal->Build();
+
+	_SceneRenderer = MakeUnique<SceneRenderer>();
+
+	_ImGuiLayer = MakeUnique<ImGuiLayer>();
+	PushOverlay(_ImGuiLayer.get());
 }
 
 /*
@@ -123,6 +128,11 @@ void Application::InitViewport()
 	_viewportFramebuffer->AttachTexture(_viewportTexture, opfor::FramebufferAttachment::ColorAttachment0);
 }
 
+void Application::RenderImgui()
+{
+	_ImGuiLayer->OnImGuiRender();
+}
+
 int Application::Run()
 {
 	Settings::Get().load("config.ini");
@@ -131,13 +141,20 @@ int Application::Run()
 	{
 		float deltaTime = Time::Get().getDeltaTime();
 
-		Update();
-
-		_ecs.Update(deltaTime);
-
 		for (auto layer : _LayerStack) {
 			layer->OnUpdate(deltaTime);
 		}
+		Update();
+		_ecs.Update(deltaTime);
+
+		Renderer::BeginScene();
+
+		_SceneRenderer->RenderScene();
+
+		Application *app = this;
+		Renderer::Submit([app] () { app->RenderImgui(); });
+
+		Renderer::EndScene();
 
 		_context->SwapBuffers();
 

@@ -87,6 +87,12 @@ void Renderer::Submit(SharedPtr<VertexArray> const &vertexArray)
 	});
 }
 
+void Renderer::Submit(const std::function<void ()> &f)
+{
+	_CallsStrings.push_back(__PRETTY_FUNCTION__);
+	_Calls.push_back(f);
+}
+
 void Renderer::PushFramebuffer(SharedPtr<Framebuffer> fb)
 {
 	_CallsStrings.push_back(__PRETTY_FUNCTION__);
