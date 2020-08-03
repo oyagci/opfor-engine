@@ -1,6 +1,6 @@
 #pragma once
 
-#include "lazy.hpp"
+#include "renderer.hpp"
 #include "TextRenderer.hpp"
 #include "Anchor.hpp"
 #include "SceneComponent.hpp"

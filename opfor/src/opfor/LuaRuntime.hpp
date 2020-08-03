@@ -7,7 +7,7 @@
 #include <fmt/format.h>
 #include "lua.hpp"
 #include "lualib.h"
-#include "Logger.hpp"
+#include "opfor/core/Logger.hpp"
 
 struct lua_StateDeleter
 {

@@ -4,7 +4,7 @@
 #include <memory>
 #include <glm/glm.hpp>
 #include "Anchor.hpp"
-#include "lazy.hpp"
+#include "renderer.hpp"
 
 using namespace anchor;
 using Origin = Anchor;

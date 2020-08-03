@@ -7,13 +7,13 @@
 #include <string>
 #include <unistd.h>
 
-#include "Application.hpp"
+#include "opfor/core/Application.hpp"
 #include "examples/imgui_impl_opengl3.h"
 #include "examples/imgui_impl_glfw.h"
 #include "imgui/misc/cpp/imgui_stdlib.h"
 #include "ImGuizmo/ImGuizmo.h"
 #include "nfd.hpp"
-#include "ShaderManager.hpp"
+#include "opfor/renderer/ShaderManager.hpp"
 
 #include "components/PlayerCameraComponent.hpp"
 #include "components/SelectedComponent.hpp"

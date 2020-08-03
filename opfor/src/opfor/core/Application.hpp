@@ -1,16 +1,13 @@
 #pragma once
 
 #include <memory>
-#include "ecs/ecs.hpp"
-#include "EngineObject.hpp"
-#include "Mesh.hpp"
-#include "Batch.hpp"
 #include <unordered_map>
-#include "TextureManager.hpp"
 #include <fmt/format.h>
-#include "Logger.hpp"
-#include "Action.hpp"
-#include "ILevel.hpp"
+#include "opfor/renderer/Mesh.hpp"
+#include "opfor/renderer/Batch.hpp"
+#include "opfor/renderer/TextureManager.hpp"
+#include "opfor/core/Logger.hpp"
+#include "opfor/core/Action.hpp"
 #include "opfor/core/base.hpp"
 #include "opfor/core/Window.hpp"
 #include "opfor/renderer/Context.hpp"
@@ -18,9 +15,12 @@
 #include "opfor/renderer/Texture.hpp"
 #include "opfor/core/events/EngineEvents.hpp"
 #include "opfor/core/Input.hpp"
-#include "layers/LayerStack.hpp"
-#include "renderer/SceneRenderer.hpp"
-#include "layers/ImGuiLayer.hpp"
+#include "opfor/layers/LayerStack.hpp"
+#include "opfor/renderer/SceneRenderer.hpp"
+#include "opfor/layers/ImGuiLayer.hpp"
+#include "ecs/ecs.hpp"
+#include "EngineObject.hpp"
+#include "ILevel.hpp"
 
 namespace ecs
 {

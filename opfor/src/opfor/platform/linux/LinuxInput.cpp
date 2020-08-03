@@ -1,9 +1,9 @@
 #include "LinuxInput.hpp"
 
-#include "opfor/Application.hpp"
 #include <functional>
+#include <renderer.hpp>
+#include "opfor/core/Application.hpp"
 #include "opfor/core/base.hpp"
-#include <lazy.hpp>
 
 namespace opfor {
 

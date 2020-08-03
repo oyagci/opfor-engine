@@ -5,7 +5,7 @@
 #include <optional>
 #include <memory>
 #include "UIScene.hpp"
-#include "lazy.hpp"
+#include "renderer.hpp"
 
 using lazy::graphics::Shader;
 

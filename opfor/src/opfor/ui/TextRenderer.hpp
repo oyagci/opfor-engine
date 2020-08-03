@@ -1,6 +1,6 @@
 #pragma once
 
-#include <lazy.hpp>
+#include <renderer.hpp>
 #include "Anchor.hpp"
 
 using namespace lazy::graphics;

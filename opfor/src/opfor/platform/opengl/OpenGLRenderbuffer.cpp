@@ -1,5 +1,5 @@
 #include "OpenGLRenderbuffer.hpp"
-#include "lazy.hpp"
+#include "renderer.hpp"
 
 namespace opfor {
 

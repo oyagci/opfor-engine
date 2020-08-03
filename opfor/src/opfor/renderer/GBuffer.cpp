@@ -1,5 +1,5 @@
-#include "GBuffer.hpp"
-#include "Application.hpp"
+#include "opfor/renderer/GBuffer.hpp"
+#include "opfor/core/Application.hpp"
 
 void GBuffer::Init()
 {

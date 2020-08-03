@@ -2,7 +2,7 @@
 #include "opfor/renderer/Texture.hpp"
 #include "opfor/renderer/Framebuffer.hpp"
 #include "opfor/renderer/Renderbuffer.hpp"
-#include "opfor/Application.hpp"
+#include "opfor/core/Application.hpp"
 
 namespace opfor {
 

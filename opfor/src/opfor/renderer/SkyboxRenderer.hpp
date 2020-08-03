@@ -6,7 +6,7 @@
 #include "opfor/renderer/Framebuffer.hpp"
 #include "opfor/renderer/Renderbuffer.hpp"
 #include "opfor/renderer/Renderer.hpp"
-#include "Mesh.hpp"
+#include "opfor/renderer/Mesh.hpp"
 
 namespace opfor {
 

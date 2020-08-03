@@ -1,6 +1,6 @@
 #include "OpenGLBuffer.hpp"
 
-#include "lazy.hpp"
+#include "renderer.hpp"
 
 namespace opfor {
 

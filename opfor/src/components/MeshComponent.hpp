@@ -2,7 +2,7 @@
 
 #include <memory>
 #include "ecs/ecs.hpp"
-#include "lazy.hpp"
+#include "renderer.hpp"
 
 ///
 /// A component for meshes that holds data about the mesh

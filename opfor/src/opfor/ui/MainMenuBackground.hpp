@@ -2,7 +2,7 @@
 
 #include "SceneComponent.hpp"
 #include "TextureManager.hpp"
-#include "lazy.hpp"
+#include "renderer.hpp"
 
 using lazy::graphics::Mesh;
 

@@ -1,6 +1,6 @@
 #pragma once
 #include <vector>
-#include <lazy.hpp>
+#include <renderer.hpp>
 #include "IDrawable.hpp"
 #include <string>
 

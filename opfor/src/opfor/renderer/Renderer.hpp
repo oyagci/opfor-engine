@@ -1,7 +1,7 @@
 #pragma once
 
 #include "RenderCommand.hpp"
-#include "lazy.hpp"
+#include "renderer.hpp"
 #include <list>
 
 namespace opfor {

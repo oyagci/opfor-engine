@@ -2,7 +2,7 @@
 
 #include <memory>
 #include "opfor/core/base.hpp"
-#include "lazy.hpp"
+#include "renderer.hpp"
 
 namespace opfor {
 

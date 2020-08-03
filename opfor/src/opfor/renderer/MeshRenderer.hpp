@@ -3,8 +3,8 @@
 #include "opfor/core/base.hpp"
 #include "opfor/renderer/Shader.hpp"
 #include "opfor/renderer/Framebuffer.hpp"
-#include "GBuffer.hpp"
-#include "Mesh.hpp"
+#include "opfor/renderer/GBuffer.hpp"
+#include "opfor/renderer/Mesh.hpp"
 
 struct PlayerCameraComponent;
 struct TransformComponent;

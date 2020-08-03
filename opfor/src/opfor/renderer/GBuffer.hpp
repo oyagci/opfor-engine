@@ -1,6 +1,6 @@
 #pragma once
 
-#include "lazy.hpp"
+#include "renderer.hpp"
 #include "opfor/renderer/Texture.hpp"
 #include "opfor/renderer/Renderbuffer.hpp"
 #include "opfor/renderer/Framebuffer.hpp"

@@ -1,6 +1,6 @@
 #pragma once
 
-#include <lazy.hpp>
+#include <renderer.hpp>
 #include "opfor/core/Input.hpp"
 #include <vector>
 #include <unordered_set>

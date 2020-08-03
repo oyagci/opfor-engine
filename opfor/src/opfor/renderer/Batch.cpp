@@ -1,6 +1,6 @@
-#include <lazy.hpp>
+#include <renderer.hpp>
 #include "Batch.hpp"
-#include "Application.hpp"
+#include "opfor/core/Application.hpp"
 
 namespace opfor {
 

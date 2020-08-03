@@ -1,6 +1,6 @@
 #pragma once
 
-#include "lazy.hpp"
+#include "renderer.hpp"
 #include <memory>
 #include <unordered_map>
 #include "opfor/renderer/Shader.hpp"

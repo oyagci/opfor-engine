@@ -1,4 +1,4 @@
-#include <lazy.hpp>
+#include <renderer.hpp>
 #include "Mesh.hpp"
 #include "TextureManager.hpp"
 #include <glm/vec3.hpp>

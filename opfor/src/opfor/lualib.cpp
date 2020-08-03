@@ -1,7 +1,7 @@
 #include "lualib.h"
 #include "lua.hpp"
 #include <fmt/format.h>
-#include "Application.hpp"
+#include "opfor/core/Application.hpp"
 #include "components/TransformComponent.hpp"
 #include <glm/vec3.hpp>
 

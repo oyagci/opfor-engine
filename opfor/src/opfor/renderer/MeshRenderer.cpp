@@ -4,11 +4,11 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <random>
 
-#include "Application.hpp"
-#include "TextureManager.hpp"
-#include "ShaderManager.hpp"
+#include "opfor/core/Application.hpp"
+#include "opfor/renderer/TextureManager.hpp"
+#include "opfor/renderer/ShaderManager.hpp"
 #include "opfor/renderer/Renderer.hpp"
-#include "opfor/ImageLoader.hpp"
+#include "opfor/core/ImageLoader.hpp"
 
 #include "components/PlayerCameraComponent.hpp"
 #include "components/MeshComponent.hpp"

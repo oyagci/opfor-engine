@@ -1,11 +1,11 @@
 #pragma once
 
 #include "ecs/System.hpp"
-#include "lazy.hpp"
+#include "renderer.hpp"
 #include "components/PlayerCameraComponent.hpp"
 #include "components/TransformComponent.hpp"
 #include "opfor/core/Input.hpp"
-#include "Application.hpp"
+#include "opfor/core/Application.hpp"
 #include <glm/gtc/matrix_transform.hpp>
 
 class CameraMovementSystem : public ecs::ComponentSystem

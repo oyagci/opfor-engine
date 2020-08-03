@@ -1,6 +1,6 @@
 #include "SkyboxRenderer.hpp"
-#include "Application.hpp"
-#include "TextureManager.hpp"
+#include "opfor/core/Application.hpp"
+#include "opfor/renderer/TextureManager.hpp"
 
 #include <glm/gtx/projection.hpp>
 #include <glm/gtc/matrix_transform.hpp>

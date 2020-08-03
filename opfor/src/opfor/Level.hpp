@@ -1,12 +1,12 @@
 #pragma once
 
-#include "Application.hpp"
-#include "ILevel.hpp"
-#include "Model.hpp"
-#include "ShaderManager.hpp"
-#include "json.hpp"
 #include <glm/vec3.hpp>
 #include <fstream>
+#include "opfor/core/Application.hpp"
+#include "ILevel.hpp"
+#include "opfor/renderer/Model.hpp"
+#include "opfor/renderer/ShaderManager.hpp"
+#include "json.hpp"
 
 #include "components/ModelComponent.hpp"
 #include "components/TransformComponent.hpp"

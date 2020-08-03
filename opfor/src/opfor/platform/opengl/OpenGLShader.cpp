@@ -3,7 +3,7 @@
 #include <sstream>
 #include <fstream>
 #include <cstring>
-#include "lazy.hpp"
+#include "renderer.hpp"
 
 namespace opfor {
 

@@ -3,12 +3,12 @@
 #include <vector>
 #include <optional>
 #include <utility>
+#include <glm/vec3.hpp>
 #include "tinygltf/tiny_gltf.h"
 #include "Mesh.hpp"
 #include "TextureManager.hpp"
-#include "Application.hpp"
-#include <glm/vec3.hpp>
-#include "opfor/ImageLoader.hpp"
+#include "opfor/core/Application.hpp"
+#include "opfor/core/ImageLoader.hpp"
 
 namespace opfor {
 

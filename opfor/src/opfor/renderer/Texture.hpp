@@ -1,8 +1,8 @@
 #pragma once
 
-#include "lazy.hpp"
+#include "renderer.hpp"
 #include "opfor/core/base.hpp"
-#include "ImageLoader.hpp"
+#include "opfor/core/ImageLoader.hpp"
 #include <glm/glm.hpp>
 
 namespace opfor {

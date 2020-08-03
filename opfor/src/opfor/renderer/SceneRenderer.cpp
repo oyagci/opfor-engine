@@ -1,5 +1,5 @@
 #include "SceneRenderer.hpp"
-#include "Application.hpp"
+#include "opfor/core/Application.hpp"
 
 namespace opfor {
 

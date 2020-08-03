@@ -1,7 +1,7 @@
 #include "LinuxWindow.hpp"
 #include "core/events/EngineEvents.hpp"
 
-#include <lazy.hpp>
+#include <renderer.hpp>
 
 namespace opfor {
 

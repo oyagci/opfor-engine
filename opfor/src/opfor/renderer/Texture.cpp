@@ -1,4 +1,4 @@
-#include "Texture.hpp"
+#include "renderer/Texture.hpp"
 #include "RendererAPI.hpp"
 #include "opfor/platform/opengl/OpenGLTexture.hpp"
 
