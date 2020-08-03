@@ -516,15 +516,28 @@ void ImGuiLayer::Viewport()
 
 		// TODO: Automatically adjust to viewport's aspect ratio.
 
-		//ImGui::Image(reinterpret_cast<void*>(engine::Application::Instance().GetViewport()), { winSize.x, winSize.x / (16.0f / 9.0f) },
-		//	ImVec2(0.0f, 1.0f), ImVec2(1.0f, 0.0f), ImVec4(1.0f, 1.0f, 1.0f, 1.0f), ImVec4(1.0f, 1.0f, 1.0f, 0.0f));
+		float targetAspectRatio = 16.0f / 9.0f;
 
-		ImGui::Image(reinterpret_cast<void*>(opfor::Application::Get().GetViewportTexture()->GetRawHandle()),
-			{ winSize.x, winSize.x / (16.0f / 9.0f) },
-			ImVec2(0.0f, 1.0f),
-			ImVec2(1.0f, 0.0f),
-			ImVec4(1.0f, 1.0f, 1.0f, 1.0f),
-			ImVec4(1.0f, 1.0f, 1.0f, 0.0f));
+		if ((winSize.x / winSize.y) < targetAspectRatio) {
+			ImGui::Image(reinterpret_cast<void*>(opfor::Application::Get().GetViewportTexture()->GetRawHandle()),
+				{ winSize.x, winSize.x / targetAspectRatio },
+				ImVec2(0.0f, 1.0f),
+				ImVec2(1.0f, 0.0f),
+				ImVec4(1.0f, 1.0f, 1.0f, 1.0f),
+				ImVec4(1.0f, 1.0f, 1.0f, 0.0f));
+
+			_ViewportSize.y = winSize.x / targetAspectRatio;
+		}
+		else {
+			ImGui::Image(reinterpret_cast<void*>(opfor::Application::Get().GetViewportTexture()->GetRawHandle()),
+				{ winSize.y * targetAspectRatio, winSize.y },
+				ImVec2(0.0f, 1.0f),
+				ImVec2(1.0f, 0.0f),
+				ImVec4(1.0f, 1.0f, 1.0f, 1.0f),
+				ImVec4(1.0f, 1.0f, 1.0f, 0.0f));
+
+			_ViewportSize.x = winSize.y * targetAspectRatio;
+		}
 
 		DrawGuizmoSelectedEnt();
 	}
