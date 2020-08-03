@@ -1,0 +1,116 @@
+{
+	"$schema": "http://json-schema.org/schema#",
+		"type": "object",
+		"definitions": {
+			"transform": {
+				"type": "object",
+				"properties": {
+					"position": {
+						"type": "array",
+						"items": {
+							"type": "number"
+						},
+						"minLength": 3,
+						"maxLength": 3
+					},
+					"rotation": {
+						"type": "array",
+						"items": {
+							"type": "number"
+						},
+						"minLength": 3,
+						"maxLength": 3
+					},
+					"scale": {
+						"type": "array",
+						"items": {
+							"type": "number"
+						},
+						"minLength": 3,
+						"maxLength": 3
+					}
+				}
+			}
+		},
+		"properties": {
+			"editor": {
+				"type": "object",
+				"properties": {
+					"transform": { "$ref": "#/definitions/transform" }
+				}
+			},
+			"name": {
+				"type": "string",
+				"minLength": 1
+			},
+			"models": {
+				"type": "array",
+				"items": {
+					"type": "object",
+					"properties": {
+						"name": {
+							"type": "string",
+							"minLength": 1
+						},
+						"uri": {
+							"type": "string"
+						},
+						"type": {
+							"type": "string",
+							"enum": [ "GLTF2" ]
+						},
+						"uuid": { "type": "string" },
+						"transform": { "$ref": "#/definitions/transform" }
+					},
+					"required": [ "uuid" ]
+				}
+			},
+			"entities": {
+				"type": "array",
+				"items": {
+					"type": "object",
+					"properties": {
+						"name": { "type": "string" },
+						"components": {
+							"type": "array",
+							"items": {
+								"type": "object",
+								"properties": {
+									"type": {
+										"type": "string",
+										"enum": [ "MODEL", "LUASCRIPT", "LIGHT" ]
+									},
+									"uuid": { "type": "string" },
+									"script": { "type": "string" },
+									"transform" : { "$ref": "#/definitions/transform" }
+								}
+							}
+						}
+					}
+				}
+			},
+			"lights": {
+				"type": "array",
+				"properties": {
+					"name": {
+						"type": "string",
+						"minLength": 1
+					},
+					"type": {
+						"type": "string",
+						"enum": [ "POINT" ]
+					},
+					"color": {
+						"type": "array",
+						"items": {
+							"type": "number"
+						},
+						"minLength": 3,
+						"maxLength": 3
+					},
+					"intensity": { "type": "number" },
+					"transform": { "$ref": "#/definitions/transform" }
+				}
+			}
+		}
+}

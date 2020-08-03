@@ -1,0 +1,81 @@
+{
+	"name": "42Run",
+	"editor": {
+		"camera": {
+			"transform": {
+				"position": [ 200.0, 300.0, 200.0 ]
+			}
+		}
+	},
+	"models": [
+		{
+			"uuid": "31360340-f204-4051-9874-94833047fda4",
+			"name": "Wall-1",
+			"uri": "models/42Run/MapTiles/Wall-1.gltf",
+			"type": "GLTF2",
+			"transform": {
+				"position": [ 0.0, 0.0, 0.0 ],
+				"rotation": [ 0.0, 0.0, 0.0 ],
+				"scale": [ 1.0, 1.0, 1.0 ]
+			}
+		},
+		{
+			"uuid": "5387fde8-6ab0-440b-92fb-debb716a61e2",
+			"name": "DoorFrame-1",
+			"uri": "models/42Run/MapTiles/DoorFrame-1.gltf",
+			"type": "GLTF2",
+			"transform": {
+				"position": [ -200.0, 0.0, 0.0 ],
+				"rotation": [ 0.0, 0.0, 0.0 ],
+				"scale": [ 1.0, 1.0, 1.0 ]
+			}
+		}
+	],
+	"entities": [
+		{
+			"name": "Wall",
+			"components": [
+				{
+					"type": "MODEL",
+					"uuid": "31360340-f204-4051-9874-94833047fda4"
+				},
+				{
+					"type": "LUASCRIPT",
+					"script": "scripts/custom_script.lua"
+				}
+			]
+		},
+		{
+			"name": "Main Light",
+			"components": [
+				{
+					"type": "POINTLIGHT",
+					"intensity": 5000.0,
+					"color": [ 1.0, 1.0, 0.8 ]
+				},
+				{
+					"type": "TRANSFORM",
+					"transform": {
+						"position": [ 200.0, 300.0, 200.0 ],
+						"rotation": [ 0.0, 0.0, 0.0 ],
+						"scale": [ 1.0, 1.0, 1.0 ]
+					}
+				}
+			]
+		}
+	],
+	"lights": [
+		{
+			"name": "Main Light",
+			"uuid": "105c83a7-8208-4970-9c95-557e76646f0f",
+			"type": "POINT",
+			"color": [ 1.0, 1.0, 0.8 ],
+			"intensity": 5000.0,
+			"transform": {
+				"position": [ 200.0, 100.0, 200.0 ],
+				"rotation": [ 0.0, 0.0, 0.0 ],
+				"scale": [ 1.0, 1.0, 1.0 ]
+			}
+		}
+	]
+}

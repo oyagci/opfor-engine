@@ -1,0 +1,114 @@
+{
+  "entities": [
+    {
+      "components": [
+        {
+          "path": "/home/oyagci/Projects/3d-engine/models/42Run/MapTiles/DoorFrame-1.gltf",
+          "type": "MODEL",
+          "uuid": "ea00ebb8-cf4b-43be-86aa-b11fc116c3e2"
+        },
+        {
+          "transform": {
+            "position": [
+              200.0,
+              0.0,
+              0.0
+            ],
+            "rotation": [
+              0.0,
+              0.0,
+              0.0
+            ],
+            "scale": [
+              1.0,
+              1.0,
+              1.0
+            ]
+          },
+          "type": "TRANSFORM"
+        }
+      ],
+      "name": "Unnamed Entity"
+    },
+    {
+      "components": [
+        {
+          "transform": {
+            "position": [
+              200.0,
+              300.0,
+              200.0
+            ],
+            "rotation": [
+              0.0,
+              0.0,
+              0.0
+            ],
+            "scale": [
+              1.0,
+              1.0,
+              1.0
+            ]
+          },
+          "type": "TRANSFORM"
+        },
+        {
+          "color": [
+            1.0,
+            1.0,
+            0.800000011920929
+          ],
+          "intensity": 5000.0,
+          "type": "POINTLIGHT"
+        }
+      ],
+      "name": "Main Light"
+    },
+    {
+      "components": [
+        {
+          "path": "models/42Run/MapTiles/Wall-1.gltf",
+          "type": "MODEL",
+          "uuid": "31360340-f204-4051-9874-94833047fda4"
+        },
+        {
+          "transform": {
+            "position": [
+              0.0,
+              0.0,
+              0.0
+            ],
+            "rotation": [
+              0.0,
+              0.0,
+              0.0
+            ],
+            "scale": [
+              1.0,
+              1.0,
+              1.0
+            ]
+          },
+          "type": "TRANSFORM"
+        },
+        {
+          "script": "scripts/custom_script.lua",
+          "type": "LUASCRIPT"
+        }
+      ],
+      "name": "Wall"
+    }
+  ],
+  "models": [
+    {
+      "type": "GLTF2",
+      "uri": "models/42Run/MapTiles/DoorFrame-1.gltf",
+      "uuid": "5387fde8-6ab0-440b-92fb-debb716a61e2"
+    },
+    {
+      "type": "GLTF2",
+      "uri": "models/42Run/MapTiles/Wall-1.gltf",
+      "uuid": "31360340-f204-4051-9874-94833047fda4"
+    }
+  ]
+}

@@ -1,0 +1,74 @@
+{
+  "entities": [
+    {
+      "components": [
+        {
+          "type": "MODEL",
+          "uuid": "94d64d49-8ec4-4dc9-9a86-981a0747c536"
+        },
+        {
+          "transform": {
+            "position": [
+              200.0,
+              0.0,
+              0.0
+            ],
+            "rotation": [
+              0.0,
+              0.0,
+              0.0
+            ],
+            "scale": [
+              1.0,
+              1.0,
+              1.0
+            ]
+          },
+          "type": "TRANSFORM"
+        }
+      ],
+      "name": "Sponza"
+    },
+    {
+      "components": [
+        {
+          "transform": {
+            "position": [
+              0.0,
+              300.0,
+              0.0
+            ],
+            "rotation": [
+              0.0,
+              0.0,
+              0.0
+            ],
+            "scale": [
+              1.0,
+              1.0,
+              1.0
+            ]
+          },
+          "type": "TRANSFORM"
+        },
+        {
+          "color": [
+            1.0,
+            1.0,
+            0.800000011920929
+          ],
+          "intensity": 5000.0,
+          "type": "POINTLIGHT"
+        }
+      ],
+      "name": "Main Light"
+    }
+  ],
+  "models": [
+    {
+      "type": "GLTF2",
+	  "uri": "./assets/models/metal-sphere/metal-sphere.gltf",
+      "uuid": "94d64d49-8ec4-4dc9-9a86-981a0747c536"
+    }
+  ]
+}

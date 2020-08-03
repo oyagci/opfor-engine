@@ -50,7 +50,7 @@ void SkyboxRenderer::InitQuad()
 opfor::SharedPtr<opfor::Texture2D> SkyboxRenderer::LoadHDRI()
 {
 	stbi_set_flip_vertically_on_load(1);
-	auto image = opfor::ImageLoader::LoadHDR("hdri/ballroom_4k.hdr");
+	auto image = opfor::ImageLoader::LoadHDR("assets/hdri/ballroom_4k.hdr");
 	stbi_set_flip_vertically_on_load(0);
 
 	auto texture = opfor::Texture2D::Create();

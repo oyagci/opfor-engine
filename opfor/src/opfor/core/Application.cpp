@@ -74,7 +74,7 @@ Application::Application()
 	};
 
 	auto prototype_tile = TextureManager::Get().Create2D("prototype_tile_8");
-	auto img = opfor::ImageLoader::Load("./img/prototype_tile_8.png");
+	auto img = opfor::ImageLoader::Load("./assets/img/prototype_tile_8.png");
 
 	prototype_tile->SetDataType(opfor::DataType::UnsignedByte);
 	prototype_tile->SetHasAlpha(img.nchannel == 4);
@@ -87,7 +87,7 @@ Application::Application()
 	prototype_tile->Build();
 
 	auto default_normal = TextureManager::Get().Create2D("default_normal");
-	img = opfor::ImageLoader::Load("./img/default_normal.png");
+	img = opfor::ImageLoader::Load("./assets/img/default_normal.png");
 
 	default_normal->SetDataType(opfor::DataType::UnsignedByte);
 	default_normal->SetHasAlpha(img.nchannel == 4);

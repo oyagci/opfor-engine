@@ -13,3 +13,4 @@ incdirs = []
 
 subdir('opfor')
 subdir('sandbox')
+subdir('opfor-editor')
