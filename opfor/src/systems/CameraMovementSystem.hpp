@@ -10,6 +10,12 @@
 
 class CameraMovementSystem : public ecs::ComponentSystem
 {
+private:
+	const float _BaseSpeed = 100.0f;
+	const float _FastSpeed = 5000.0f;
+
+	float _MoveSpeed = _BaseSpeed;
+
 public:
 	void OnUpdate(float __unused deltaTime) override
 	{
@@ -76,15 +82,18 @@ public:
 		glm::vec3 front(glm::normalize(transform.direction));
 		glm::vec3 right(glm::normalize(glm::cross(front, glm::vec3(0.0f, 1.0f, 0.0f))));
 
+		// Fast Speed?
+		_MoveSpeed = opfor::Input::GetKey(opfor::KeyCode::LeftShift) == opfor::KeyStatus::Pressed ? _FastSpeed : _BaseSpeed;
+
 		bool fwd = opfor::Input::GetKey(opfor::KeyCode::W) == opfor::KeyStatus::Pressed;
 		bool lft = opfor::Input::GetKey(opfor::KeyCode::A) == opfor::KeyStatus::Pressed;
 		bool bck = opfor::Input::GetKey(opfor::KeyCode::S) == opfor::KeyStatus::Pressed;
 		bool rgt = opfor::Input::GetKey(opfor::KeyCode::D) == opfor::KeyStatus::Pressed;
 
-		transform.position += fwd * dt * 100.0f * front;
-		transform.position += bck * dt * 100.0f * -front;
-		transform.position += rgt * dt * 100.0f * right;
-		transform.position += lft * dt * 100.0f * -right;
+		transform.position += fwd * dt * _MoveSpeed * front;
+		transform.position += bck * dt * _MoveSpeed * -front;
+		transform.position += rgt * dt * _MoveSpeed * right;
+		transform.position += lft * dt * _MoveSpeed * -right;
 		playerCamera[0]->Set(transform);
 	}
 };
