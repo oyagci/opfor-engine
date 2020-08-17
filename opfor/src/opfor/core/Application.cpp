@@ -11,6 +11,7 @@
 #ifdef OP4_PLATFORM_LINUX
 # include <unistd.h>
 #endif
+#include "physfs.h"
 
 namespace opfor
 {
@@ -22,6 +23,24 @@ unsigned int Application::_nextMaterialId = 0;
 
 Application::Application()
 {
+	if (!PHYSFS_init(nullptr)) {
+		OP4_CORE_ERROR("Could not init PHYSFS: {}\n", PHYSFS_getErrorByCode(PHYSFS_getLastErrorCode()));
+		OP4_ABORT();
+	}
+
+	PHYSFS_mount("assets/levels/", "levels", 1);
+
+	PHYSFS_file *file = PHYSFS_openRead("levels/pbr.level");
+
+	auto fileSize = PHYSFS_fileLength(file);
+	std::vector<char> buf;
+	buf.resize(fileSize);
+
+	PHYSFS_readBytes(file, buf.data(), buf.size());
+	PHYSFS_close(file);
+
+	fmt::print("{}\n", buf.data());
+
 	_Instance = this;
 
 	_window = IWindow::Create({ "OPFOR - Untitled Project", 1920, 1080 });

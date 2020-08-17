@@ -20,6 +20,7 @@ IncludeDir["glm"]      = "opfor/vendor/glm"
 IncludeDir["stduuid"]  = "opfor/vendor/stduuid/include"
 IncludeDir["NFD"]      = "opfor/vendor/nativefiledialog/src/include"
 IncludeDir["ImGuizmo"] = "opfor/vendor/ImGuizmo"
+IncludeDir["PhysFS"]   = "opfor/vendor/physfs/src"
 
 -- "%{prj.name}/thirdparty",
 -- "%{prj.name}/thirdparty/ImGuizmo",
@@ -37,6 +38,7 @@ include "opfor/vendor/fmt"
 include "opfor/vendor/imgui"
 include "opfor/vendor/ImGuizmo"
 include "opfor/vendor/nativefiledialog"
+include "opfor/vendor/physfs"
 
 project "opfor"
     location "opfor"
@@ -107,6 +109,7 @@ project "opfor"
 		"%{IncludeDir.stduuid}",
 		"%{IncludeDir.NFD}",
 		"%{IncludeDir.ImGuizmo}",
+		"%{IncludeDir.PhysFS}",
         "%{prj.name}/src",
         "%{prj.name}/src/opfor",
     }
@@ -119,7 +122,8 @@ project "opfor"
         "ImGui",
 		"ImGuizmo",
 		"nativefiledialog",
-		"opengl32.lib"
+		"opengl32.lib",
+		"PhysFS"
 	}
 
     filter "system:windows"
