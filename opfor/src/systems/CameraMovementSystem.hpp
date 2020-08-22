@@ -17,7 +17,7 @@ private:
 	float _MoveSpeed = _BaseSpeed;
 
 public:
-	void OnUpdate(float __unused deltaTime) override
+	void OnUpdate(float deltaTime) override
 	{
 		auto mouse = opfor::Input::GetMouseButton(opfor::MouseButton::ButtonRight) == opfor::KeyStatus::Pressed;
 		if (!mouse) {

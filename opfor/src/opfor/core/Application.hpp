@@ -10,6 +10,7 @@
 #include "opfor/core/Action.hpp"
 #include "opfor/core/base.hpp"
 #include "opfor/core/Window.hpp"
+#include <Windows.h>
 #include "opfor/renderer/Context.hpp"
 #include "opfor/renderer/Framebuffer.hpp"
 #include "opfor/renderer/Texture.hpp"
@@ -29,7 +30,6 @@ namespace ecs
 }
 
 struct ModelComponent;
-struct LuaScriptComponent;
 
 namespace opfor
 {
@@ -99,7 +99,6 @@ public:
 
 	// Editor
 	void OnRebuildModel(ModelComponent &model);
-	void OnReloadScript(LuaScriptComponent &script);
 
 	void StartPlaying()
 	{

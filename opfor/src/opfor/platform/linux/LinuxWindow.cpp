@@ -1,7 +1,7 @@
 #include "LinuxWindow.hpp"
 #include "core/events/EngineEvents.hpp"
 
-#include <renderer.hpp>
+#include <GLFW/glfw3.h>
 
 namespace opfor {
 

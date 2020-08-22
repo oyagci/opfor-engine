@@ -4,7 +4,7 @@
 #include <optional>
 #include <utility>
 #include <glm/vec3.hpp>
-#include "tinygltf/tiny_gltf.h"
+#include "tiny_gltf.h"
 #include "Mesh.hpp"
 #include "TextureManager.hpp"
 #include "opfor/core/Application.hpp"

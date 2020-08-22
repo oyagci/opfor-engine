@@ -67,7 +67,7 @@ private:
 		size_t offset = 0;
 		_Stride = 0;
 		for (auto &element : _Elements) {
-			element.Offset = offset;
+			element.Offset = static_cast<uint32_t>(offset);
 			_Stride += element.Size;
 			offset += element.Size;
 		}

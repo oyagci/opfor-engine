@@ -1,3 +1,4 @@
+#include <Windows.h>
 #include "OpenGLFramebuffer.hpp"
 #include "opfor/renderer/Texture.hpp"
 #include "opfor/renderer/Framebuffer.hpp"

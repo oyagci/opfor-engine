@@ -8,8 +8,11 @@
 #ifdef OP4_PLATFORM_LINUX
 # define OP4_DEBUGBREAK() raise(SIGTRAP)
 # define OP4_ABORT() abort();
+#elif OP4_PLATFORM_WINDOWS
+# define OP4_DEBUGBREAK() (void)0
+# define OP4_ABORT() abort();
 #else
-# warning "Unsupported Platform!"
+# error "Unsupported Platform!"
 # define OP4_DEBUGBREAK() (void)0
 # define OP4_ABORT() (void)0
 #endif

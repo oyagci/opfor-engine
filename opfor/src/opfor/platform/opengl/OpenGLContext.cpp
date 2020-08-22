@@ -1,5 +1,6 @@
 #include "OpenGLContext.hpp"
-#include <renderer.hpp>
+#include <glad/glad.h>
+#include <GLFW/glfw3.h>
 
 namespace opfor {
 
@@ -13,8 +14,8 @@ void OpenGLContext::Init()
 {
 	glfwMakeContextCurrent(_WindowHandle);
 
-	glewExperimental = true;
-	OP4_CORE_ASSERT(glewInit() == GLEW_OK, "Failed to initialize GLEW\n");
+	int status = gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
+	OP4_CORE_ASSERT(status, "Failed to initialize GLEW\n");
 
 	int width = 0, height = 0;
 	glfwGetWindowSize(_WindowHandle, &width, &height);

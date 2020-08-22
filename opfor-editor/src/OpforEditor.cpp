@@ -8,8 +8,6 @@
 #include "components/TransformComponent.hpp"
 #include "components/SkyboxComponent.hpp"
 
-namespace opfor {
-
 class OpforEditor : public opfor::Application
 {
 public:
@@ -33,11 +31,13 @@ public:
 			t.position = glm::vec3(0.0f, 18.0f, -0.5f);
 		player->Set(t);
 
-		auto __attribute__((unused)) skybox = CreateEntity<SkyboxComponent>();
+		auto skybox = CreateEntity<SkyboxComponent>();
 
 		opfor::Application::Get().LoadLevel("assets/levels/terrain.level");
 	}
 };
+
+namespace opfor {
 
 UniquePtr<Application> CreateApplication()
 {

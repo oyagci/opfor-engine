@@ -4,6 +4,7 @@
 #include "opfor/core/base.hpp"
 #include "opfor/core/ImageLoader.hpp"
 #include <glm/glm.hpp>
+#include <glad/glad.h>
 
 namespace opfor {
 
@@ -108,7 +109,7 @@ private:
 	DataFormat _OutputFormat = DataFormat::RGB;
 	DataType _DataType = DataType::Int;
 	TextureParameterList _Parameters;
-	glm::vec3 _Size;
+	glm::uvec3 _Size;
 
 	bool _HasAlpha = false;
 	bool _IsSRGB = false;
@@ -134,7 +135,7 @@ public:
 	void SetHasAlpha(bool alpha) { _HasAlpha = alpha; }
 	void SetIsSRGB(bool srgb) { _IsSRGB = srgb; }
 	void SetTextureParameters(TextureParameterList paramList) { _Parameters = paramList; }
-	void SetSize(float width, float height = 0, float depth = 0) {
+	void SetSize(unsigned int width, unsigned int height = 0, unsigned int depth = 0) {
 		_Size.x = width;
 		_Size.y = height;
 		_Size.z = depth;

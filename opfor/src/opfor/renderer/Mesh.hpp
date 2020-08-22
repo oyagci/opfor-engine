@@ -38,7 +38,7 @@ private:
 	std::list<std::array<float, 3>> vNormals;
 	std::list<std::array<float, 2>> vUvs;
 	std::list<std::array<float, 4>> vTangents;
-	std::vector<GLuint> indices;
+	std::vector<uint32_t> indices;
 	std::vector<Texture> textures;
 
 	SharedPtr<VertexArray> _vertexArray;

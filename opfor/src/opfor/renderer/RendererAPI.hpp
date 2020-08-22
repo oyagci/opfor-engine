@@ -3,6 +3,7 @@
 #include <array>
 #include "opfor/core/base.hpp"
 #include <glm/glm.hpp>
+#include <optional>
 
 namespace opfor {
 

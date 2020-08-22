@@ -11,7 +11,6 @@
 #include "components/ModelComponent.hpp"
 #include "components/TransformComponent.hpp"
 #include "components/PointLightComponent.hpp"
-#include "components/LuaScriptComponent.hpp"
 
 #include "uuid.h"
 
@@ -102,10 +101,6 @@ public:
 
 					entity->AddComponents<ModelComponent>();
 					entity->Get<ModelComponent>() = _models[uuid.value()];
-				}
-				else if (type == "LUASCRIPT") {
-					entity->AddComponents<LuaScriptComponent>();
-					entity->Get<LuaScriptComponent>().Path = component["script"];
 				}
 				else if (type == "POINTLIGHT") {
 					entity->AddComponents<PointLightComponent>();

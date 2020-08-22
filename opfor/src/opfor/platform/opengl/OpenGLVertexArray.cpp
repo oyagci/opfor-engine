@@ -1,4 +1,5 @@
 #include "OpenGLVertexArray.hpp"
+#include <glad/glad.h>
 
 namespace opfor {
 

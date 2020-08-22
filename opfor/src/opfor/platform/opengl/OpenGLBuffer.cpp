@@ -1,6 +1,6 @@
 #include "OpenGLBuffer.hpp"
 
-#include "renderer.hpp"
+#include <glad/glad.h>
 
 namespace opfor {
 

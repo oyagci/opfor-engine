@@ -2,7 +2,7 @@
 
 #include "opfor/renderer/Context.hpp"
 
-class GLFWwindow;
+struct GLFWwindow;
 
 namespace opfor {
 

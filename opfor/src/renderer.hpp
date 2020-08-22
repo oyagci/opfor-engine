@@ -1,4 +1,5 @@
 #pragma once
 
-#include <GL/glew.h>
-#include <GLFW/glfw3.h>
+#ifdef OP4_PLATFORM_WINDOWS
+# include <Windows.h>
+#endif

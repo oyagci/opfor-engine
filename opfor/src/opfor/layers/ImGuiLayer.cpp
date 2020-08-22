@@ -5,13 +5,17 @@
 #include <glm/gtx/quaternion.hpp>
 #include <glm/gtx/matrix_decompose.hpp>
 #include <string>
-#include <unistd.h>
+#ifdef OP4_PLATFORM_LINUX
+# include <unistd.h>
+#elif defined(OP4_PLATFORM_WINDOWS)
+# include <direct.h>
+#endif
 
 #include "opfor/core/Application.hpp"
 #include "examples/imgui_impl_opengl3.h"
 #include "examples/imgui_impl_glfw.h"
-#include "imgui/misc/cpp/imgui_stdlib.h"
-#include "ImGuizmo/ImGuizmo.h"
+#include "misc/cpp/imgui_stdlib.h"
+#include "ImGuizmo.h"
 #include "nfd.hpp"
 #include "opfor/renderer/ShaderManager.hpp"
 
@@ -20,9 +24,37 @@
 #include "components/TransformComponent.hpp"
 #include "components/PointLightComponent.hpp"
 #include "components/ModelComponent.hpp"
-#include "components/LuaScriptComponent.hpp"
 
 ImGuiLayer::ImGuiLayer() = default;
+
+std::unique_ptr<char[]> GetCwd()
+{
+#ifdef OP4_PLATFORM_LINUX
+	auto buf = getcwd(nullptr, 0);
+
+	auto ret = std::make_unique<char[]>(strlen(buf));
+	strcpy(ret.get(), buf);
+
+	return ret;
+#elif defined(OP4_PLATFORM_WINDOWS)
+	DWORD bufLen = GetCurrentDirectory(0, nullptr);
+	auto buffer = std::make_unique<WCHAR[]>(bufLen);
+
+	//std::wcstombs
+	GetCurrentDirectory(bufLen, buffer.get());
+
+	auto ret = std::make_unique<char[]>(bufLen);
+	
+	size_t pRetVal = 0;
+	
+
+	wcstombs_s(&pRetVal, ret.get(), bufLen, buffer.get(), bufLen);
+
+	return ret;
+#else
+# error "Unsupported Platform!"
+#endif
+}
 
 void ImGuiLayer::BeginFrame()
 {
@@ -143,7 +175,7 @@ void ImGuiLayer::MenuBar()
 			}
 			if (ImGui::MenuItem("Open Level")) {
 				char *outPath = nullptr;
-				NFD_OpenDialog(nullptr, getcwd(nullptr, 0), &outPath);
+				NFD_OpenDialog(nullptr, GetCwd().get(), &outPath);
 				if (outPath) {
 					opfor::Application::Get().LoadLevel(outPath);
 				}
@@ -152,7 +184,7 @@ void ImGuiLayer::MenuBar()
 			}
 			if (ImGui::MenuItem("Save Level As...")) {
 				char *outPath = nullptr;
-				NFD_OpenDialog(nullptr, getcwd(nullptr, 0), &outPath);
+				NFD_OpenDialog(nullptr, GetCwd().get(), &outPath);
 			}
 
 			ImGui::EndMenu();
@@ -215,7 +247,7 @@ void ImGuiLayer::Log()
 	ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(0, 0));
 
 	ImGuiListClipper clipper;
-	clipper.Begin(lineOffsets.size());
+	clipper.Begin(static_cast<int>(lineOffsets.size()));
 	while (clipper.Step()) {
 		for (int line_no = clipper.DisplayStart; line_no < clipper.DisplayEnd; line_no++) {
 			const char *line_start = bufp + lineOffsets[line_no];
@@ -295,9 +327,15 @@ void ImGuiLayer::ObjectTransform()
 	std::array<float, 3> translation{ transform.position.x, transform.position.y, transform.position.z };
 	std::array<float, 3> scale{ transform.scale.x, transform.scale.y, transform.scale.z };
 
-	changed += ImGui::InputFloat3("Position", translation.data(), 3);
-	changed += ImGui::InputFloat3("Rotation", rotation.data(), 3);
-	changed += ImGui::InputFloat3("Scale", scale.data(), 3);
+	if (ImGui::InputFloat3("Position", translation.data(), 3)) {
+		changed = true;
+	}
+	if (ImGui::InputFloat3("Rotation", rotation.data(), 3)) {
+		changed = true;
+	}
+	if (ImGui::InputFloat3("Scale", scale.data(), 3)) {
+		changed = true;
+	}
 
 	if (ImGui::Button("Reset")) {
 		rotation.fill(0.0f);
@@ -335,7 +373,7 @@ void ImGuiLayer::ObjectMesh()
 	if (ImGui::Button("...")) {
 		char *newPath = nullptr;
 		// Open File Dialog
-		if (NFD_OpenDialog(nullptr, getcwd(nullptr, 0), &newPath) == NFD_OKAY
+		if (NFD_OpenDialog(nullptr, GetCwd().get(), &newPath) == NFD_OKAY
 			&& newPath) {
 			model.Path = std::string(newPath);
 			opfor::Application::Get().OnRebuildModel(model);
@@ -396,34 +434,6 @@ void ImGuiLayer::ObjectLight()
 	ImGui::Columns(1);
 }
 
-void ImGuiLayer::ObjectLuaScript()
-{
-	if (!_currentEntity) { return ; }
-	if (!_currentEntity->HasComponents<LuaScriptComponent>()) { return; }
-
-	if (!ImGui::CollapsingHeader("Lua Script")) { return ; }
-
-	auto &luaScript = _currentEntity->Get<LuaScriptComponent>();
-
-	ImGui::SetNextItemWidth(ImGui::GetFontSize() * 8);
-	ImGui::Columns(2, NULL, true);
-
-	std::string scriptPath = luaScript.Path;
-	ImGui::Text("Script");
-	ImGui::NextColumn();
-	ImGui::InputText("##ScriptPath", &scriptPath);
-	ImGui::SameLine();
-	if (ImGui::Button("...##LuaScriptPathButton")) {
-		char *newPath = nullptr;
-		if (NFD_OpenDialog(nullptr, getcwd(nullptr, 0), &newPath) != NFD_CANCEL &&
-			newPath != nullptr) {
-			luaScript.Path = std::string(newPath);
-			opfor::Application::Get().OnReloadScript(luaScript);
-			luaScript.Runtime.PushGlobal("__ENTITY_ID__", _currentEntity->GetId());
-		}
-	}
-}
-
 void ImGuiLayer::Properties()
 {
 	if (_currentEntity == nullptr) { return ; }
@@ -442,7 +452,6 @@ void ImGuiLayer::Properties()
 		ObjectTransform();
 		ObjectMesh();
 		ObjectLight();
-		ObjectLuaScript();
 
 		ImGui::Separator();
 		if (ImGui::Button("Add Component")) {
@@ -467,9 +476,6 @@ void ImGuiLayer::Properties()
 			}
 			if (ImGui::MenuItem("Transform")) {
 				_currentEntity->AddComponents<TransformComponent>();
-			}
-			if (ImGui::MenuItem("Lua Script")) {
-				_currentEntity->AddComponents<LuaScriptComponent>();
 			}
 			if (ImGui::MenuItem("Child Entity")) {
 			}
@@ -518,8 +524,12 @@ void ImGuiLayer::Viewport()
 
 		float targetAspectRatio = 16.0f / 9.0f;
 
+		// I would have loved to just reinterpret_cast to ImTextureID but the compiler won't let me :(
+		uint32_t rawHandle = opfor::Application::Get().GetViewportTexture()->GetRawHandle();
+		ImTextureID *rawHandleP = (ImTextureID*)&rawHandle;
+
 		if ((winSize.x / winSize.y) < targetAspectRatio) {
-			ImGui::Image(reinterpret_cast<void*>(opfor::Application::Get().GetViewportTexture()->GetRawHandle()),
+			ImGui::Image(*rawHandleP,
 				{ winSize.x, winSize.x / targetAspectRatio },
 				ImVec2(0.0f, 1.0f),
 				ImVec2(1.0f, 0.0f),
@@ -529,7 +539,7 @@ void ImGuiLayer::Viewport()
 			_ViewportSize.y = winSize.x / targetAspectRatio;
 		}
 		else {
-			ImGui::Image(reinterpret_cast<void*>(opfor::Application::Get().GetViewportTexture()->GetRawHandle()),
+			ImGui::Image(*rawHandleP,
 				{ winSize.y * targetAspectRatio, winSize.y },
 				ImVec2(0.0f, 1.0f),
 				ImVec2(1.0f, 0.0f),
@@ -610,7 +620,7 @@ void ImGuiLayer::SetupImGuiStyle()
 	style.WindowBorderSize = 1;
 	style.ChildBorderSize  = 1;
 	style.PopupBorderSize  = 1;
-	style.FrameBorderSize  = is3D;
+	style.FrameBorderSize  = static_cast<float>(is3D);
 
 	style.WindowRounding    = 0;
 	style.ChildRounding     = 0;
@@ -619,7 +629,7 @@ void ImGuiLayer::SetupImGuiStyle()
 	style.GrabRounding      = 0;
 
 	#ifdef IMGUI_HAS_DOCK
-		style.TabBorderSize = is3D;
+		style.TabBorderSize = static_cast<float>(is3D);
 		style.TabRounding   = 0;
 
 		colors[ImGuiCol_DockingEmptyBg]     = ImVec4(0.38f, 0.38f, 0.38f, 1.00f);

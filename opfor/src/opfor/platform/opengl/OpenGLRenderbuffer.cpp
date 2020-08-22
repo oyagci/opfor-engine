@@ -1,5 +1,5 @@
 #include "OpenGLRenderbuffer.hpp"
-#include "renderer.hpp"
+#include <glad/glad.h>
 
 namespace opfor {
 

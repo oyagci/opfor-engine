@@ -3,6 +3,7 @@
 #include <renderer.hpp>
 #include "IDrawable.hpp"
 #include <string>
+#include <glad/glad.h>
 
 namespace opfor {
 

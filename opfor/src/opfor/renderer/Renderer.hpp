@@ -1,7 +1,7 @@
 #pragma once
 
+#include <glad/glad.h>
 #include "RenderCommand.hpp"
-#include "renderer.hpp"
 #include <list>
 
 namespace opfor {
@@ -21,8 +21,8 @@ enum class RendererCaps
 {
 #ifdef OP4_PLATFORM_OPENGL
 	DepthTest = GL_DEPTH_TEST,
-	CullFace = GL_CULL_FACE,
-	Blend = GL_BLEND,
+	CullFace  = GL_CULL_FACE,
+	Blend     = GL_BLEND,
 #endif
 };
 

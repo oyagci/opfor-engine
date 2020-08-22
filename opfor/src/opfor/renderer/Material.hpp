@@ -3,6 +3,7 @@
 #include <string>
 #include <fmt/format.h>
 #include <glm/vec4.hpp>
+#include <optional>
 
 struct PbrMaterial
 {

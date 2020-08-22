@@ -1,6 +1,7 @@
 #pragma once
 
 #include <renderer.hpp>
+#include <GLFW/glfw3.h>
 
 namespace opfor
 {
@@ -23,7 +24,7 @@ public:
 	float getDeltaTime()
 	{
 		_lastFrame = _newFrame;
-		_newFrame = glfwGetTime();
+		_newFrame = static_cast<float>(glfwGetTime());
 		return _newFrame - _lastFrame;
 	};
 

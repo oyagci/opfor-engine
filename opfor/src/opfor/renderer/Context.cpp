@@ -3,9 +3,9 @@
 
 namespace opfor {
 
-UniquePtr<IRendererContext> IRendererContext::Create()
-{
-	return MakeUnique<OpenGLContext>();
-}
+//UniquePtr<IRendererContext> IRendererContext::Create()
+//{
+//	return MakeUnique<OpenGLContext>();
+//}
 
 }

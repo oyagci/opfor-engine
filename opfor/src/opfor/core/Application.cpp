@@ -4,12 +4,13 @@
 #include "stb_image.h"
 #include "components/SelectedComponent.hpp"
 #include "components/ModelComponent.hpp"
-#include "components/LuaScriptComponent.hpp"
 #include "opfor/renderer/Model.hpp"
 #include "Level.hpp"
 #include "opfor/platform/opengl/OpenGLContext.hpp"
 #include "opfor/platform/linux/LinuxInput.hpp"
-#include <unistd.h>
+#ifdef OP4_PLATFORM_LINUX
+# include <unistd.h>
+#endif
 
 namespace opfor
 {
@@ -229,12 +230,6 @@ void Application::OnRebuildModel(ModelComponent &model)
 		model.Meshes.reserve(meshes.size());
 		model.Meshes.insert(model.Meshes.begin(), meshes.begin(), meshes.end());
 	}
-}
-
-void Application::OnReloadScript(LuaScriptComponent &script)
-{
-	script.Runtime.Reset();
-	script.Runtime.Load(script.Path);
 }
 
 void Application::OnEvent(Event &e)

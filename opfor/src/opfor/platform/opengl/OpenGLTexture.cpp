@@ -1,4 +1,5 @@
 #include "OpenGLTexture.hpp"
+#include <glad/glad.h>
 
 namespace opfor {
 

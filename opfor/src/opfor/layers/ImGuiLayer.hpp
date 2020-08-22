@@ -32,7 +32,6 @@ private:
 	void ObjectTransform();
 	void ObjectMesh();
 	void ObjectLight();
-	void ObjectLuaScript();
 
 	void SetupImGuiStyle();
 
