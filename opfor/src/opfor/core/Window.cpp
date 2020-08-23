@@ -1,5 +1,9 @@
 #include "Window.hpp"
-#include "opfor/platform/linux/LinuxWindow.hpp"
+#ifdef OP4_PLATFORM_LINUX
+# include "opfor/platform/linux/LinuxWindow.hpp"
+#elif defined(OP4_PLATFORM_WINDOWS)
+# include "opfor/platform/windows/WindowsWindow.hpp"
+#endif
 
 namespace opfor {
 
@@ -7,6 +11,8 @@ UniquePtr<IWindow> IWindow::Create(const WindowProps &props)
 {
 #ifdef OP4_PLATFORM_LINUX
 	return MakeUnique<LinuxWindow>(props);
+#elif defined(OP4_PLATFORM_WINDOWS)
+	return MakeUnique<WindowsWindow>(props);
 #endif
 
 	OP4_CORE_ASSERT(false, "Unsupported Platform!");

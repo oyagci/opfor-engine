@@ -92,6 +92,8 @@ project "opfor"
 		"%{prj.name}/src/opfor/platform/opengl/imgui_impl_glfw.cpp",
 		"%{prj.name}/src/opfor/platform/linux/LinuxWindow.cpp",
 		"%{prj.name}/src/opfor/platform/linux/LinuxInput.cpp",
+		"%{prj.name}/src/opfor/platform/windows/WindowsInput.cpp",
+		"%{prj.name}/src/opfor/platform/windows/WindowsWindow.cpp",
     }
 
     includedirs

@@ -33,7 +33,7 @@ public:
 
 		auto skybox = CreateEntity<SkyboxComponent>();
 
-		opfor::Application::Get().LoadLevel("assets/levels/terrain.level");
+		opfor::Application::Get().LoadLevel("assets/levels/pbr.level");
 	}
 };
 
