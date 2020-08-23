@@ -1,6 +1,6 @@
 #include "Input.hpp"
-#include "opfor/platform/linux/LinuxInput.hpp"
-#include "opfor/platform/windows/WindowsInput.hpp"
+#include "platform/linux/LinuxInput.hpp"
+#include "platform/windows/WindowsInput.hpp"
 
 namespace opfor {
 

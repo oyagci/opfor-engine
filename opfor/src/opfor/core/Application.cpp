@@ -6,8 +6,8 @@
 #include "components/ModelComponent.hpp"
 #include "opfor/renderer/Model.hpp"
 #include "Level.hpp"
-#include "opfor/platform/opengl/OpenGLContext.hpp"
-#include "opfor/platform/linux/LinuxInput.hpp"
+#include "platform/opengl/OpenGLContext.hpp"
+#include "platform/linux/LinuxInput.hpp"
 #ifdef OP4_PLATFORM_LINUX
 # include <unistd.h>
 #endif

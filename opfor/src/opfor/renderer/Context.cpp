@@ -1,5 +1,5 @@
 #include "Context.hpp"
-#include "opfor/platform/opengl/OpenGLContext.hpp"
+#include "platform/opengl/OpenGLContext.hpp"
 
 namespace opfor {
 

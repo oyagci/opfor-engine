@@ -1,6 +1,6 @@
 #include "VertexArray.hpp"
 #include "Renderer.hpp"
-#include "opfor/platform/opengl/OpenGLVertexArray.hpp"
+#include "platform/opengl/OpenGLVertexArray.hpp"
 
 namespace opfor {
 

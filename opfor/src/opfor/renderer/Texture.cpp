@@ -1,6 +1,6 @@
 #include "renderer/Texture.hpp"
 #include "RendererAPI.hpp"
-#include "opfor/platform/opengl/OpenGLTexture.hpp"
+#include "platform/opengl/OpenGLTexture.hpp"
 
 namespace opfor {
 

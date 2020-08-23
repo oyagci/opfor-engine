@@ -1,8 +1,8 @@
 #include "Window.hpp"
 #ifdef OP4_PLATFORM_LINUX
-# include "opfor/platform/linux/LinuxWindow.hpp"
+# include "platform/linux/LinuxWindow.hpp"
 #elif defined(OP4_PLATFORM_WINDOWS)
-# include "opfor/platform/windows/WindowsWindow.hpp"
+# include "platform/windows/WindowsWindow.hpp"
 #endif
 
 namespace opfor {
