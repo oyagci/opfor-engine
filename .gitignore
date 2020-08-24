@@ -89,3 +89,6 @@ tags
 
 build/
 compile_commands.json
+
+bin/
+bin-int
