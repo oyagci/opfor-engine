@@ -20,8 +20,6 @@ void OpenGLContext::Init()
 	int width = 0, height = 0;
 	glfwGetWindowSize(_WindowHandle, &width, &height);
 
-	glViewport(0, 0, width, height);
-	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_CULL_FACE);
 
 	OP4_CORE_INFO("OpenGL Info:\n");

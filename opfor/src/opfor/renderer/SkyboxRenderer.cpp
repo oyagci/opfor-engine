@@ -6,7 +6,6 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/glm.hpp>
 
-#include "components/PlayerCameraComponent.hpp"
 #include "components/SkyboxComponent.hpp"
 
 namespace opfor {
@@ -369,17 +368,14 @@ void SkyboxRenderer::InitSkybox()
 
 void SkyboxRenderer::RenderSkybox()
 {
-	auto camera = opfor::Application::Get().GetEntities<PlayerCameraComponent>();
+	auto camera = opfor::Application::Get().GetCameraController().GetCamera();
 	auto skybox = opfor::Application::Get().GetEntities<SkyboxComponent>();
 
 	if (skybox.size() == 0) { return ; }
-	if (camera.size() == 0) { return ; }
-
-	auto cameraData = camera[0]->Get<PlayerCameraComponent>();
 
 	opfor::Renderer::Shader::Push(_shader);
-	opfor::Renderer::Shader::SetUniform("viewMatrix", glm::mat4(glm::mat3(cameraData.view)));
-	opfor::Renderer::Shader::SetUniform("projectionMatrix", cameraData.projection);
+	opfor::Renderer::Shader::SetUniform("viewMatrix", glm::mat4(glm::mat3(camera.GetViewMatrix())));
+	opfor::Renderer::Shader::SetUniform("projectionMatrix", camera.GetProjection());
 
 	opfor::Renderer::SetDepthMask(false);
 	opfor::Renderer::PushTexture(_HDRI, opfor::TextureUnit::Texture0);

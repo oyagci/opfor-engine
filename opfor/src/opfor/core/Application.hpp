@@ -22,6 +22,7 @@
 #include "ecs/ecs.hpp"
 #include "EngineObject.hpp"
 #include "ILevel.hpp"
+#include "opfor/renderer/PerspectiveCameraController.hpp"
 
 namespace ecs
 {
@@ -49,6 +50,8 @@ private:
 
 	ecs::EntityManager *_entityManager;
 	ecs::SystemManager *_systemManager;
+
+	UniquePtr<PerspectiveCameraController> _camera;
 
 	std::vector<std::unique_ptr<EngineObject>> _engineObjects;
 
@@ -284,6 +287,8 @@ public:
 	}
 
 	void RenderImgui();
+
+	auto &GetCameraController() { return *_camera; }
 };
 
 UniquePtr<Application> CreateApplication();

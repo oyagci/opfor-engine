@@ -2,8 +2,6 @@
 
 #include "opfor/layers/ImGuiLayer.hpp"
 
-#include "systems/CameraMovementSystem.hpp"
-
 #include "components/PlayerCameraComponent.hpp"
 #include "components/TransformComponent.hpp"
 #include "components/SkyboxComponent.hpp"
@@ -13,8 +11,6 @@ class OpforEditor : public opfor::Application
 public:
 	OpforEditor() : opfor::Application()
 	{
-		CreateComponentSystem<CameraMovementSystem>();
-
 		auto player = CreateEntity<PlayerCameraComponent, TransformComponent>();
 
 		PlayerCameraComponent p;
