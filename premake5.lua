@@ -26,16 +26,6 @@ IncludeDir["stduuid"]  = "opfor/vendor/stduuid/include"
 IncludeDir["NFD"]      = "opfor/vendor/nativefiledialog/src/include"
 IncludeDir["ImGuizmo"] = "opfor/vendor/ImGuizmo"
 
--- "%{prj.name}/thirdparty",
--- "%{prj.name}/thirdparty/ImGuizmo",
--- "%{prj.name}/thirdparty/nativefiledialog/src/include",
--- "%{prj.name}/thirdparty/stduuid/include",
--- "%{prj.name}/thirdparty/glm",
--- "subprojects/glfw/include",
--- "subprojects/json/include",
--- "subprojects/LazyGL/includes",
--- "subprojects/fmt/include",
-
 include "opfor/vendor/glfw"
 include "opfor/vendor/glad"
 include "opfor/vendor/fmt"
