@@ -16,6 +16,8 @@ public:
 
 	virtual void AttachDepthComponent(std::array<unsigned int, 2> size) = 0;
 
+	virtual void Resize(unsigned int width, unsigned int height) = 0;
+
 	virtual uint32_t GetRawHandle() const = 0;
 
 	static UniquePtr<Renderbuffer> Create();

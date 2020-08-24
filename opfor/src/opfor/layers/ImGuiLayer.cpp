@@ -25,6 +25,8 @@
 #include "components/PointLightComponent.hpp"
 #include "components/ModelComponent.hpp"
 
+#include "opfor/core/events/EngineEvents.hpp"
+
 ImGuiLayer::ImGuiLayer() = default;
 
 std::unique_ptr<char[]> GetCwd()
@@ -135,8 +137,7 @@ void ImGuiLayer::BeginDockspace()
 	ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
 	ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
 
-	ImGuiWindowFlags windowFlags = ImGuiWindowFlags_MenuBar |
-								   ImGuiWindowFlags_NoDocking |
+	ImGuiWindowFlags windowFlags = ImGuiWindowFlags_NoDocking |
 								   ImGuiWindowFlags_NoTitleBar |
 								   ImGuiWindowFlags_NoCollapse |
 								   ImGuiWindowFlags_NoResize |
@@ -515,6 +516,7 @@ void ImGuiLayer::Viewport()
 
 	if (ImGui::Begin("Viewport", nullptr, windowFlags)) {
 
+		auto prevSize = _ViewportSize;
 		_ViewportSize = ImGui::GetWindowSize();
 		_ViewportPosition = ImGui::GetWindowPos();
 
@@ -522,10 +524,20 @@ void ImGuiLayer::Viewport()
 
 		// TODO: Automatically adjust to viewport's aspect ratio.
 
-		float targetAspectRatio = 16.0f / 9.0f;
+		if (abs(prevSize.x - _ViewportSize.x) > 0.01 ||
+			abs(prevSize.y - _ViewportSize.y) > 0.01) {
 
-		// I would have loved to just reinterpret_cast to ImTextureID but the compiler won't let me :(
-		uint32_t rawHandle = opfor::Application::Get().GetViewportTexture()->GetRawHandle();
+			opfor::ViewportResizeEvent e(static_cast<int>(_ViewportSize.x), static_cast<int>(_ViewportSize.y));
+			opfor::Application::Get().OnEvent(e);
+
+			opfor::Application::Get().GetCameraController().GetCamera().SetAspect(_ViewportSize.x / _ViewportSize.y);
+		}
+
+		// float targetAspectRatio = 16.0f / 9.0f;
+		float targetAspectRatio = _ViewportSize.x / _ViewportSize.y;
+
+		// I would've loved to just reinterpret_cast to ImTextureID but the compiler won't let me :(
+		uint32_t rawHandle = opfor::Application::Get().GetViewport()->GetRawHandle();
 		ImTextureID *rawHandleP = (ImTextureID*)&rawHandle;
 
 		if ((winSize.x / winSize.y) < targetAspectRatio) {

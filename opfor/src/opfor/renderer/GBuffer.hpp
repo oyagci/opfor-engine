@@ -35,6 +35,8 @@ public:
 		_gBuffer->Unbind();
 	}
 
+	void Resize(unsigned int width, unsigned int height);
+
 	auto const &GetFramebuffer() { return _gBuffer; }
 	auto &GetPositionTex() const { return _gPosition; }
 	auto &GetNormalTex() const { return _gNormal; }

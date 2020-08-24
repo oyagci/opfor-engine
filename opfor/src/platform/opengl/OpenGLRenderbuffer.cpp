@@ -32,4 +32,11 @@ void OpenGLRenderbuffer::AttachDepthComponent(std::array<unsigned int, 2> size)
 	glBindRenderbuffer(GL_RENDERBUFFER, 0);
 }
 
+void OpenGLRenderbuffer::Resize(unsigned int width, unsigned int height)
+{
+	glBindRenderbuffer(GL_RENDERBUFFER, _RendererID);
+	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, width, height);
+	glBindRenderbuffer(GL_RENDERBUFFER, 0);
+}
+
 }

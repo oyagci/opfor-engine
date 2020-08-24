@@ -23,6 +23,7 @@
 #include "EngineObject.hpp"
 #include "ILevel.hpp"
 #include "opfor/renderer/PerspectiveCameraController.hpp"
+#include "opfor/renderer/Viewport.hpp"
 
 namespace ecs
 {
@@ -65,8 +66,7 @@ private:
 	std::unordered_map<std::string, MaterialContainer> _materials;
 	std::unordered_map<std::string, PbrMaterial> _pbrMaterials;
 
-	opfor::SharedPtr<opfor::Framebuffer> _viewportFramebuffer;
-	opfor::SharedPtr<opfor::Texture2D> _viewportTexture;
+	opfor::SharedPtr<opfor::Viewport> _viewport;
 
 	static unsigned int _nextId;
 	static unsigned int _nextMaterialId;
@@ -259,16 +259,15 @@ public:
 		_entityManager->DeleteEntity(entityId);
 	}
 
-	void RebuildModel(ModelComponent &model);
-
 	auto &GetCurrentLevel() { return _currentLevel; }
 
-	auto GetViewport() { return _viewportFramebuffer; }
-	auto GetViewportTexture() { return _viewportTexture; }
+	auto GetViewport() { return _viewport; }
+	auto GetViewportTexture() { return _viewport->GetRawHandle(); }
 
 	void OnEvent(Event &);
 	bool OnWindowResize(WindowResizeEvent &e);
 	bool OnWindowClose(WindowCloseEvent &e);
+	bool OnViewportResize(ViewportResizeEvent &e);
 
 	void PushLayer(Layer *layer);
 	void PushOverlay(Layer *overlay);

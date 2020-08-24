@@ -7,7 +7,17 @@ void SceneRenderer::RenderScene()
 {
 	_MeshRenderer.RenderMeshes();
 	_SkyboxRenderer.RenderSkybox();
-	opfor::Renderer::CopyDefaultFramebufferTo(opfor::Application::Get().GetViewport(), opfor::CopyTarget::ColorBufferBit);
+	opfor::Renderer::CopyDefaultFramebufferTo(opfor::Application::Get().GetViewport()->GetFramebuffer(), opfor::CopyTarget::ColorBufferBit);
+}
+
+void SceneRenderer::OnEvent(Event &e)
+{
+	EventDispatcher dispatcher(e);
+
+	dispatcher.DispatchIf<ViewportResizeEvent>([&](ViewportResizeEvent &e) -> bool {
+		_MeshRenderer.Resize(e.GetWidth(), e.GetHeight());
+		return false;
+	});
 }
 
 }

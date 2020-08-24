@@ -1,12 +1,13 @@
 #pragma once
 #include "SkyboxRenderer.hpp"
 #include "MeshRenderer.hpp"
+#include "opfor/layers/Layer.hpp"
 
 using namespace std::placeholders;
 
 namespace opfor {
 
-class SceneRenderer
+class SceneRenderer : public Layer
 {
 private:
 	MeshRenderer _MeshRenderer;
@@ -17,6 +18,8 @@ public:
 	~SceneRenderer() = default;
 
 	void RenderScene();
+
+	void OnEvent(Event &e);
 };
 
 }

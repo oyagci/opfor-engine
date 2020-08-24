@@ -18,6 +18,8 @@ public:
 
 	void AttachDepthComponent(std::array<unsigned int, 2> size) override;
 
+	void Resize(unsigned int width, unsigned int height) override;
+
 	uint32_t GetRawHandle() const override { return _RendererID; }
 };
 

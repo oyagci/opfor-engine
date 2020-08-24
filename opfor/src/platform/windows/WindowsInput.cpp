@@ -268,6 +268,7 @@ glm::vec2 WindowsInput::GetMouseRelativePosition_Impl()
 	auto rel = _LastMousePosition - _MousePosition;
 
 	// Reset the value of _LastMousePosition to prevent ghost inputs from previous frame
+	// FIXME: Find a better way
 	_LastMousePosition = _MousePosition;
 
 	return rel;

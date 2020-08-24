@@ -65,3 +65,20 @@ void GBuffer::Init()
 
 	_gBuffer->Unbind();
 }
+
+void GBuffer::Resize(unsigned int width, unsigned int height)
+{
+	_gPosition->SetSize(width, height);
+	_gPosition->Build();
+
+	_gNormal->SetSize(width, height);
+	_gNormal->Build();
+
+	_gAlbedoSpec->SetSize(width, height);
+	_gAlbedoSpec->Build();
+
+	_gMetallicRoughness->SetSize(width, height);
+	_gMetallicRoughness->Build();
+
+	_gDepth->Resize(width, height);
+}

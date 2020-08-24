@@ -105,6 +105,8 @@ Application::Application()
 
 	_ImGuiLayer = MakeUnique<ImGuiLayer>();
 	PushOverlay(_ImGuiLayer.get());
+	PushLayer(_viewport.get());
+	PushLayer(_SceneRenderer.get());
 }
 
 /*
@@ -115,20 +117,7 @@ Application::~Application() = default;
 
 void Application::InitViewport()
 {
-	_viewportFramebuffer = opfor::Framebuffer::Create();
-	_viewportTexture = opfor::Texture2D::Create();
-
-	_viewportTexture->SetSize(1920, 1080);
-	_viewportTexture->SetInputFormat(opfor::DataFormat::RGB);
-	_viewportTexture->SetOutputFormat(opfor::DataFormat::RGB);
-	_viewportTexture->SetDataType(opfor::DataType::UnsignedInt);
-	_viewportTexture->SetTextureParameters({
-		{ opfor::TextureParameterType::MagnifyFilter, opfor::TextureParameterValue::Nearest },
-		{ opfor::TextureParameterType::MignifyFilter, opfor::TextureParameterValue::Nearest },
-	});
-	_viewportTexture->Build();
-
-	_viewportFramebuffer->AttachTexture(_viewportTexture, opfor::FramebufferAttachment::ColorAttachment0);
+	_viewport = MakeUnique<Viewport>(1920, 1080);
 }
 
 void Application::RenderImgui()
@@ -149,13 +138,18 @@ int Application::Run()
 		}
 		Update();
 		_ecs.Update(deltaTime);
+		_camera->Update(deltaTime);
 
 		Renderer::BeginScene();
+
+		Renderer::PushViewport({ 0, 0 }, _viewport->GetSize());
 
 		_SceneRenderer->RenderScene();
 
 		Application *app = this;
 		Renderer::Submit([app] () { app->RenderImgui(); });
+
+		Renderer::PopViewport();
 
 		Renderer::EndScene();
 
@@ -239,6 +233,7 @@ void Application::OnEvent(Event &e)
 	EventDispatcher dispatcher(e);
 	dispatcher.DispatchIf<WindowResizeEvent>(BIND_EVENT_FN(OnWindowResize));
 	dispatcher.DispatchIf<WindowCloseEvent>(BIND_EVENT_FN(OnWindowClose));
+	dispatcher.DispatchIf<ViewportResizeEvent>(BIND_EVENT_FN(OnViewportResize));
 
 	for (auto it = _LayerStack.rbegin(); it != _LayerStack.rend(); it++) {
 		(*it)->OnEvent(e);
@@ -250,12 +245,17 @@ void Application::OnEvent(Event &e)
 
 bool Application::OnWindowResize(WindowResizeEvent &)
 {
-	return true;
+	return false;
 }
 
 bool Application::OnWindowClose(WindowCloseEvent &)
 {
-	return true;
+	return false;
+}
+
+bool Application::OnViewportResize(ViewportResizeEvent &)
+{
+	return false;
 }
 
 void Application::PushLayer(Layer *layer)
