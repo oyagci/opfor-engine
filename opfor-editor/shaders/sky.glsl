@@ -44,37 +44,7 @@ vec2 raySphere(vec3 sphereCentre, float sphereRadius, vec3 rayOrigin, vec3 rayDi
 	return vec2(FLT_MAX, 0.0);
 }
 
-vec2 castRay()
-{
-	vec4 pixel = vec4(1.0, 0.0, 0.0, 1.0);
-	ivec2 pixel_coords = ivec2(gl_GlobalInvocationID.xy);
-	vec2 dimensions = imageSize(img_output);
-
-	float aspect_ratio = dimensions.x / dimensions.y;
-
-	float viewport_height = 2.0;
-	float viewport_width = viewport_height * aspect_ratio;
-	float focal_length = 1.0;
-
-	float x = float(pixel_coords.x * 1.0);
-	float y = float(pixel_coords.y * 1.0);
-
-	vec3 origin = vec3(0, 0, 0);
-	vec3 horizontal = vec3(viewport_width, 0.0, 0.0);
-	vec3 vertical = vec3(0.0, viewport_height, 0.0);
-	vec3 lower_left_corner = origin - horizontal / 2.0 - vertical / 2.0 - vec3(0.0, 0.0, focal_length);
-
-	float u = x / dimensions.x;
-	float v = y / dimensions.y;
-
-	ray r = { origin, lower_left_corner + u * horizontal + v * vertical - origin };
-
-	vec2 hitInfo = raySphere(vec3(0.0, 0.0, -1.0), 0.5, r.origin, r.dir);
-
-	return hitInfo;
-}
-
-struct camera
+struct Camera
 {
 	vec3 origin;
 	vec3 horizontal;
@@ -82,9 +52,37 @@ struct camera
 	vec3 lower_left_corner;
 };
 
-camera make_camera(vec3 lookFrom, vec3 lookAt, vec3 vup, float hfov, float aspectRatio)
+struct Sphere
 {
-	camera c;
+	vec3 position;
+	float radius;
+};
+
+ray get_ray(Camera c, float s, float t)
+{
+	ray r = { c.origin, c.lower_left_corner + s * c.horizontal + t * c.vertical - c.origin };
+
+	return r;
+}
+
+vec2 castRay(Camera c, Sphere s)
+{
+	ivec2 pixel_coords = ivec2(gl_GlobalInvocationID.xy);
+	vec2 dimensions = imageSize(img_output);
+
+	float u = float(pixel_coords.x * 1.0) / dimensions.x;
+	float v = float(pixel_coords.y * 1.0) / dimensions.y;
+
+	ray r = get_ray(c, u, v);
+
+	vec2 hitInfo = raySphere(s.position, s.radius, r.origin, r.dir);
+
+	return hitInfo;
+}
+
+Camera make_camera(vec3 lookFrom, vec3 lookAt, vec3 vup, float hfov, float aspectRatio)
+{
+	Camera c;
 
 	float theta = radians(hfov);
 	float h = theta / 2.0;
@@ -103,22 +101,19 @@ camera make_camera(vec3 lookFrom, vec3 lookAt, vec3 vup, float hfov, float aspec
 	return c;
 }
 
-ray get_ray(camera c, float s, float t)
-{
-	ray r = { c.origin, c.lower_left_corner + s * c.horizontal + t * c.vertical - c.origin };
-
-	return r;
-}
-
 void main()
 {
-	camera c = make_camera(viewPos, viewPos + viewDir, vec3(0, 1, 0), 80.0, 16.0 / 9.0);
+	vec2 dimensions = imageSize(img_output);
+	float aspectRatio = dimensions.x / dimensions.y;
+
+	Camera c = make_camera(viewPos, viewPos + viewDir, vec3(0, 1, 0), 90.0, aspectRatio);
+	Sphere s = { vec3(0, 0, 0), 100.0 };
 
 	ivec2 pixel_coords = ivec2(gl_GlobalInvocationID.xy);
 
-	vec2 hitInfo = castRay();
+	vec2 hitInfo = castRay(c, s);
 
-	float atmosphereRadius = 0.7;
+	float atmosphereRadius = 110.0;
 
 	float dstToAtmosphere = hitInfo.x;
 	float dstThroughAtmosphere = hitInfo.y;
