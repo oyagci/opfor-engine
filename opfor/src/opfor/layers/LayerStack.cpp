@@ -7,7 +7,7 @@ LayerStack::LayerStack() = default;
 LayerStack::~LayerStack()
 {
 	for (auto layer : _Layers) {
-		layer->OnDetach();
+		//layer->OnDetach();
 	}
 }
 

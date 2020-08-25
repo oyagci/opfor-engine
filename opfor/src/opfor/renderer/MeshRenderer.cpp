@@ -435,6 +435,10 @@ void MeshRenderer::RenderMeshes()
 		RenderLightBillboard(camera);
 	Renderer::PopCapability(RendererCaps::DepthTest);
 	Renderer::PopCapability(RendererCaps::Blend);
+
+	Renderer::PushCapability(RendererCaps::DepthTest, false);
+
+	Renderer::PopCapability(RendererCaps::DepthTest);
 }
 
 void MeshRenderer::Resize(unsigned int width, unsigned int height)

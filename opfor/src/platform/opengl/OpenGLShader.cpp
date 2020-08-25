@@ -30,6 +30,9 @@ OpenGLShader::OpenGLShader(std::string shaderPath)
 	if (shaderSrcs.find(ShaderType::Fragment) != std::end(shaderSrcs)) {
 		_FragmentShader = AddShaderFromSource(shaderSrcs[ShaderType::Fragment], GL_FRAGMENT_SHADER);
 	}
+	if (shaderSrcs.find(ShaderType::Compute) != std::end(shaderSrcs)) {
+		_FragmentShader = AddShaderFromSource(shaderSrcs[ShaderType::Compute], GL_COMPUTE_SHADER);
+	}
 
 	Link();
 }
@@ -86,7 +89,7 @@ auto OpenGLShader::ParseShaderSource(std::string const &src) -> std::unordered_m
 		{ "compute",  ShaderType::Compute },
 	};
 
-	ShaderType currentShaderType = ShaderType::Vertex;
+	ShaderType currentShaderType = ShaderType::None;
 
 	std::unordered_map<ShaderType, std::string> shaders;
 	std::string currentShader = "";
@@ -130,7 +133,10 @@ auto OpenGLShader::ParseShaderSource(std::string const &src) -> std::unordered_m
 			auto match = std::find(prepocessorKeywords.begin(), prepocessorKeywords.end(), currentKeyword);
 
 			if (match != std::end(prepocessorKeywords)) {
-				shaders[currentShaderType] = currentShader;
+				if (currentShaderType != ShaderType::None) {
+					shaders[currentShaderType] = currentShader;
+					currentShaderType = ShaderType::None;
+				}
 				currentShaderType = shaderTypeMatch.at(*match);
 				currentShader.clear();
 			}

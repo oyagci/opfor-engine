@@ -29,6 +29,7 @@ private:
 		PreprocessorStop,
 	};
 	enum class ShaderType {
+		None = 0,
 		Geometry = 1,
 		Vertex,
 		Fragment,

@@ -110,6 +110,11 @@ class RenderCommand
 			_API->SetUniform(name, value);
 		}
 
+		static inline void SetUniform(std::string const &name, glm::vec2 value)
+		{
+			_API->SetUniform(name, value);
+		}
+
 		static inline void SetUniform(std::string const &name, glm::vec3 value)
 		{
 			_API->SetUniform(name, value);

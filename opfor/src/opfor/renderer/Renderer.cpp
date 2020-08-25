@@ -41,6 +41,11 @@ ClearFlag operator&(ClearFlag lhs, ClearFlag rhs) {
 			static_cast<unsigned int>(rhs));
 }
 
+void Renderer::DebugString(const std::string &s)
+{
+	_CallsStrings.push_back(s);
+}
+
 void Renderer::BeginScene()
 {
 	_Calls.clear();
@@ -48,7 +53,7 @@ void Renderer::BeginScene()
 
 void Renderer::EndScene()
 {
-	// PrintTree();
+	//PrintTree();
 	_CallsStrings.clear();
 
 	while (!_Calls.empty()) {
@@ -205,6 +210,12 @@ void Renderer::Shader::SetUniform(std::string const &name, float value)
 {
 	_CallsStrings.push_back(__OP4_FUNCNAME__);
 	_Calls.push_back([name, value] () { RenderCommand::SetUniform(name, value); });
+}
+
+void Renderer::Shader::SetUniform(std::string const &name, glm::vec2 value)
+{
+	_CallsStrings.push_back(__OP4_FUNCNAME__);
+	_Calls.push_back([name, value]() { RenderCommand::SetUniform(name, value); });
 }
 
 void Renderer::Shader::SetUniform(std::string const &name, glm::vec3 value)

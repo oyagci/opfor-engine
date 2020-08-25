@@ -233,6 +233,12 @@ namespace opfor {
 		glUniform1f(loc, value);
 	}
 
+	void OpenGLRendererAPI::SetUniform(std::string const &name, glm::vec2 value)
+	{
+		auto loc = FindUniformLocation(name);
+		glUniform2f(loc, value.x, value.y);
+	}
+
 	void OpenGLRendererAPI::SetUniform(std::string const &name, glm::vec3 value)
 	{
 		auto loc = FindUniformLocation(name);

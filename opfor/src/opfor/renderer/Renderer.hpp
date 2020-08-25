@@ -36,6 +36,8 @@ private:
 	static void PrintTree(unsigned int offset = 0);
 
 public:
+	static void DebugString(const std::string &s);
+
 	static void BeginScene();
 	static void EndScene();
 
@@ -75,6 +77,7 @@ public:
 		static void SetUniform(std::string const &name, int32_t value);
 		static void SetUniform(std::string const &name, uint32_t value);
 		static void SetUniform(std::string const &name, float value);
+		static void SetUniform(std::string const &name, glm::vec2 value);
 		static void SetUniform(std::string const &name, glm::vec3 value);
 		static void SetUniform(std::string const &name, glm::vec4 value);
 		static void SetUniform(std::string const &name, glm::mat3 value);

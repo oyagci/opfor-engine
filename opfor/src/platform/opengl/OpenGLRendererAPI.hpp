@@ -63,6 +63,7 @@ public:
 	void SetUniform(std::string const &name, int32_t value) override;
 	void SetUniform(std::string const &name, uint32_t value) override;
 	void SetUniform(std::string const &name, float value) override;
+	void SetUniform(std::string const &name, glm::vec2 value) override;
 	void SetUniform(std::string const &name, glm::vec3 value) override;
 	void SetUniform(std::string const &name, glm::vec4 value) override;
 	void SetUniform(std::string const &name, glm::mat3 value) override;

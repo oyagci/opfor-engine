@@ -2,6 +2,7 @@
 #include "SkyboxRenderer.hpp"
 #include "MeshRenderer.hpp"
 #include "opfor/layers/Layer.hpp"
+#include "SkyRenderer.hpp"
 
 using namespace std::placeholders;
 
@@ -12,6 +13,7 @@ class SceneRenderer : public Layer
 private:
 	MeshRenderer _MeshRenderer;
 	SkyboxRenderer _SkyboxRenderer;
+	SkyRenderer _SkyRenderer;
 
 public:
 	SceneRenderer() = default;
