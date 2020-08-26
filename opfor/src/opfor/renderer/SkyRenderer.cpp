@@ -35,7 +35,6 @@ namespace opfor {
 		// Calculate Sky
 		
 		auto pos = Application::Get().GetCameraController().GetCamera().GetPosition();
-		OP4_CORE_INFO("{}, {}, {}\n", pos.x, pos.y, pos.z);
 
 		Renderer::DebugString(">>> Start Sky Calculations.");
 		
@@ -51,6 +50,22 @@ namespace opfor {
 		Renderer::Shader::SetUniform("gColor",    1);
 		Renderer::Shader::SetUniform("gDepth",    2);
 		Renderer::Shader::SetUniform("gPosition", 3);
+
+		Renderer::Shader::SetUniform("numInScatteringPoints",      NumInScatteringPoints);
+		Renderer::Shader::SetUniform("numOpticalScatteringPoints", NumOpticalScatteringPoints);
+		Renderer::Shader::SetUniform("atmosphereRadius",           AtmosphereRadius);
+		Renderer::Shader::SetUniform("planetCenter",               PlanetCenter);
+		Renderer::Shader::SetUniform("planetRadius",               PlanetRadius);
+		Renderer::Shader::SetUniform("sunPosition",                SunPosition);
+		Renderer::Shader::SetUniform("densityFalloff",             DensityFalloff);
+
+		float scatterR = pow(400.0f / Wavelengths.x, 4.0) / ScatteringStrength;
+		float scatterG = pow(400.0f / Wavelengths.y, 4.0) / ScatteringStrength;
+		float scatterB = pow(400.0f / Wavelengths.z, 4.0) / ScatteringStrength;
+
+		glm::vec3 scatteringCoefficients(scatterR, scatterG, scatterB);
+
+		Renderer::Shader::SetUniform("scatteringCoefficients", scatteringCoefficients);
 
 		Renderer::PushTexture(GBuffer::Get().GetAlbedoSpecTex(), TextureUnit::Texture1);
 		Renderer::PushTexture(GBuffer::Get().GetDepthTex(),      TextureUnit::Texture2);

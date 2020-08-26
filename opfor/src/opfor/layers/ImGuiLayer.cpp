@@ -685,6 +685,49 @@ void ImGuiLayer::OnDetach()
 {
 }
 
+void ImGuiLayer::Sky()
+{
+	if (ImGui::Begin("Sky")) {
+		
+		static int numInScatteringPoints = 10;
+		if (ImGui::SliderInt("Num In Scattering Points", &numInScatteringPoints, 0, 15)) {
+			opfor::SkyRenderer::NumInScatteringPoints = numInScatteringPoints;
+		}
+		
+		static int numOpticalScatteringPoints = 10;
+		if (ImGui::SliderInt("Num Optical Scattering Points", &numOpticalScatteringPoints, 0, 15)) {
+			opfor::SkyRenderer::NumInScatteringPoints = numOpticalScatteringPoints;
+		}
+
+		static float densityFalloff = 8.0;
+		if (ImGui::DragFloat("Density Falloff", &densityFalloff, 0.1f)) {
+			opfor::SkyRenderer::DensityFalloff = densityFalloff;
+		}
+
+		static float atmosphereRadius = opfor::SkyRenderer::AtmosphereRadius;
+		if (ImGui::DragFloat("Atmosphere Radius", &atmosphereRadius, 1.f)) {
+			opfor::SkyRenderer::AtmosphereRadius = atmosphereRadius;
+		}
+
+		static glm::vec3 sunPosition = opfor::SkyRenderer::SunPosition;
+		if (ImGui::DragFloat3("Sun Position", &sunPosition[0], 10.f)) {
+			opfor::SkyRenderer::SunPosition = sunPosition;
+		}
+
+		static glm::vec3 wavelengths = opfor::SkyRenderer::Wavelengths;
+		if (ImGui::DragFloat3("Wavelengths", &wavelengths[0], 10.f)) {
+			opfor::SkyRenderer::Wavelengths = wavelengths;
+		}
+
+		static float scatteringStrength = opfor::SkyRenderer::ScatteringStrength;
+		if (ImGui::DragFloat3("Scattering Strength", &scatteringStrength, 0.1f)) {
+			opfor::SkyRenderer::ScatteringStrength = scatteringStrength;
+		}
+
+		ImGui::End();
+	}
+}
+
 void ImGuiLayer::OnImGuiRender()
 {
 	static bool show = true;
@@ -699,6 +742,7 @@ void ImGuiLayer::OnImGuiRender()
 		Log();
 		SceneHierarchy();
 		Properties();
+		Sky();
 	EndDockspace();
 	EndFrame();
 

@@ -28,6 +28,7 @@ private:
 	void PlayMenu();
 	void Viewport();
 	void SceneHierarchy();
+	void Sky();
 
 	void ObjectTransform();
 	void ObjectMesh();
