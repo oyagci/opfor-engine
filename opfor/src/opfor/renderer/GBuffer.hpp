@@ -13,7 +13,7 @@ private:
 	opfor::SharedPtr<opfor::Texture> _gNormal;
 	opfor::SharedPtr<opfor::Texture> _gAlbedoSpec;
 	opfor::SharedPtr<opfor::Texture> _gMetallicRoughness;
-	opfor::SharedPtr<opfor::Renderbuffer> _gDepth;
+	opfor::SharedPtr<opfor::Texture> _gDepth;
 
 	void Init();
 
@@ -41,6 +41,6 @@ public:
 	auto &GetPositionTex() const { return _gPosition; }
 	auto &GetNormalTex() const { return _gNormal; }
 	auto &GetAlbedoSpecTex() const { return _gAlbedoSpec; }
-	GLuint GetDepthTex() const { return _gDepth->GetRawHandle(); }
+	auto &GetDepthTex() const { return _gDepth; }
 	auto &GetMetallicRoughnessTex() const { return _gMetallicRoughness; }
 };

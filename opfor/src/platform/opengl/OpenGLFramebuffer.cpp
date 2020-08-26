@@ -54,8 +54,8 @@ void OpenGLFramebuffer::AttachTexture(SharedPtr<Texture> texture, FramebufferAtt
 			break ;
 		case FramebufferAttachment::DepthAttachment:
 			glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, texture->GetRawHandle(), 0);
-			glReadBuffer(GL_NONE);
-			glDrawBuffer(GL_NONE);
+			//glReadBuffer(GL_NONE);
+			//glDrawBuffer(GL_NONE);
 			break ;
 	}
 

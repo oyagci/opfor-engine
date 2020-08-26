@@ -51,15 +51,19 @@ void GBuffer::Init()
 		_gMetallicRoughness->SetSize(width, height);
 		_gMetallicRoughness->Build();
 
-	_gDepth = Renderbuffer::Create();
-	_gDepth->AttachDepthComponent({ static_cast<uint32_t>(width), static_cast<uint32_t>(height) });
+	_gDepth = Texture2D::Create();
+		_gDepth->SetTextureParameters(params);
+		_gDepth->SetInputFormat(DataFormat::Depth);
+		_gDepth->SetOutputFormat(DataFormat::Depth);
+		_gDepth->SetDataType(DataType::UnsignedByte);
+		_gDepth->SetSize(width, height);
+		_gDepth->Build();
 
 	_gBuffer->AttachTexture(_gPosition,          FramebufferAttachment::ColorAttachment0);
 	_gBuffer->AttachTexture(_gNormal,            FramebufferAttachment::ColorAttachment1);
 	_gBuffer->AttachTexture(_gAlbedoSpec,        FramebufferAttachment::ColorAttachment2);
 	_gBuffer->AttachTexture(_gMetallicRoughness, FramebufferAttachment::ColorAttachment3);
-
-	_gBuffer->AttachRenderbuffer(_gDepth, RenderbufferAttachment::DepthAttachment);
+	_gBuffer->AttachTexture(_gDepth, FramebufferAttachment::DepthAttachment);
 
 	OP4_CORE_ASSERT(_gBuffer->IsComplete(), "Incomplete Framebuffer!\n");
 
@@ -80,5 +84,6 @@ void GBuffer::Resize(unsigned int width, unsigned int height)
 	_gMetallicRoughness->SetSize(width, height);
 	_gMetallicRoughness->Build();
 
-	_gDepth->Resize(width, height);
+	_gDepth->SetSize(width, height);
+	_gDepth->Build();
 }
