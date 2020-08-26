@@ -34,23 +34,33 @@ namespace opfor {
 	{
 		// Calculate Sky
 		
+		auto pos = Application::Get().GetCameraController().GetCamera().GetPosition();
+		OP4_CORE_INFO("{}, {}, {}\n", pos.x, pos.y, pos.z);
+
 		Renderer::DebugString(">>> Start Sky Calculations.");
-		Renderer::Shader::Push(_Shader);
-		// Renderer::PushFramebuffer(_Framebuffer);
 		
-		Renderer::Shader::SetUniform("viewPos", Application::Get().GetCameraController().GetCamera().GetPosition());
-		Renderer::Shader::SetUniform("viewDir", Application::Get().GetCameraController().GetCamera().GetDirection());
+		Renderer::Shader::Push(_Shader);
+		
+		auto &camera = Application::Get().GetCameraController().GetCamera();
+
+		Renderer::Shader::SetUniform("viewPos", camera.GetPosition());
+		Renderer::Shader::SetUniform("viewDir", glm::normalize(camera.GetDirection()));
+		Renderer::Shader::SetUniform("inverseProjectionMatrix", glm::inverse(camera.GetProjection()));
+		Renderer::Shader::SetUniform("inverseViewMatrix", glm::inverse(camera.GetViewMatrix()));
+
+		Renderer::Shader::SetUniform("gColor",    1);
+		Renderer::Shader::SetUniform("gDepth",    2);
+		Renderer::Shader::SetUniform("gPosition", 3);
+
+		Renderer::PushTexture(GBuffer::Get().GetAlbedoSpecTex(), TextureUnit::Texture1);
+		Renderer::PushTexture(GBuffer::Get().GetDepthTex(),      TextureUnit::Texture2);
+		Renderer::PushTexture(GBuffer::Get().GetPositionTex(),   TextureUnit::Texture3);
+
 		// Renderer::Shader::SetUniform("viewMatrix", Application::Get().GetCameraController().GetCamera().GetViewMatrix());
-		Renderer::Shader::SetUniform("viewProjectionMatrix", Application::Get().GetCameraController().GetCamera().GetViewProjectionMatrix());
+		// Renderer::Shader::SetUniform("viewProjectionMatrix", Application::Get().GetCameraController().GetCamera().GetViewProjectionMatrix());
 		// Renderer::Shader::SetUniform("projectionMatrix", Application::Get().GetCameraController().GetCamera().GetProjection());
 		// Renderer::Shader::SetUniform("dimensions", glm::vec2(Application::Get().GetViewport()->GetSize()));
 		
-		// Renderer::PushTexture(_Texture, TextureUnit::Texture0);
-
-		// _Quad.Draw();
-
-		// Renderer::PopTexture(TextureUnit::Texture0);
-
 		Renderer::Submit([&]() {
 
 			glBindImageTexture(0, _Texture->GetRawHandle(), 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA16F);
@@ -60,7 +70,6 @@ namespace opfor {
 			glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
 		});
 
-		// Renderer::PopFramebuffer();
 		Renderer::Shader::Pop();
 
 		Renderer::DebugString("<<< Done Sky Calculations.");

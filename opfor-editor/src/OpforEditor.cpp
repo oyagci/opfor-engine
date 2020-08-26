@@ -12,7 +12,7 @@ public:
 	OpforEditor() : opfor::Application()
 	{
 		auto player = CreateEntity<TransformComponent>();
-
+		auto sky = CreateEntity<SkyboxComponent>();
 		opfor::Application::Get().LoadLevel("assets/levels/sky.level");
 	}
 };

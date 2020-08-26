@@ -5,8 +5,8 @@ namespace opfor {
 
 void SceneRenderer::RenderScene()
 {
-	// _MeshRenderer.RenderMeshes();
-	// _SkyboxRenderer.RenderSkybox();
+	_MeshRenderer.RenderMeshes();
+	_SkyboxRenderer.RenderSkybox();
 	_SkyRenderer.Render();
 	opfor::Renderer::CopyDefaultFramebufferTo(opfor::Application::Get().GetViewport()->GetFramebuffer(), opfor::CopyTarget::ColorBufferBit);
 }

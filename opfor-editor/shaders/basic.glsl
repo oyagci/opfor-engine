@@ -75,8 +75,6 @@ void main()
 
 	vec4 tex = texture(material.albedo, TexCoords);
 //	vec4 tex = texture(materials[int(MaterialID)].diffuse, TexCoords);
-	if (tex.a < 0.0001)
-		discard ;
 
 	gPosition = FragPos;
 	gNormal = normal;
@@ -86,7 +84,7 @@ void main()
 	else {
 		gAlbedoSpec.rgb = material.baseColor.rgb;
 	}
-	gAlbedoSpec.a = 0.0;
+	gAlbedoSpec.a = 1.0;
 
 	gMetallicRoughness = vec4(0.0);
 	if (material.hasMetallicRoughness) {

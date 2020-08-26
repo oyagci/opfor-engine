@@ -11,9 +11,14 @@
 layout (local_size_x = 1, local_size_y = 1) in;
 layout (rgba16f, binding = 0) uniform image2D img_output;
 
-uniform mat4 viewProjectionMatrix;
 uniform vec3 viewPos;
 uniform vec3 viewDir;
+uniform mat4 inverseProjectionMatrix;
+uniform mat4 inverseViewMatrix;
+
+uniform sampler2D gColor;
+uniform sampler2D gDepth;
+uniform sampler2D gPosition;
 
 struct ray
 {
@@ -86,8 +91,8 @@ Camera make_camera(vec3 lookFrom, vec3 lookAt, vec3 vup, float hfov, float aspec
 
 	float theta = radians(hfov);
 	float h = theta / 2.0;
-	float viewport_width = 2.0 * h;
-	float viewport_height = aspectRatio / viewport_width;
+	float viewport_height = 2.0 * h;
+	float viewport_width = viewport_height * aspectRatio;
 	
 	vec3 w = normalize(lookFrom - lookAt);
 	vec3 u = normalize(cross(vup, w));
@@ -101,24 +106,113 @@ Camera make_camera(vec3 lookFrom, vec3 lookAt, vec3 vup, float hfov, float aspec
 	return c;
 }
 
+int numInScatteringPoints = 10;
+int numOpticalScatteringPoints = 10;
+float atmosphereRadius = 120.0;
+vec3 planetCentre = { 0.0, 0.0, 0.0 };
+float planetRadius = 100.0;
+vec3 sunPosition = { 0.0, 0.0, -1000.0 };
+float densityFalloff = 8.0;
+
+float densityAtPoint(vec3 densitySamplePoint)
+{
+	float heightAboveSurface = length(densitySamplePoint - planetCentre) - planetRadius;
+	float height01 = heightAboveSurface / (atmosphereRadius - planetRadius);
+	float localDensity = exp(-height01 * densityFalloff) * (1.0 - height01);
+
+	return localDensity;
+}
+
+float opticalLength(vec3 rayOrigin, vec3 rayDir, float rayLength)
+{
+	vec3 densitySamplePoint = rayOrigin;
+	float stepSize = rayLength / (numOpticalScatteringPoints - 1);
+	float opticalDepth = 0.0;
+
+	for (int i = 0; i < numOpticalScatteringPoints; i++) {
+	
+		float localDensity = densityAtPoint(densitySamplePoint);
+		opticalDepth += localDensity * stepSize;
+		densitySamplePoint += rayDir * stepSize;
+	}
+
+	return opticalDepth;
+}
+
+float CalcLight(vec3 rayOrigin, vec3 rayDir, float rayLen)
+{
+	vec3 inScatterPoint = rayOrigin;
+	float stepSize = rayLen / (numInScatteringPoints - 1.0);
+	float inScatteredLight = 0.0;
+
+	vec3 dirToSun = normalize(-sunPosition);
+
+	for (int i = 0; i < numInScatteringPoints; i++) {
+	
+		float sunRayLength = raySphere(planetCentre, atmosphereRadius, inScatterPoint, dirToSun).y;
+		float sunRayOpticalLength = opticalLength(inScatterPoint, dirToSun, sunRayLength);
+		float viewRayOpticalLength = opticalLength(inScatterPoint, -rayDir, stepSize * i);
+		float transmittance = exp(-(sunRayOpticalLength + -viewRayOpticalLength));
+		float localDensity = densityAtPoint(inScatterPoint);
+
+		inScatteredLight += localDensity * transmittance * stepSize;
+		inScatterPoint += rayDir * stepSize;
+	}
+
+	return inScatteredLight;
+}
+
+float LinearizeDepth(float depth)
+{
+	float near = 1.0;
+	float far = 1000000.0;
+	float ndc = depth * 2.0 - 1.0;
+
+	return (2.0 * near * far) / (far + near - ndc * (far - near));
+}
+
+vec3 ViewToWorldSpace(vec3 viewSpacePosition)
+{
+	vec4 worldSpace = inverseProjectionMatrix * vec4(viewSpacePosition, -1.0);	
+	worldSpace = inverseViewMatrix * vec4(viewSpacePosition, 0.0);
+
+	return worldSpace.xyz;
+}
+
 void main()
 {
 	vec2 dimensions = imageSize(img_output);
+	vec2 uv = vec2(gl_GlobalInvocationID.x / dimensions.x, gl_GlobalInvocationID.y / dimensions.y);	
+	vec3 viewVector = ViewToWorldSpace(vec3(uv * 2.0 - 1.1, 0.0));
+	//vec3 viewVector = ViewToWorldSpace(texture(gPosition, uv).rgb);
 	float aspectRatio = dimensions.x / dimensions.y;
 
-	Camera c = make_camera(viewPos, viewPos + viewDir, vec3(0, 1, 0), 90.0, aspectRatio);
-	Sphere s = { vec3(0, 0, 0), 100.0 };
+	vec4 originalColor = texture(gColor, uv);
+	float sceneDepthNonLinear = texture(gDepth, uv).r;
+	float sceneDepth = LinearizeDepth(sceneDepthNonLinear);// * length(viewVector);
 
-	ivec2 pixel_coords = ivec2(gl_GlobalInvocationID.xy);
+	vec3 rayOrigin = viewPos;
+	vec3 rayDir = normalize(viewDir);
 
-	vec2 hitInfo = castRay(c, s);
-
-	float atmosphereRadius = 110.0;
+	vec2 hitInfo = raySphere(planetCentre, atmosphereRadius, rayOrigin, rayDir);
 
 	float dstToAtmosphere = hitInfo.x;
-	float dstThroughAtmosphere = hitInfo.y;
+	float dstThroughAtmosphere = min(hitInfo.y, sceneDepth - dstToAtmosphere);
 
-	float color = dstThroughAtmosphere / (atmosphereRadius * 2.0);
-
+	ivec2 pixel_coords = ivec2(gl_GlobalInvocationID.xy);
+	float color = dstThroughAtmosphere / (atmosphereRadius / 2.0);
 	imageStore(img_output, pixel_coords, vec4(color.rrr, 1.0));
-}
+	
+	//vec4 color = originalColor;
+	//
+	//if (dstThroughAtmosphere > 0.0) {
+	//	const float epsilon = 0.0001;
+	//	vec3 pointInAtmosphere = rayOrigin + rayDir * (dstToAtmosphere + epsilon);
+	//	float light = CalcLight(pointInAtmosphere, rayDir, dstThroughAtmosphere - epsilon * 2.0);
+	//
+	//	color = originalColor * (1.0 - light) + light;
+	//}
+	//
+	//ivec2 pixel_coords = ivec2(gl_GlobalInvocationID.xy);
+	//imageStore(img_output, pixel_coords, color);
+}	

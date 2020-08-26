@@ -42,7 +42,7 @@ namespace opfor {
 	public:
 		PerspectiveCamera()
 		{
-			_Position = { 0.0f, 0.0f, 0.0f };
+			_Position = { -275.0f, 0.0f, 0.0f };
 			_Direction = { 0.0f, 0.0f, 0.0f };
 
 			_FOV = 90.0f;

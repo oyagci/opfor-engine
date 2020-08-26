@@ -17,9 +17,16 @@ private:
 
 	void Init();
 
+	inline static GBuffer *_Instance = nullptr;
+
 public:
+
+	static GBuffer &Get() { return *_Instance; }
+
 	GBuffer()
 	{
+		_Instance = this;
+
 		Init();
 	}
 
