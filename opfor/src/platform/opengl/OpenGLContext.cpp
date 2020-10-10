@@ -22,6 +22,12 @@ void OpenGLContext::Init()
 
 	glEnable(GL_CULL_FACE);
 
+	glEnable(GL_BLEND);
+	glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	glDepthFunc(GL_LEQUAL);
+	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+
 	OP4_CORE_INFO("OpenGL Info:\n");
 	OP4_CORE_INFO("  Vendor: {}\n", glGetString(GL_VENDOR));
 	OP4_CORE_INFO("  Renderer: {}\n", glGetString(GL_RENDERER));

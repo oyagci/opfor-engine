@@ -35,12 +35,6 @@ Application::Application()
 
 	_camera = MakeUnique<PerspectiveCameraController>();
 
-	glEnable(GL_BLEND);
-	glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	glDepthFunc(GL_LEQUAL);
-	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-
 	_selectItem = Callback<size_t>([&] (size_t id) {
 		auto ents = _ecs.GetEntityManager()->GetAllEntities();
 		std::vector<ecs::IEntityBase const *> matches;
