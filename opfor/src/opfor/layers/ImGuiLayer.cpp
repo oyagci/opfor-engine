@@ -74,9 +74,14 @@ void ImGuiLayer::EndFrame()
 
 void ImGuiLayer::DrawGuizmoSelectedEnt()
 {
-	auto cameraEnt = opfor::Application::Get().GetEntities<PlayerCameraComponent>()[0];
-	auto camera = cameraEnt->Get<PlayerCameraComponent>();
+	auto cameras = opfor::Application::Get().GetEntities<PlayerCameraComponent>();
+
+	if (cameras.size() <= 0) { return; }
+
+	auto &cameraEnt = cameras[0];
+	auto &camera = cameraEnt->Get<PlayerCameraComponent>();
 	auto selectedEnt = opfor::Application::Get().GetEntities<TransformComponent, SelectedComponent>();
+	
 	if (selectedEnt.size() > 0) {
 
 		auto selected = selectedEnt[0]->Get<TransformComponent>();
