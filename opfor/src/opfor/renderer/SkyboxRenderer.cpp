@@ -366,9 +366,8 @@ void SkyboxRenderer::InitSkybox()
 	_SkyboxCubeMesh.build();
 }
 
-void SkyboxRenderer::RenderSkybox()
+void SkyboxRenderer::RenderSkybox(PerspectiveCamera const &camera)
 {
-	auto camera = opfor::Application::Get().GetCameraController().GetCamera();
 	auto skybox = opfor::Application::Get().GetEntities<SkyboxComponent>();
 
 	if (skybox.size() == 0) { return ; }

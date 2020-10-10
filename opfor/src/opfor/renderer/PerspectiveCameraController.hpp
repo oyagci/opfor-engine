@@ -1,5 +1,6 @@
 #pragma once
 
+#include "opfor/core/base.hpp"
 #include "PerspectiveCamera.hpp"
 
 namespace opfor {

@@ -2,6 +2,7 @@
 
 #include <memory>
 #include <csignal>
+#include <optional>
 
 #include "opfor/core/log.hpp"
 
@@ -42,5 +43,8 @@ constexpr UniquePtr<T> MakeUnique(Args&&... args)
 {
 	return std::make_unique<T>(std::forward<Args>(args)...);
 }
+
+template <typename T>
+using Optional = std::optional<T>;
 
 }

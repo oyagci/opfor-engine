@@ -33,7 +33,7 @@ private:
 	void InitQuad();
 	void InitBillboard();
 	void RenderShadowMeshes();
-	void RenderMeshes(PerspectiveCamera const &);
+	void SubmitMeshes(PerspectiveCamera const &);
 	void UpdateLight();
 	void RenderLightBillboard(PerspectiveCamera const &);
 	void RenderLight(PerspectiveCamera const &);
@@ -42,7 +42,7 @@ private:
 public:
 	MeshRenderer();
 
-	void RenderMeshes();
+	void RenderMeshes(PerspectiveCamera const &);
 	void Resize(unsigned int width, unsigned int height);
 };
 

@@ -7,6 +7,7 @@
 #include "opfor/renderer/Renderbuffer.hpp"
 #include "opfor/renderer/Renderer.hpp"
 #include "opfor/renderer/Mesh.hpp"
+#include "opfor/renderer/PerspectiveCamera.hpp"
 
 namespace opfor {
 
@@ -32,7 +33,7 @@ public:
 	SkyboxRenderer();
 	~SkyboxRenderer() = default;
 
-	void RenderSkybox();
+	void RenderSkybox(PerspectiveCamera const &camera);
 };
 
 }

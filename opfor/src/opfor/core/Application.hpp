@@ -149,7 +149,7 @@ public:
 	IWindow *GetWindow() { return _window.get(); }
 
 	template <typename T, typename ... ArgTypes>
-	[[nodiscard]] T *CreateEngineObject(ArgTypes... args)
+	[[nodiscard]] T *CreateEngineObject(ArgTypes&&... args)
 	{
 		static_assert(std::is_base_of<EngineObject, T>::value && !std::is_same<EngineObject, T>::value,
 			"T must be derived from EngineObject");

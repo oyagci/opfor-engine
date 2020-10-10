@@ -166,7 +166,7 @@ void MeshRenderer::RenderShadowMeshes()
 	}
 }
 
-void MeshRenderer::RenderMeshes(PerspectiveCamera const &camera)
+void MeshRenderer::SubmitMeshes(PerspectiveCamera const &camera)
 {
 	auto models = Application::Get().GetEntities<ModelComponent, TransformComponent>();
 
@@ -260,9 +260,9 @@ void MeshRenderer::RenderMeshes(PerspectiveCamera const &camera)
 						}
 					}
 				}
+				
+				Renderer::Submit(reinterpret_cast<Mesh const*>(mesh)->GetVertexArray());
 			}
-
-			Renderer::Submit(reinterpret_cast<Mesh const*>(mesh)->GetVertexArray());
 
 			popAlbedo   ? Renderer::PopTexture(TextureUnit::Texture0) : (void)0;
 			popMetallic ? Renderer::PopTexture(TextureUnit::Texture1) : (void)0;
@@ -406,18 +406,16 @@ void MeshRenderer::BakeShadowMap()
 	Renderer::PopCapability(RendererCaps::Blend);
 }
 
-void MeshRenderer::RenderMeshes()
+void MeshRenderer::RenderMeshes(PerspectiveCamera const &camera)
 {
 	BakeShadowMap();
-
-	auto &camera = Application::Get().GetCameraController().GetCamera();
 
 	Renderer::PushFramebuffer(_gBuffer.GetFramebuffer());
 		Renderer::SetClearColor({ 0.0f, 0.0f, 0.0f, 1.0f });
 		Renderer::Clear(ClearFlag::ColorBit | ClearFlag::DepthBit);
 
 		Renderer::PushCapability(RendererCaps::DepthTest, true);
-			RenderMeshes(camera);
+			SubmitMeshes(camera);
 		Renderer::PopCapability(RendererCaps::DepthTest);
 	Renderer::PopFramebuffer();
 
