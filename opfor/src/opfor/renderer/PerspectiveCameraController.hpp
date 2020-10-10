@@ -39,6 +39,7 @@ namespace opfor {
 
 			glm::vec3 front(glm::normalize(_Camera.GetDirection()));
 			glm::vec3 right(glm::normalize(glm::cross(front, glm::vec3(0.0f, 1.0f, 0.0f))));
+			glm::vec3 up(glm::cross(right, front));
 
 			// Fast Speed?
 			_MoveSpeed = opfor::Input::GetKey(opfor::KeyCode::LeftShift) == opfor::KeyStatus::Pressed ? _FastSpeed : _BaseSpeed;
@@ -53,6 +54,12 @@ namespace opfor {
 			position += bck * dt * _MoveSpeed * -front;
 			position += rgt * dt * _MoveSpeed * right;
 			position += lft * dt * _MoveSpeed * -right;
+
+			bool moveUp = opfor::Input::GetKey(opfor::KeyCode::E) == opfor::KeyStatus::Pressed;
+			bool moveDown = opfor::Input::GetKey(opfor::KeyCode::Q) == opfor::KeyStatus::Pressed;
+
+			position += moveUp * dt * _MoveSpeed * up;
+			position += moveDown * dt * _MoveSpeed * -up;
 
 			_Camera.SetPosition(position);
 		}
