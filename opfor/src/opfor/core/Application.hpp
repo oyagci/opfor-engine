@@ -66,7 +66,7 @@ private:
 	std::unordered_map<std::string, MaterialContainer> _materials;
 	std::unordered_map<std::string, PbrMaterial> _pbrMaterials;
 
-	opfor::SharedPtr<opfor::Viewport> _viewport;
+	opfor::Viewport *_viewport;
 
 	static unsigned int _nextId;
 	static unsigned int _nextMaterialId;
@@ -82,8 +82,8 @@ private:
 
 	LayerStack _LayerStack;
 
-	UniquePtr<SceneRenderer> _SceneRenderer;
-	UniquePtr<ImGuiLayer> _ImGuiLayer;
+	SceneRenderer *_SceneRenderer;
+	ImGuiLayer *_ImGuiLayer;
 
 	void InitViewport();
 

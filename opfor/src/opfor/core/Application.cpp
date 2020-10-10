@@ -101,12 +101,12 @@ Application::Application()
 	default_normal->SetData(img.data.get());
 	default_normal->Build();
 
-	_SceneRenderer = MakeUnique<SceneRenderer>();
+	_SceneRenderer = new SceneRenderer;
+	_ImGuiLayer = new ImGuiLayer;
 
-	_ImGuiLayer = MakeUnique<ImGuiLayer>();
-	PushOverlay(_ImGuiLayer.get());
-	PushLayer(_viewport.get());
-	PushLayer(_SceneRenderer.get());
+	PushOverlay(_ImGuiLayer);
+	PushLayer(_viewport);
+	PushLayer(_SceneRenderer);
 }
 
 /*
@@ -117,7 +117,7 @@ Application::~Application() = default;
 
 void Application::InitViewport()
 {
-	_viewport = MakeUnique<Viewport>(1920, 1080);
+	_viewport = new Viewport(1920, 1080);
 }
 
 void Application::RenderImgui()
