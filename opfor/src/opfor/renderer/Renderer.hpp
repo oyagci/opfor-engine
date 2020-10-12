@@ -26,6 +26,43 @@ enum class RendererCaps
 #endif
 };
 
+struct DrawCommandTextureBinding
+{
+	SharedPtr<Texture> texture;
+	TextureUnit binding;
+};
+
+struct UniformBinding
+{
+	using BindingValue = Variant<int, float, glm::vec3, glm::vec4, glm::mat4, Vector<glm::mat4>>;
+	
+	String name;
+	BindingValue value;
+};
+
+struct ClearScreenParam
+{
+	std::array<float, 4> color;
+	ClearFlag flags;
+};
+
+struct DrawCommand
+{
+	SharedPtr<Shader> shader;
+	SharedPtr<VertexArray> vertexArray;
+	Vector<DrawCommandTextureBinding> textureBindings;
+	Vector<UniformBinding> uniformBindings;
+};
+
+struct RenderCommandBuffer
+{
+	Optional<SharedPtr<Framebuffer>> framebuffer;
+	Optional<std::pair<glm::uvec2, glm::uvec2>> viewportExtent;
+	Optional<ClearScreenParam> clear;
+	Vector<std::pair<RendererCaps, bool>> capabilities;
+	Vector<DrawCommand> drawCommands;
+};
+
 enum class RendererCaps;
 
 class Renderer
@@ -64,6 +101,9 @@ public:
 	static void PopTexture(TextureUnit);
 
 	static RendererAPI::API GetAPI() { return RendererAPI::GetAPI(); }
+
+	static void SubmitDrawCommand(DrawCommand const &drawCommand);
+	static void SubmitRenderCommandBuffer(RenderCommandBuffer const &renderCommand);
 
 	class Shader
 	{

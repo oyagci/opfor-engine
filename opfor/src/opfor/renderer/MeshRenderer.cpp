@@ -143,8 +143,10 @@ void MeshRenderer::InitBillboard()
 	_billboard = Shader::Create("shaders/billboard.glsl");
 }
 
-void MeshRenderer::RenderShadowMeshes()
+Vector<DrawCommand> MeshRenderer::RenderShadowMeshes()
 {
+	Vector<DrawCommand> drawCommands;
+
 	auto entities = Application::Get().GetEntities<ModelComponent, TransformComponent>();
 
 	for (auto const entity: entities) {
@@ -158,16 +160,22 @@ void MeshRenderer::RenderShadowMeshes()
 			glm::mat4 model(1.0f);
 			model = glm::translate(model, transform.position);
 			model = glm::scale(model, transform.scale);
-			Renderer::Shader::SetUniform("modelMatrix", model);
-
-			Renderer::Submit(reinterpret_cast<Mesh const*>(mesh)->GetVertexArray());
+			
+			DrawCommand cmd;
+			cmd.uniformBindings = { { "modelMatrix", model } };
+			cmd.vertexArray = reinterpret_cast<Mesh const *>(mesh)->GetVertexArray();
+			drawCommands.push_back(cmd);
 		}
 
 	}
+
+	return drawCommands;
 }
 
-void MeshRenderer::SubmitMeshes(PerspectiveCamera const &camera)
+Vector<DrawCommand> MeshRenderer::SubmitMeshes(PerspectiveCamera const &camera)
 {
+	Vector<DrawCommand> drawCommands;
+
 	auto models = Application::Get().GetEntities<ModelComponent, TransformComponent>();
 
 	for (auto const &entity : models) {
@@ -192,16 +200,15 @@ void MeshRenderer::SubmitMeshes(PerspectiveCamera const &camera)
 			modelMatrix = glm::translate(modelMatrix, transform.position);
 			modelMatrix = glm::scale(modelMatrix, transform.scale);
 
-			Renderer::Shader::Push(shader);
-			Renderer::Shader::SetUniform("viewProjectionMatrix", camera.GetViewProjectionMatrix());
-			Renderer::Shader::SetUniform("viewMatrix", camera.GetViewMatrix());
-			Renderer::Shader::SetUniform("projectionMatrix", camera.GetProjection());
-			Renderer::Shader::SetUniform("viewPos", camera.GetPosition());
-			Renderer::Shader::SetUniform("modelMatrix", modelMatrix);
-
-			bool popAlbedo = false;
-			bool popMetallic = false;
-			bool popNormal = false;
+			DrawCommand drawCommand;
+			drawCommand.shader = shader;
+			drawCommand.uniformBindings = {
+				{ "viewProjectionMatrix",  camera.GetViewProjectionMatrix() },
+				{ "viewMatrix",            camera.GetViewMatrix() },
+				{ "projectionMatrix",      camera.GetProjection() },
+				{ "viewPos",               camera.GetPosition() },
+				{ "modelMatrix",           modelMatrix },
+			};
 
 			// Bind each texture
 			auto meshCast = dynamic_cast<Mesh*>(mesh);
@@ -214,225 +221,218 @@ void MeshRenderer::SubmitMeshes(PerspectiveCamera const &camera)
 					if (material.has_value()) {
 						auto m = material.value();
 
-						Renderer::Shader::SetUniform("material.baseColor", m->BaseColor);
-						Renderer::Shader::SetUniform("material.metallicFactor", m->MetallicFactor);
-						Renderer::Shader::SetUniform("material.roughnessFactor", m->RoughnessFactor);
+						drawCommand.uniformBindings.push_back({ "material.baseColor", m->BaseColor });
+						drawCommand.uniformBindings.push_back({ "material.metallicFactor", m->MetallicFactor });
+						drawCommand.uniformBindings.push_back({ "material.roughnessFactor", m->RoughnessFactor });
 
 						if (m->Albedo.has_value()) {
 							auto albedo = m->Albedo.value();
 							auto texture = TextureManager::Get().Get(albedo);
 
-							popAlbedo = true;
-
-							Renderer::Shader::SetUniform("material.hasAlbedo", 1);
-							Renderer::PushTexture(texture, TextureUnit::Texture0);
+							drawCommand.uniformBindings.push_back({ "material.hasAlbedo", 1 });
+							drawCommand.textureBindings.push_back({ texture, TextureUnit::Texture0 });
 						}
 						else {
-							Renderer::Shader::SetUniform("material.hasAlbedo", 0);
+							drawCommand.uniformBindings.push_back({ "material.hasAlbedo", 0 });
 						}
 
 						if (m->MetallicRoughness.has_value()) {
 							auto metallicRoughness = m->MetallicRoughness.value();
 							auto texture = TextureManager::Get().Get(metallicRoughness);
 
-							popMetallic = true;
-
-							Renderer::Shader::SetUniform("material.hasMetallicRoughness", 1);
-							Renderer::PushTexture(texture, TextureUnit::Texture1);
+							drawCommand.uniformBindings.push_back({ "material.hasMetallicRoughness", 1 });
+							drawCommand.textureBindings.push_back({ texture, TextureUnit::Texture1 });
 						}
 						else {
-							Renderer::Shader::SetUniform("material.hasMetallicRoughness", 0);
+							drawCommand.uniformBindings.push_back({ "material.hasMetallicRoughness", 0 });
 						}
 
 						if (m->Normal.has_value()) {
 							auto normal = m->Normal.value();
 							auto texture = TextureManager::Get().Get(normal);
 
-							popNormal = true;
-
-							Renderer::PushTexture(texture, TextureUnit::Texture2);
+							drawCommand.textureBindings.push_back({ texture, TextureUnit::Texture2 });
 						}
 						else {
 							auto const defaultNormal = TextureManager::Get().Get("default_normal");
-							Renderer::PushTexture(defaultNormal, TextureUnit::Texture2);
 
-							popNormal = true;
+							drawCommand.textureBindings.push_back({ defaultNormal, TextureUnit::Texture2 });
 						}
 					}
 				}
-				
-				Renderer::Submit(reinterpret_cast<Mesh const*>(mesh)->GetVertexArray());
-			}
 
-			popAlbedo   ? Renderer::PopTexture(TextureUnit::Texture0) : (void)0;
-			popMetallic ? Renderer::PopTexture(TextureUnit::Texture1) : (void)0;
-			popNormal   ? Renderer::PopTexture(TextureUnit::Texture2) : (void)0;
-
-			Renderer::Shader::Pop();
+				drawCommand.vertexArray = reinterpret_cast<Mesh const *>(mesh)->GetVertexArray();
+				drawCommands.push_back(drawCommand);
+			}			
 		}
 
 	}
+
+	return drawCommands;
 }
 
-void MeshRenderer::UpdateLight()
+Vector<UniformBinding> MeshRenderer::UpdateLight()
 {
+	Vector<UniformBinding> lightBindings;
+
 	auto lights = Application::Get().GetEntities<PointLightComponent, TransformComponent>();
 
-	if (lights.size() == 0) { return ; }
+	if (lights.size() == 0) { return lightBindings; }
 
-	Renderer::Shader::SetUniform("pointLightCount", lights.size());
+	lightBindings.push_back({ "pointLightCount", static_cast<int>(lights.size()) });
 
 	for (size_t i = 0; i < lights.size(); i++) {
 		auto [ light, transform ] = lights[i]->GetAll();
 
 		std::string pointLight = "pointLight[" + std::to_string(i) + "]";
 
-		Renderer::Shader::SetUniform(pointLight + ".position", transform.position);
-		Renderer::Shader::SetUniform(pointLight + ".color", light.Color);
-		Renderer::Shader::SetUniform(pointLight + ".intensity", light.Intensity);
+		lightBindings.push_back({ pointLight + ".position",  transform.position });
+		lightBindings.push_back({ pointLight + ".color",     light.Color });
+		lightBindings.push_back({ pointLight + ".intensity", light.Intensity });
 	}
 
 	auto dirLights = Application::Get().GetEntities<DirectionalLightComponent>();
 
-	Renderer::Shader::SetUniform("directionalLightCount", dirLights.size());
+	lightBindings.push_back({ "directionalLightCount", static_cast<int>(dirLights.size()) });
 
 	for (size_t i = 0; i < dirLights.size(); i++) {
 		auto [ light ] = dirLights[i]->GetAll();
 
 		std::string directionalLight = "directionalLights[" + std::to_string(i) + "]";
 
-		Renderer::Shader::SetUniform(directionalLight + ".direction", light.Direction);
-		Renderer::Shader::SetUniform(directionalLight + ".color", light.Color);
-		Renderer::Shader::SetUniform(directionalLight + ".intensity", light.Intensity);
+		lightBindings.push_back({ directionalLight + ".direction", light.Direction });
+		lightBindings.push_back({ directionalLight + ".color",     light.Color });
+		lightBindings.push_back({ directionalLight + ".intensity", light.Intensity });
+
 	}
+
+	return lightBindings;
 }
 
-void MeshRenderer::RenderLightBillboard(PerspectiveCamera const &camera)
+Vector<DrawCommand> MeshRenderer::RenderLightBillboard(PerspectiveCamera const &camera)
 {
+	Vector<DrawCommand> drawCommands;
+
 	auto lights = Application::Get().GetEntities<PointLightComponent, TransformComponent>();
 
-	if (lights.size() == 0 ) { return ; }
+	if (lights.size() == 0) { return drawCommands; }
 
 	for (auto const &lightEnt : lights) {
-		auto [ light, transform ] = lightEnt->GetAll();
+		auto [light, transform] = lightEnt->GetAll();
 
-		Renderer::Shader::Push(_billboard);
-		Renderer::Shader::SetUniform("viewMatrix", camera.GetViewMatrix());
-		Renderer::Shader::SetUniform("viewProjectionMatrix", camera.GetViewProjectionMatrix());
-		Renderer::Shader::SetUniform("projectionMatrix", camera.GetProjection());
-		Renderer::Shader::SetUniform("particlePosition", transform.position);
-
-		Renderer::PushTexture(TextureManager::Get().Get("light_bulb_icon"), TextureUnit::Texture0);
-		Renderer::Submit(_quad.GetVertexArray());
-		Renderer::PopTexture(TextureUnit::Texture0);
-
-		Renderer::Shader::Pop();
+		DrawCommand drawCommand;
+		drawCommand.shader = _billboard;
+		drawCommand.uniformBindings = {
+			{ "viewMatrix", camera.GetViewMatrix() },
+			{ "viewProjectionMatrix", camera.GetViewProjectionMatrix() },
+			{ "projectionMatrix", camera.GetProjection() },
+			{ "particlePosition", transform.position },
+		};
+		drawCommand.textureBindings = {
+			{ TextureManager::Get().Get("light_bulb_icon"), TextureUnit::Texture0 }
+		};
+		drawCommand.vertexArray = _quad.GetVertexArray();
+		drawCommands.push_back(drawCommand);
 	}
+
+	return drawCommands;
 }
 
-void MeshRenderer::RenderLight(PerspectiveCamera const &camera)
+Vector<DrawCommand> MeshRenderer::RenderLight(PerspectiveCamera const &camera)
 {
-	Renderer::Shader::Push(_light);
+	DrawCommand drawCommand;
+		drawCommand.shader = _light;
+		drawCommand.uniformBindings = {
+			{ "viewPos", camera.GetPosition() },
+			{ "exposure", camera.GetExposure() },
+		};
+		drawCommand.textureBindings = {
+			{ _gBuffer.GetPositionTex(),                  TextureUnit::Texture0 },
+			{ _gBuffer.GetNormalTex(),                    TextureUnit::Texture1 },
+			{ _gBuffer.GetAlbedoSpecTex(),                TextureUnit::Texture2 },
+			{ _depthCubemap,                              TextureUnit::Texture4 },
+			{ _gBuffer.GetMetallicRoughnessTex(),         TextureUnit::Texture5 },
+			{ TextureManager::Get().Get("irradianceMap"), TextureUnit::Texture6 },
+			{ TextureManager::Get().Get("brdfLUT"),       TextureUnit::Texture7 },
+			{ TextureManager::Get().Get("prefilterMap"),  TextureUnit::Texture8 },
+		};
 
-		UpdateLight();
+		auto lightBindings = UpdateLight();
+		drawCommand.uniformBindings.insert(drawCommand.uniformBindings.end(), lightBindings.begin(), lightBindings.end());
+		
+		drawCommand.vertexArray = { _quad.GetVertexArray() };
 
-		Renderer::Shader::SetUniform("viewPos", camera.GetPosition());
-		Renderer::Shader::SetUniform("exposure", camera.GetExposure());
-
-		Renderer::PushTexture(_gBuffer.GetPositionTex(),   TextureUnit::Texture0);
-		Renderer::PushTexture(_gBuffer.GetNormalTex(),     TextureUnit::Texture1);
-		Renderer::PushTexture(_gBuffer.GetAlbedoSpecTex(), TextureUnit::Texture2);
-		Renderer::PushTexture(_depthCubemap,               TextureUnit::Texture4);
-		Renderer::PushTexture(_gBuffer.GetMetallicRoughnessTex(),         TextureUnit::Texture5);
-		Renderer::PushTexture(TextureManager::Get().Get("irradianceMap"), TextureUnit::Texture6);
-		Renderer::PushTexture(TextureManager::Get().Get("brdfLUT"),       TextureUnit::Texture7);
-		Renderer::PushTexture(TextureManager::Get().Get("prefilterMap"),  TextureUnit::Texture8);
-
-		Renderer::Submit(_quad.GetVertexArray());
-
-		Renderer::PopTexture(TextureUnit::Texture8);
-		Renderer::PopTexture(TextureUnit::Texture7);
-		Renderer::PopTexture(TextureUnit::Texture6);
-		Renderer::PopTexture(TextureUnit::Texture5);
-		Renderer::PopTexture(TextureUnit::Texture4);
-		Renderer::PopTexture(TextureUnit::Texture2);
-		Renderer::PopTexture(TextureUnit::Texture1);
-		Renderer::PopTexture(TextureUnit::Texture0);
-
-	Renderer::Shader::Pop();
+	return { drawCommand };
 }
 
-void MeshRenderer::BakeShadowMap()
+RenderCommandBuffer MeshRenderer::RenderShadowMap()
 {
+	RenderCommandBuffer renderCommand;
+
 	auto lights = Application::Get().GetEntities<PointLightComponent, TransformComponent>();
 
-	if (lights.size() == 0) return ;
+	if (lights.size() == 0) { return renderCommand; };
 
 	auto lightPos = lights[0]->Get<TransformComponent>().position;
 
 	std::vector<glm::mat4> shadowTransforms = {
-		_shadowProjection * glm::lookAt(lightPos, lightPos + glm::vec3( 1.0, 0.0, 0.0), glm::vec3(0.0,-1.0, 0.0)),
+		_shadowProjection * glm::lookAt(lightPos, lightPos + glm::vec3(1.0, 0.0, 0.0), glm::vec3(0.0,-1.0, 0.0)),
 		_shadowProjection * glm::lookAt(lightPos, lightPos + glm::vec3(-1.0, 0.0, 0.0), glm::vec3(0.0,-1.0, 0.0)),
-		_shadowProjection * glm::lookAt(lightPos, lightPos + glm::vec3( 0.0, 1.0, 0.0), glm::vec3(0.0, 0.0, 1.0)),
-		_shadowProjection * glm::lookAt(lightPos, lightPos + glm::vec3( 0.0,-1.0, 0.0), glm::vec3(0.0, 0.0,-1.0)),
-		_shadowProjection * glm::lookAt(lightPos, lightPos + glm::vec3( 0.0, 0.0, 1.0), glm::vec3(0.0,-1.0, 0.0)),
-		_shadowProjection * glm::lookAt(lightPos, lightPos + glm::vec3( 0.0, 0.0,-1.0), glm::vec3(0.0,-1.0, 0.0)),
+		_shadowProjection * glm::lookAt(lightPos, lightPos + glm::vec3(0.0, 1.0, 0.0), glm::vec3(0.0, 0.0, 1.0)),
+		_shadowProjection * glm::lookAt(lightPos, lightPos + glm::vec3(0.0,-1.0, 0.0), glm::vec3(0.0, 0.0,-1.0)),
+		_shadowProjection * glm::lookAt(lightPos, lightPos + glm::vec3(0.0, 0.0, 1.0), glm::vec3(0.0,-1.0, 0.0)),
+		_shadowProjection * glm::lookAt(lightPos, lightPos + glm::vec3(0.0, 0.0,-1.0), glm::vec3(0.0,-1.0, 0.0)),
 	};
 
-	Renderer::PushViewport({ 0, 0 }, { ShadowWidth, ShadowHeight });
-	Renderer::PushFramebuffer(_depthmap);
+	renderCommand.framebuffer = _depthmap;
+	renderCommand.viewportExtent = { { 0, 0 }, { ShadowWidth, ShadowHeight } };
+	renderCommand.capabilities = {
+		{ RendererCaps::Blend, false },
+		{ RendererCaps::DepthTest, true }
+	};
+	renderCommand.clear = { { 0.0f, 0.0f, 0.0f, 1.0f }, ClearFlag::DepthBit | ClearFlag::ColorBit };
 
-	Renderer::SetClearColor({ 0.0f, 0.0f, 0.0f, 1.0f });
-	Renderer::Clear(ClearFlag::ColorBit | ClearFlag::DepthBit);
+	Vector<DrawCommand> shadowDrawCommands = RenderShadowMeshes();
+	for (auto &cmd : shadowDrawCommands) {
+		cmd.shader = _shadow;
+		cmd.uniformBindings.push_back({ "model", glm::mat4(1.0f) });
+		cmd.uniformBindings.push_back({ "shadowMatrices", shadowTransforms });
+		cmd.uniformBindings.push_back({ "far_plane", 10000.0f });
+		cmd.uniformBindings.push_back({ "lightPos", lightPos });
+	}
 
-	Renderer::PushCapability(RendererCaps::Blend, false);
-	Renderer::PushCapability(RendererCaps::DepthTest, true);
-	Renderer::Clear(ClearFlag::DepthBit);
-
-	Renderer::Shader::Push(_shadow);
-		Renderer::Shader::SetUniform("model", glm::mat4(1.0f));
-		Renderer::Shader::SetUniform("shadowMatrices", shadowTransforms);
-		Renderer::Shader::SetUniform("far_plane", 10000.0f);
-		Renderer::Shader::SetUniform("lightPos", lightPos);
-
-		RenderShadowMeshes();
-
-	Renderer::Shader::Pop();
-
-	Renderer::PopFramebuffer();
-	Renderer::PopViewport();
-
-	Renderer::PopCapability(RendererCaps::DepthTest);
-	Renderer::PopCapability(RendererCaps::Blend);
+	renderCommand.drawCommands = shadowDrawCommands;
+	
+	return renderCommand;
 }
 
 void MeshRenderer::RenderMeshes(PerspectiveCamera const &camera)
 {
-	BakeShadowMap();
+	RenderCommandBuffer shadowMapRenderCommand = RenderShadowMap();
+	Renderer::SubmitRenderCommandBuffer(shadowMapRenderCommand);
 
-	Renderer::PushFramebuffer(_gBuffer.GetFramebuffer());
-		Renderer::SetClearColor({ 0.0f, 0.0f, 0.0f, 1.0f });
-		Renderer::Clear(ClearFlag::ColorBit | ClearFlag::DepthBit);
+	RenderCommandBuffer renderCommand;
+		renderCommand.framebuffer = _gBuffer.GetFramebuffer();
+		renderCommand.clear = { { 0.0f, 0.0f, 0.0f, 1.0f }, ClearFlag::ColorBit | ClearFlag::DepthBit };
+		renderCommand.capabilities = { { RendererCaps::DepthTest, true } };
+		renderCommand.drawCommands = SubmitMeshes(camera);
+	Renderer::SubmitRenderCommandBuffer(renderCommand);
 
-		Renderer::PushCapability(RendererCaps::DepthTest, true);
-			SubmitMeshes(camera);
-		Renderer::PopCapability(RendererCaps::DepthTest);
-	Renderer::PopFramebuffer();
-
-	Renderer::SetClearColor({ 1.0f, 0.0f, 1.0f, 1.0f });
-	Renderer::Clear(ClearFlag::ColorBit | ClearFlag::DepthBit);
-
-	RenderLight(camera);
+	RenderCommandBuffer lightRenderCommand;
+		lightRenderCommand.clear = { { 1.0f, 0.0f, 1.0f, 1.0f }, ClearFlag::ColorBit | ClearFlag::DepthBit };
+		lightRenderCommand.drawCommands = RenderLight(camera);
+	Renderer::SubmitRenderCommandBuffer(lightRenderCommand);
 
 	// Copy depth buffer to viewport framebuffer to enable depth testing with billboard
 	// and other shaders
 	Renderer::CopyFramebufferToDefaultFramebuffer(_gBuffer.GetFramebuffer(), CopyTarget::DepthBufferBit);
 
-	Renderer::PushCapability(RendererCaps::Blend, true);
-	Renderer::PushCapability(RendererCaps::DepthTest, true);
-		RenderLightBillboard(camera);
-	Renderer::PopCapability(RendererCaps::DepthTest);
-	Renderer::PopCapability(RendererCaps::Blend);
+	RenderCommandBuffer billboardRenderCommand;
+	billboardRenderCommand.capabilities = {
+		{ RendererCaps::Blend, true },
+		{ RendererCaps::DepthTest, true }
+	};
+	billboardRenderCommand.drawCommands = RenderLightBillboard(camera);
 }
 
 void MeshRenderer::Resize(unsigned int width, unsigned int height)

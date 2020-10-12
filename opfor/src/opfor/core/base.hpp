@@ -3,6 +3,7 @@
 #include <memory>
 #include <csignal>
 #include <optional>
+#include <variant>
 
 #include "opfor/core/log.hpp"
 
@@ -46,5 +47,16 @@ constexpr UniquePtr<T> MakeUnique(Args&&... args)
 
 template <typename T>
 using Optional = std::optional<T>;
+
+template <typename T, typename Allocator = std::allocator<T>>
+using Vector = std::vector<T, Allocator>;
+
+template <typename T, std::size_t N>
+using Array = std::array<T, N>;
+
+using String = std::string;
+
+template <typename ... T>
+using Variant = std::variant<T...>;
 
 }

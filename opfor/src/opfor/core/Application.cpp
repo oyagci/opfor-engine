@@ -138,7 +138,9 @@ int Application::Run()
 
 		Renderer::PushViewport({ 0, 0 }, _viewport->GetSize());
 
-		_SceneRenderer->RenderScene();
+		// TODO: Pick primary camera
+		PerspectiveCamera &camera = opfor::Application::Get().GetCameraController().GetCamera();
+		_SceneRenderer->RenderScene(camera);
 
 		Application *app = this;
 		Renderer::Submit([app] () { app->RenderImgui(); });
@@ -167,7 +169,6 @@ void Application::UpdateObjects()
 		UpdateSubobjects(o->GetSubobjects());
 	}
 }
-
 
 void Application::UpdateSubobjects(std::vector<EngineObject*> subobjects)
 {

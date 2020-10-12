@@ -32,12 +32,12 @@ private:
 	void InitDepthCubemap();
 	void InitQuad();
 	void InitBillboard();
-	void RenderShadowMeshes();
-	void SubmitMeshes(PerspectiveCamera const &);
-	void UpdateLight();
-	void RenderLightBillboard(PerspectiveCamera const &);
-	void RenderLight(PerspectiveCamera const &);
-	void BakeShadowMap();
+	Vector<DrawCommand> RenderShadowMeshes();
+	Vector<DrawCommand> SubmitMeshes(PerspectiveCamera const &);
+	Vector<UniformBinding> UpdateLight();
+	Vector<DrawCommand> RenderLightBillboard(PerspectiveCamera const &);
+	Vector<DrawCommand> RenderLight(PerspectiveCamera const &);
+	RenderCommandBuffer RenderShadowMap();
 
 public:
 	MeshRenderer();

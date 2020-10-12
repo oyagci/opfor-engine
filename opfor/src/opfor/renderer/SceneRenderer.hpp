@@ -2,6 +2,7 @@
 #include "SkyboxRenderer.hpp"
 #include "MeshRenderer.hpp"
 #include "opfor/layers/Layer.hpp"
+#include "opfor/renderer/PerspectiveCamera.hpp"
 
 using namespace std::placeholders;
 
@@ -17,7 +18,7 @@ public:
 	SceneRenderer() = default;
 	~SceneRenderer() = default;
 
-	void RenderScene();
+	void RenderScene(PerspectiveCamera const &);
 
 	void OnEvent(Event &e);
 };

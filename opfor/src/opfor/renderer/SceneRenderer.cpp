@@ -3,10 +3,8 @@
 
 namespace opfor {
 
-void SceneRenderer::RenderScene()
+void SceneRenderer::RenderScene(PerspectiveCamera const &camera)
 {
-	PerspectiveCamera &camera = opfor::Application::Get().GetCameraController().GetCamera();
-
 	_MeshRenderer.RenderMeshes(camera);
 	_SkyboxRenderer.RenderSkybox(camera);
 	opfor::Renderer::CopyDefaultFramebufferTo(opfor::Application::Get().GetViewport()->GetFramebuffer(), opfor::CopyTarget::ColorBufferBit);

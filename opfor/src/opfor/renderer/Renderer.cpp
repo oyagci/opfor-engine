@@ -100,6 +100,93 @@ void Renderer::Submit(const std::function<void ()> &f)
 	_Calls.push_back(f);
 }
 
+void Renderer::SubmitDrawCommand(DrawCommand const &drawCommand)
+{
+	Renderer::Shader::Push(drawCommand.shader);
+
+	for (auto const &t : drawCommand.textureBindings) {
+		Renderer::PushTexture(t.texture, t.binding);
+	}
+
+	for (auto const &binding : drawCommand.uniformBindings) {
+		
+		if (std::holds_alternative<int>(binding.value)) {
+			Renderer::Shader::SetUniform(binding.name, std::get<int>(binding.value));
+		}
+//		else if (std::holds_alternative<unsigned int>(binding.value)) {
+//			Renderer::Shader::SetUniform(binding.name, std::get<unsigned int>(binding.value));
+//		}
+		else if (std::holds_alternative<float>(binding.value)) {
+			Renderer::Shader::SetUniform(binding.name, std::get<float>(binding.value));
+		}
+		else if (std::holds_alternative<glm::vec3>(binding.value)) {
+			Renderer::Shader::SetUniform(binding.name, std::get<glm::vec3>(binding.value));
+		}
+		else if (std::holds_alternative<glm::vec4>(binding.value)) {
+			Renderer::Shader::SetUniform(binding.name, std::get<glm::vec4>(binding.value));
+		}
+//		else if (std::holds_alternative<glm::mat3>(binding.value)) {
+//			//Renderer::Shader::SetUniform(binding.name, std::get<glm::mat3>(binding.value));
+//			throw std::runtime_error("Unsupported uniform binding type");
+//		}
+		else if (std::holds_alternative<glm::mat4>(binding.value)) {
+			Renderer::Shader::SetUniform(binding.name, std::get<glm::mat4>(binding.value));
+		}
+		else if (std::holds_alternative<Vector<glm::mat4>>(binding.value)) {
+			Renderer::Shader::SetUniform(binding.name, std::get<Vector<glm::mat4>>(binding.value));
+		}
+		else {
+			throw std::runtime_error("Unsupported uniform binding type");
+		}
+	}
+
+	Renderer::Submit(drawCommand.vertexArray);
+
+	for (auto const &t : drawCommand.textureBindings) {
+		Renderer::PopTexture(t.binding);
+	}
+
+	Renderer::Shader::Pop();
+}
+
+void Renderer::SubmitRenderCommandBuffer(RenderCommandBuffer const &renderCommand)
+{
+	for (auto const &cap : renderCommand.capabilities) {
+		Renderer::PushCapability(cap.first, cap.second);
+	}
+
+	if (renderCommand.framebuffer) {
+		Renderer::PushFramebuffer(*renderCommand.framebuffer);
+	}
+
+	if (renderCommand.viewportExtent) {
+		Renderer::PushViewport(renderCommand.viewportExtent->first, renderCommand.viewportExtent->second);
+	}
+
+	if (renderCommand.clear) {
+		Renderer::SetClearColor(renderCommand.clear->color);
+		Renderer::Clear(renderCommand.clear->flags);
+	}
+
+	// Draw
+	for (auto const &cmd : renderCommand.drawCommands) {
+		Renderer::SubmitDrawCommand(cmd);
+	}
+
+	// Cleanup
+	if (renderCommand.viewportExtent) {
+		Renderer::PopViewport();
+	}
+
+	if (renderCommand.framebuffer) {
+		Renderer::PopFramebuffer();
+	}
+
+	for (auto const &cap : renderCommand.capabilities) {
+		Renderer::PopCapability(cap.first);
+	}
+}
+
 void Renderer::PushFramebuffer(SharedPtr<Framebuffer> fb)
 {
 	_CallsStrings.push_back(__OP4_FUNCNAME__);
