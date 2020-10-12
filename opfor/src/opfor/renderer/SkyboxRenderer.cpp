@@ -372,17 +372,25 @@ void SkyboxRenderer::RenderSkybox(PerspectiveCamera const &camera)
 
 	if (skybox.size() == 0) { return ; }
 
-	opfor::Renderer::Shader::Push(_shader);
-	opfor::Renderer::Shader::SetUniform("viewMatrix", glm::mat4(glm::mat3(camera.GetViewMatrix())));
-	opfor::Renderer::Shader::SetUniform("projectionMatrix", camera.GetProjection());
+	RenderCommandBuffer renderCommand;
+	
+	DrawCommand drawCommand;
+		drawCommand.shader = _shader;
+		drawCommand.uniformBindings = {
+			{ "viewMatrix", glm::mat4(glm::mat3(camera.GetViewMatrix())) },
+			{ "projectionMatrix", camera.GetProjection() },
+		};
+		drawCommand.textureBindings = {
+			{ _HDRI, TextureUnit::Texture0 }
+		};
+		drawCommand.vertexArray = _SkyboxCubeMesh.GetVertexArray();
+
+	renderCommand.drawCommands = { drawCommand };
 
 	opfor::Renderer::SetDepthMask(false);
-	opfor::Renderer::PushTexture(_HDRI, opfor::TextureUnit::Texture0);
-	opfor::Renderer::Submit(_SkyboxCubeMesh.GetVertexArray());
-	opfor::Renderer::PopTexture(opfor::TextureUnit::Texture0);
+	Renderer::SubmitRenderCommandBuffer(renderCommand);
 	opfor::Renderer::SetDepthMask(true);
 
-	opfor::Renderer::Shader::Pop();
 }
 
 }
