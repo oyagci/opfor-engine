@@ -24,7 +24,7 @@ void Renderer::PrintTree(unsigned int offset)
 }
 
 template <typename FuncType, typename ... ArgTypes>
-auto BIND(FuncType fn, ArgTypes&& ... args)
+static inline constexpr auto BIND(FuncType fn, ArgTypes&& ... args)
 {
 	return std::bind(fn, std::forward<ArgTypes>(args)...);
 }
@@ -102,7 +102,6 @@ void Renderer::Submit(const std::function<void ()> &f)
 
 void Renderer::SubmitDrawCommand(DrawCommand const &drawCommand)
 {
-	Renderer::Shader::Push(drawCommand.shader);
 
 	for (auto const &t : drawCommand.textureBindings) {
 		Renderer::PushTexture(t.texture, t.binding);
@@ -146,11 +145,22 @@ void Renderer::SubmitDrawCommand(DrawCommand const &drawCommand)
 		Renderer::PopTexture(t.binding);
 	}
 
-	Renderer::Shader::Pop();
+	//Renderer::Shader::Pop();
 }
 
 void Renderer::SubmitRenderCommandBuffer(RenderCommandBuffer const &renderCommand)
 {
+	// For each RenderCommandBuffer:
+	//   - Get a list of DrawCommands using the same shaders
+	//   - Only bind each different shader once
+
+	std::unordered_map<SharedPtr<opfor::Shader>, Vector<DrawCommand>> uniqueDrawCommands;
+	for (auto const &dc : renderCommand.drawCommands) {
+		uniqueDrawCommands[dc.shader].push_back(dc);
+	}
+
+	// ============================================================
+
 	for (auto const &cap : renderCommand.capabilities) {
 		Renderer::PushCapability(cap.first, cap.second);
 	}
@@ -168,12 +178,31 @@ void Renderer::SubmitRenderCommandBuffer(RenderCommandBuffer const &renderComman
 		Renderer::Clear(renderCommand.clear->flags);
 	}
 
+	if (renderCommand.disableDepthMask) {
+		glDepthMask(false);
+	}
+
+	//for (auto const &cmd : renderCommand.drawCommands) {
+	//	Renderer::SubmitDrawCommand(cmd);
+	//}
+
 	// Draw
-	for (auto const &cmd : renderCommand.drawCommands) {
-		Renderer::SubmitDrawCommand(cmd);
+	// ====
+	for (auto const &[shader, uniqueShaderCommands] : uniqueDrawCommands) {
+		Renderer::Shader::Push(shader);
+		for (auto const &drawCommand : uniqueShaderCommands) {
+			Renderer::SubmitDrawCommand(drawCommand);
+		}
+		Renderer::Shader::Pop();
 	}
 
 	// Cleanup
+	// =======
+
+	if (renderCommand.disableDepthMask) {
+		glDepthMask(true);
+	}
+
 	if (renderCommand.viewportExtent) {
 		Renderer::PopViewport();
 	}

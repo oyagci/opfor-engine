@@ -61,6 +61,7 @@ struct RenderCommandBuffer
 	Optional<ClearScreenParam> clear;
 	Vector<std::pair<RendererCaps, bool>> capabilities;
 	Vector<DrawCommand> drawCommands;
+	bool disableDepthMask;
 };
 
 enum class RendererCaps;
