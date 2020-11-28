@@ -186,8 +186,6 @@ protected:
 class Input
 {
 private:
-	Input();
-
 	static auto &Get()
 	{
 		static UniquePtr<IInput> input = Create();
@@ -196,7 +194,19 @@ private:
 
 	static UniquePtr<IInput> Create();
 
+	inline static bool _isPrimed = false;
+
 public:
+
+	/// Call initializing ImGui. This will ensure that callbacks are properly saved.
+	static void Prime()
+	{
+		if (_isPrimed) return;
+		
+		Input::Get();
+		_isPrimed = true;
+	}
+
 	/// Returns true if the key has been pressed
 	static bool GetKeyDown(KeyCode keyCode) { return Get()->GetKeyDown_Impl(keyCode); }
 

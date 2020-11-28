@@ -28,6 +28,8 @@ Application::Application()
 	_context = MakeUnique<OpenGLContext>(reinterpret_cast<GLFWwindow*>(_window->GetRawHandle()));
 	_context->Init();
 
+	Input::Prime();
+
 	_window->SetEventCallback(BIND_EVENT_FN(OnEvent));
 
 	_systemManager = _ecs.GetSystemManager();
