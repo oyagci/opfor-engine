@@ -155,7 +155,7 @@ WindowsInput::WindowsInput()
 
 	_UniqueInstance = this;
 
-	_WindowHandle = reinterpret_cast<GLFWwindow*>(Application::Get().GetWindow()->GetRawHandle());
+	_WindowHandle = static_cast<GLFWwindow*>(Application::Get().GetWindow()->GetRawHandle());
 
 	glfwSetKeyCallback(_WindowHandle, &WindowsInput::KeyCallback);
 	glfwSetMouseButtonCallback(_WindowHandle, &WindowsInput::MouseButtonCallback);

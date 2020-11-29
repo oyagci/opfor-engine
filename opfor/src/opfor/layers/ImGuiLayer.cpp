@@ -651,7 +651,7 @@ void ImGuiLayer::OnAttach()
 	//ImFont *roboto = io.Fonts->AddFontFromFileTTF("vendor/imgui/misc/fonts/Roboto-Medium.ttf", 16);
 	//io.FontDefault = roboto;
 
-	ImGui_ImplGlfw_InitForOpenGL(reinterpret_cast<GLFWwindow*>(opfor::Application::Get().GetWindow()->GetRawHandle()), true);
+	ImGui_ImplGlfw_InitForOpenGL(static_cast<GLFWwindow*>(opfor::Application::Get().GetWindow()->GetRawHandle()), true);
 	ImGui_ImplOpenGL3_Init("#version 450");
 }
 

@@ -25,7 +25,7 @@ Application::Application()
 	_Instance = this;
 
 	_window = IWindow::Create({ "OPFOR - Untitled Project", 1920, 1080 });
-	_context = MakeUnique<OpenGLContext>(reinterpret_cast<GLFWwindow*>(_window->GetRawHandle()));
+	_context = MakeUnique<OpenGLContext>(static_cast<GLFWwindow*>(_window->GetRawHandle()));
 	_context->Init();
 
 	Input::Prime();
