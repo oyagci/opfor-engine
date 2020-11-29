@@ -17,6 +17,8 @@
 #include "components/DirectionalLightComponent.hpp"
 #include "components/ModelComponent.hpp"
 
+#include <glm/gtc/quaternion.hpp>
+
 namespace opfor {
 
 MeshRenderer::MeshRenderer()
@@ -157,12 +159,13 @@ Vector<DrawCommand> MeshRenderer::RenderShadowMeshes()
 
 			auto const *mesh = Application::Get().GetMesh(meshId);
 
-			glm::mat4 model(1.0f);
-			model = glm::translate(model, transform.position);
-			model = glm::scale(model, transform.scale);
+			glm::mat4 modelMatrix(1.0f);
+			modelMatrix = glm::translate(modelMatrix, transform.position);
+			modelMatrix *= glm::mat4_cast(transform.rotation);
+			modelMatrix = glm::scale(modelMatrix, transform.scale);
 			
 			DrawCommand cmd;
-			cmd.uniformBindings = { { "modelMatrix", model } };
+			cmd.uniformBindings = { { "modelMatrix", modelMatrix } };
 			cmd.vertexArray = reinterpret_cast<Mesh const *>(mesh)->GetVertexArray();
 			drawCommands.push_back(cmd);
 		}
@@ -198,6 +201,7 @@ Vector<DrawCommand> MeshRenderer::SubmitMeshes(PerspectiveCamera const &camera)
 
 			glm::mat4 modelMatrix(1.0f);
 			modelMatrix = glm::translate(modelMatrix, transform.position);
+			modelMatrix *= glm::mat4_cast(transform.rotation);
 			modelMatrix = glm::scale(modelMatrix, transform.scale);
 
 			DrawCommand drawCommand;

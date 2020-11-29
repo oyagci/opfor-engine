@@ -320,16 +320,16 @@ void ImGuiLayer::SceneHierarchy()
 
 void ImGuiLayer::ObjectTransform()
 {
-	if (!_currentEntity) { return ; }
+	if (!_currentEntity) { return; }
 	if (!_currentEntity->HasComponents<TransformComponent>()) { return; }
 
-	if (!ImGui::CollapsingHeader("Transform")) { return ; }
+	if (!ImGui::CollapsingHeader("Transform")) { return; }
 
 	bool changed = false;
 
 	auto &transform = _currentEntity->Get<TransformComponent>();
 
-	std::array<float, 3> rotation{};
+	std::array<float, 3> rotation{ transform.rotation.x, transform.rotation.y, transform.rotation.z };
 	std::array<float, 3> translation{ transform.position.x, transform.position.y, transform.position.z };
 	std::array<float, 3> scale{ transform.scale.x, transform.scale.y, transform.scale.z };
 
