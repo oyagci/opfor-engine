@@ -372,8 +372,6 @@ void SkyboxRenderer::RenderSkybox(PerspectiveCamera const &camera)
 
 	if (skybox.size() == 0) { return ; }
 
-	RenderCommandBuffer renderCommand;
-	
 	DrawCommand drawCommand;
 		drawCommand.shader = _shader;
 		drawCommand.uniformBindings = {
@@ -385,13 +383,11 @@ void SkyboxRenderer::RenderSkybox(PerspectiveCamera const &camera)
 		};
 		drawCommand.vertexArray = _SkyboxCubeMesh.GetVertexArray();
 
-	renderCommand.disableDepthMask = true;
-	renderCommand.drawCommands = { drawCommand };
+	RenderCommandBuffer renderCommand;
+		renderCommand.disableDepthMask = true;
+		renderCommand.drawCommands = { drawCommand };
 
-	//opfor::Renderer::SetDepthMask(false);
 	Renderer::SubmitRenderCommandBuffer(renderCommand);
-	//opfor::Renderer::SetDepthMask(true);
-
 }
 
 }
