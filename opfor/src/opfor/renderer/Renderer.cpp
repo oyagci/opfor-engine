@@ -3,6 +3,7 @@
 #include "opfor/renderer/VertexArray.hpp"
 #include "opfor/renderer/Framebuffer.hpp"
 #include <glad/glad.h>
+#include <unordered_map>
 
 #if defined(OP4_PLATFORM_LINUX)
 # define __OP4_FUNCNAME__ __PRETTY_FUNCTION__
@@ -51,8 +52,16 @@ void Renderer::EndScene()
 	// PrintTree();
 	_CallsStrings.clear();
 
+	while (!_OptimizedRenderCommands.empty()) {
+		auto const &nextRenderCommand = _OptimizedRenderCommands.front();
+
+		ExecRenderCommandBuffer(nextRenderCommand);
+
+		_OptimizedRenderCommands.pop_front();
+	}
+
 	while (!_Calls.empty()) {
-		auto nextCall = _Calls.front();
+		auto &nextCall = _Calls.front();
 
 		nextCall();
 
@@ -144,23 +153,34 @@ void Renderer::SubmitDrawCommand(DrawCommand const &drawCommand)
 	for (auto const &t : drawCommand.textureBindings) {
 		Renderer::PopTexture(t.binding);
 	}
-
-	//Renderer::Shader::Pop();
 }
 
 void Renderer::SubmitRenderCommandBuffer(RenderCommandBuffer const &renderCommand)
 {
 	// For each RenderCommandBuffer:
-	//   - Get a list of DrawCommands using the same shaders
-	//   - Only bind each different shader once
+	//   - Get a list of DrawCommands which are using the same shaders
+	//   - Sort the draw commands by their shader
+	//   - Create a RenderCommandBufferOptimized using the sorted list of DrawCommands
 
-	std::unordered_map<SharedPtr<opfor::Shader>, Vector<DrawCommand>> uniqueDrawCommands;
+	std::unordered_map<SharedPtr<opfor::Shader>, Vector<DrawCommand>> drawCommandsByShader;
 	for (auto const &dc : renderCommand.drawCommands) {
-		uniqueDrawCommands[dc.shader].push_back(dc);
+		drawCommandsByShader[dc.shader].push_back(dc);
 	}
 
-	// ============================================================
+	RenderCommandBufferOptimized optimizedRenderCommand;
+		optimizedRenderCommand.framebuffer = renderCommand.framebuffer;
+		optimizedRenderCommand.viewportExtent = renderCommand.viewportExtent;
+		optimizedRenderCommand.clear = renderCommand.clear;
+		optimizedRenderCommand.capabilities = renderCommand.capabilities;
+		optimizedRenderCommand.drawCommandsByShader = std::move(drawCommandsByShader);
+		optimizedRenderCommand.disableDepthMask = renderCommand.disableDepthMask;
 
+	ExecRenderCommandBuffer(optimizedRenderCommand);
+	//_OptimizedRenderCommands.push_back(std::move(optimizedRenderCommand));
+}
+
+void Renderer::ExecRenderCommandBuffer(RenderCommandBufferOptimized const &renderCommand)
+{
 	for (auto const &cap : renderCommand.capabilities) {
 		Renderer::PushCapability(cap.first, cap.second);
 	}
@@ -182,13 +202,9 @@ void Renderer::SubmitRenderCommandBuffer(RenderCommandBuffer const &renderComman
 		glDepthMask(false);
 	}
 
-	//for (auto const &cmd : renderCommand.drawCommands) {
-	//	Renderer::SubmitDrawCommand(cmd);
-	//}
-
 	// Draw
 	// ====
-	for (auto const &[shader, uniqueShaderCommands] : uniqueDrawCommands) {
+	for (auto const &[shader, uniqueShaderCommands] : renderCommand.drawCommandsByShader) {
 		Renderer::Shader::Push(shader);
 		for (auto const &drawCommand : uniqueShaderCommands) {
 			Renderer::SubmitDrawCommand(drawCommand);

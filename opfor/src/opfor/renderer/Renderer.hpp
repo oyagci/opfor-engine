@@ -64,12 +64,25 @@ struct RenderCommandBuffer
 	bool disableDepthMask;
 };
 
+struct RenderCommandBufferOptimized
+{
+	Optional<SharedPtr<Framebuffer>> framebuffer;
+	Optional<std::pair<glm::uvec2, glm::uvec2>> viewportExtent;
+	Optional<ClearScreenParam> clear;
+	Vector<std::pair<RendererCaps, bool>> capabilities;
+	std::unordered_map<SharedPtr<opfor::Shader>, Vector<DrawCommand>> drawCommandsByShader;
+	bool disableDepthMask;
+
+};
+
 enum class RendererCaps;
 
 class Renderer
 {
 private:
 	static std::list<std::function<void()>> _Calls;
+
+	static inline std::list<RenderCommandBufferOptimized> _OptimizedRenderCommands;
 
 	static void PrintTree(unsigned int offset = 0);
 
@@ -105,6 +118,8 @@ public:
 
 	static void SubmitDrawCommand(DrawCommand const &drawCommand);
 	static void SubmitRenderCommandBuffer(RenderCommandBuffer const &renderCommand);
+
+	static void ExecRenderCommandBuffer(RenderCommandBufferOptimized const &renderCommand);
 
 	class Shader
 	{
