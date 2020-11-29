@@ -437,6 +437,7 @@ void MeshRenderer::RenderMeshes(PerspectiveCamera const &camera)
 		{ RendererCaps::DepthTest, true }
 	};
 	billboardRenderCommand.drawCommands = RenderLightBillboard(camera);
+	Renderer::SubmitRenderCommandBuffer(billboardRenderCommand);
 }
 
 void MeshRenderer::Resize(unsigned int width, unsigned int height)
