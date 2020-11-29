@@ -19,9 +19,11 @@ protected:
 
 private:
 	std::vector<EngineObject*> _subobjects;
+	std::string _editorName;
 
 public:
-	EngineObject(ecs::ECSEngine *engine) : _ecs(engine) {}
+	EngineObject(ecs::ECSEngine *engine, std::string const &editorName = "Unnamed Object")
+		: _ecs(engine), _editorName(editorName) {}
 	virtual ~EngineObject() {}
 
 	///
@@ -80,6 +82,9 @@ public:
 	{
 		return _ecs->GetEntityManager()->GetEntities<ArgTypes...>();
 	}
+
+	std::string const &GetName() const { return _editorName; }
+	void SetName(std::string const &name) { _editorName = name; }
 };
 
 }
