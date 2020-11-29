@@ -198,7 +198,7 @@ private:
 
 public:
 
-	/// Call initializing ImGui. This will ensure that callbacks are properly saved.
+	/// Call to initialize ImGui. This will ensure that callbacks are properly saved.
 	static void Prime()
 	{
 		if (_isPrimed) return;

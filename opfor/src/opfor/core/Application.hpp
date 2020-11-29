@@ -5,17 +5,12 @@
 #include <fmt/format.h>
 #include "opfor/renderer/Mesh.hpp"
 #include "opfor/renderer/Batch.hpp"
-#include "opfor/renderer/TextureManager.hpp"
 #include "opfor/core/Logger.hpp"
 #include "opfor/core/Action.hpp"
 #include "opfor/core/base.hpp"
 #include "opfor/core/Window.hpp"
-#include <Windows.h>
 #include "opfor/renderer/Context.hpp"
-#include "opfor/renderer/Framebuffer.hpp"
-#include "opfor/renderer/Texture.hpp"
 #include "opfor/core/events/EngineEvents.hpp"
-#include "opfor/core/Input.hpp"
 #include "opfor/layers/LayerStack.hpp"
 #include "opfor/renderer/SceneRenderer.hpp"
 #include "opfor/layers/ImGuiLayer.hpp"
@@ -54,7 +49,7 @@ private:
 
 	UniquePtr<PerspectiveCameraController> _camera;
 
-	std::vector<std::unique_ptr<EngineObject>> _engineObjects;
+	Vector<std::unique_ptr<EngineObject>> _engineObjects;
 
 	std::unordered_map<unsigned int, std::unique_ptr<opfor::Model>> _models;
 	std::unordered_map<unsigned int, std::unique_ptr<IDrawable>> _meshes;
@@ -88,46 +83,13 @@ private:
 	void InitViewport();
 
 public:
-	/// Observer for building the lighting of the level
-	/// Call this to rebuild the lighting of the scene
-	Action<> OnBuildLighting;
-
 	/// Select an item in the editor
 	Action<size_t> OnSelectItem;
-
-	/// Called when the level starts
-	Action<> OnStartPlaying;
-	/// Called when the level stops
-	Action<> OnStopPlaying;
 
 	// Editor
 	void OnRebuildModel(ModelComponent &model);
 
-	void StartPlaying()
-	{
-		if (_isPlaying == PlayState::Stopped) {
-			_isPlaying = PlayState::Playing;
-			OnStartPlaying();
-		}
-	}
-
-	void PausePlaying()
-	{
-		if (_isPlaying == PlayState::Playing) {
-			_isPlaying = PlayState::Paused;
-		}
-	}
-
-	void StopPlaying()
-	{
-		if (_isPlaying == PlayState::Paused ||
-			_isPlaying == PlayState::Playing) {
-			_isPlaying = PlayState::Stopped;
-			OnStopPlaying();
-		}
-	}
-
-	auto IsPlaying() { return _isPlaying == PlayState::Playing; }
+	auto IsPlaying() const { return _isPlaying == PlayState::Playing; }
 
 public:
 	Application();
@@ -144,9 +106,9 @@ public:
 	int Run();
 	void Update();
 	void UpdateObjects();
-	void UpdateSubobjects(std::vector<EngineObject*> subobjects);
+	void UpdateSubobjects(Vector<EngineObject*> subobjects);
 
-	IWindow *GetWindow() { return _window.get(); }
+	IWindow *GetWindow() const { return _window.get(); }
 
 	template <typename T, typename ... ArgTypes>
 	[[nodiscard]] T *CreateEngineObject(ArgTypes&&... args)
@@ -225,9 +187,9 @@ public:
 		return _materials[name].first;
 	}
 
-	std::vector<std::string> GetMaterialList() const
+	Vector<std::string> GetMaterialList() const
 	{
-		std::vector<std::string> materials;
+		Vector<std::string> materials;
 
 		materials.resize(_materials.size());
 		std::transform(_materials.begin(), _materials.end(), materials.begin(),
@@ -235,34 +197,34 @@ public:
 		return materials;
 	}
 
-	void Close()
+	void Close() const
 	{
 		_window->Close();
 	}
 
 	unsigned int RegisterModel(opfor::Model model);
-	std::optional<opfor::Model const *> GetModel(unsigned int id) const;
+	Optional<opfor::Model const *> GetModel(unsigned int id) const;
 	void RemoveModel(unsigned int id);
 
-	void LoadLevel(std::string const &path)
+	void LoadLevel(std::string const &path) const
 	{
 		_currentLevel->Load(path);
 	}
 
-	auto GetEntity(unsigned int id)
+	auto GetEntity(unsigned int id) const
 	{
 		return _entityManager->GetEntity(id);
 	}
 
-	void DeleteEntity(unsigned int entityId)
+	void DeleteEntity(unsigned int entityId) const
 	{
 		_entityManager->DeleteEntity(entityId);
 	}
 
 	auto &GetCurrentLevel() { return _currentLevel; }
 
-	auto GetViewport() { return _viewport; }
-	auto GetViewportTexture() { return _viewport->GetRawHandle(); }
+	auto GetViewport() const { return _viewport; }
+	auto GetViewportTexture() const { return _viewport->GetRawHandle(); }
 
 	void OnEvent(Event &);
 	bool OnWindowResize(WindowResizeEvent &e);
@@ -275,19 +237,27 @@ public:
 	void PopOverlay(Layer *overlay);
 
 	template <typename ... ArgTypes>
-	inline std::vector<ecs::IEntity<ArgTypes...>*> GetEntities()
+	Vector<ecs::IEntity<ArgTypes...>*> GetEntities()
 	{
 		return _ecs.GetEntityManager()->GetEntities<ArgTypes...>();
 	}
 
-	inline std::vector<ecs::IEntityBase*> GetAllEntities()
+	Vector<ecs::IEntityBase*> GetAllEntities()
 	{
 		return _ecs.GetEntityManager()->GetAllEntities();
 	}
 
 	void RenderImgui();
 
-	auto &GetCameraController() { return *_camera; }
+	auto &GetCameraController() const { return *_camera; }
+
+	Vector<EngineObject *> GetSubobjects()
+	{
+		Vector<EngineObject *> subobjects;
+		std::transform(_engineObjects.begin(), _engineObjects.end(), std::back_inserter(subobjects),
+			[](auto &item) { return item.get(); });
+		return subobjects;
+	}
 };
 
 UniquePtr<Application> CreateApplication();

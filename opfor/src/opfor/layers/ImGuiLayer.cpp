@@ -1,5 +1,6 @@
 #include "ImGuiLayer.hpp"
 
+#include "opfor/core/base.hpp"
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtx/quaternion.hpp>
@@ -195,13 +196,6 @@ void ImGuiLayer::MenuBar()
 
 			ImGui::EndMenu();
 		}
-		if (ImGui::BeginMenu("Lighting")) {
-			if (ImGui::MenuItem("Build")) {
-				/* Build Lighting for the Level */
-				opfor::Application::Get().OnBuildLighting();
-			}
-			ImGui::EndMenu();
-		}
 		ImGui::EndMainMenuBar();
 	}
 }
@@ -304,10 +298,13 @@ void ImGuiLayer::SceneHierarchy()
 	size_t itemIndex = 0;
 	for (auto const &ent : allEnts) {
 		auto name = ent->GetName();
-		name += "##" + std::to_string(itemIndex);
-		if (ImGui::Selectable(name.c_str(), _SelectedItem == itemIndex)) {
+		if (ImGui::TreeNodeEx((void *)itemIndex, (ImGuiTreeNodeFlags)0, "%s", name)) {
+			ImGui::TreePop();
+		}
+		if (ImGui::IsItemClicked()) {
 			Logger::Verbose("Clicked on item {} (prev. {}) (ID. {})\n",
 				itemIndex, _SelectedItem, allEnts[itemIndex]->GetId());
+
 			_SelectedItem = itemIndex;
 			_currentEntity = allEnts[itemIndex];
 			opfor::Application::Get().OnSelectItem(_SelectedItem);
@@ -488,28 +485,6 @@ void ImGuiLayer::Properties()
 			ImGui::EndPopup();
 		}
 
-	ImGui::End();
-}
-
-void ImGuiLayer::PlayMenu()
-{
-	if (ImGui::Begin("Editor Actions")) {
-		ImGui::PushItemWidth(-1);
-		if (opfor::Application::Get().IsPlaying()) {
-			if (ImGui::Button("Pause")) {
-			}
-			ImGui::SameLine();
-			if (ImGui::Button("Stop")) {
-				opfor::Application::Get().StopPlaying();
-			}
-		}
-		else {
-			if (ImGui::Button("Play")) {
-				opfor::Application::Get().StartPlaying();
-			}
-		}
-		ImGui::PopItemWidth();
-	}
 	ImGui::End();
 }
 
@@ -698,7 +673,6 @@ void ImGuiLayer::OnImGuiRender()
 		ImGui::ShowDemoWindow(&show);
 		Viewport();
 		MenuBar();
-		PlayMenu();
 		Materials();
 		Log();
 		SceneHierarchy();

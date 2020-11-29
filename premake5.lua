@@ -119,6 +119,7 @@ project "opfor-editor"
 		"%{IncludeDir.glm}",
 		"%{IncludeDir.ImGui}",
 		"%{IncludeDir.stduuid}",
+        "%{IncludeDir.tinygltf}",
         "opfor/src",
         "opfor/src/opfor",
         "opfor/thirdparty",

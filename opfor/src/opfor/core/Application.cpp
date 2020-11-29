@@ -47,7 +47,7 @@ Application::Application()
 			}
 		}
 
-		if (matches.size() > 0) {
+		if (!matches.empty()) {
 			auto prev = _ecs.GetEntityManager()->GetEntities<SelectedComponent>();
 			for (auto &p : prev) {
 				p->DeleteComponents<SelectedComponent>();
@@ -129,7 +129,7 @@ int Application::Run()
 	{
 		float deltaTime = Time::Get().getDeltaTime();
 
-		for (auto layer : _LayerStack) {
+		for (auto *layer : _LayerStack) {
 			layer->OnUpdate(deltaTime);
 		}
 		Update();
@@ -172,7 +172,7 @@ void Application::UpdateObjects()
 	}
 }
 
-void Application::UpdateSubobjects(std::vector<EngineObject*> subobjects)
+void Application::UpdateSubobjects(Vector<EngineObject*> subobjects)
 {
 	for (auto &o : subobjects) {
 		o->Update();

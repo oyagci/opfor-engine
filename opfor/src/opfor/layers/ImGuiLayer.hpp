@@ -25,7 +25,6 @@ private:
 	void Materials();
 	void Log();
 	void Properties();
-	void PlayMenu();
 	void Viewport();
 	void SceneHierarchy();
 
