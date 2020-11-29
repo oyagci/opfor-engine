@@ -61,8 +61,6 @@ Application::Application()
 	});
 	OnSelectItem += _selectItem;
 
-	_currentLevel = std::make_unique<Level>();
-
 	InitViewport();
 
 	opfor::TextureParameterList texParams = {

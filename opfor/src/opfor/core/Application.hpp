@@ -54,7 +54,6 @@ private:
 	std::unordered_map<unsigned int, std::unique_ptr<opfor::Model>> _models;
 	std::unordered_map<unsigned int, std::unique_ptr<IDrawable>> _meshes;
 	std::unordered_map<unsigned int, std::unique_ptr<Batch>> _batches;
-	std::unique_ptr<ILevel> _currentLevel;
 
 	using MaterialContainer = std::pair<unsigned int, Material>;
 
@@ -206,11 +205,6 @@ public:
 	Optional<opfor::Model const *> GetModel(unsigned int id) const;
 	void RemoveModel(unsigned int id);
 
-	void LoadLevel(std::string const &path) const
-	{
-		_currentLevel->Load(path);
-	}
-
 	auto GetEntity(unsigned int id) const
 	{
 		return _entityManager->GetEntity(id);
@@ -220,8 +214,6 @@ public:
 	{
 		_entityManager->DeleteEntity(entityId);
 	}
-
-	auto &GetCurrentLevel() { return _currentLevel; }
 
 	auto GetViewport() const { return _viewport; }
 	auto GetViewportTexture() const { return _viewport->GetRawHandle(); }
