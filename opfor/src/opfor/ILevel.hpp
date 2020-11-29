@@ -11,11 +11,9 @@ namespace opfor {
 class ILevel
 {
 public:
-	virtual ~ILevel() {}
+	virtual ~ILevel() = default;
 
-	virtual void Load(const std::string &path) = 0;
-	virtual void Unload() = 0;
-	virtual ecs::IEntityBase *CreateEntity() = 0;
+	virtual Vector<ecs::IEntityBase*> GetEntities() const = 0;
 };
 
 }

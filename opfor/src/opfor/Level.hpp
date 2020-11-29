@@ -45,7 +45,7 @@ public:
 	///
 	/// Load a level from a level JSON
 	///
-	void Load(std::string const &path) override
+	void Load(std::string const &path)
 	{
 		if (_isLoaded) {
 			Unload();
@@ -128,7 +128,7 @@ public:
 		_isLoaded = true;
 	}
 
-	void Unload() override {
+	void Unload() {
 		_isLoaded = false;
 
 		for (auto &entity : _entities) {
@@ -146,7 +146,7 @@ public:
 	/// Create an Entity.
 	/// The lifetime of the created entity is managed by the Level (Load/Unload)
 	///
-	ecs::IEntityBase *CreateEntity() override
+	ecs::IEntityBase *CreateEntity()
 	{
 		auto entity = opfor::Application::Get().CreateEntity<TransformComponent>();
 		_entities[entity->GetUuid()] = entity;

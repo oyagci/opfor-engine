@@ -28,6 +28,8 @@
 
 #include "opfor/core/events/EngineEvents.hpp"
 
+#include "opfor/core/LevelSerializer.hpp"
+
 ImGuiLayer::ImGuiLayer() = default;
 
 std::unique_ptr<char[]> GetCwd()
@@ -179,10 +181,11 @@ void ImGuiLayer::MenuBar()
 				char *outPath = nullptr;
 				NFD_OpenDialog(nullptr, GetCwd().get(), &outPath);
 				if (outPath) {
-					opfor::Application::Get().LoadLevel(outPath);
+					//opfor::Application::Get().LoadLevel(outPath);
 				}
 			}
 			if (ImGui::MenuItem("Save Level")) {
+				fmt::print("{}\n", opfor::LevelSerializer::Serialize());
 			}
 			if (ImGui::MenuItem("Save Level As...")) {
 				char *outPath = nullptr;
@@ -275,13 +278,13 @@ void ImGuiLayer::SceneHierarchy()
 	if (ImGui::BeginPopup("hierarchy_popup_menu")) {
 		if (ImGui::BeginMenu("Add...")) {
 			if (ImGui::MenuItem("Entity")) {
-				auto ent = opfor::Application::Get().GetCurrentLevel()->CreateEntity();
-				(void)ent;
+				//auto ent = opfor::Application::Get().GetCurrentLevel()->CreateEntity();
+				//(void)ent;
 			}
 			if (ImGui::MenuItem("Point Light")) {
-				auto ent = opfor::Application::Get().GetCurrentLevel()->CreateEntity();
-				ent->AddComponents<PointLightComponent>();
-				(void)ent;
+				//auto ent = opfor::Application::Get().GetCurrentLevel()->CreateEntity();
+				//ent->AddComponents<PointLightComponent>();
+				//(void)ent;
 			}
 			ImGui::EndMenu();
 		}
