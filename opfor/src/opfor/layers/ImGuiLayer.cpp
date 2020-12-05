@@ -517,7 +517,7 @@ void ImGuiLayer::Viewport()
 		float targetAspectRatio = _ViewportSize.x / _ViewportSize.y;
 
 		// I would've loved to just reinterpret_cast to ImTextureID but the compiler won't let me :(
-		uint32_t rawHandle = opfor::Application::Get().GetViewport()->GetRawHandle();
+		uint32_t rawHandle = opfor::Application::Get().GetViewport()->GetTexture()->GetRawHandle();
 		ImTextureID *rawHandleP = (ImTextureID*)&rawHandle;
 
 		if ((winSize.x / winSize.y) < targetAspectRatio) {

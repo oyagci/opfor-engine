@@ -31,6 +31,7 @@ namespace opfor {
 		uint32_t GetRawHandle() { return _Framebuffer->GetRawHandle(); }
 		auto GetFramebuffer() { return _Framebuffer; }
 		auto &GetSize() { return _Size; }
+		auto GetTexture() { return _Texture; }
 	};
 
 }
