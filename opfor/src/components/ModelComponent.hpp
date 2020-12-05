@@ -6,7 +6,7 @@
 
 struct ModelComponent : ecs::IComponentBase
 {
-	std::string Path;
-	unsigned int Shader;
-	std::vector<unsigned int> Meshes;
+	std::string path = "";
+	unsigned int shader = 0;
+	std::vector<unsigned int> meshes{};
 };

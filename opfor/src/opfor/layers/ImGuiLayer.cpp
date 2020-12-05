@@ -368,7 +368,7 @@ void ImGuiLayer::ObjectMesh()
 	ImGui::Text("File Path");
 	ImGui::NextColumn();
 
-	std::string inputFilePath = model.Path;
+	std::string inputFilePath = model.path;
 
 	if (ImGui::InputText("##FilePath", &inputFilePath)) {
 	}
@@ -378,7 +378,7 @@ void ImGuiLayer::ObjectMesh()
 		// Open File Dialog
 		if (NFD_OpenDialog(nullptr, GetCwd().get(), &newPath) == NFD_OKAY
 			&& newPath) {
-			model.Path = std::string(newPath);
+			model.path = std::string(newPath);
 			opfor::Application::Get().OnRebuildModel(model);
 		}
 	}
@@ -475,7 +475,7 @@ void ImGuiLayer::Properties()
 				_currentEntity->AddComponents<ModelComponent>();
 
 				auto &model = _currentEntity->Get<ModelComponent>();
-				model.Shader = shaderId;
+				model.shader = shaderId;
 			}
 			if (ImGui::MenuItem("Transform")) {
 				_currentEntity->AddComponents<TransformComponent>();

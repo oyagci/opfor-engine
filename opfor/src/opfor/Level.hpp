@@ -74,10 +74,10 @@ public:
 
 			engineModel.LoadFromGLTF(model["uri"].get<std::string>());
 
-			component.Meshes.insert(component.Meshes.begin(),
+			component.meshes.insert(component.meshes.begin(),
 				engineModel.GetMeshes().begin(),
 				engineModel.GetMeshes().end());
-			component.Shader = _meshShader;
+			component.shader = _meshShader;
 
 			_models[uuid] = component;
 		}

@@ -209,19 +209,19 @@ std::optional<Model const *> Application::GetModel(unsigned int id) const
 
 void Application::OnRebuildModel(ModelComponent &model)
 {
-	for (auto const &m : model.Meshes) {
+	for (auto const &m : model.meshes) {
 		RemoveModel(m);
 	}
-	model.Meshes.clear();
+	model.meshes.clear();
 
 	Model modelData{};
-	modelData.LoadFromGLTF(model.Path);
+	modelData.LoadFromGLTF(model.path);
 
 	auto const &meshes = modelData.GetMeshes();
 
 	if (meshes.size() > 0) {
-		model.Meshes.reserve(meshes.size());
-		model.Meshes.insert(model.Meshes.begin(), meshes.begin(), meshes.end());
+		model.meshes.reserve(meshes.size());
+		model.meshes.insert(model.meshes.begin(), meshes.begin(), meshes.end());
 	}
 }
 

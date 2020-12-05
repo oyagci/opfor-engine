@@ -155,7 +155,7 @@ Vector<DrawCommand> MeshRenderer::RenderShadowMeshes()
 
 		auto [ model, transform ] = entity->GetAll();
 
-		for (auto const meshId : model.Meshes) {
+		for (auto const meshId : model.meshes) {
 
 			auto const *mesh = Application::Get().GetMesh(meshId);
 
@@ -185,10 +185,10 @@ Vector<DrawCommand> MeshRenderer::SubmitMeshes(PerspectiveCamera const &camera)
 
 		auto const [ model, transform ] = entity->GetAll();
 
-		for (auto const meshId : model.Meshes) {
+		for (auto const meshId : model.meshes) {
 
 			auto const mesh = Application::Get().GetMesh(meshId);
-			auto const shaderId = model.Shader;
+			auto const shaderId = model.shader;
 
 			auto shaderOpt = ShaderManager::Get().Get(shaderId);
 
