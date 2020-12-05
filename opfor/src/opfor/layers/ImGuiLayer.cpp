@@ -80,7 +80,7 @@ void ImGuiLayer::DrawGuizmoSelectedEnt()
 	if (cameras.size() <= 0) { return; }
 
 	auto &cameraEnt = cameras[0];
-	auto &camera = cameraEnt->Get<PlayerCameraComponent>();
+	auto &camera = opfor::Application::Get().GetCameraController().GetCamera();
 	auto selectedEnt = opfor::Application::Get().GetEntities<TransformComponent, SelectedComponent>();
 	
 	if (selectedEnt.size() > 0) {
@@ -112,7 +112,7 @@ void ImGuiLayer::DrawGuizmoSelectedEnt()
 		glm::mat4 cpy = model;
 
 		ImGuizmo::SetDrawlist();
-		ImGuizmo::Manipulate(&camera.view[0][0], &camera.projection[0][0],
+		ImGuizmo::Manipulate(&camera.GetViewMatrix()[0][0], &camera.GetProjection()[0][0],
 			ImGuizmo::TRANSLATE,
 			ImGuizmo::WORLD,
 			&model[0][0],
