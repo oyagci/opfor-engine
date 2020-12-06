@@ -2,7 +2,7 @@
 
 #include "renderer.hpp"
 #include "opfor/core/base.hpp"
-#include <glad/glad.h>
+#include "opfor/core/base.hpp"
 
 namespace opfor {
 

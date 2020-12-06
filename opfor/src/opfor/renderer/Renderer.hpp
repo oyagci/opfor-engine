@@ -1,6 +1,6 @@
 #pragma once
 
-#include <glad/glad.h>
+#include "opfor/core/base.hpp"
 #include "RenderCommand.hpp"
 #include <list>
 

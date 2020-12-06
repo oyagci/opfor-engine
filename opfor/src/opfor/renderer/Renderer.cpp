@@ -2,7 +2,7 @@
 
 #include "opfor/renderer/VertexArray.hpp"
 #include "opfor/renderer/Framebuffer.hpp"
-#include <glad/glad.h>
+#include "opfor/core/base.hpp"
 #include <unordered_map>
 
 #if defined(OP4_PLATFORM_LINUX)

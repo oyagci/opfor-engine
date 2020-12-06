@@ -4,7 +4,7 @@
 #include "opfor/core/base.hpp"
 #include "opfor/core/ImageLoader.hpp"
 #include <glm/glm.hpp>
-#include <glad/glad.h>
+#include "opfor/core/base.hpp"
 
 namespace opfor {
 

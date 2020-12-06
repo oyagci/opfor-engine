@@ -3,7 +3,7 @@
 #include <sstream>
 #include <fstream>
 #include <cstring>
-#include <glad/glad.h>
+#include "opfor/core/base.hpp"
 
 namespace opfor {
 

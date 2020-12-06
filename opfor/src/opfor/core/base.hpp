@@ -11,6 +11,7 @@
 # define OP4_DEBUGBREAK() raise(SIGTRAP)
 # define OP4_ABORT() abort();
 #elif OP4_PLATFORM_WINDOWS
+# include <Windows.h>
 # define OP4_DEBUGBREAK() (void)0
 # define OP4_ABORT() abort();
 #else
@@ -24,6 +25,9 @@
 #define OP4_CORE_UNREACHABLE(...) { OP4_CORE_ERROR("Unreachable: {0}\n"); OP4_ABORT(); }
 
 #define BIT(x) (1 << x)
+
+#include <glad/glad.h>
+#include <GLFW/glfw3.h>
 
 namespace opfor {
 

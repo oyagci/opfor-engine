@@ -115,6 +115,7 @@ project "opfor-editor"
     includedirs
     {
         "%{IncludeDir.fmt}",
+        "%{IncludeDir.GLFW}",
         "%{IncludeDir.GLAD}",
 		"%{IncludeDir.glm}",
 		"%{IncludeDir.ImGui}",

@@ -1,5 +1,5 @@
 #include "OpenGLContext.hpp"
-#include <glad/glad.h>
+#include "opfor/core/base.hpp"
 #include <GLFW/glfw3.h>
 
 namespace opfor {
