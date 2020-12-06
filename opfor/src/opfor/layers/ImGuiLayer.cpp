@@ -293,7 +293,7 @@ void ImGuiLayer::SceneHierarchy()
 	size_t itemIndex = 0;
 	for (auto const &ent : allEnts) {
 		auto name = ent->GetName();
-		if (ImGui::TreeNodeEx((void *)itemIndex, (ImGuiTreeNodeFlags)0, "%s", name)) {
+		if (ImGui::TreeNodeEx((void *)itemIndex, (ImGuiTreeNodeFlags)0, "%s", name.c_str())) {
 			ImGui::TreePop();
 		}
 		if (ImGui::IsItemClicked()) {

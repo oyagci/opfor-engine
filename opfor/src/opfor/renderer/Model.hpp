@@ -15,7 +15,7 @@ namespace opfor {
 class Model
 {
 private:
-	unsigned int _id;
+	unsigned int _id = 0;
 	std::vector<unsigned int> _meshes;
 
 	std::optional<std::vector<unsigned int>> TinyProcessNode(tinygltf::Node const &node, tinygltf::Model const &model, std::vector<std::string> const &materials)

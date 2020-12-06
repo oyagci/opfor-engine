@@ -8,7 +8,7 @@
 struct PbrMaterial
 {
 	std::string Name;
-	glm::vec4 BaseColor;
+	glm::vec4 BaseColor{};
 	std::optional<std::string> Albedo;
 	std::optional<std::string> Normal;
 	std::optional<std::string> MetallicRoughness;

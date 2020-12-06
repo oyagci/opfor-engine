@@ -10,7 +10,7 @@ private:
 	ImVec2 _ViewportPosition;
 	ImVec2 _ViewportSize;
 
-	bool _logAutoScroll;
+	bool _logAutoScroll = true;
 	size_t _SelectedItem = 0;
 
 	ecs::IEntityBase *_currentEntity = nullptr;
