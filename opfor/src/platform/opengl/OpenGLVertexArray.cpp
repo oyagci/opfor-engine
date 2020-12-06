@@ -50,17 +50,19 @@ void OpenGLVertexArray::AddVertexBuffer(SharedPtr<VertexBuffer> vertexBuffer)
 
 	OP4_CORE_ASSERT(elements.size() > 0, "No elements in buffer layout!\n");
 
-	for (size_t i = 0; i < elements.size(); i++) {
+	for (uint32_t i = 0; i < static_cast<uint32_t>(elements.size()); i++) {
 
 		auto const &elem = elements[i];
 
+		uint64_t const offset = elem.Offset;
+
 		glEnableVertexAttribArray(i);
 		glVertexAttribPointer(i,
-			elem.GetComponentCount(),
+			static_cast<GLsizei>(elem.GetComponentCount()),
 			ShaderDataTypeToOpenGLBase(elem.Type),
 			elem.Normalized,
 			layout.GetStride(),
-			reinterpret_cast<void*>(elem.Offset));
+			reinterpret_cast<void*>(offset));
 	}
 
 	_VertexBuffers.push_back(vertexBuffer);

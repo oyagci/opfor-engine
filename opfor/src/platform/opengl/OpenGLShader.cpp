@@ -246,12 +246,6 @@ uint32_t OpenGLShader::FindUniformLocation(std::string name)
 	}
 }
 
-void OpenGLShader::SetUniform(std::string const &name, size_t value)
-{
-	auto loc = FindUniformLocation(name);
-	glUniform1i(loc, value);
-}
-
 void OpenGLShader::SetUniform(std::string const &name, int32_t value)
 {
 	auto loc = FindUniformLocation(name);
@@ -303,7 +297,7 @@ void OpenGLShader::SetUniform(std::string const &name, std::vector<glm::mat4> ma
 	}
 
 	auto loc = FindUniformLocation(name);
-	glUniformMatrix4fv(loc, dataSize, GL_FALSE, (float *)matrices.data());
+	glUniformMatrix4fv(loc, static_cast<GLsizei>(dataSize), GL_FALSE, reinterpret_cast<float*>(matrices.data()));
 }
 
 void OpenGLShader::SetUniform(std::string const &name, std::vector<glm::vec3> vectors, std::optional<size_t> size)
@@ -315,7 +309,7 @@ void OpenGLShader::SetUniform(std::string const &name, std::vector<glm::vec3> ve
 	}
 
 	auto loc = FindUniformLocation(name);
-	glUniform3fv(loc, dataSize, (float *)vectors.data());
+	glUniform3fv(loc, static_cast<GLsizei>(dataSize), reinterpret_cast<float*>(vectors.data()));
 }
 
 void OpenGLShader::Bind()

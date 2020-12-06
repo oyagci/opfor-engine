@@ -124,7 +124,7 @@ void SkyboxRenderer::InitHDRI()
 
 	for (size_t i = 0; i < 6; i++) {
 		_SphericalToCubemap->SetUniform("viewMatrix", views[i]);
-		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, envCubemap->GetRawHandle(), 0);
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + static_cast<GLenum>(i), envCubemap->GetRawHandle(), 0);
 		opfor::RenderCommand::Clear(opfor::ClearFlag::ColorBit | opfor::ClearFlag::DepthBit);
 		_SkyboxCubeMesh.Draw();
 	}
@@ -173,7 +173,7 @@ void SkyboxRenderer::InitHDRI()
 
 	for (size_t i = 0; i < 6; i++) {
 		irradianceShader->SetUniform("viewMatrix", views[i]);
-		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, _Irradiance->GetRawHandle(), 0);
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + static_cast<GLenum>(i), _Irradiance->GetRawHandle(), 0);
 		opfor::RenderCommand::Clear(opfor::ClearFlag::ColorBit | opfor::ClearFlag::DepthBit);
 		_SkyboxCubeMesh.Draw();
 	}
@@ -220,8 +220,8 @@ void SkyboxRenderer::InitHDRI()
 	size_t maxMipLevel = 5;
 	for (size_t mip = 0; mip < maxMipLevel; mip++) {
 
-		unsigned int mipWidth = 128 * std::pow(0.5, mip);
-		unsigned int mipHeight = 128 * std::pow(0.5, mip);
+		unsigned int mipWidth = 128 * static_cast<int>(std::pow(0.5, mip));
+		unsigned int mipHeight = 128 * static_cast<int>(std::pow(0.5, mip));
 
 		captureRbo->Bind();
 		glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, mipWidth, mipHeight);
@@ -233,7 +233,7 @@ void SkyboxRenderer::InitHDRI()
 		for (unsigned int i = 0; i < 6; i++) {
 			prefilterShader->SetUniform("viewMatrix", views[i]);
 			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i,
-				_Prefilter->GetRawHandle(), mip);
+				_Prefilter->GetRawHandle(), static_cast<GLint>(mip));
 			opfor::RenderCommand::Clear(opfor::ClearFlag::ColorBit | opfor::ClearFlag::DepthBit);
 			_SkyboxCubeMesh.Draw();
 		}

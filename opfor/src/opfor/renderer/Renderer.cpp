@@ -318,7 +318,7 @@ void Renderer::Shader::Pop()
 void Renderer::Shader::SetUniform(std::string const &name, size_t value)
 {
 	_CallsStrings.push_back(__OP4_FUNCNAME__);
-	_Calls.push_back([name, value] () { RenderCommand::SetUniform(name, value); });
+	_Calls.push_back([name, value] () { RenderCommand::SetUniform(name, static_cast<uint32_t>(value)); });
 }
 
 void Renderer::Shader::SetUniform(std::string const &name, int32_t value)

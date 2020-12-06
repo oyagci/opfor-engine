@@ -73,11 +73,6 @@ void Batch::Build()
 //		offset += _materials.size() * sizeof(GLfloat);
 //	}
 
-	std::vector<GLfloat> _materialIds{};
-	_materialIds.reserve(_materials.size());
-	std::transform(_materials.begin(), _materials.end(), _materialIds.begin(),
-		[] (std::string const &m) -> GLfloat { return opfor::Application::Get().GetMaterialId(m); });
-
 	glGenBuffers(1, &_ibo);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _ibo);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLuint) * _indices.size(), _indices.data(), GL_STATIC_DRAW);
@@ -88,7 +83,7 @@ void Batch::Build()
 void Batch::Draw() const
 {
 	glBindVertexArray(_vao);
-	glDrawElements(GL_TRIANGLES, _indices.size(), GL_UNSIGNED_INT, nullptr);
+	glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(_indices.size()), GL_UNSIGNED_INT, nullptr);
 	glBindVertexArray(0);
 }
 

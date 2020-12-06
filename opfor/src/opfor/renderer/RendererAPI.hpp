@@ -58,7 +58,6 @@ public:
 	virtual void PushShader(SharedPtr<Shader> const &) = 0;
 	virtual void PopShader() = 0;
 
-	virtual void SetUniform(std::string const &name, size_t value) = 0;
 	virtual void SetUniform(std::string const &name, int32_t value) = 0;
 	virtual void SetUniform(std::string const &name, uint32_t value) = 0;
 	virtual void SetUniform(std::string const &name, float value) = 0;

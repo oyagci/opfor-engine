@@ -8,6 +8,7 @@ solution "TinyGLTFSolution"
 
    if (os.is("windows")) then
       platforms { "x32", "x64" }
+      defines { "_CRT_NO_SECURE_WARNINGS" }
    else
       platforms { "native", "x32", "x64" }
    end

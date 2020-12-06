@@ -22,7 +22,10 @@ namespace opfor {
 	{
 		auto prevViewport = _prevViewports.back();
 
-		glViewport(prevViewport.first.x, prevViewport.first.y, prevViewport.second.x, prevViewport.second.y);
+		glViewport(static_cast<GLint>(prevViewport.first.x),
+			static_cast<GLint>(prevViewport.first.y),
+			static_cast<GLsizei>(prevViewport.second.x),
+			static_cast<GLsizei>(prevViewport.second.y));
 
 		_prevViewports.pop_back();
 	}
@@ -53,7 +56,7 @@ namespace opfor {
 
 	void OpenGLRendererAPI::DrawIndexed(SharedPtr<VertexArray> const &vertexArray)
 	{
-		glDrawElements(GL_TRIANGLES, vertexArray->GetIndexBuffer()->GetCount(),
+		glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(vertexArray->GetIndexBuffer()->GetCount()),
 			GL_UNSIGNED_INT, nullptr);
 	}
 
@@ -209,12 +212,6 @@ namespace opfor {
 		glDepthMask(val == true ? GL_TRUE : GL_FALSE);
 	}
 
-	void OpenGLRendererAPI::SetUniform(std::string const &name, size_t value)
-	{
-		auto loc = FindUniformLocation(name);
-		glUniform1i(loc, value);
-	}
-
 	void OpenGLRendererAPI::SetUniform(std::string const &name, int32_t value)
 	{
 		auto loc = FindUniformLocation(name);
@@ -266,7 +263,7 @@ namespace opfor {
 		}
 
 		auto loc = FindUniformLocation(name);
-		glUniformMatrix4fv(loc, dataSize, GL_FALSE, (float *)matrices.data());
+		glUniformMatrix4fv(loc, static_cast<GLsizei>(dataSize), GL_FALSE, reinterpret_cast<float*>(matrices.data()));
 	}
 
 	void OpenGLRendererAPI::SetUniform(std::string const &name, std::vector<glm::vec3> vectors, std::optional<size_t> size)
@@ -278,7 +275,7 @@ namespace opfor {
 		}
 
 		auto loc = FindUniformLocation(name);
-		glUniform3fv(loc, dataSize, (float *)vectors.data());
+		glUniform3fv(loc, static_cast<GLsizei>(dataSize), reinterpret_cast<float*>(vectors.data()));
 	}
 
 }

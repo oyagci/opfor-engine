@@ -90,11 +90,6 @@ class RenderCommand
 			_API->PopShader();
 		}
 
-		static inline void SetUniform(std::string const &name, size_t value)
-		{
-			_API->SetUniform(name, value);
-		}
-
 		static inline void SetUniform(std::string const &name, int32_t value)
 		{
 			_API->SetUniform(name, value);

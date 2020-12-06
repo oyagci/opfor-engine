@@ -23,7 +23,7 @@ void Settings::loadDefaults()
 		auto now_ms = std::chrono::time_point_cast<std::chrono::milliseconds>(now);
 		auto epoch = now_ms.time_since_epoch();
 		auto value = std::chrono::duration_cast<std::chrono::milliseconds>(epoch);
-		long duration = value.count();
+		long long duration = value.count();
 
 		_values["seed"] = static_cast<unsigned int>(duration);
 	}

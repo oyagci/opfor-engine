@@ -84,7 +84,7 @@ void OpenGLFramebuffer::UpdateDrawBuffers() const
 	}
 
 	if (attachments.size() > 0) {
-		glDrawBuffers(attachments.size(), attachments.data());
+		glDrawBuffers(static_cast<GLsizei>(attachments.size()), attachments.data());
 	}
 }
 

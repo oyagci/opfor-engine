@@ -157,7 +157,7 @@ namespace opfor
 	void Mesh::Draw() const
 	{
 		_vertexArray->Bind();
-		glDrawElements(GL_TRIANGLES, _vertexArray->GetIndexBuffer()->GetCount(), GL_UNSIGNED_INT, nullptr);
+		glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(_vertexArray->GetIndexBuffer()->GetCount()), GL_UNSIGNED_INT, nullptr);
 		_vertexArray->Unbind();
 	}
 
