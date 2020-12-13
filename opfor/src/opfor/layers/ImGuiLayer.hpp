@@ -3,6 +3,9 @@
 #include "Layer.hpp"
 #include "imgui.h"
 #include "ecs/Entity.hpp"
+#include <glm/vec2.hpp>
+#include "editor/EditorViewport.hpp"
+#include "editor/EditorMenuBar.hpp"
 
 class ImGuiLayer : public opfor::Layer
 {
@@ -14,6 +17,9 @@ private:
 	size_t _SelectedItem = 0;
 
 	ecs::IEntityBase *_currentEntity = nullptr;
+
+	opfor::UniquePtr<EditorViewport> _viewport;
+	opfor::UniquePtr<EditorMenuBar> _menuBar;
 
 	void BeginFrame();
 	void EndFrame();

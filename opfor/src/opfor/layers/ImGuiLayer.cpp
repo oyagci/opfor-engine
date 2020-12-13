@@ -6,11 +6,6 @@
 #include <glm/gtx/quaternion.hpp>
 #include <glm/gtx/matrix_decompose.hpp>
 #include <string>
-#ifdef OP4_PLATFORM_LINUX
-# include <unistd.h>
-#elif defined(OP4_PLATFORM_WINDOWS)
-# include <direct.h>
-#endif
 
 #include "opfor/core/Application.hpp"
 #include "examples/imgui_impl_opengl3.h"
@@ -30,35 +25,12 @@
 
 #include "opfor/core/LevelSerializer.hpp"
 
-ImGuiLayer::ImGuiLayer() = default;
+opfor::UniquePtr<char[]> GetCwd();
 
-std::unique_ptr<char[]> GetCwd()
+ImGuiLayer::ImGuiLayer()
+	: _viewport(opfor::MakeUnique<EditorViewport>()),
+	_menuBar(opfor::MakeUnique<EditorMenuBar>())
 {
-#ifdef OP4_PLATFORM_LINUX
-	auto buf = getcwd(nullptr, 0);
-
-	auto ret = std::make_unique<char[]>(strlen(buf));
-	strcpy(ret.get(), buf);
-
-	return ret;
-#elif defined(OP4_PLATFORM_WINDOWS)
-	DWORD bufLen = GetCurrentDirectory(0, nullptr);
-	auto buffer = std::make_unique<WCHAR[]>(bufLen);
-
-	//std::wcstombs
-	GetCurrentDirectory(bufLen, buffer.get());
-
-	auto ret = std::make_unique<char[]>(bufLen);
-	
-	size_t pRetVal = 0;
-	
-
-	wcstombs_s(&pRetVal, ret.get(), bufLen, buffer.get(), bufLen);
-
-	return ret;
-#else
-# error "Unsupported Platform!"
-#endif
 }
 
 void ImGuiLayer::BeginFrame()
@@ -73,59 +45,6 @@ void ImGuiLayer::EndFrame()
 	ImGui::EndFrame();
 	ImGui::Render();
 	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-}
-
-void ImGuiLayer::DrawGuizmoSelectedEnt()
-{
-	auto &camera = opfor::Application::Get().GetCameraController().GetCamera();
-	auto selectedEnt = opfor::Application::Get().GetEntities<TransformComponent, SelectedComponent>();
-	
-	if (selectedEnt.size() > 0) {
-
-		auto selected = selectedEnt[0]->Get<TransformComponent>();
-
-		glm::mat4 model(1.0f);
-		model = glm::translate(model, selected.position);
-		model = glm::scale(model, selected.scale);
-
-		bool changed = false;
-
-		ImGuizmo::BeginFrame();
-		ImGuizmo::SetRect(_ViewportPosition.x, _ViewportPosition.y, _ViewportSize.x, _ViewportSize.y);
-		{
-			std::array<float, 3> rotation{} , translation{}, scale{};
-			ImGuizmo::DecomposeMatrixToComponents(&model[0][0],
-				translation.data(), rotation.data(), scale.data());
-
-			ImGuizmo::RecomposeMatrixFromComponents(translation.data(), rotation.data(), scale.data(),
-				&model[0][0]);
-		}
-
-		glm::quat rotation;
-		glm::vec3 skew(0.0f);
-		glm::vec4 persp(0.0f);
-		ImGuizmo::DecomposeMatrixToComponents(&model[0][0], &selected.position[0], &rotation[0], &selected.scale[0]);
-
-		glm::mat4 cpy = model;
-
-		ImGuizmo::SetDrawlist();
-		ImGuizmo::Manipulate(&camera.GetViewMatrix()[0][0], &camera.GetProjection()[0][0],
-			ImGuizmo::TRANSLATE,
-			ImGuizmo::WORLD,
-			&model[0][0],
-			nullptr,
-			nullptr);
-
-		if (cpy != model) {
-			changed = true;
-		}
-
-		glm::decompose(model, selected.scale, rotation, selected.position, skew, persp);
-		if (changed) {
-			selectedEnt[0]->Set(selected);
-		}
-
-	}
 }
 
 void ImGuiLayer::BeginDockspace()
@@ -163,39 +82,6 @@ void ImGuiLayer::BeginDockspace()
 void ImGuiLayer::EndDockspace()
 {
 	ImGui::End();
-}
-
-void ImGuiLayer::MenuBar()
-{
-	if (ImGui::BeginMainMenuBar()) {
-		if (ImGui::BeginMenu("File")) {
-			if (ImGui::MenuItem("Close")) {
-				opfor::Application::Get().Close();
-			}
-
-			ImGui::Separator();
-
-			if (ImGui::MenuItem("New Level")) {
-			}
-			if (ImGui::MenuItem("Open Level")) {
-				char *outPath = nullptr;
-				NFD_OpenDialog(nullptr, GetCwd().get(), &outPath);
-				if (outPath) {
-					//opfor::Application::Get().LoadLevel(outPath);
-				}
-			}
-			if (ImGui::MenuItem("Save Level")) {
-				fmt::print("{}\n", opfor::LevelSerializer::Serialize());
-			}
-			if (ImGui::MenuItem("Save Level As...")) {
-				char *outPath = nullptr;
-				NFD_OpenDialog(nullptr, GetCwd().get(), &outPath);
-			}
-
-			ImGui::EndMenu();
-		}
-		ImGui::EndMainMenuBar();
-	}
 }
 
 void ImGuiLayer::Materials()
@@ -486,66 +372,6 @@ void ImGuiLayer::Properties()
 	ImGui::End();
 }
 
-void ImGuiLayer::Viewport()
-{
-	ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
-
-	ImGuiWindowFlags windowFlags = ImGuiWindowFlags_NoScrollbar;
-
-	if (ImGui::Begin("Viewport", nullptr, windowFlags)) {
-
-		auto prevSize = _ViewportSize;
-		_ViewportSize = ImGui::GetWindowSize();
-		_ViewportPosition = ImGui::GetWindowPos();
-
-		ImVec2 winSize = ImGui::GetWindowSize();
-
-		// TODO: Automatically adjust to viewport's aspect ratio.
-
-		if (abs(prevSize.x - _ViewportSize.x) > 0.01 ||
-			abs(prevSize.y - _ViewportSize.y) > 0.01) {
-
-			opfor::ViewportResizeEvent e(static_cast<int>(_ViewportSize.x), static_cast<int>(_ViewportSize.y));
-			opfor::Application::Get().OnEvent(e);
-
-			opfor::Application::Get().GetCameraController().GetCamera().SetAspect(_ViewportSize.x / _ViewportSize.y);
-		}
-
-		// float targetAspectRatio = 16.0f / 9.0f;
-		float targetAspectRatio = _ViewportSize.x / _ViewportSize.y;
-
-		// I would've loved to just reinterpret_cast to ImTextureID but the compiler won't let me :(
-		uint32_t rawHandle = opfor::Application::Get().GetViewport()->GetTexture()->GetRawHandle();
-		ImTextureID *rawHandleP = (ImTextureID*)&rawHandle;
-
-		if ((winSize.x / winSize.y) < targetAspectRatio) {
-			ImGui::Image(*rawHandleP,
-				{ winSize.x, winSize.x / targetAspectRatio },
-				ImVec2(0.0f, 1.0f),
-				ImVec2(1.0f, 0.0f),
-				ImVec4(1.0f, 1.0f, 1.0f, 1.0f),
-				ImVec4(1.0f, 1.0f, 1.0f, 0.0f));
-
-			_ViewportSize.y = winSize.x / targetAspectRatio;
-		}
-		else {
-			ImGui::Image(*rawHandleP,
-				{ winSize.y * targetAspectRatio, winSize.y },
-				ImVec2(0.0f, 1.0f),
-				ImVec2(1.0f, 0.0f),
-				ImVec4(1.0f, 1.0f, 1.0f, 1.0f),
-				ImVec4(1.0f, 1.0f, 1.0f, 0.0f));
-
-			_ViewportSize.x = winSize.y * targetAspectRatio;
-		}
-
-		DrawGuizmoSelectedEnt();
-	}
-	ImGui::End();
-
-	ImGui::PopStyleVar();
-}
-
 void ImGuiLayer::SetupImGuiStyle()
 {
 	ImGuiStyle & style = ImGui::GetStyle();
@@ -669,8 +495,8 @@ void ImGuiLayer::OnImGuiRender()
 	BeginFrame();
 	BeginDockspace();
 		ImGui::ShowDemoWindow(&show);
-		Viewport();
-		MenuBar();
+		_viewport->OnDrawGUI();
+		_menuBar->OnDrawGUI();
 		Materials();
 		Log();
 		SceneHierarchy();
