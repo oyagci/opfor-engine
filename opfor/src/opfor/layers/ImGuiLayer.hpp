@@ -7,6 +7,7 @@
 #include "editor/EditorViewport.hpp"
 #include "editor/EditorMenuBar.hpp"
 #include "editor/EditorLog.hpp"
+#include "editor/EditorSceneHierarchy.hpp"
 
 class ImGuiLayer : public opfor::Layer
 {
@@ -22,6 +23,7 @@ private:
 	opfor::UniquePtr<EditorViewport> _viewport;
 	opfor::UniquePtr<EditorMenuBar> _menuBar;
 	opfor::UniquePtr<EditorLog> _log;
+	opfor::UniquePtr<EditorSceneHierarchy> _hierarchy;
 
 	void BeginFrame();
 	void EndFrame();
@@ -58,4 +60,7 @@ public:
 
 	ImVec2 GetViewportSize() const { return _ViewportSize; }
 	ImVec2 GetViewportPosition() const { return _ViewportPosition; }
+
+	[[nodiscard]] ecs::IEntityBase *GetSelectedEntity() const { return _currentEntity; }
+	void SetSelectedEntity(ecs::IEntityBase *ent) { _currentEntity = ent; }
 };
