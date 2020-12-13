@@ -1,6 +1,9 @@
 #include "EditorMenuBar.hpp"
 
 #include <nfd.h>
+
+#include "EditorInspector.hpp"
+#include "EditorSceneHierarchy.hpp"
 #include "core/LevelSerializer.hpp"
 #include "core/Application.hpp"
 
@@ -68,6 +71,21 @@ void EditorMenuBar::OnDrawGUI()
 
 			ImGui::EndMenu();
 		}
+
+		if (ImGui::BeginMenu("Window"))
+		{
+			if (ImGui::MenuItem("Inspector"))
+			{
+				ImGuiLayer::Get().OpenWindow<EditorInspector>();
+			}
+			if (ImGui::MenuItem("Scene Hierarchy"))
+			{
+				ImGuiLayer::Get().OpenWindow<EditorSceneHierarchy>();
+			}
+
+			ImGui::EndMenu();
+		}
+
 		ImGui::EndMainMenuBar();
 	}
 }
