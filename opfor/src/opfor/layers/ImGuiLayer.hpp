@@ -3,12 +3,7 @@
 #include "Layer.hpp"
 #include "imgui.h"
 #include "ecs/Entity.hpp"
-#include <glm/vec2.hpp>
-#include "editor/EditorViewport.hpp"
-#include "editor/EditorMenuBar.hpp"
-#include "editor/EditorLog.hpp"
-#include "editor/EditorSceneHierarchy.hpp"
-#include "editor/EditorInspector.hpp"
+#include "editor/EditorWindow.hpp"
 
 class ImGuiLayer : public opfor::Layer
 {
@@ -21,12 +16,6 @@ private:
 
 	ecs::IEntityBase *_currentEntity = nullptr;
 
-	opfor::UniquePtr<EditorViewport> _viewport;
-	opfor::UniquePtr<EditorMenuBar> _menuBar;
-	opfor::UniquePtr<EditorLog> _log;
-	opfor::UniquePtr<EditorSceneHierarchy> _hierarchy;
-	opfor::UniquePtr<EditorInspector> _inspector;
-
 	void BeginFrame();
 	void EndFrame();
 
@@ -34,6 +23,8 @@ private:
 	void EndDockspace();
 
 	void SetupImGuiStyle();
+
+	opfor::Vector<opfor::UniquePtr<IEditorWindow>> _windows;
 
 private:
 	ImGuiLayer();
@@ -54,4 +45,11 @@ public:
 
 	[[nodiscard]] ecs::IEntityBase *GetSelectedEntity() const { return _currentEntity; }
 	void SetSelectedEntity(ecs::IEntityBase *ent) { _currentEntity = ent; }
+
+	template<typename T>
+	void OpenWindow()
+	{
+		static_assert(std::is_base_of<IEditorWindow, T>::value);
+		_windows.emplace_back(opfor::MakeUnique<T>());
+	}
 };

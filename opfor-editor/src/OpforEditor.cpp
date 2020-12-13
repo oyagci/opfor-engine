@@ -6,6 +6,12 @@
 #include "components/ModelComponent.hpp"
 #include "SpheresRotateSystem.hpp"
 
+#include "editor/EditorViewport.hpp"
+#include "editor/EditorMenuBar.hpp"
+#include "editor/EditorLog.hpp"
+#include "editor/EditorSceneHierarchy.hpp"
+#include "editor/EditorInspector.hpp"
+
 class OpforEditor : public opfor::Application
 {
 private:
@@ -26,6 +32,12 @@ public:
 	OpforEditor() : opfor::Application()
 	{
 		//opfor::Application::Get().LoadLevel("assets/levels/pbr.level");
+
+		ImGuiLayer::Get().OpenWindow<EditorViewport>();
+		ImGuiLayer::Get().OpenWindow<EditorMenuBar>();
+		ImGuiLayer::Get().OpenWindow<EditorLog>();
+		ImGuiLayer::Get().OpenWindow<EditorSceneHierarchy>();
+		ImGuiLayer::Get().OpenWindow<EditorInspector>();
 
 		CreateComponentSystem<SpheresRotateSystem>();
 

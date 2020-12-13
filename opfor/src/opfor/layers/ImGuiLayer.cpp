@@ -8,14 +8,7 @@
 
 opfor::UniquePtr<char[]> GetCwd();
 
-ImGuiLayer::ImGuiLayer()
-	: _viewport(opfor::MakeUnique<EditorViewport>()),
-	_menuBar(opfor::MakeUnique<EditorMenuBar>()),
-	_log(opfor::MakeUnique<EditorLog>()),
-	_hierarchy(opfor::MakeUnique<EditorSceneHierarchy>()),
-	_inspector(opfor::MakeUnique<EditorInspector>())
-{
-}
+ImGuiLayer::ImGuiLayer() = default;
 
 void ImGuiLayer::BeginFrame()
 {
@@ -191,11 +184,10 @@ void ImGuiLayer::OnImGuiRender()
 	BeginFrame();
 	BeginDockspace();
 		ImGui::ShowDemoWindow(&show);
-		_viewport->OnDrawGUI();
-		_menuBar->OnDrawGUI();
-		_log->OnDrawGUI();
-		_hierarchy->OnDrawGUI();
-		_inspector->OnDrawGUI();
+		for (auto &w : _windows)
+		{
+			w->OnDrawGUI();
+		}
 	EndDockspace();
 	EndFrame();
 
