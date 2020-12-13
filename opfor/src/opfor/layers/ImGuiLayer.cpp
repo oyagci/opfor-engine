@@ -183,11 +183,14 @@ void ImGuiLayer::OnImGuiRender()
 
 	BeginFrame();
 	BeginDockspace();
-		ImGui::ShowDemoWindow(&show);
-		for (auto &w : _windows)
-		{
-			w->OnDrawGUI();
-		}
+	ImGui::ShowDemoWindow(&show);
+	// WARNING: Do not used range-based for loop here because if we create a window inside a "OnDrawGUI" call
+	// the iterators would get invalidated and will probably crash the program... or worse... will corrupt
+	// the program in an annoying way.
+	for (size_t i = 0; i < _windows.size(); i++)
+	{
+		_windows[i]->OnDrawGUI();
+	}
 	EndDockspace();
 	EndFrame();
 
