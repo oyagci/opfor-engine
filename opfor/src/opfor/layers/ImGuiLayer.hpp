@@ -8,6 +8,7 @@
 #include "editor/EditorMenuBar.hpp"
 #include "editor/EditorLog.hpp"
 #include "editor/EditorSceneHierarchy.hpp"
+#include "editor/EditorInspector.hpp"
 
 class ImGuiLayer : public opfor::Layer
 {
@@ -24,6 +25,7 @@ private:
 	opfor::UniquePtr<EditorMenuBar> _menuBar;
 	opfor::UniquePtr<EditorLog> _log;
 	opfor::UniquePtr<EditorSceneHierarchy> _hierarchy;
+	opfor::UniquePtr<EditorInspector> _inspector;
 
 	void BeginFrame();
 	void EndFrame();
