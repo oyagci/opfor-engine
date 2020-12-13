@@ -6,6 +6,7 @@
 #include <glm/vec2.hpp>
 #include "editor/EditorViewport.hpp"
 #include "editor/EditorMenuBar.hpp"
+#include "editor/EditorLog.hpp"
 
 class ImGuiLayer : public opfor::Layer
 {
@@ -20,6 +21,7 @@ private:
 
 	opfor::UniquePtr<EditorViewport> _viewport;
 	opfor::UniquePtr<EditorMenuBar> _menuBar;
+	opfor::UniquePtr<EditorLog> _log;
 
 	void BeginFrame();
 	void EndFrame();

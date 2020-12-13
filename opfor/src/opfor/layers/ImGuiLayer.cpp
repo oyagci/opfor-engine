@@ -29,7 +29,8 @@ opfor::UniquePtr<char[]> GetCwd();
 
 ImGuiLayer::ImGuiLayer()
 	: _viewport(opfor::MakeUnique<EditorViewport>()),
-	_menuBar(opfor::MakeUnique<EditorMenuBar>())
+	_menuBar(opfor::MakeUnique<EditorMenuBar>()),
+	_log(opfor::MakeUnique<EditorLog>())
 {
 }
 
@@ -497,8 +498,7 @@ void ImGuiLayer::OnImGuiRender()
 		ImGui::ShowDemoWindow(&show);
 		_viewport->OnDrawGUI();
 		_menuBar->OnDrawGUI();
-		Materials();
-		Log();
+		_log->OnDrawGUI();
 		SceneHierarchy();
 		Properties();
 	EndDockspace();
