@@ -30,19 +30,8 @@ private:
 	void BeginFrame();
 	void EndFrame();
 
-	void DrawGuizmoSelectedEnt();
 	void BeginDockspace();
 	void EndDockspace();
-	void MenuBar();
-	void Materials();
-	void Log();
-	void Properties();
-	void Viewport();
-	void SceneHierarchy();
-
-	void ObjectTransform();
-	void ObjectMesh();
-	void ObjectLight();
 
 	void SetupImGuiStyle();
 

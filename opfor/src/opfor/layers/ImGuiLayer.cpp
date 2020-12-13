@@ -1,29 +1,10 @@
 #include "ImGuiLayer.hpp"
-
 #include "opfor/core/base.hpp"
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtx/quaternion.hpp>
-#include <glm/gtx/matrix_decompose.hpp>
-#include <string>
-
 #include "opfor/core/Application.hpp"
+#include "opfor/core/LevelSerializer.hpp"
 #include "examples/imgui_impl_opengl3.h"
 #include "examples/imgui_impl_glfw.h"
-#include "misc/cpp/imgui_stdlib.h"
-#include "ImGuizmo.h"
-#include "nfd.hpp"
-#include "opfor/renderer/ShaderManager.hpp"
-
 #include "components/PlayerCameraComponent.hpp"
-#include "components/SelectedComponent.hpp"
-#include "components/TransformComponent.hpp"
-#include "components/PointLightComponent.hpp"
-#include "components/ModelComponent.hpp"
-
-#include "opfor/core/events/EngineEvents.hpp"
-
-#include "opfor/core/LevelSerializer.hpp"
 
 opfor::UniquePtr<char[]> GetCwd();
 
@@ -84,121 +65,6 @@ void ImGuiLayer::BeginDockspace()
 
 void ImGuiLayer::EndDockspace()
 {
-	ImGui::End();
-}
-
-void ImGuiLayer::Materials()
-{
-	auto materialList = opfor::Application::Get().GetMaterialList();
-	std::sort(materialList.begin(), materialList.end());
-	ImGui::Begin("Materials");
-	if (ImGui::TreeNode("Materials")) {
-		for (auto const &m: materialList) {
-			ImGui::Text("%s", m.c_str());
-		}
-		ImGui::TreePop();
-	}
-	ImGui::End();
-}
-
-void ImGuiLayer::Log()
-{
-	if (!ImGui::Begin("Log")) {
-		ImGui::End();
-		return ;
-	}
-
-	if (ImGui::BeginPopup("Options")) {
-		ImGui::Checkbox("Auto-Scroll", &_logAutoScroll);
-		ImGui::EndPopup();
-	}
-
-	if (ImGui::Button("Options")) {
-		ImGui::OpenPopup("Options");
-	}
-	ImGui::SameLine();
-	bool clear = ImGui::Button("Clear");
-	if (clear) {
-		Logger::Clear();
-	}
-
-	ImGui::Separator();
-	ImGui::BeginChild("scolling", ImVec2(0, 0), false, ImGuiWindowFlags_HorizontalScrollbar);
-
-	auto &logs = Logger::GetLog();
-	auto &lineOffsets = Logger::GetLineOffsets();
-
-	const char *bufp = logs.data();
-	const char *bufendp = logs.data() + logs.size();
-
-	ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(0, 0));
-
-	ImGuiListClipper clipper;
-	clipper.Begin(static_cast<int>(lineOffsets.size()));
-	while (clipper.Step()) {
-		for (int line_no = clipper.DisplayStart; line_no < clipper.DisplayEnd; line_no++) {
-			const char *line_start = bufp + lineOffsets[line_no];
-			const char *line_end = (line_no + 1 < static_cast<int>(lineOffsets.size())) ?
-				(bufp + lineOffsets[line_no + 1] - 1) : bufendp;
-			ImGui::TextUnformatted(line_start, line_end);
-		}
-	}
-	clipper.End();
-
-	ImGui::PopStyleVar();
-
-	if (_logAutoScroll && ImGui::GetScrollY() >= ImGui::GetScrollMaxY()) {
-		ImGui::SetScrollHereY(1.0f);
-	}
-
-	ImGui::EndChild();
-
-	ImGui::End();
-}
-
-void ImGuiLayer::SceneHierarchy()
-{
-	ImGui::Begin("Scene Hierarchy");
-
-	if (ImGui::BeginPopupContextWindow("hierarchy_popup_menu")) {
-		ImGui::EndPopup();
-	}
-
-	if (ImGui::BeginPopup("hierarchy_popup_menu")) {
-		if (ImGui::BeginMenu("Add...")) {
-			if (ImGui::MenuItem("Entity")) {
-				//auto ent = opfor::Application::Get().GetCurrentLevel()->CreateEntity();
-				//(void)ent;
-			}
-			if (ImGui::MenuItem("Point Light")) {
-				//auto ent = opfor::Application::Get().GetCurrentLevel()->CreateEntity();
-				//ent->AddComponents<PointLightComponent>();
-				//(void)ent;
-			}
-			ImGui::EndMenu();
-		}
-		ImGui::EndPopup();
-	}
-
-	auto allEnts = opfor::Application::Get().GetAllEntities();
-
-	size_t itemIndex = 0;
-	for (auto const &ent : allEnts) {
-		auto name = ent->GetName();
-		if (ImGui::TreeNodeEx((void *)itemIndex, (ImGuiTreeNodeFlags)0, "%s", name.c_str())) {
-			ImGui::TreePop();
-		}
-		if (ImGui::IsItemClicked()) {
-			Logger::Verbose("Clicked on item {} (prev. {}) (ID. {})\n",
-				itemIndex, _SelectedItem, allEnts[itemIndex]->GetId());
-
-			_SelectedItem = itemIndex;
-			_currentEntity = allEnts[itemIndex];
-			opfor::Application::Get().OnSelectItem(_SelectedItem);
-		}
-		itemIndex++;
-	}
-
 	ImGui::End();
 }
 
