@@ -6,6 +6,7 @@
 #include "components/ModelComponent.hpp"
 #include "opfor/renderer/Model.hpp"
 #include "Level.hpp"
+#include "layers/ImGuiWrapperLayer.hpp"
 #include "platform/opengl/OpenGLContext.hpp"
 #include "platform/linux/LinuxInput.hpp"
 #ifdef OP4_PLATFORM_LINUX
@@ -96,7 +97,7 @@ Application::Application()
 	default_normal->Build();
 
 	_SceneRenderer = new SceneRenderer;
-	_ImGuiLayer = new ImGuiLayer;
+	_ImGuiLayer = new ImGuiWrapperLayer;
 
 	PushOverlay(_ImGuiLayer);
 	PushLayer(_viewport);

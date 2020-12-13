@@ -30,8 +30,9 @@ struct ModelComponent;
 
 namespace opfor
 {
+	class ImGuiWrapperLayer;
 
-class Model;
+	class Model;
 
 class Application
 {
@@ -77,7 +78,7 @@ private:
 	LayerStack _LayerStack;
 
 	SceneRenderer *_SceneRenderer;
-	ImGuiLayer *_ImGuiLayer;
+	ImGuiWrapperLayer *_ImGuiLayer;
 
 	void InitViewport();
 

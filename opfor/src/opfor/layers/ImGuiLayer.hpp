@@ -34,10 +34,20 @@ private:
 
 	void SetupImGuiStyle();
 
-public:
+private:
 	ImGuiLayer();
+
+public:
+	static ImGuiLayer &Get()
+	{
+		static ImGuiLayer instance;
+		return instance;
+	}
 
 	void OnAttach() override;
 	void OnDetach() override;
 	void OnImGuiRender() override;
+
+	ImVec2 GetViewportSize() const { return _ViewportSize; }
+	ImVec2 GetViewportPosition() const { return _ViewportPosition; }
 };
