@@ -1,9 +1,17 @@
 #pragma once
 
+#include "opfor/core/base.hpp"
 #include <string>
 #include <fmt/format.h>
-#include <glm/vec4.hpp>
 #include <optional>
+#include <glm/fwd.hpp>
+#include <glm/vec2.hpp>
+#include <glm/vec3.hpp>
+#include <glm/vec4.hpp>
+#include <glm/mat3x3.hpp>
+#include <glm/mat4x4.hpp>
+
+#include "Shader.hpp"
 
 struct PbrMaterial
 {
@@ -91,3 +99,120 @@ struct fmt::formatter<PbrMaterial>
 		);
 	}
 };
+
+namespace opfor
+{
+
+class AMaterial
+{
+public:
+	enum class UniformType
+	{
+		Int,
+		UInt,
+		Float,
+		Vec2,
+		Vec3,
+		Vec4,
+		Mat3,
+		Mat4,
+	};
+
+	union UniformValue
+	{
+		int Int;
+		unsigned int UInt;
+		float Float;
+		glm::vec2 Vec2;
+		glm::vec3 Vec3;
+		glm::vec4 Vec4;
+		glm::mat3 Mat3;
+		glm::mat4 Mat4;
+	};
+
+	struct Uniform
+	{
+		UniformType Type;
+		UniformValue Value;
+	};
+
+private:
+	UnorderedMap<String, Uniform> _uniforms{};
+
+	Optional<Shader *> _shader = nullptr;
+
+public:
+	virtual ~AMaterial() = default;
+
+	[[nodiscard]] const UnorderedMap<String, Uniform> &GetAllUniforms() const { return _uniforms; }
+	[[nodiscard]] Uniform GetUniform(const String &name) const { return _uniforms.at(name); }
+
+	[[nodiscard]] Optional<Shader *> GetShader() const { return _shader; }
+	void SetShader(Shader *shader) { _shader = shader; }
+
+	void SetUniform(const String &name, int value)
+	{
+		Uniform u{};
+		u.Type = UniformType::Int;
+		u.Value.Int = value;
+		_uniforms[name] = u;
+	}
+
+	void SetUniform(const String &name, unsigned int value)
+	{
+		Uniform u{};
+		u.Type = UniformType::UInt;
+		u.Value.UInt = value;
+		_uniforms[name] = u;
+	}
+
+	void SetUniform(const String &name, float value)
+	{
+		Uniform u{};
+		u.Type = UniformType::Float;
+		u.Value.Float = value;
+		_uniforms[name] = u;
+	}
+
+	void SetUniform(const String &name, glm::vec2 value)
+	{
+		Uniform u{};
+		u.Type = UniformType::Vec2;
+		u.Value.Vec2 = value;
+		_uniforms[name] = u;
+	}
+
+	void SetUniform(const String &name, glm::vec3 value)
+	{
+		Uniform u{};
+		u.Type = UniformType::Vec3;
+		u.Value.Vec3 = value;
+		_uniforms[name] = u;
+	}
+
+	void SetUniform(const String &name, glm::vec4 value)
+	{
+		Uniform u{};
+		u.Type = UniformType::Vec4;
+		u.Value.Vec4 = value;
+		_uniforms[name] = u;
+	}
+
+	void SetUniform(const String &name, glm::mat3 value)
+	{
+		Uniform u{};
+		u.Type = UniformType::Mat3;
+		u.Value.Mat3 = value;
+		_uniforms[name] = u;
+	}
+
+	void SetUniform(const String &name, glm::mat4 value)
+	{
+		Uniform u{};
+		u.Type = UniformType::Mat4;
+		u.Value.Mat4 = value;
+		_uniforms[name] = u;
+	}
+};
+
+}
