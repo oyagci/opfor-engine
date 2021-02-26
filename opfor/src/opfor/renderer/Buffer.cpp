@@ -1,7 +1,7 @@
 #include "Buffer.hpp"
 #include "Renderer.hpp"
 #include <fmt/format.h>
-#include "platform/opengl/OpenGLBuffer.hpp"
+#include "backend/opengl/OpenGLBuffer.hpp"
 
 namespace opfor {
 

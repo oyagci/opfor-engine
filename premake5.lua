@@ -7,11 +7,11 @@ workspace "opfor"
         "Release",
         "Dist"
     }
-	
-	flags
-	{
-		"MultiProcessorCompile"
-	}
+
+    flags
+    {
+     "MultiProcessorCompile"
+    }
 
 outputdir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
 
@@ -33,11 +33,12 @@ include "opfor/vendor/imgui"
 include "opfor/vendor/ImGuizmo"
 include "opfor/vendor/nativefiledialog"
 
+
 project "opfor"
     location "opfor"
     kind "StaticLib"
     language "C++"
-	cppdialect "C++17"
+    cppdialect "C++17"
 
     targetdir ("bin/" .. outputdir .. "/%{prj.name}")
     objdir ("bin-int/" .. outputdir .. "/%{prj.name}")
@@ -46,53 +47,34 @@ project "opfor"
     {
         "%{prj.name}/src/**.hpp",
         "%{prj.name}/src/**.h",
-		"%{prj.name}/src/**.cpp",
+        "%{prj.name}/src/**.cpp",
     }
 
     includedirs
     {
-	    "%{prj.name}/src",
+        "%{prj.name}/src",
         "%{prj.name}/src/opfor",
         "%{IncludeDir.GLFW}",
         "%{IncludeDir.GLAD}",
         "%{IncludeDir.fmt}",
         "%{IncludeDir.ImGui}",
         "%{IncludeDir.tinygltf}",
-		"%{IncludeDir.glm}",
-		"%{IncludeDir.stduuid}",
-		"%{IncludeDir.NFD}",
-		"%{IncludeDir.ImGuizmo}",
+        "%{IncludeDir.glm}",
+        "%{IncludeDir.stduuid}",
+        "%{IncludeDir.NFD}",
+        "%{IncludeDir.ImGuizmo}",
     }
 
-	links
-	{
+    links
+    {
         "GLFW",
         "GLAD",
         "fmt",
         "ImGui",
-		"ImGuizmo",
-		"nativefiledialog",
-		"opengl32.lib"
-	}
-
-    filter "system:windows"
-        staticruntime "On"
-        systemversion "latest"
-
-        defines
-        {
-            "OP4_PLATFORM_WINDOWS",
-            "OP4_PLATFORM_OPENGL"
-        }
-
-	filter "system:linux"
-
-        defines
-        {
-            "OP4_PLATFORM_LINUX",
-            "OP4_PLATFORM_OPENGL"
-        }
-
+        "ImGuizmo",
+        "nativefiledialog",
+        "opengl32.lib"
+    }
     filter "configurations:Release"
         defines "OP4_RELEASE"
         optimize "On"
@@ -101,15 +83,32 @@ project "opfor"
         defines "OP4_DEBUG"
         symbols "On"
 
-    filter "configurations:Release"
+    filter "configurations:Dist"
         defines "OP4_DIST"
         optimize "On"
+
+    filter "system:windows"
+        staticruntime "On"
+        systemversion "latest"
+
+        defines
+        {
+            "OP4_PLATFORM_WINDOWS",
+            "OP4_BACKEND_OPENGL"
+        }
+
+ filter "system:linux"
+        defines
+        {
+            "OP4_PLATFORM_LINUX",
+            "OP4_BACKEND_OPENGL"
+        }
 
 project "opfor-editor"
     location "opfor-editor"
     kind "ConsoleApp"
     language "C++"
-	cppdialect "C++17"
+    cppdialect "C++17"
 
     targetdir ("bin/" .. outputdir .. "/%{prj.name}")
     objdir ("bin-int/" .. outputdir .. "/%{prj.name}")
@@ -126,9 +125,9 @@ project "opfor-editor"
         "%{IncludeDir.fmt}",
         "%{IncludeDir.GLFW}",
         "%{IncludeDir.GLAD}",
-		"%{IncludeDir.glm}",
-		"%{IncludeDir.ImGui}",
-		"%{IncludeDir.stduuid}",
+        "%{IncludeDir.glm}",
+        "%{IncludeDir.ImGui}",
+        "%{IncludeDir.stduuid}",
         "%{IncludeDir.tinygltf}",
         "opfor/src",
         "opfor/src/opfor",
@@ -144,12 +143,12 @@ project "opfor-editor"
         "opfor",
         "fmt",
         "ImGui",
-		"uuid",
-		"GLFW",
-		"GLAD",
+        "uuid",
+        "GLFW",
+        "GLAD",
         "ImGui",
-		"ImGuizmo",
-		"nativefiledialog",
+        "ImGuizmo",
+        "nativefiledialog",
     }
 
     filter "system:windows"
@@ -159,28 +158,24 @@ project "opfor-editor"
         defines
         {
             "OP4_PLATFORM_WINDOWS",
-            "OP4_PLATFORM_OPENGL"
+            "OP4_BACKEND_OPENGL"
         }
 
-	filter "system:linux"
-
-		-- linkoptions { "`pkg-config --libs gtk+-3.0`" }
-		toolset "clang"
-
+    filter "system:linux"
         defines
         {
             "OP4_PLATFORM_LINUX",
-            "OP4_PLATFORM_OPENGL"
+            "OP4_BACKEND_OPENGL"
         }
 
-		links {
-			"dl",
-			"m",
-			"X11",
-			"pthread",
-			"GL"
-		}
-		linkoptions { "-lgtk-3 -lgdk-3 -lpangocairo-1.0 -lpango-1.0 -lharfbuzz -latk-1.0 -lcairo-gobject -lcairo -lgdk_pixbuf-2.0 -lgio-2.0 -lgobject-2.0 -lglib-2.0" }
+        links {
+            "dl",
+            "m",
+            "X11",
+            "pthread",
+            "GL"
+        }
+        linkoptions { "-lgtk-3 -lgdk-3 -lpangocairo-1.0 -lpango-1.0 -lharfbuzz -latk-1.0 -lcairo-gobject -lcairo -lgdk_pixbuf-2.0 -lgio-2.0 -lgobject-2.0 -lglib-2.0" }
 
     filter "configurations:Release"
         defines "OP4_RELEASE"
@@ -190,6 +185,6 @@ project "opfor-editor"
         defines "OP4_DEBUG"
         symbols "On"
 
-    filter "configurations:Release"
+    filter "configurations:Dist"
         defines "OP4_DIST"
         optimize "On"

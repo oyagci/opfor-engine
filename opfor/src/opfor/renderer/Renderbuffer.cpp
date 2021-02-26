@@ -1,6 +1,6 @@
 #include "Renderbuffer.hpp"
 #include "RendererAPI.hpp"
-#include "platform/opengl/OpenGLRenderbuffer.hpp"
+#include "backend/opengl/OpenGLRenderbuffer.hpp"
 
 namespace opfor {
 

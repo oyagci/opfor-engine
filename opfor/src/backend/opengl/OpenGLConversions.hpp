@@ -4,6 +4,7 @@
 #include <renderer/Framebuffer.hpp>
 #include <renderer/Renderbuffer.hpp>
 #include <renderer/Texture.hpp>
+#include <renderer/Renderer.hpp>
 
 namespace opfor {
 

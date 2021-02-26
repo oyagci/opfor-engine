@@ -1,5 +1,5 @@
 #include "RenderCommand.hpp"
-#include "platform/opengl/OpenGLRendererAPI.hpp"
+#include "backend/opengl/OpenGLRendererAPI.hpp"
 
 namespace opfor {
 

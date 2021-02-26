@@ -7,7 +7,7 @@
 #include "opfor/renderer/Model.hpp"
 #include "Level.hpp"
 #include "layers/ImGuiWrapperLayer.hpp"
-#include "platform/opengl/OpenGLContext.hpp"
+#include "backend/opengl/OpenGLContext.hpp"
 #include "platform/linux/LinuxInput.hpp"
 #ifdef OP4_PLATFORM_LINUX
 # include <unistd.h>
