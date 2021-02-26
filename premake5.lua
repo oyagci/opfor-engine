@@ -37,6 +37,7 @@ project "opfor"
     location "opfor"
     kind "StaticLib"
     language "C++"
+	cppdialect "C++17"
 
     targetdir ("bin/" .. outputdir .. "/%{prj.name}")
     objdir ("bin-int/" .. outputdir .. "/%{prj.name}")
@@ -75,13 +76,20 @@ project "opfor"
 	}
 
     filter "system:windows"
-        cppdialect "C++17"
         staticruntime "On"
         systemversion "latest"
 
         defines
         {
             "OP4_PLATFORM_WINDOWS",
+            "OP4_PLATFORM_OPENGL"
+        }
+
+	filter "system:linux"
+
+        defines
+        {
+            "OP4_PLATFORM_LINUX",
             "OP4_PLATFORM_OPENGL"
         }
 
@@ -101,6 +109,7 @@ project "opfor-editor"
     location "opfor-editor"
     kind "ConsoleApp"
     language "C++"
+	cppdialect "C++17"
 
     targetdir ("bin/" .. outputdir .. "/%{prj.name}")
     objdir ("bin-int/" .. outputdir .. "/%{prj.name}")
@@ -128,20 +137,22 @@ project "opfor-editor"
         "opfor/thirdparty/ImGuizmo",
         "opfor/thirdparty/tinygltf",
         "opfor/thirdparty/nativefiledialog/src/include",
-        "opfor/thirdparty/stduuid/include",
-        "opfor/thirdparty/glew/include",
-        "opfor/thirdparty/glm",
     }
 
     links
     {
         "opfor",
         "fmt",
-        "ImGui"
+        "ImGui",
+		"uuid",
+		"GLFW",
+		"GLAD",
+        "ImGui",
+		"ImGuizmo",
+		"nativefiledialog",
     }
 
     filter "system:windows"
-        cppdialect "C++17"
         staticruntime "On"
         systemversion "latest"
 
@@ -150,6 +161,26 @@ project "opfor-editor"
             "OP4_PLATFORM_WINDOWS",
             "OP4_PLATFORM_OPENGL"
         }
+
+	filter "system:linux"
+
+		-- linkoptions { "`pkg-config --libs gtk+-3.0`" }
+		toolset "clang"
+
+        defines
+        {
+            "OP4_PLATFORM_LINUX",
+            "OP4_PLATFORM_OPENGL"
+        }
+
+		links {
+			"dl",
+			"m",
+			"X11",
+			"pthread",
+			"GL"
+		}
+		linkoptions { "-lgtk-3 -lgdk-3 -lpangocairo-1.0 -lpango-1.0 -lharfbuzz -latk-1.0 -lcairo-gobject -lcairo -lgdk_pixbuf-2.0 -lgio-2.0 -lgobject-2.0 -lglib-2.0" }
 
     filter "configurations:Release"
         defines "OP4_RELEASE"

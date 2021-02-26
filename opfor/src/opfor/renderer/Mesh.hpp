@@ -7,6 +7,8 @@
 #include "Material.hpp"
 #include "opfor/renderer/Buffer.hpp"
 #include "opfor/renderer/VertexArray.hpp"
+#include <glm/vec3.hpp>
+#include <glm/vec2.hpp>
 
 namespace opfor
 {

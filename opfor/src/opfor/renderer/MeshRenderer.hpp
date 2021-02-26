@@ -6,6 +6,7 @@
 #include "opfor/renderer/GBuffer.hpp"
 #include "opfor/renderer/Mesh.hpp"
 #include "opfor/renderer/PerspectiveCamera.hpp"
+#include "Renderer.hpp"
 
 struct PlayerCameraComponent;
 struct TransformComponent;
