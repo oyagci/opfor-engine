@@ -1,6 +1,6 @@
 #include "Shader.hpp"
 #include "RendererAPI.hpp"
-#include "platform/opengl/OpenGLShader.hpp"
+#include "backend/opengl/OpenGLShader.hpp"
 
 namespace opfor {
 
