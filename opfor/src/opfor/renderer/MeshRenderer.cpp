@@ -187,17 +187,10 @@ Vector<DrawCommand> MeshRenderer::SubmitMeshes(PerspectiveCamera const &camera)
 
 		for (auto const meshId : model.meshes) {
 
-			auto const mesh = Application::Get().GetMesh(meshId);
-			auto const shaderId = model.shader;
+			auto *const mesh = Application::Get().GetMesh(meshId);
+			auto const &material = model.material;
 
-			auto shaderOpt = ShaderManager::Get().Get(shaderId);
-
-			if (!shaderOpt.has_value()) {
-				Logger::Warn("Shader {} does not exist\n", shaderId);
-				continue ;
-			}
-
-			auto &shader = shaderOpt.value();
+			auto const &shader = material.GetShader();
 
 			glm::mat4 modelMatrix(1.0f);
 			modelMatrix = glm::translate(modelMatrix, transform.position);
@@ -205,7 +198,7 @@ Vector<DrawCommand> MeshRenderer::SubmitMeshes(PerspectiveCamera const &camera)
 			modelMatrix = glm::scale(modelMatrix, transform.scale);
 
 			DrawCommand drawCommand;
-			drawCommand.shader = shader;
+			drawCommand.shader = &shader;
 			drawCommand.uniformBindings = {
 				{ "viewProjectionMatrix",  camera.GetViewProjectionMatrix() },
 				{ "viewMatrix",            camera.GetViewMatrix() },
@@ -215,15 +208,15 @@ Vector<DrawCommand> MeshRenderer::SubmitMeshes(PerspectiveCamera const &camera)
 			};
 
 			// Bind each texture
-			auto meshCast = dynamic_cast<Mesh*>(mesh);
+			auto *meshCast = dynamic_cast<Mesh*>(mesh);
 			if (meshCast != nullptr) {
 				if (meshCast->GetPbrMaterial().has_value()) {
 
-					auto material = Application::Get().GetPbrMaterial(
+					auto pbrMaterial = Application::Get().GetPbrMaterial(
 						meshCast->GetPbrMaterial().value());
 
-					if (material.has_value()) {
-						auto m = material.value();
+					if (pbrMaterial.has_value()) {
+						auto const *m = pbrMaterial.value();
 
 						drawCommand.uniformBindings.push_back({ "material.baseColor", m->BaseColor });
 						drawCommand.uniformBindings.push_back({ "material.metallicFactor", m->MetallicFactor });
@@ -231,7 +224,7 @@ Vector<DrawCommand> MeshRenderer::SubmitMeshes(PerspectiveCamera const &camera)
 
 						if (m->Albedo.has_value()) {
 							auto albedo = m->Albedo.value();
-							auto texture = TextureManager::Get().Get(albedo);
+							auto const texture = TextureManager::Get().Get(albedo);
 
 							drawCommand.uniformBindings.push_back({ "material.hasAlbedo", 1 });
 							drawCommand.textureBindings.push_back({ texture, TextureUnit::Texture0 });
@@ -242,7 +235,7 @@ Vector<DrawCommand> MeshRenderer::SubmitMeshes(PerspectiveCamera const &camera)
 
 						if (m->MetallicRoughness.has_value()) {
 							auto metallicRoughness = m->MetallicRoughness.value();
-							auto texture = TextureManager::Get().Get(metallicRoughness);
+							auto const texture = TextureManager::Get().Get(metallicRoughness);
 
 							drawCommand.uniformBindings.push_back({ "material.hasMetallicRoughness", 1 });
 							drawCommand.textureBindings.push_back({ texture, TextureUnit::Texture1 });
@@ -253,7 +246,7 @@ Vector<DrawCommand> MeshRenderer::SubmitMeshes(PerspectiveCamera const &camera)
 
 						if (m->Normal.has_value()) {
 							auto normal = m->Normal.value();
-							auto texture = TextureManager::Get().Get(normal);
+							auto const texture = TextureManager::Get().Get(normal);
 
 							drawCommand.textureBindings.push_back({ texture, TextureUnit::Texture2 });
 						}
@@ -325,7 +318,7 @@ Vector<DrawCommand> MeshRenderer::RenderLightBillboard(PerspectiveCamera const &
 		auto [light, transform] = lightEnt->GetAll();
 
 		DrawCommand drawCommand;
-		drawCommand.shader = _billboard;
+		drawCommand.shader = _billboard.get();
 		drawCommand.uniformBindings = {
 			{ "viewMatrix", camera.GetViewMatrix() },
 			{ "viewProjectionMatrix", camera.GetViewProjectionMatrix() },
@@ -345,7 +338,7 @@ Vector<DrawCommand> MeshRenderer::RenderLightBillboard(PerspectiveCamera const &
 Vector<DrawCommand> MeshRenderer::RenderLight(PerspectiveCamera const &camera)
 {
 	DrawCommand drawCommand;
-		drawCommand.shader = _light;
+		drawCommand.shader = _light.get();
 		drawCommand.uniformBindings = {
 			{ "viewPos", camera.GetPosition() },
 			{ "exposure", camera.GetExposure() },
@@ -398,7 +391,7 @@ RenderCommandBuffer MeshRenderer::RenderShadowMap()
 
 	Vector<DrawCommand> shadowDrawCommands = RenderShadowMeshes();
 	for (auto &cmd : shadowDrawCommands) {
-		cmd.shader = _shadow;
+		cmd.shader = _shadow.get();
 		cmd.uniformBindings.push_back({ "model", glm::mat4(1.0f) });
 		cmd.uniformBindings.push_back({ "shadowMatrices", shadowTransforms });
 		cmd.uniformBindings.push_back({ "far_plane", 10000.0f });
@@ -406,6 +399,7 @@ RenderCommandBuffer MeshRenderer::RenderShadowMap()
 	}
 
 	renderCommand.drawCommands = shadowDrawCommands;
+	renderCommand.disableDepthMask = false;
 	
 	return renderCommand;
 }

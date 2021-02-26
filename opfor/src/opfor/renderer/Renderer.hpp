@@ -48,7 +48,7 @@ struct ClearScreenParam
 
 struct DrawCommand
 {
-	SharedPtr<Shader> shader;
+	Shader const *shader;
 	SharedPtr<VertexArray> vertexArray;
 	Vector<DrawCommandTextureBinding> textureBindings;
 	Vector<UniformBinding> uniformBindings;
@@ -70,7 +70,7 @@ struct RenderCommandBufferOptimized
 	Optional<std::pair<glm::uvec2, glm::uvec2>> viewportExtent;
 	Optional<ClearScreenParam> clear;
 	Vector<std::pair<RendererCaps, bool>> capabilities;
-	std::unordered_map<SharedPtr<opfor::Shader>, Vector<DrawCommand>> drawCommandsByShader;
+	std::unordered_map<opfor::Shader *, Vector<DrawCommand>> drawCommandsByShader;
 	bool disableDepthMask;
 
 };

@@ -12,6 +12,8 @@
 #include "editor/EditorSceneHierarchy.hpp"
 #include "editor/EditorInspector.hpp"
 
+#include "renderer/ShaderInstance.hpp"
+
 class OpforEditor : public opfor::Application
 {
 private:
@@ -31,8 +33,6 @@ private:
 public:
 	OpforEditor() : opfor::Application()
 	{
-		//opfor::Application::Get().LoadLevel("assets/levels/pbr.level");
-
 		ImGuiLayer::Get().OpenWindow<EditorViewport>();
 		ImGuiLayer::Get().OpenWindow<EditorMenuBar>();
 		ImGuiLayer::Get().OpenWindow<EditorLog>();
@@ -49,10 +49,16 @@ public:
 
 		auto [ spheresShaderID, spheresShader ] = ShaderManager::Get().Create("shaders/basic.glsl");
 
+		opfor::Material sphereMaterial(&spheresShader);
+			sphereMaterial.SetUInt("material.albedo", 0);
+			sphereMaterial.SetUInt("material.metallicRoughness", 1);
+			sphereMaterial.SetUInt("material.normal", 2);
+			sphereMaterial.SetFloat("material.metallicFactor", 1.0f);
+			sphereMaterial.SetFloat("material.roughnessFactor", 1.0f);
+
 		auto *spheres = CreateEntity<SphereComponent, TransformComponent, ModelComponent>();
 		auto &sphereModel = spheres->Get<ModelComponent>();
 			LoadModel("./assets/models/metal-sphere/metal-sphere.gltf", sphereModel);
-			sphereModel.shader = spheresShaderID;
 			spheresShader.Bind();
 			spheresShader.SetUniform("material.albedo", 0);
 			spheresShader.SetUniform("material.metallicRoughness", 1);
@@ -60,6 +66,7 @@ public:
 			spheresShader.SetUniform("material.metallicFactor", 1.0f);
 			spheresShader.SetUniform("material.roughnessFactor", 1.0f);
 			spheresShader.Unbind();
+			sphereModel.material = sphereMaterial;
 		spheres->SetName("Spheres");
 	}
 };

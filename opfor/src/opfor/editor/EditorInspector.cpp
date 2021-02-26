@@ -168,16 +168,15 @@ void EditorInspector::OnDrawGUI()
 				auto [shaderId, shader] = ShaderManager::Get().Create("shaders/basic.glsl");
 
 				// TODO: Recycle existing shaders
-				shader.Bind();
-				shader.SetUniform("material.albedo", 0);
-				shader.SetUniform("material.metallicRoughness", 1);
-				shader.SetUniform("material.normal", 2);
-				shader.Unbind();
+				opfor::Material material(&shader);
+				material.SetUInt("material.albedo", 0);
+				material.SetUInt("material.metallicRoughness", 1);
+				material.SetUInt("material.normal", 2);
 
 				currentEntity->AddComponents<ModelComponent>();
 
 				auto &model = currentEntity->Get<ModelComponent>();
-				model.shader = shaderId;
+				model.material = material;
 			}
 			if (ImGui::MenuItem("Transform")) {
 				currentEntity->AddComponents<TransformComponent>();

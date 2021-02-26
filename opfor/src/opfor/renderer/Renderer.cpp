@@ -162,7 +162,7 @@ void Renderer::SubmitRenderCommandBuffer(RenderCommandBuffer const &renderComman
 	//   - Sort the draw commands by their shader
 	//   - Create a RenderCommandBufferOptimized using the sorted list of DrawCommands
 
-	std::unordered_map<SharedPtr<opfor::Shader>, Vector<DrawCommand>> drawCommandsByShader;
+	std::unordered_map<opfor::Shader const *, Vector<DrawCommand>> drawCommandsByShader;
 	for (auto const &dc : renderCommand.drawCommands) {
 		drawCommandsByShader[dc.shader].push_back(dc);
 	}

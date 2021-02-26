@@ -53,13 +53,14 @@ public:
 
 		auto [ shaderId, meshShader ] = ShaderManager::Get().Create("shaders/basic.glsl");
 
-		meshShader.Bind();
-		meshShader.SetUniform("material.albedo", 0);
-		meshShader.SetUniform("material.metallicRoughness", 1);
-		meshShader.SetUniform("material.normal", 2);
-		meshShader.SetUniform("material.metallicFactor", 1.0f);
-		meshShader.SetUniform("material.roughnessFactor", 1.0f);
-		meshShader.Unbind();
+		opfor::Material meshMaterial(&meshShader);
+		
+		meshMaterial.SetUInt("material.albedo", 0);
+		meshMaterial.SetUInt("material.metallicRoughness", 1);
+		meshMaterial.SetUInt("material.normal", 2);
+		meshMaterial.SetFloat("material.metallicFactor", 1.0f);
+		meshMaterial.SetFloat("material.roughnessFactor", 1.0f);
+
 		_meshShader = shaderId;
 
 		std::string const levelJsonFile = ReadFile(path);
@@ -77,7 +78,7 @@ public:
 			component.meshes.insert(component.meshes.begin(),
 				engineModel.GetMeshes().begin(),
 				engineModel.GetMeshes().end());
-			component.shader = _meshShader;
+			component.material = meshMaterial;
 
 			_models[uuid] = component;
 		}

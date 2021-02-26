@@ -56,9 +56,6 @@ private:
 	std::unordered_map<unsigned int, std::unique_ptr<IDrawable>> _meshes;
 	std::unordered_map<unsigned int, std::unique_ptr<Batch>> _batches;
 
-	using MaterialContainer = std::pair<unsigned int, Material>;
-
-	std::unordered_map<std::string, MaterialContainer> _materials;
 	std::unordered_map<std::string, PbrMaterial> _pbrMaterials;
 
 	opfor::Viewport *_viewport;
@@ -180,21 +177,6 @@ public:
 			return std::make_optional(&_pbrMaterials[name]);
 		}
 		return std::nullopt;
-	}
-
-	unsigned int GetMaterialId(std::string const &name)
-	{
-		return _materials[name].first;
-	}
-
-	Vector<std::string> GetMaterialList() const
-	{
-		Vector<std::string> materials;
-
-		materials.resize(_materials.size());
-		std::transform(_materials.begin(), _materials.end(), materials.begin(),
-			[] (auto mat) { return mat.first; });
-		return materials;
 	}
 
 	void Close() const

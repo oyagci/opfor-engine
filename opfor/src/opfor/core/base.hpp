@@ -4,6 +4,7 @@
 #include <csignal>
 #include <optional>
 #include <variant>
+#include <utility>
 
 #include "opfor/core/log.hpp"
 
@@ -71,5 +72,14 @@ class KeyEqual = std::equal_to<Key>,
 class Allocator = std::allocator<std::pair<const Key, T>>
 >
 using UnorderedMap = std::unordered_map<Key, T, Hash, KeyEqual, Allocator>;
+
+template <class T1, class T2>
+using Pair = std::pair<T1, T2>;
+
+template<class T1, class T2>
+constexpr Pair<T1,T2> MakePair( T1 &&t, T2 &&u )
+{
+	return std::make_pair<T1, T2>(std::forward<T1>(t), std::forward<T2>(u));
+}
 
 }

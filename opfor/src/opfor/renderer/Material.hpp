@@ -103,7 +103,7 @@ struct fmt::formatter<PbrMaterial>
 namespace opfor
 {
 
-class AMaterial
+class Material
 {
 public:
 	enum class UniformType
@@ -139,18 +139,79 @@ public:
 private:
 	UnorderedMap<String, Uniform> _uniforms{};
 
-	Optional<Shader *> _shader = nullptr;
+	Optional<Shader*> _shader{};
+
+	Vector<Pair<String, unsigned int>> _defaultBindings;
 
 public:
-	virtual ~AMaterial() = default;
+	Material() : _shader(nullptr),
+		_defaultBindings ({
+			{ "material.albedo", 0 },
+			{ "material.metallicRoughness", 1 },
+			{ "material.normal", 2 },
+		})
+	{
+	}
 
-	[[nodiscard]] const UnorderedMap<String, Uniform> &GetAllUniforms() const { return _uniforms; }
-	[[nodiscard]] Uniform GetUniform(const String &name) const { return _uniforms.at(name); }
+	Material(Shader *shader) : _shader(shader),
+		_defaultBindings ({
+			{ "material.albedo", 0 },
+			{ "material.metallicRoughness", 1 },
+			{ "material.normal", 2 },
+		})
+	{
+	}
 
-	[[nodiscard]] Optional<Shader *> GetShader() const { return _shader; }
+	Material(Material const &m)
+	{
+		_uniforms = m._uniforms;
+		_shader = m._shader;
+		_defaultBindings = m._defaultBindings;
+	}
+
+	Material(Material const &&m) noexcept
+	{
+		_uniforms = m._uniforms;
+		_shader = m._shader;
+		_defaultBindings = m._defaultBindings;
+	}
+
+	Material &operator=(Material const &rhs) = default;
+
+	Material &operator=(Material const &&rhs)
+	{
+		_uniforms = rhs._uniforms;
+		_shader = rhs._shader;
+		_defaultBindings = rhs._defaultBindings;
+
+		return *this;
+	}
+
+	virtual ~Material() = default;
+
+	[[nodiscard]] const UnorderedMap<String, Uniform> &GetAllUniforms() const
+	{
+		return _uniforms;
+	}
+
+	[[nodiscard]] Uniform GetUniform(const String &name) const
+	{
+		return _uniforms.at(name);
+	}
+
+	[[nodiscard]] const Vector<Pair<String, unsigned int>> &GetDefaultBindings() const
+	{
+		return _defaultBindings;
+	}
+
+	[[nodiscard]] Shader const &GetShader() const {
+		OP4_CORE_ASSERT(*_shader != nullptr, "Shader is null")
+		return **_shader;
+	}
+
 	void SetShader(Shader *shader) { _shader = shader; }
 
-	void SetUniform(const String &name, int value)
+	void SetInt(const String &name, int value)
 	{
 		Uniform u{};
 		u.Type = UniformType::Int;
@@ -158,7 +219,7 @@ public:
 		_uniforms[name] = u;
 	}
 
-	void SetUniform(const String &name, unsigned int value)
+	void SetUInt(const String &name, unsigned int value)
 	{
 		Uniform u{};
 		u.Type = UniformType::UInt;
@@ -166,7 +227,7 @@ public:
 		_uniforms[name] = u;
 	}
 
-	void SetUniform(const String &name, float value)
+	void SetFloat(const String &name, float value)
 	{
 		Uniform u{};
 		u.Type = UniformType::Float;
@@ -174,7 +235,7 @@ public:
 		_uniforms[name] = u;
 	}
 
-	void SetUniform(const String &name, glm::vec2 value)
+	void SetVec2(const String &name, glm::vec2 value)
 	{
 		Uniform u{};
 		u.Type = UniformType::Vec2;
@@ -182,7 +243,7 @@ public:
 		_uniforms[name] = u;
 	}
 
-	void SetUniform(const String &name, glm::vec3 value)
+	void SetVec3(const String &name, glm::vec3 value)
 	{
 		Uniform u{};
 		u.Type = UniformType::Vec3;
@@ -190,7 +251,7 @@ public:
 		_uniforms[name] = u;
 	}
 
-	void SetUniform(const String &name, glm::vec4 value)
+	void SetVec4(const String &name, glm::vec4 value)
 	{
 		Uniform u{};
 		u.Type = UniformType::Vec4;
@@ -198,7 +259,7 @@ public:
 		_uniforms[name] = u;
 	}
 
-	void SetUniform(const String &name, glm::mat3 value)
+	void SetMat3(const String &name, glm::mat3 value)
 	{
 		Uniform u{};
 		u.Type = UniformType::Mat3;
@@ -206,7 +267,7 @@ public:
 		_uniforms[name] = u;
 	}
 
-	void SetUniform(const String &name, glm::mat4 value)
+	void SetMat4(const String &name, glm::mat4 value)
 	{
 		Uniform u{};
 		u.Type = UniformType::Mat4;
