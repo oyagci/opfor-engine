@@ -2,7 +2,7 @@
 #include "WindowsInput.hpp"
 
 #include "opfor/core/Application.hpp"
-#include "opfor/core/Base.hpp"
+#include "opfor/core/base.hpp"
 #include <GLFW/glfw3.h>
 
 namespace opfor {

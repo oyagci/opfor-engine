@@ -1,4 +1,3 @@
-#pragma once
 //#include "opforpch.hpp"
 
 #include "WindowsWindow.hpp"

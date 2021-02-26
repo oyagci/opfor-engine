@@ -84,6 +84,11 @@
 #endif
 
 
+#ifdef IMGUI_IMPL_OPENGL_LOADER_GLEW
+# undef IMGUI_IMPL_OPENGL_LOADER_GLEW
+# define IMGUI_IMPL_OPENGL_LOADER_GLAD
+#endif
+
 // GL includes
 #if defined(IMGUI_IMPL_OPENGL_ES2)
 #include <GLES2/gl2.h>
