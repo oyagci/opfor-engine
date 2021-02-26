@@ -1,5 +1,4 @@
 #include "ImGuiLayer.hpp"
-#include "components/PlayerCameraComponent.hpp"
 #include "examples/imgui_impl_glfw.h"
 #include "examples/imgui_impl_opengl3.h"
 #include "opfor/core/Application.hpp"
@@ -191,22 +190,6 @@ void ImGuiLayer::OnImGuiRender()
     }
     EndDockspace();
     EndFrame();
-
-    if (opfor::Input::GetKeyDown(opfor::KeyCode::Escape))
-    {
-        auto playerEnts = opfor::Application::Get().GetEntities<PlayerCameraComponent>();
-        if (playerEnts.size() > 0)
-        {
-            auto camera = playerEnts[0]->Get<PlayerCameraComponent>();
-
-            // Enable/Disable input for camera
-            camera.useInput = !camera.useInput;
-            playerEnts[0]->Set(camera);
-
-            // Enable/Disable cursor
-            opfor::Application::Get().GetWindow()->HideCursor(camera.useInput);
-        }
-    }
 
     auto mouse = opfor::Input::GetMouseButton(opfor::MouseButton::ButtonRight) == opfor::KeyStatus::Pressed;
     if (mouse)

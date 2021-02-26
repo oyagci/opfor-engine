@@ -3,7 +3,6 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
-#include "components/PlayerCameraComponent.hpp"
 #include "components/TransformComponent.hpp"
 #include "opfor/core/Input.hpp"
 
