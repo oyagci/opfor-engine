@@ -4,6 +4,7 @@
 #include "opfor/renderer/Framebuffer.hpp"
 #include "opfor/renderer/Renderbuffer.hpp"
 #include "opfor/core/Application.hpp"
+#include "OpenGLConversions.hpp"
 
 namespace opfor {
 
@@ -48,7 +49,7 @@ void OpenGLFramebuffer::AttachTexture(SharedPtr<Texture> texture, FramebufferAtt
 		case FramebufferAttachment::ColorAttachment13:
 		case FramebufferAttachment::ColorAttachment14:
 		case FramebufferAttachment::ColorAttachment15:
-			glFramebufferTexture2D(GL_FRAMEBUFFER, (GLenum)attachment, GL_TEXTURE_2D, texture->GetRawHandle(), 0);
+			glFramebufferTexture2D(GL_FRAMEBUFFER, ToGlColorAttachmentEnum(attachment), GL_TEXTURE_2D, texture->GetRawHandle(), 0);
 			_Attachments.insert(attachment);
 			UpdateDrawBuffers();
 			break ;
@@ -67,7 +68,8 @@ void OpenGLFramebuffer::AttachTexture(SharedPtr<Texture> texture, FramebufferAtt
 void OpenGLFramebuffer::AttachRenderbuffer(SharedPtr<Renderbuffer> renderbuffer, RenderbufferAttachment attachment)
 {
 	glBindFramebuffer(GL_FRAMEBUFFER, _RendererID);
-	glFramebufferRenderbuffer(GL_FRAMEBUFFER, (GLenum)attachment, GL_RENDERBUFFER, renderbuffer->GetRawHandle());
+	glFramebufferRenderbuffer(GL_FRAMEBUFFER, ToGlRenderbufferAttachment(attachment), GL_RENDERBUFFER,
+        renderbuffer->GetRawHandle());
 
 	_Renderbuffers.push_back(renderbuffer);
 }
@@ -80,7 +82,7 @@ void OpenGLFramebuffer::UpdateDrawBuffers() const
 
 	for (auto const &attach : _Attachments) {
 		if (attach >= FramebufferAttachment::ColorAttachment0 && attach <= FramebufferAttachment::ColorAttachment15)
-			attachments.push_back((GLuint)attach);
+			attachments.push_back(ToGlColorAttachmentEnum(attach));
 	}
 
 	if (attachments.size() > 0) {

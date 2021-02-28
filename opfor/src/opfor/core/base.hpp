@@ -4,6 +4,7 @@
 #include <csignal>
 #include <optional>
 #include <variant>
+#include <unordered_map>
 
 #include "opfor/core/log.hpp"
 
@@ -62,5 +63,8 @@ using String = std::string;
 
 template <typename ... T>
 using Variant = std::variant<T...>;
+
+template <typename Key, typename T>
+using UnorderedMap = std::unordered_map<Key, T>;
 
 }

@@ -1,4 +1,6 @@
 #include "OpenGLTexture.hpp"
+
+#include "OpenGLConversions.hpp"
 #include "opfor/core/base.hpp"
 
 namespace opfor {
@@ -8,7 +10,7 @@ namespace opfor {
 
 void OpenGLTexture2D::Build()
 {
-	GLint inputFormat = (GLint)GetInputFormat();
+	GLint inputFormat = ToGlDataFormat(GetInputFormat());
 
 	if (IsSRGB()) {
 		if (GetInputFormat() == DataFormat::RGB) {
@@ -21,13 +23,13 @@ void OpenGLTexture2D::Build()
 
 	glBindTexture(GL_TEXTURE_2D, _RendererID);
 
-	glTexImage2D(GL_TEXTURE_2D, 0, (GLint)inputFormat, GetSize().x, GetSize().y, 0, (GLint)GetOutputFormat(),
-		(GLenum)GetDataType(), _TextureData);
+	glTexImage2D(GL_TEXTURE_2D, 0, inputFormat, GetSize().x, GetSize().y, 0, ToGlDataFormat(GetOutputFormat()),
+		ToGlDataType(GetDataType()), _TextureData);
 
 	ApplyParameters();
 
 	if (ShouldGenerateMipmap()) {
-		glGenerateMipmap((GLenum)GetTextureType());
+		glGenerateMipmap(ToGlTextureType(GetTextureType()));
 	}
 
 	glBindTexture(GL_TEXTURE_2D, 0);
@@ -53,7 +55,7 @@ void OpenGLTexture2D::Bind(TextureUnit unit)
 void OpenGLTexture2D::ApplyParameters()
 {
 	for (auto const &param : GetTextureParameters()) {
-		glTexParameteri(GL_TEXTURE_2D, (GLenum)param.first, (GLint)param.second);
+		glTexParameteri(GL_TEXTURE_2D, ToGlTextureParameterType(param.first), ToGlTextureParameterValue(param.second));
 	}
 }
 
@@ -87,7 +89,7 @@ void OpenGLTextureCubemap::Build()
 	glBindTexture(GL_TEXTURE_CUBE_MAP, _RendererID);
 	ApplyParameters();
 	if (ShouldGenerateMipmap()) {
-		glGenerateMipmap((GLenum)GetTextureType());
+		glGenerateMipmap(ToGlTextureType(GetTextureType()));
 	}
 	glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
 }
@@ -95,14 +97,14 @@ void OpenGLTextureCubemap::Build()
 void OpenGLTextureCubemap::ApplyParameters()
 {
 	for (auto const &param : GetTextureParameters()) {
-		glTexParameteri(GL_TEXTURE_CUBE_MAP, (GLenum)param.first, (GLint)param.second);
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, ToGlTextureParameterType(param.first), ToGlTextureParameterValue(param.second));
 	}
 }
 
 void OpenGLTextureCubemap::SetFaceData(CubemapFace face, ImageLoader::Image image)
 {
-	glTexImage2D((GLenum)face, 0, (GLint)GetInputFormat(),
-		image.width, image.height, 0, (GLint)GetOutputFormat(), (GLenum)GetDataType(),
+	glTexImage2D((GLenum)ToGlCubemapFace(face), 0, ToGlDataFormat(GetInputFormat()),
+		image.width, image.height, 0, ToGlDataFormat(GetOutputFormat()), ToGlDataType(GetDataType()),
 		image.data.get());
 }
 

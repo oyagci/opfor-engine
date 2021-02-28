@@ -1,4 +1,6 @@
 #include "OpenGLRendererAPI.hpp"
+
+#include "OpenGLConversions.hpp"
 #include "opfor/renderer/VertexArray.hpp"
 #include "opfor/renderer/Framebuffer.hpp"
 #include "opfor/renderer/Texture.hpp"
@@ -105,10 +107,10 @@ namespace opfor {
 	void OpenGLRendererAPI::PushCapability(RendererCaps cap, bool enable)
 	{
 		if (enable) {
-			glEnable((GLenum)cap);
+			glEnable(ToGlRendererCap(cap));
 		}
 		else {
-			glDisable((GLenum)cap);
+			glDisable(ToGlRendererCap(cap));
 		}
 
 		_capStates[cap].push_back(enable);
@@ -120,10 +122,10 @@ namespace opfor {
 			int32_t prevState = _capStates[cap].back();
 
 			if (prevState) {
-				glEnable((GLenum)cap);
+				glEnable(ToGlRendererCap(cap));
 			}
 			else {
-				glDisable((GLenum)cap);
+				glDisable(ToGlRendererCap(cap));
 			}
 
 			_capStates[cap].pop_back();
@@ -135,7 +137,7 @@ namespace opfor {
 		int32_t prevTexture = 0;
 		TextureType type = texture->GetTextureType();
 
-		glActiveTexture((GLenum)unit);
+		glActiveTexture(ToGlTextureUnit(unit));
 
 		if (type == TextureType::Tex1D) {
 			glGetIntegerv(GL_TEXTURE_BINDING_1D, &prevTexture);
@@ -152,15 +154,15 @@ namespace opfor {
 
 		_prevTextureUnits[unit].push_back({ type, prevTexture });
 
-		glBindTexture((GLenum)type, texture->GetRawHandle());
+		glBindTexture(ToGlTextureType(type), texture->GetRawHandle());
 	}
 
 	void OpenGLRendererAPI::PopTexture(TextureUnit unit)
 	{
 		auto prevTexture = _prevTextureUnits[unit].back();
 
-		glActiveTexture((GLenum)unit);
-		glBindTexture((GLenum)prevTexture.first, (GLuint)prevTexture.second);
+		glActiveTexture(ToGlTextureUnit(unit));
+		glBindTexture(ToGlTextureType(prevTexture.first),prevTexture.second);
 
 		_prevTextureUnits[unit].pop_back();
 	}
