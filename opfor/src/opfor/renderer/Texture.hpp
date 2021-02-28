@@ -10,93 +10,82 @@ namespace opfor {
 
 enum class CubemapFace
 {
-	PositiveX = GL_TEXTURE_CUBE_MAP_POSITIVE_X,
-	NegativeX = GL_TEXTURE_CUBE_MAP_NEGATIVE_X,
-	PositiveY = GL_TEXTURE_CUBE_MAP_POSITIVE_Y,
-	NegativeY = GL_TEXTURE_CUBE_MAP_NEGATIVE_Y,
-	PositiveZ = GL_TEXTURE_CUBE_MAP_POSITIVE_Z,
-	NegativeZ = GL_TEXTURE_CUBE_MAP_NEGATIVE_Z,
+	PositiveX = 1,
+	NegativeX = 2,
+	PositiveY = 3,
+	NegativeY = 4,
+	PositiveZ = 5,
+	NegativeZ = 6,
+
 };
 
 enum class TextureType
 {
-#ifdef OP4_PLATFORM_OPENGL
-	Tex1D = GL_TEXTURE_1D,
-	Tex2D = GL_TEXTURE_2D,
-	Tex3D = GL_TEXTURE_3D,
-	TexCubemap = GL_TEXTURE_CUBE_MAP,
-#endif
+	Tex1D      = 1,
+	Tex2D      = 2,
+	Tex3D      = 3,
+	TexCubemap = 4,
 };
 
 enum class DataFormat
 {
-#ifdef OP4_PLATFORM_OPENGL
-	RG      = GL_RG,
-	RGB     = GL_RGB,
-	RGBA    = GL_RGBA,
-	RGBA16F = GL_RGBA16F,
-	RGB16F  = GL_RGB16F,
-	Depth   = GL_DEPTH_COMPONENT,
-#endif
+	RG      = 1,
+	RGB     = 2,
+	RGBA    = 3,
+	RGBA16F = 4,
+	RGB16F  = 5,
+	Depth   = 6,
 };
 
 enum class DataType
 {
-#ifdef OP4_PLATFORM_OPENGL
-	Int            = GL_INT,
-	Float          = GL_FLOAT,
-	UnsignedByte   = GL_UNSIGNED_BYTE,
-	UnsignedInt    = GL_UNSIGNED_INT,
-#endif
+	Int            = 1,
+	Float          = 2,
+	UnsignedByte   = 3,
+	UnsignedInt    = 4,
 };
 
 enum class TextureParameterType
 {
-#ifdef OP4_PLATFORM_OPENGL
-	MignifyFilter = GL_TEXTURE_MIN_FILTER,
-	MagnifyFilter = GL_TEXTURE_MAG_FILTER,
-	WrapR         = GL_TEXTURE_WRAP_R,
-	WrapS         = GL_TEXTURE_WRAP_S,
-	WrapT         = GL_TEXTURE_WRAP_T,
-#endif
+	MignifyFilter = 1,
+	MagnifyFilter = 2,
+	WrapR         = 3,
+	WrapS         = 4,
+	WrapT         = 5,
 };
 
 enum class TextureParameterValue
 {
-#ifdef OP4_PLATFORM_OPENGL
-	Nearest              = GL_NEAREST,
-	Linear               = GL_LINEAR,
-	NearestMipmapNearest = GL_NEAREST_MIPMAP_NEAREST,
-	NearestMipmapLinear  = GL_NEAREST_MIPMAP_LINEAR,
-	LinearMipmapNearest  = GL_LINEAR_MIPMAP_NEAREST,
-	LinearMipmapLinear   = GL_LINEAR_MIPMAP_LINEAR,
-	ClampToEdge          = GL_CLAMP_TO_EDGE,
-	ClampToBorder        = GL_CLAMP_TO_BORDER,
-	Repeat               = GL_REPEAT,
-	MirroredRepeat       = GL_MIRRORED_REPEAT,
-#endif
+	Nearest              = 1,
+	Linear               = 2,
+	NearestMipmapNearest = 3,
+	NearestMipmapLinear  = 4,
+	LinearMipmapNearest  = 5,
+	LinearMipmapLinear   = 6,
+	ClampToEdge          = 7,
+	ClampToBorder        = 8,
+	Repeat               = 9,
+	MirroredRepeat       = 10,
 };
 
 enum class TextureUnit
 {
-#ifdef OP4_PLATFORM_OPENGL
-	Texture0  = GL_TEXTURE0,
-	Texture1  = GL_TEXTURE1,
-	Texture2  = GL_TEXTURE2,
-	Texture3  = GL_TEXTURE3,
-	Texture4  = GL_TEXTURE4,
-	Texture5  = GL_TEXTURE5,
-	Texture6  = GL_TEXTURE6,
-	Texture7  = GL_TEXTURE7,
-	Texture8  = GL_TEXTURE8,
-	Texture9  = GL_TEXTURE9,
-	Texture10 = GL_TEXTURE10,
-	Texture11 = GL_TEXTURE11,
-	Texture12 = GL_TEXTURE12,
-	Texture13 = GL_TEXTURE13,
-	Texture14 = GL_TEXTURE14,
-	Texture15 = GL_TEXTURE15,
-#endif
+	Texture0  = 0,
+	Texture1  = 1,
+	Texture2  = 2,
+	Texture3  = 3,
+	Texture4  = 4,
+	Texture5  = 5,
+	Texture6  = 6,
+	Texture7  = 7,
+	Texture8  = 8,
+	Texture9  = 9,
+	Texture10 = 10,
+	Texture11 = 11,
+	Texture12 = 12,
+	Texture13 = 13,
+	Texture14 = 14,
+	Texture15 = 15,
 };
 
 using TextureParameter = std::pair<TextureParameterType, TextureParameterValue>;

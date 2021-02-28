@@ -19,11 +19,9 @@ ClearFlag operator&(ClearFlag lhs, ClearFlag rhs);
 
 enum class RendererCaps
 {
-#ifdef OP4_PLATFORM_OPENGL
-	DepthTest = GL_DEPTH_TEST,
-	CullFace  = GL_CULL_FACE,
-	Blend     = GL_BLEND,
-#endif
+	DepthTest = 1,
+	CullFace  = 2,
+	Blend     = 3,
 };
 
 struct DrawCommandTextureBinding
