@@ -217,15 +217,14 @@ void SkyboxRenderer::InitHDRI()
 	opfor::RenderCommand::PushTexture(_HDRI, opfor::TextureUnit::Texture0);
 	opfor::RenderCommand::PushFramebuffer(capture);
 
-	size_t maxMipLevel = 5;
+	constexpr size_t maxMipLevel = 5;
 	for (size_t mip = 0; mip < maxMipLevel; mip++) {
 
-		unsigned int mipWidth = 128 * static_cast<int>(std::pow(0.5, mip));
-		unsigned int mipHeight = 128 * static_cast<int>(std::pow(0.5, mip));
+		const unsigned int mipSize = 128 >> mip;
 
 		captureRbo->Bind();
-		glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, mipWidth, mipHeight);
-		opfor::RenderCommand::PushViewport({ 0, 0 }, { mipWidth, mipHeight });
+		glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, mipSize, mipSize);
+		opfor::RenderCommand::PushViewport({ 0, 0 }, { mipSize, mipSize });
 
 		float roughness = (float)mip / (float)(maxMipLevel - 1);
 		prefilterShader->SetUniform("roughness", roughness);
