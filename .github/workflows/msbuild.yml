@@ -31,6 +31,9 @@ jobs:
 
     - name: Setup premake
       uses: abel0b/setup-premake@v1
+      
+    - name: Setup Build
+      run: premake5 vs2019
 
     - name: Build
       working-directory: ${{env.GITHUB_WORKSPACE}}
