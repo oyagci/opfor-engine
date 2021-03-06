@@ -28,8 +28,8 @@ jobs:
     - name: Setup premake
       uses: abel0b/setup-premake@v1
 
-    - name: Setup premake
-      uses: abel0b/setup-premake@v1
+    - name: Setup Build
+      run: premake5 vs2019
       
     - name: Restore NuGet packages
       working-directory: ${{env.GITHUB_WORKSPACE}}
