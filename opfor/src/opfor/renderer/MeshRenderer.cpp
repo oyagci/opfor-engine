@@ -161,10 +161,7 @@ Vector<DrawCommand> MeshRenderer::RenderShadowMeshes()
 
             auto const *mesh = Application::Get().GetMesh(meshId);
 
-            glm::mat4 modelMatrix(1.0f);
-            modelMatrix = glm::translate(modelMatrix, transform.position);
-            modelMatrix *= glm::mat4_cast(transform.rotation);
-            modelMatrix = glm::scale(modelMatrix, transform.scale);
+            glm::mat4 modelMatrix(CalcModelMatrix(transform));
 
             DrawCommand cmd;
             cmd.uniformBindings = {{"modelMatrix", modelMatrix}};
@@ -174,6 +171,47 @@ Vector<DrawCommand> MeshRenderer::RenderShadowMeshes()
     }
 
     return drawCommands;
+}
+
+glm::mat4 MeshRenderer::CalcModelMatrix(TransformComponent const &transform)
+{
+    glm::mat4 modelMatrix(1.0f);
+
+    glm::vec3 position(0.0f, 0.0f, 0.0f);
+    glm::quat rotation(1.0f, 0.0f, 0.0f, 0.0f);
+    glm::vec3 scale(1.0f, 1.0f, 1.0f);
+
+    if (transform.parent)
+    {
+        Vector<Ref<TransformComponent>> parents;
+        Ref<TransformComponent> curParent = transform.parent.value();
+        while (true)
+        {
+            parents.push_back(curParent);
+
+            if (curParent.get().parent)
+                curParent = curParent.get().parent.value();
+            else
+                break;
+        }
+
+        for (auto p = parents.rbegin(); p != parents.rend(); ++p)
+        {
+            position += (*p).get().position;
+            rotation *= (*p).get().rotation;
+            scale *= (*p).get().scale;
+        }
+    }
+
+    position += transform.position;
+    rotation *= transform.rotation;
+    scale *= transform.scale;
+
+    modelMatrix = glm::translate(modelMatrix, position);
+    modelMatrix *= glm::mat4_cast(rotation);
+    modelMatrix = glm::scale(modelMatrix, scale);
+
+    return modelMatrix;
 }
 
 Vector<DrawCommand> MeshRenderer::SubmitMeshes(PerspectiveCamera const &camera)
@@ -203,10 +241,7 @@ Vector<DrawCommand> MeshRenderer::SubmitMeshes(PerspectiveCamera const &camera)
 
             auto &shader = shaderOpt.value();
 
-            glm::mat4 modelMatrix(1.0f);
-            modelMatrix = glm::translate(modelMatrix, transform.position);
-            modelMatrix *= glm::mat4_cast(transform.rotation);
-            modelMatrix = glm::scale(modelMatrix, transform.scale);
+            glm::mat4 modelMatrix(CalcModelMatrix(transform));
 
             DrawCommand drawCommand;
             drawCommand.shader = shader;

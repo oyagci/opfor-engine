@@ -15,6 +15,7 @@ struct TransformComponent : ecs::IComponentBase
     glm::vec3 scale{1.0f, 1.0f, 1.0f};
 
     ecs::IEntityBase &entity;
+    opfor::Optional<opfor::Ref<TransformComponent>> parent;
 
     TransformComponent(ecs::IEntityBase &owner) : entity(owner)
     {

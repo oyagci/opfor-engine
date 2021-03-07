@@ -4,6 +4,30 @@
 #include "imgui.h"
 #include "layers/ImGuiLayer.hpp"
 
+void EditorSceneHierarchy::DrawHierarchy(opfor::UnorderedMap<uuids::uuid, EntityHierarchy> const &lookup,
+                                         EntityHierarchy const &hierarchy, int idx = 0) const
+{
+    size_t itemIndex = idx;
+    const ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick;
+
+    if (ImGui::TreeNodeEx(reinterpret_cast<void *>(itemIndex++), flags, "%s",
+                          fmt::format("{}", hierarchy.name).c_str()))
+    {
+        for (auto const &child : hierarchy.children)
+        {
+            DrawHierarchy(lookup, child, itemIndex);
+            itemIndex++;
+        }
+        ImGui::TreePop();
+    }
+    if (ImGui::IsItemClicked())
+    {
+        //_selectedItem = static_cast<int>(itemIndex);
+        // ImGuiLayer::Get().SetSelectedEntity(allEnts[itemIndex]);
+        // opfor::Application::Get().OnSelectItem(_selectedItem);
+    }
+}
+
 void EditorSceneHierarchy::OnDrawGUI()
 {
     ImGui::Begin("Scene Hierarchy");
@@ -35,23 +59,59 @@ void EditorSceneHierarchy::OnDrawGUI()
 
     auto allEnts = opfor::Application::Get().GetAllEntities();
 
-    size_t itemIndex = 0;
-    for (auto const &ent : allEnts)
+    opfor::UnorderedMap<uuids::uuid, ecs::IEntityBase *> entitiesByUuid;
+    opfor::UnorderedMap<uuids::uuid, EntityHierarchy> lookup;
+
+    for (auto const *ent : allEnts)
     {
-        auto name = ent->GetName();
-        if (ImGui::TreeNodeEx(reinterpret_cast<void *>(itemIndex), static_cast<ImGuiTreeNodeFlags>(0),
-                              fmt::format("{}", name).c_str()))
+        if (ent->HasComponents<TransformComponent>())
         {
-            ImGui::TreePop();
+            auto &t = ent->Get<TransformComponent>();
+
+            lookup[ent->GetUuid()].name = ent->GetName();
+            lookup[ent->GetUuid()].uuid = ent->GetUuid();
+
+            if (t.parent)
+            {
+                lookup[ent->GetUuid()].parent = t.parent->get().entity.GetUuid();
+            }
         }
-        if (ImGui::IsItemClicked())
+    }
+
+    for (auto const &[uuid, entityHierarchy] : lookup)
+    {
+        if (entityHierarchy.parent)
         {
-            _selectedItem = itemIndex;
-            ImGuiLayer::Get().SetSelectedEntity(allEnts[itemIndex]);
-            opfor::Application::Get().OnSelectItem(_selectedItem);
+            lookup[entityHierarchy.parent.value()].children.push_back(entityHierarchy);
         }
+    }
+
+    const ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick;
+    size_t itemIndex = 0;
+
+    for (auto const &[uuid, ent] : lookup)
+    {
+        if (!ent.parent)
+        {
+            DrawHierarchy(lookup, ent);
+        }
+
         itemIndex++;
     }
+
+    // size_t itemIndex = 0;
+    // for (auto const &ent : allEnts) {
+    //	auto name = ent->GetName();
+    //	if (ImGui::TreeNodeEx(reinterpret_cast<void*>(itemIndex), flags,fmt::format("{}", name).c_str())) {
+    //		ImGui::TreePop();
+    //	}
+    //	if (ImGui::IsItemClicked()) {
+    //		_selectedItem = itemIndex;
+    //		ImGuiLayer::Get().SetSelectedEntity(allEnts[itemIndex]);
+    //		opfor::Application::Get().OnSelectItem(_selectedItem);
+    //	}
+    //	itemIndex++;
+    //}
 
     ImGui::End();
 }

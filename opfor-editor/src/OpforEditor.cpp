@@ -12,6 +12,31 @@
 #include "editor/EditorSceneHierarchy.hpp"
 #include "editor/EditorViewport.hpp"
 
+struct Container : ecs::IComponent
+{
+};
+
+class ContainerSystem : public ecs::ComponentSystem
+{
+  private:
+    float totalTime = 0.0f;
+
+  public:
+    void OnUpdate(float deltaTime) override
+    {
+        totalTime += deltaTime;
+
+        auto containers = GetEntities<TransformComponent, Container>();
+
+        for (auto c : containers)
+        {
+            auto &t = c->Get<TransformComponent>();
+
+            t.position.x = sinf(totalTime) * 1000;
+        }
+    }
+};
+
 class OpforEditor : public opfor::Application
 {
   private:
@@ -41,12 +66,10 @@ class OpforEditor : public opfor::Application
         ImGuiLayer::Get().OpenWindow<EditorInspector>();
 
         CreateComponentSystem<SpheresRotateSystem>();
+        CreateComponentSystem<ContainerSystem>();
 
         auto *skyBox = CreateEntity<SkyboxComponent>();
         skyBox->SetName("SkyBox");
-
-        auto *player = opfor::Application::Get().CreateEntity<TransformComponent>();
-        player->SetName("Default Player");
 
         auto [spheresShaderID, spheresShader] = ShaderManager::Get().Create("shaders/basic.glsl");
 
@@ -62,6 +85,24 @@ class OpforEditor : public opfor::Application
         spheresShader.SetUniform("material.roughnessFactor", 1.0f);
         spheresShader.Unbind();
         spheres->SetName("Spheres");
+
+        auto *container = CreateEntity<TransformComponent, Container>();
+        container->SetName("Container");
+
+        auto &containerTransform = container->Get<TransformComponent>();
+        spheres->Get<TransformComponent>().parent = containerTransform;
+
+        auto *child = CreateEntity<TransformComponent>();
+        child->SetName("Child1");
+        child->Get<TransformComponent>().parent = containerTransform;
+
+        auto *childchild = CreateEntity<TransformComponent>();
+        childchild->SetName("ChildChild1");
+        childchild->Get<TransformComponent>().parent = child->Get<TransformComponent>();
+
+        auto *child2 = CreateEntity<TransformComponent>();
+        child2->SetName("Child2");
+        child2->Get<TransformComponent>().parent = containerTransform;
     }
 };
 
