@@ -39,6 +39,7 @@ private:
 	Vector<DrawCommand> RenderLightBillboard(PerspectiveCamera const &);
 	Vector<DrawCommand> RenderLight(PerspectiveCamera const &);
 	RenderCommandBuffer RenderShadowMap();
+	glm::mat4 CalcModelMatrix(TransformComponent const &);
 
 public:
 	MeshRenderer();

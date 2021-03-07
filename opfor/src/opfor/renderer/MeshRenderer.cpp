@@ -159,10 +159,7 @@ Vector<DrawCommand> MeshRenderer::RenderShadowMeshes()
 
 			auto const *mesh = Application::Get().GetMesh(meshId);
 
-			glm::mat4 modelMatrix(1.0f);
-			modelMatrix = glm::translate(modelMatrix, transform.position);
-			modelMatrix *= glm::mat4_cast(transform.rotation);
-			modelMatrix = glm::scale(modelMatrix, transform.scale);
+			glm::mat4 modelMatrix(CalcModelMatrix(transform));
 			
 			DrawCommand cmd;
 			cmd.uniformBindings = { { "modelMatrix", modelMatrix } };
@@ -173,6 +170,41 @@ Vector<DrawCommand> MeshRenderer::RenderShadowMeshes()
 	}
 
 	return drawCommands;
+}
+
+glm::mat4 MeshRenderer::CalcModelMatrix(TransformComponent const &transform)
+{
+	glm::mat4 modelMatrix(1.0f);
+
+	TransformComponent finalTransform;
+
+	if (transform.parent)
+	{
+		Vector<TransformComponent const *> parents;
+		TransformComponent const *curParent = transform.parent;
+		while (curParent)
+		{
+			parents.push_back(curParent);
+			curParent = curParent->parent;
+		}
+
+		for (auto p = parents.rbegin(); p != parents.rend(); ++p)
+		{
+			finalTransform.position += (*p)->position;
+			finalTransform.rotation *= (*p)->rotation;
+			finalTransform.scale *= (*p)->scale;
+		}
+	}
+
+	finalTransform.position += transform.position;
+	finalTransform.rotation *= transform.rotation;
+	finalTransform.scale *= transform.scale;
+	
+	modelMatrix = glm::translate(modelMatrix, finalTransform.position);
+	modelMatrix *= glm::mat4_cast(finalTransform.rotation);
+	modelMatrix = glm::scale(modelMatrix, finalTransform.scale);
+
+	return modelMatrix;
 }
 
 Vector<DrawCommand> MeshRenderer::SubmitMeshes(PerspectiveCamera const &camera)
@@ -199,10 +231,7 @@ Vector<DrawCommand> MeshRenderer::SubmitMeshes(PerspectiveCamera const &camera)
 
 			auto &shader = shaderOpt.value();
 
-			glm::mat4 modelMatrix(1.0f);
-			modelMatrix = glm::translate(modelMatrix, transform.position);
-			modelMatrix *= glm::mat4_cast(transform.rotation);
-			modelMatrix = glm::scale(modelMatrix, transform.scale);
+			glm::mat4 modelMatrix = CalcModelMatrix(transform);
 
 			DrawCommand drawCommand;
 			drawCommand.shader = shader;

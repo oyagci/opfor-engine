@@ -12,6 +12,29 @@
 #include "editor/EditorSceneHierarchy.hpp"
 #include "editor/EditorInspector.hpp"
 
+struct Container : ecs::IComponent {};
+
+class ContainerSystem : public ecs::ComponentSystem
+{
+private:
+	float totalTime = 0.0f;
+	
+public:
+	void OnUpdate(float deltaTime) override
+	{
+		totalTime += deltaTime;
+		
+		auto containers = GetEntities<TransformComponent, Container>();
+
+		for (auto c : containers)
+		{
+			auto &t = c->Get<TransformComponent>();
+
+			t.position.x = sinf(totalTime) * 1000;
+		}
+	}
+};
+
 class OpforEditor : public opfor::Application
 {
 private:
@@ -40,6 +63,7 @@ public:
 		ImGuiLayer::Get().OpenWindow<EditorInspector>();
 
 		CreateComponentSystem<SpheresRotateSystem>();
+		CreateComponentSystem<ContainerSystem>();
 
 		auto *skyBox = CreateEntity<SkyboxComponent>();
 		skyBox->SetName("SkyBox");
@@ -61,6 +85,12 @@ public:
 			spheresShader.SetUniform("material.roughnessFactor", 1.0f);
 			spheresShader.Unbind();
 		spheres->SetName("Spheres");
+
+		auto *container = CreateEntity<TransformComponent, Container>();
+		container->SetName("Container");
+
+		auto &containerTransform = container->Get<TransformComponent>();
+		spheres->Get<TransformComponent>().parent = &containerTransform;
 	}
 };
 
