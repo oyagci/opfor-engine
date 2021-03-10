@@ -133,6 +133,7 @@ public:
 	template <typename U>
 	void Set(U const &data)
 	{
+		static_assert(!std::is_same_v<U, TransformComponent>, "TransformComponent cannot be assigned (read-only)");
 		static_assert(std::is_base_of<IComponentBase, U>::value, "typename U must de derived from IComponentBase");
 		GetComponent<U>() = data;
 	}

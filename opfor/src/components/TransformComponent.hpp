@@ -3,6 +3,8 @@
 #include "ecs/Component.hpp"
 #include <glm/vec3.hpp>
 #include <glm/gtc/quaternion.hpp>
+#include "opfor/core/base.hpp"
+#include "ecs/Entity.hpp"
 
 struct TransformComponent : ecs::IComponentBase
 {
@@ -13,4 +15,9 @@ struct TransformComponent : ecs::IComponentBase
 	glm::vec3 scale{ 1.0f, 1.0f, 1.0f };
 
 	TransformComponent *parent = nullptr;
+	ecs::IEntityBase &entity;
+
+	TransformComponent(ecs::IEntityBase &owner) : entity(owner)
+	{
+	}
 };
