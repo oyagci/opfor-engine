@@ -2,8 +2,10 @@
 
 class IEditorWindow
 {
-public:
-	virtual ~IEditorWindow() {}
+  public:
+    virtual ~IEditorWindow()
+    {
+    }
 
-	virtual void OnDrawGUI() = 0;
+    virtual void OnDrawGUI() = 0;
 };

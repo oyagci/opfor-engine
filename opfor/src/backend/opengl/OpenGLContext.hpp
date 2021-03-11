@@ -4,20 +4,21 @@
 
 struct GLFWwindow;
 
-namespace opfor {
+namespace opfor
+{
 
 class OpenGLContext : public IRendererContext
 {
-private:
-	GLFWwindow *_WindowHandle;
+  private:
+    GLFWwindow *_WindowHandle;
 
-public:
-	OpenGLContext() = delete;
-	OpenGLContext(GLFWwindow *window);
-	OpenGLContext(OpenGLContext &) = delete;
+  public:
+    OpenGLContext() = delete;
+    OpenGLContext(GLFWwindow *window);
+    OpenGLContext(OpenGLContext &) = delete;
 
-	void Init() override;
-	void SwapBuffers() override;
+    void Init() override;
+    void SwapBuffers() override;
 };
 
-}
+} // namespace opfor

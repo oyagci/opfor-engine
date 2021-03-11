@@ -1,7 +1,7 @@
 #pragma once
 
-extern "C" {
+extern "C"
+{
 
 #include "nfd.h"
-
 }

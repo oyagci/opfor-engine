@@ -3,8 +3,9 @@
 
 class EditorSceneHierarchy : public IEditorWindow
 {
-private:
-	int _selectedItem = 0;
-public:
-	void OnDrawGUI() override;
+  private:
+    int _selectedItem = 0;
+
+  public:
+    void OnDrawGUI() override;
 };

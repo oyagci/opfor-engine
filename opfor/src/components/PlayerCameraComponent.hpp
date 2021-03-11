@@ -5,11 +5,11 @@
 
 struct PlayerCameraComponent : ecs::IComponentBase
 {
-	glm::mat4 projection;
-	glm::mat4 model;
-	glm::mat4 view;
-	glm::mat4 viewProjection;
+    glm::mat4 projection;
+    glm::mat4 model;
+    glm::mat4 view;
+    glm::mat4 viewProjection;
 
-	float exposure;
-	bool useInput = true;
+    float exposure;
+    bool useInput = true;
 };

@@ -1,9 +1,10 @@
 #include "Context.hpp"
 #include "backend/opengl/OpenGLContext.hpp"
 
-namespace opfor {
+namespace opfor
+{
 
-//UniquePtr<IRendererContext> IRendererContext::Create()
+// UniquePtr<IRendererContext> IRendererContext::Create()
 //{
 //	return MakeUnique<OpenGLContext>();
 //}

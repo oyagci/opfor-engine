@@ -1,9 +1,9 @@
 #pragma once
-#include "imgui.h"
 #include "EditorWindow.hpp"
+#include "imgui.h"
 
 class EditorMenuBar : public IEditorWindow
 {
-public:
-	void OnDrawGUI() override;
+  public:
+    void OnDrawGUI() override;
 };

@@ -1,55 +1,66 @@
 #pragma once
 
 #include "Layer.hpp"
-#include "imgui.h"
 #include "ecs/Entity.hpp"
 #include "editor/EditorWindow.hpp"
+#include "imgui.h"
 
 class ImGuiLayer : public opfor::Layer
 {
-private:
-	ImVec2 _ViewportPosition;
-	ImVec2 _ViewportSize;
+  private:
+    ImVec2 _ViewportPosition;
+    ImVec2 _ViewportSize;
 
-	bool _logAutoScroll = true;
-	size_t _SelectedItem = 0;
+    bool _logAutoScroll = true;
+    size_t _SelectedItem = 0;
 
-	ecs::IEntityBase *_currentEntity = nullptr;
+    ecs::IEntityBase *_currentEntity = nullptr;
 
-	void BeginFrame();
-	void EndFrame();
+    void BeginFrame();
+    void EndFrame();
 
-	void BeginDockspace();
-	void EndDockspace();
+    void BeginDockspace();
+    void EndDockspace();
 
-	void SetupImGuiStyle();
+    void SetupImGuiStyle();
 
-	opfor::Vector<opfor::UniquePtr<IEditorWindow>> _windows;
+    opfor::Vector<opfor::UniquePtr<IEditorWindow>> _windows;
 
-private:
-	ImGuiLayer();
+  private:
+    ImGuiLayer();
 
-public:
-	static ImGuiLayer &Get()
-	{
-		static ImGuiLayer instance;
-		return instance;
-	}
+  public:
+    static ImGuiLayer &Get()
+    {
+        static ImGuiLayer instance;
+        return instance;
+    }
 
-	void OnAttach() override;
-	void OnDetach() override;
-	void OnImGuiRender() override;
+    void OnAttach() override;
+    void OnDetach() override;
+    void OnImGuiRender() override;
 
-	ImVec2 GetViewportSize() const { return _ViewportSize; }
-	ImVec2 GetViewportPosition() const { return _ViewportPosition; }
+    ImVec2 GetViewportSize() const
+    {
+        return _ViewportSize;
+    }
+    ImVec2 GetViewportPosition() const
+    {
+        return _ViewportPosition;
+    }
 
-	[[nodiscard]] ecs::IEntityBase *GetSelectedEntity() const { return _currentEntity; }
-	void SetSelectedEntity(ecs::IEntityBase *ent) { _currentEntity = ent; }
+    [[nodiscard]] ecs::IEntityBase *GetSelectedEntity() const
+    {
+        return _currentEntity;
+    }
+    void SetSelectedEntity(ecs::IEntityBase *ent)
+    {
+        _currentEntity = ent;
+    }
 
-	template<typename T>
-	void OpenWindow()
-	{
-		static_assert(std::is_base_of<IEditorWindow, T>::value);
-		_windows.emplace_back(opfor::MakeUnique<T>());
-	}
+    template <typename T> void OpenWindow()
+    {
+        static_assert(std::is_base_of<IEditorWindow, T>::value);
+        _windows.emplace_back(opfor::MakeUnique<T>());
+    }
 };

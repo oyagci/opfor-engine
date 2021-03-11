@@ -1,152 +1,153 @@
 #pragma once
 
+#include "Component.hpp"
+#include "Entity.hpp"
+#include <algorithm>
+#include <map>
 #include <memory>
 #include <type_traits>
 #include <vector>
-#include <algorithm>
-#include <map>
-#include "Component.hpp"
-#include "Entity.hpp"
 
-namespace ecs {
+namespace ecs
+{
 
 /*
  * Keeps track of every IComponentBase
  */
 class EntityManager_Impl
 {
-	/*
-	 * Can/Should only be accessed by EntityManager
-	 */
-	friend class EntityManager;
+    /*
+     * Can/Should only be accessed by EntityManager
+     */
+    friend class EntityManager;
 
-private:
-	/* Container of managed components */
-	std::vector<std::shared_ptr<IComponentBase>> Components;
-	std::vector<std::shared_ptr<IEntityBase>> Entities;
+  private:
+    /* Container of managed components */
+    std::vector<std::shared_ptr<IComponentBase>> Components;
+    std::vector<std::shared_ptr<IEntityBase>> Entities;
 
-	EntityManager_Impl()
-	{
-	};
+    EntityManager_Impl(){};
 
-	/* EntityManager should be unique */
-	EntityManager_Impl(EntityManager_Impl const &) = delete;
-	void operator=(EntityManager_Impl const &) = delete;
+    /* EntityManager should be unique */
+    EntityManager_Impl(EntityManager_Impl const &) = delete;
+    void operator=(EntityManager_Impl const &) = delete;
 
-	template <typename T, typename ... Types>
-	IEntity<T, Types...> *CreateEntity()
-	{
-		static_assert(std::is_base_of<IComponentBase, T>::value,
-			"T must be derived from IComponentBase");
+    template <typename T, typename... Types> IEntity<T, Types...> *CreateEntity()
+    {
+        static_assert(std::is_base_of<IComponentBase, T>::value, "T must be derived from IComponentBase");
 
-		auto entity = std::make_shared<IEntity<T, Types...>>();
+        auto entity = std::make_shared<IEntity<T, Types...>>();
 
-		Entities.push_back(entity);
+        Entities.push_back(entity);
 
-		return entity.get();
-	}
+        return entity.get();
+    }
 
-	///
-	/// Get a vector of non-owned pointers matching the specified list of components
-	/// there should be in each element
-	///
-	template <typename... Types>
-	std::vector<IEntity<Types...>*> GetEntities()
-	{
-		std::vector<IEntity<Types...>*> entities;
+    ///
+    /// Get a vector of non-owned pointers matching the specified list of components
+    /// there should be in each element
+    ///
+    template <typename... Types> std::vector<IEntity<Types...> *> GetEntities()
+    {
+        std::vector<IEntity<Types...> *> entities;
 
-		// Extract matching entities and put them in the vector
-		for (auto &e : Entities) {
-			if (e->HasComponents<Types...>()) {
-				// We can reinterpret_cast the pointer to any IEntity<...> because
-				// the type information is only relevant on the object's construction
-				// so there should be no problem as long as the components are present
-				auto ptr = reinterpret_cast<IEntity<Types...>*>(e.get());
-				entities.push_back(ptr);
-			}
-		}
+        // Extract matching entities and put them in the vector
+        for (auto &e : Entities)
+        {
+            if (e->HasComponents<Types...>())
+            {
+                // We can reinterpret_cast the pointer to any IEntity<...> because
+                // the type information is only relevant on the object's construction
+                // so there should be no problem as long as the components are present
+                auto ptr = reinterpret_cast<IEntity<Types...> *>(e.get());
+                entities.push_back(ptr);
+            }
+        }
 
-		return entities;
-	}
+        return entities;
+    }
 
-	std::vector<IEntityBase*> GetAllEntities()
-	{
-		std::vector<IEntityBase*> entities;
+    std::vector<IEntityBase *> GetAllEntities()
+    {
+        std::vector<IEntityBase *> entities;
 
-		for (auto &e : Entities) {
-			entities.push_back(e.get());
-		}
+        for (auto &e : Entities)
+        {
+            entities.push_back(e.get());
+        }
 
-		return entities;
-	}
+        return entities;
+    }
 
-	std::optional<IEntityBase *> GetEntity(size_t id)
-	{
-		for (auto &ent : Entities) {
-			if (ent->GetId() == id) {
-				return std::make_optional(ent.get());
-			}
-		}
+    std::optional<IEntityBase *> GetEntity(size_t id)
+    {
+        for (auto &ent : Entities)
+        {
+            if (ent->GetId() == id)
+            {
+                return std::make_optional(ent.get());
+            }
+        }
 
-		return std::nullopt;
-	}
+        return std::nullopt;
+    }
 
-	void DeleteEntity(unsigned int entityId)
-	{
-		auto entity = std::find_if(Entities.begin(), Entities.end(),
-			[entityId] (auto const &ptr) { return ptr->GetId() == entityId; });
+    void DeleteEntity(unsigned int entityId)
+    {
+        auto entity = std::find_if(Entities.begin(), Entities.end(),
+                                   [entityId](auto const &ptr) { return ptr->GetId() == entityId; });
 
-		if (entity != Entities.end()) {
-			Entities.erase(entity);
-		}
-	}
+        if (entity != Entities.end())
+        {
+            Entities.erase(entity);
+        }
+    }
 };
 
 class EntityManager
 {
-private:
-	EntityManager_Impl Manager;
-public:
-	EntityManager()
-	{
-	}
+  private:
+    EntityManager_Impl Manager;
 
-	/* An EntityManager should be unique */
-	EntityManager(EntityManager const &) = delete;
-	void operator=(EntityManager const &) = delete;
+  public:
+    EntityManager()
+    {
+    }
 
-	///
-	/// Create an entity with the components given in parameter
-	///
-	template <typename ... Types>
-	IEntity<Types...> *CreateEntity()
-	{
-		return Manager.CreateEntity<Types...>();
-	}
+    /* An EntityManager should be unique */
+    EntityManager(EntityManager const &) = delete;
+    void operator=(EntityManager const &) = delete;
 
-	///
-	/// Get a vector of entities that contains the list of components given in parameter
-	///
-	template <typename ... Types>
-	std::vector<IEntity<Types...>*> GetEntities()
-	{
-		return Manager.GetEntities<Types...>();
-	}
+    ///
+    /// Create an entity with the components given in parameter
+    ///
+    template <typename... Types> IEntity<Types...> *CreateEntity()
+    {
+        return Manager.CreateEntity<Types...>();
+    }
 
-	std::vector<IEntityBase*> GetAllEntities()
-	{
-		return Manager.GetAllEntities();
-	}
+    ///
+    /// Get a vector of entities that contains the list of components given in parameter
+    ///
+    template <typename... Types> std::vector<IEntity<Types...> *> GetEntities()
+    {
+        return Manager.GetEntities<Types...>();
+    }
 
-	std::optional<IEntityBase *> GetEntity(size_t id)
-	{
-		return Manager.GetEntity(id);
-	}
+    std::vector<IEntityBase *> GetAllEntities()
+    {
+        return Manager.GetAllEntities();
+    }
 
-	void DeleteEntity(unsigned int entityId)
-	{
-		Manager.DeleteEntity(entityId);
-	}
+    std::optional<IEntityBase *> GetEntity(size_t id)
+    {
+        return Manager.GetEntity(id);
+    }
+
+    void DeleteEntity(unsigned int entityId)
+    {
+        Manager.DeleteEntity(entityId);
+    }
 };
 
-}
+} // namespace ecs
