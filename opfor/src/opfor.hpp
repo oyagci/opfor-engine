@@ -1,7 +1,7 @@
 #pragma once
 
-#include "opfor/core/base.hpp"
 #include "opfor/core/Application.hpp"
+#include "opfor/core/base.hpp"
 
 // APPLICATION ENTRY POINT
 // =======================

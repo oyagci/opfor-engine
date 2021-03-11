@@ -2,7 +2,8 @@
 
 #include "Entity.hpp"
 
-namespace ecs {
+namespace ecs
+{
 
 class EntityManager;
 
@@ -11,27 +12,27 @@ class SystemManager;
 
 class ECSEngine
 {
-private:
-	typedef std::unique_ptr<EntityManager> EntityManagerHandle;
-	typedef std::unique_ptr<SystemManager> SystemManagerHandle;
+  private:
+    typedef std::unique_ptr<EntityManager> EntityManagerHandle;
+    typedef std::unique_ptr<SystemManager> SystemManagerHandle;
 
-	EntityManagerHandle _EntityManager;
-	SystemManagerHandle _SystemManager;
+    EntityManagerHandle _EntityManager;
+    SystemManagerHandle _SystemManager;
 
-public:
-	ECSEngine();
+  public:
+    ECSEngine();
 
-	EntityManager *GetEntityManager()
-	{
-		return _EntityManager.get();
-	}
+    EntityManager *GetEntityManager()
+    {
+        return _EntityManager.get();
+    }
 
-	SystemManager *GetSystemManager()
-	{
-		return _SystemManager.get();
-	}
+    SystemManager *GetSystemManager()
+    {
+        return _SystemManager.get();
+    }
 
-	void Update(float deltaTime);
+    void Update(float deltaTime);
 };
 
-}
+} // namespace ecs

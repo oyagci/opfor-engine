@@ -2,23 +2,39 @@
 
 #include "opfor/core/events/Event.h"
 
-namespace opfor {
+namespace opfor
+{
 
 class Layer
 {
-public:
-	virtual ~Layer() {}
+  public:
+    virtual ~Layer()
+    {
+    }
 
-	virtual void OnAttach() {}
-	virtual void OnDetach() {}
-	virtual void OnUpdate(float) {}
-	virtual void OnEvent(Event &) {}
-	virtual void OnImGuiRender() {}
+    virtual void OnAttach()
+    {
+    }
+    virtual void OnDetach()
+    {
+    }
+    virtual void OnUpdate(float)
+    {
+    }
+    virtual void OnEvent(Event &)
+    {
+    }
+    virtual void OnImGuiRender()
+    {
+    }
 
-	const std::string &GetName() const { return _DebugName; }
+    const std::string &GetName() const
+    {
+        return _DebugName;
+    }
 
-protected:
-	std::string _DebugName;
+  protected:
+    std::string _DebugName;
 };
 
-}
+} // namespace opfor

@@ -2,7 +2,9 @@
 
 class IDrawable
 {
-public:
-	virtual ~IDrawable() {}
-	virtual void Draw() const = 0;
+  public:
+    virtual ~IDrawable()
+    {
+    }
+    virtual void Draw() const = 0;
 };

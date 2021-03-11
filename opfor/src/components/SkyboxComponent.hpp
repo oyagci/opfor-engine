@@ -4,7 +4,7 @@
 
 struct SkyboxComponent : ecs::IComponentBase
 {
-	GLuint vao = 0;
-	GLuint vbo = 0;
-	GLuint texture = 0;
+    GLuint vao = 0;
+    GLuint vbo = 0;
+    GLuint texture = 0;
 };

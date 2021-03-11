@@ -1,15 +1,20 @@
 #pragma once
 
-namespace ecs {
+namespace ecs
+{
 
 struct IComponentBase
 {
-	virtual ~IComponentBase() {}
+    virtual ~IComponentBase()
+    {
+    }
 };
 
 struct IComponent : IComponentBase
 {
-	virtual ~IComponent() {}
+    virtual ~IComponent()
+    {
+    }
 };
 
-}
+} // namespace ecs

@@ -2,18 +2,20 @@
 #include "RendererAPI.hpp"
 #include "backend/opengl/OpenGLRenderbuffer.hpp"
 
-namespace opfor {
+namespace opfor
+{
 
 UniquePtr<Renderbuffer> Renderbuffer::Create()
 {
-	switch (RendererAPI::GetAPI()) {
-		case RendererAPI::API::None:
-			OP4_CORE_EXPECT(false, "Unsupported Platform API!\n");
-		case RendererAPI::API::OpenGL:
-			return MakeUnique<OpenGLRenderbuffer>();
-	};
+    switch (RendererAPI::GetAPI())
+    {
+    case RendererAPI::API::None:
+        OP4_CORE_EXPECT(false, "Unsupported Platform API!\n");
+    case RendererAPI::API::OpenGL:
+        return MakeUnique<OpenGLRenderbuffer>();
+    };
 
-	OP4_CORE_UNREACHABLE("{}\n", __PRETTY_FUNCTION__);
+    OP4_CORE_UNREACHABLE("{}\n", __PRETTY_FUNCTION__);
 }
 
-}
+} // namespace opfor

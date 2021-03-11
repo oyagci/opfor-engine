@@ -4,5 +4,5 @@
 
 struct BatchComponent : ecs::IComponentBase
 {
-	unsigned int Id;
+    unsigned int Id;
 };
