@@ -26,7 +26,7 @@ Application::Application()
     _Instance = this;
 
     _window = IWindow::Create({"OPFOR - Untitled Project", 1920, 1080});
-    _context = IRendererContext::Create(static_cast<GLFWwindow *>(_window->GetRawHandle()));
+    _context = IRendererContext::Create(*_window);
     _context->Init();
 
     Input::Prime();
