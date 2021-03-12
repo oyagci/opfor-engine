@@ -214,10 +214,6 @@ void EditorInspector::OnDrawGUI()
                 auto &model = currentEntity->Get<ModelComponent>();
                 model.shader = shaderId;
             }
-            if (ImGui::MenuItem("Transform"))
-            {
-                currentEntity->AddComponents<TransformComponent>();
-            }
             if (ImGui::MenuItem("Child Entity"))
             {
             }

@@ -11,6 +11,8 @@
 #include <unordered_map>
 #include <vector>
 
+struct TransformComponent;
+
 namespace ecs
 {
 
@@ -42,7 +44,14 @@ class IEntityBase
     ///
     template <typename U> void RegisterComponents()
     {
-        Components[GetTypeIndex<U>()] = std::make_unique<U>();
+        if constexpr (std::is_same<U, TransformComponent>::value)
+        {
+            Components[GetTypeIndex<U>()] = std::make_unique<U>(*this);
+        }
+        else
+        {
+            Components[GetTypeIndex<U>()] = std::make_unique<U>();
+        }
     }
 
     template <typename U, typename V, typename... UTypes> void RegisterComponents()
@@ -132,6 +141,7 @@ class IEntityBase
     ///
     template <typename U> void Set(U const &data)
     {
+        static_assert(!std::is_same_v<U, TransformComponent>, "TransformComponent cannot be assigned (read-only)");
         static_assert(std::is_base_of<IComponentBase, U>::value, "typename U must de derived from IComponentBase");
         GetComponent<U>() = data;
     }

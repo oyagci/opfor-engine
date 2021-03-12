@@ -122,7 +122,6 @@ class Level : public opfor::ILevel
                     // std::array<float, 3> rotation = transform["rotation"];
                     std::array<float, 3> scale = transform["scale"];
 
-                    entity->AddComponents<TransformComponent>();
                     auto &tr = entity->Get<TransformComponent>();
                     tr.position = {position[0], position[1], position[2]};
                     // tr.rotation = { rotation[0], rotation[1], rotation[2] };
