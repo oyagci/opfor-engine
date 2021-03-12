@@ -5,6 +5,11 @@
 namespace opfor
 {
 
+UniquePtr<IRendererContext> IRendererContext::Create(GLFWwindow *window)
+{
+    return MakeUnique<OpenGLContext>(window);
+}
+
 OpenGLContext::OpenGLContext(GLFWwindow *window) : _WindowHandle(window)
 {
     OP4_CORE_ASSERT(_WindowHandle, "Window handle is null\n");

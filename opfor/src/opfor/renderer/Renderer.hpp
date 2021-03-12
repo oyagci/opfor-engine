@@ -111,9 +111,9 @@ class Renderer
     static void PushTexture(SharedPtr<Texture>, TextureUnit);
     static void PopTexture(TextureUnit);
 
-    static RendererAPI::API GetAPI()
+    static RendererAPI::Backend GetBackend()
     {
-        return RendererAPI::GetAPI();
+        return RendererAPI::GetBackend();
     }
 
     static void SubmitDrawCommand(DrawCommand const &drawCommand);

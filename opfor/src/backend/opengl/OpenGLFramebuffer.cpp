@@ -9,6 +9,11 @@
 namespace opfor
 {
 
+UniquePtr<Framebuffer> Framebuffer::Create()
+{
+    return MakeUnique<OpenGLFramebuffer>();
+}
+
 OpenGLFramebuffer::OpenGLFramebuffer()
 {
     glGenFramebuffers(1, &_RendererID);

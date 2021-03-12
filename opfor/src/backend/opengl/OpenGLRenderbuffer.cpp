@@ -4,6 +4,11 @@
 namespace opfor
 {
 
+UniquePtr<Renderbuffer> Renderbuffer::Create()
+{
+    return MakeUnique<OpenGLRenderbuffer>();
+}
+
 OpenGLRenderbuffer::OpenGLRenderbuffer()
 {
     glGenRenderbuffers(1, &_RendererID);

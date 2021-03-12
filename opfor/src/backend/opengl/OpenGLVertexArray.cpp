@@ -4,6 +4,11 @@
 namespace opfor
 {
 
+UniquePtr<VertexArray> VertexArray::Create()
+{
+    return MakeUnique<OpenGLVertexArray>();
+}
+
 static GLenum ShaderDataTypeToOpenGLBase(ShaderDataType type)
 {
     switch (type)

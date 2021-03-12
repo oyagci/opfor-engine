@@ -23,14 +23,11 @@ enum class ClearFlag;
 class RendererAPI
 {
   public:
-    enum class API
+    enum class Backend
     {
-        None = 0,
-        OpenGL = 1,
+        OpenGL = 0,
+        Vulkan = 1,
     };
-
-  private:
-    static API _API;
 
   public:
     virtual ~RendererAPI() = default;
@@ -74,10 +71,8 @@ class RendererAPI
 
     virtual void SetDepthMask(bool val) = 0;
 
-    inline static API GetAPI()
-    {
-        return _API;
-    }
+    static Backend GetBackend() noexcept;
+    static UniquePtr<RendererAPI> Create();
 };
 
 } // namespace opfor
