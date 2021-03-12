@@ -15,28 +15,32 @@ void EditorViewport::OnDrawGUI()
 	const ImGuiWindowFlags windowFlags = ImGuiWindowFlags_NoScrollbar;
 
 	if (ImGui::Begin("Viewport", nullptr, windowFlags)) {
-		const ImVec2 prevSize = viewportSize;
 		viewportSize = ImGui::GetWindowSize();
 
 		const ImVec2 winSize = ImGui::GetWindowSize();
 
-		if (abs(prevSize.x - viewportSize.x) > 0.01 ||
-			abs(prevSize.y - viewportSize.y) > 0.01) {
+		if (abs(prevViewportSize.x - viewportSize.x) > 0.01 ||
+			abs(prevViewportSize.y - viewportSize.y) > 0.01) {
+
+			fmt::print("({}, {}) - ({}, {}) = ({}, {})\n",
+				prevViewportSize.x, prevViewportSize.y,
+				viewportSize.x, viewportSize.y,
+				prevViewportSize.x - viewportSize.x, prevViewportSize.y - viewportSize.y);
 
 			opfor::ViewportResizeEvent e(static_cast<int>(viewportSize.x), static_cast<int>(viewportSize.y));
 			opfor::Application::Get().OnEvent(e);
 			opfor::Application::Get().GetCameraController().GetCamera().SetAspect(viewportSize.x / viewportSize.y);
+
+			prevViewportSize = viewportSize;
 		}
 
 		// float targetAspectRatio = 16.0f / 9.0f;
 		const float targetAspectRatio = viewportSize.x / viewportSize.y;
 
-		// I would've loved to just reinterpret_cast to ImTextureID but the compiler won't let me :(
-		uint32_t rawHandle = opfor::Application::Get().GetViewport()->GetTexture()->GetRawHandle();
-		ImTextureID *rawHandleP = reinterpret_cast<ImTextureID*>(&rawHandle);
+		void *rawHandle = (void*)(intptr_t)opfor::Application::Get().GetViewport()->GetTexture()->GetRawHandle();
 
 		if ((winSize.x / winSize.y) < targetAspectRatio) {
-			ImGui::Image(*rawHandleP,
+			ImGui::Image(rawHandle,
 				{ winSize.x, winSize.x / targetAspectRatio },
 				ImVec2(0.0f, 1.0f),
 				ImVec2(1.0f, 0.0f),
@@ -46,7 +50,7 @@ void EditorViewport::OnDrawGUI()
 			viewportSize.y = winSize.x / targetAspectRatio;
 		}
 		else {
-			ImGui::Image(*rawHandleP,
+			ImGui::Image(rawHandle,
 				{ winSize.y * targetAspectRatio, winSize.y },
 				ImVec2(0.0f, 1.0f),
 				ImVec2(1.0f, 0.0f),
