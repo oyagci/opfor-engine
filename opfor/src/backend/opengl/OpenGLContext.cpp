@@ -1,29 +1,29 @@
 #include "OpenGLContext.hpp"
+#include "opfor/core/Window.hpp"
 #include "opfor/core/base.hpp"
-#include <GLFW/glfw3.h>
 
 namespace opfor
 {
 
-UniquePtr<IRendererContext> IRendererContext::Create(GLFWwindow *window)
+UniquePtr<IRendererContext> IRendererContext::Create(IWindow &window)
 {
     return MakeUnique<OpenGLContext>(window);
 }
 
-OpenGLContext::OpenGLContext(GLFWwindow *window) : _WindowHandle(window)
+OpenGLContext::OpenGLContext(IWindow &window) : _WindowHandle(window)
 {
-    OP4_CORE_ASSERT(_WindowHandle, "Window handle is null\n");
 }
 
 void OpenGLContext::Init()
 {
-    glfwMakeContextCurrent(_WindowHandle);
+    // TODO remove glfw specific code and expose this method in the IWindow interface
+    glfwMakeContextCurrent(static_cast<GLFWwindow *>(_WindowHandle.GetRawHandle()));
 
     int status = gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
     OP4_CORE_ASSERT(status, "Failed to initialize GLAD\n");
 
-    int width = 0, height = 0;
-    glfwGetWindowSize(_WindowHandle, &width, &height);
+   // const auto width = _WindowHandle.GetWidth();
+   // const auto height = _WindowHandle.GetHeight();
 
     glEnable(GL_CULL_FACE);
 
@@ -41,8 +41,9 @@ void OpenGLContext::Init()
 
 void OpenGLContext::SwapBuffers()
 {
+    // TODO remove glfw specific code and expose this method in the IWindow interface
     glfwPollEvents();
-    glfwSwapBuffers(_WindowHandle);
+    glfwSwapBuffers(static_cast<GLFWwindow *>(_WindowHandle.GetRawHandle()));
 }
 
 } // namespace opfor

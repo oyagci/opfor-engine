@@ -2,10 +2,9 @@
 
 #include "opfor/core/base.hpp"
 
-struct GLFWwindow;
-
 namespace opfor
 {
+struct IWindow;
 
 class IRendererContext
 {
@@ -18,7 +17,7 @@ class IRendererContext
     virtual void Init() = 0;
     virtual void SwapBuffers() = 0;
 
-    static UniquePtr<IRendererContext> Create(GLFWwindow*);
+    static UniquePtr<IRendererContext> Create(IWindow &);
 };
 
 } // namespace opfor

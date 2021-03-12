@@ -2,20 +2,22 @@
 
 #include "opfor/renderer/Context.hpp"
 
-struct GLFWwindow;
 
 namespace opfor
 {
 
+struct IWindow;
+
 class OpenGLContext : public IRendererContext
 {
   private:
-    GLFWwindow *_WindowHandle;
+    IWindow &_WindowHandle;
 
   public:
     OpenGLContext() = delete;
-    OpenGLContext(GLFWwindow *window);
     OpenGLContext(OpenGLContext &) = delete;
+
+    OpenGLContext(IWindow &);
 
     void Init() override;
     void SwapBuffers() override;
