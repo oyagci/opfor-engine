@@ -19,11 +19,7 @@ public:
 
 			glm::quat newRotation = transform.rotation;
 			newRotation = glm::rotate(newRotation, 1.0f * dt, glm::vec3(0, 1, 0));
-
-			TransformComponent newTransform = transform;
-			newTransform.rotation = newRotation;
-
-			e->Set<TransformComponent>(newTransform);
+			e->Get<TransformComponent>().rotation = newRotation;
 		}
 	}
 };

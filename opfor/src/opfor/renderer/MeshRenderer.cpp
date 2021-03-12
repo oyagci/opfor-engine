@@ -176,7 +176,9 @@ glm::mat4 MeshRenderer::CalcModelMatrix(TransformComponent const &transform)
 {
 	glm::mat4 modelMatrix(1.0f);
 
-	TransformComponent finalTransform;
+	glm::vec3 position(0.0f, 0.0f, 0.0f);
+	glm::quat rotation(1.0f, 0.0f, 0.0f, 0.0f);
+	glm::vec3 scale(1.0f, 1.0f, 1.0f);
 
 	if (transform.parent)
 	{
@@ -190,19 +192,19 @@ glm::mat4 MeshRenderer::CalcModelMatrix(TransformComponent const &transform)
 
 		for (auto p = parents.rbegin(); p != parents.rend(); ++p)
 		{
-			finalTransform.position += (*p)->position;
-			finalTransform.rotation *= (*p)->rotation;
-			finalTransform.scale *= (*p)->scale;
+			position += (*p)->position;
+			rotation *= (*p)->rotation;
+			scale *= (*p)->scale;
 		}
 	}
 
-	finalTransform.position += transform.position;
-	finalTransform.rotation *= transform.rotation;
-	finalTransform.scale *= transform.scale;
-	
-	modelMatrix = glm::translate(modelMatrix, finalTransform.position);
-	modelMatrix *= glm::mat4_cast(finalTransform.rotation);
-	modelMatrix = glm::scale(modelMatrix, finalTransform.scale);
+	position += transform.position;
+	rotation *= transform.rotation;
+	scale *= transform.scale;
+
+	modelMatrix = glm::translate(modelMatrix, position);
+	modelMatrix *= glm::mat4_cast(rotation);
+	modelMatrix = glm::scale(modelMatrix, scale);
 
 	return modelMatrix;
 }

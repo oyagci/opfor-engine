@@ -71,7 +71,7 @@ void EditorViewport::DrawGuizmoSelectedEntity(ImVec2 viewportSize, ImVec2 viewpo
 	
 	if (!selectedEnt.empty()) {
 
-		auto selected = selectedEnt[0]->Get<TransformComponent>();
+		auto &selected = selectedEnt[0]->Get<TransformComponent>();
 
 		glm::mat4 model(1.0f);
 		model = glm::translate(model, selected.position);
@@ -109,9 +109,8 @@ void EditorViewport::DrawGuizmoSelectedEntity(ImVec2 viewportSize, ImVec2 viewpo
 			changed = true;
 		}
 
-		glm::decompose(model, selected.scale, rotation, selected.position, skew, persp);
 		if (changed) {
-			selectedEnt[0]->Set(selected);
+			glm::decompose(model, selected.scale, rotation, selected.position, skew, persp);
 		}
 
 	}
