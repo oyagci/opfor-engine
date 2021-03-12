@@ -113,9 +113,7 @@ class Texture
     }
 
   public:
-    virtual ~Texture()
-    {
-    }
+    virtual ~Texture() = default;
 
     virtual void Bind(TextureUnit) = 0;
 
@@ -209,9 +207,7 @@ class Texture2D : public Texture
 class TextureCubemap : public Texture
 {
   public:
-    virtual ~TextureCubemap()
-    {
-    }
+    virtual ~TextureCubemap() = default;
 
     virtual void SetFaceData(CubemapFace face, ImageLoader::Image) = 0;
 

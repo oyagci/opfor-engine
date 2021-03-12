@@ -47,9 +47,7 @@ class Framebuffer
 {
   private:
   public:
-    virtual ~Framebuffer()
-    {
-    }
+    virtual ~Framebuffer() = default;
 
     virtual void Bind() = 0;
     virtual void Unbind() = 0;

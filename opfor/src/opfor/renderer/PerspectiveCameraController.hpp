@@ -68,9 +68,7 @@ class PerspectiveCameraController
     }
 
   public:
-    PerspectiveCameraController()
-    {
-    }
+    PerspectiveCameraController() = default;
 
     auto &GetCamera()
     {

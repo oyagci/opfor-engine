@@ -10,9 +10,7 @@ class IRendererContext
 {
   private:
   public:
-    virtual ~IRendererContext()
-    {
-    }
+    virtual ~IRendererContext() = default;
 
     virtual void Init() = 0;
     virtual void SwapBuffers() = 0;

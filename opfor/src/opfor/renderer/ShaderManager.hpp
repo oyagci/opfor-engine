@@ -52,5 +52,5 @@ class ShaderManager
     unsigned int _nextId = 0;
 
   private:
-    ShaderManager(){};
+    ShaderManager() = default;
 };

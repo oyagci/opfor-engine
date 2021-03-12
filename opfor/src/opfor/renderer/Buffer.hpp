@@ -103,9 +103,7 @@ class BufferLayout
     }
 
   public:
-    BufferLayout()
-    {
-    }
+    BufferLayout() = default;
     BufferLayout(std::initializer_list<BufferElement> const &elements) : _Elements(elements)
     {
         CalcOffsetAndStride();
@@ -151,9 +149,7 @@ class BufferLayout
 class VertexBuffer
 {
   public:
-    virtual ~VertexBuffer()
-    {
-    }
+    virtual ~VertexBuffer() = default;
 
     virtual void Bind() const = 0;
     virtual void Unbind() const = 0;
@@ -167,9 +163,7 @@ class VertexBuffer
 class IndexBuffer
 {
   public:
-    virtual ~IndexBuffer()
-    {
-    }
+    virtual ~IndexBuffer() = default;
 
     virtual void Bind() const = 0;
     virtual void Unbind() const = 0;

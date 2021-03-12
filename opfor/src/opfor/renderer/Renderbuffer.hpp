@@ -10,9 +10,7 @@ class Renderbuffer
 {
   private:
   public:
-    virtual ~Renderbuffer()
-    {
-    }
+    virtual ~Renderbuffer() = default;
 
     virtual void Bind() const = 0;
     virtual void Unbind() const = 0;

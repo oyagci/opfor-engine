@@ -11,9 +11,7 @@ namespace opfor
 class Shader
 {
   public:
-    virtual ~Shader()
-    {
-    }
+    virtual ~Shader() = default;
 
     virtual uint32_t GetRawHandle() const = 0;
 
