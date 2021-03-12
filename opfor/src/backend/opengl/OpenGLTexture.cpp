@@ -53,7 +53,7 @@ OpenGLTexture2D::~OpenGLTexture2D()
 
 void OpenGLTexture2D::Bind(TextureUnit unit)
 {
-    glActiveTexture((GLenum)unit);
+    glActiveTexture(ToGlTextureUnit(unit));
     glBindTexture(GL_TEXTURE_2D, (GLuint)_RendererID);
 }
 
@@ -86,7 +86,7 @@ OpenGLTextureCubemap::~OpenGLTextureCubemap()
 
 void OpenGLTextureCubemap::Bind(TextureUnit unit)
 {
-    glActiveTexture((GLenum)unit);
+    glActiveTexture(ToGlTextureUnit(unit));
     glBindTexture((GLenum)GL_TEXTURE_CUBE_MAP, _RendererID);
 }
 
@@ -112,7 +112,7 @@ void OpenGLTextureCubemap::ApplyParameters()
 
 void OpenGLTextureCubemap::SetFaceData(CubemapFace face, ImageLoader::Image image)
 {
-    glTexImage2D((GLenum)ToGlCubemapFace(face), 0, ToGlDataFormat(GetInputFormat()), image.width, image.height, 0,
+    glTexImage2D(ToGlCubemapFace(face), 0, ToGlDataFormat(GetInputFormat()), image.width, image.height, 0,
                  ToGlDataFormat(GetOutputFormat()), ToGlDataType(GetDataType()), image.data.get());
 }
 
