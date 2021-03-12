@@ -1,10 +1,10 @@
 #include "Application.hpp"
 #include "Level.hpp"
-#include "backend/opengl/OpenGLContext.hpp"
 #include "components/ModelComponent.hpp"
 #include "components/SelectedComponent.hpp"
 #include "layers/ImGuiWrapperLayer.hpp"
 #include "opfor/renderer/Model.hpp"
+#include "opfor/renderer/Context.hpp"
 #include "opfor/utils/Time.hpp"
 #include "platform/linux/LinuxInput.hpp"
 #include "stb_image.h"
@@ -26,7 +26,7 @@ Application::Application()
     _Instance = this;
 
     _window = IWindow::Create({"OPFOR - Untitled Project", 1920, 1080});
-    _context = MakeUnique<OpenGLContext>(static_cast<GLFWwindow *>(_window->GetRawHandle()));
+    _context = IRendererContext::Create(static_cast<GLFWwindow *>(_window->GetRawHandle()));
     _context->Init();
 
     Input::Prime();

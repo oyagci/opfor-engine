@@ -6,8 +6,11 @@
 namespace opfor
 {
 
+
 // OpenGLTexture2D
 // ===============
+
+UniquePtr<Texture2D> Texture2D::Create() { return MakeUnique<OpenGLTexture2D>(); }
 
 void OpenGLTexture2D::Build()
 {
@@ -72,6 +75,7 @@ void OpenGLTexture2D::SetData(void *data)
 
 // OpenGLTextureCubemap
 // ====================
+UniquePtr<TextureCubemap> TextureCubemap::Create() { return MakeUnique<OpenGLTextureCubemap>(); }
 
 OpenGLTextureCubemap::OpenGLTextureCubemap()
 {

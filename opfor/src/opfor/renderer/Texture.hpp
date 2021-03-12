@@ -3,6 +3,7 @@
 #include "opfor/core/ImageLoader.hpp"
 #include "opfor/core/base.hpp"
 #include "renderer.hpp"
+
 #include <glm/glm.hpp>
 
 namespace opfor
@@ -198,7 +199,7 @@ class Texture
 class Texture2D : public Texture
 {
   public:
-    virtual ~Texture2D();
+    virtual ~Texture2D() = default;
 
     virtual void SetData(void *) = 0;
 

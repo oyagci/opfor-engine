@@ -8,6 +8,11 @@
 namespace opfor
 {
 
+UniquePtr<Shader> Shader::Create(String const &source)
+{
+    return MakeUnique<OpenGLShader>(source);
+}
+
 OpenGLShader::OpenGLShader(std::string shaderPath)
 {
     _RendererID = glCreateProgram();

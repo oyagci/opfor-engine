@@ -10,6 +10,16 @@
 namespace opfor
 {
 
+UniquePtr<RendererAPI> RendererAPI::Create()
+{
+    return MakeUnique<OpenGLRendererAPI>();
+}
+
+RendererAPI::Backend RendererAPI::GetBackend() noexcept
+{
+    return RendererAPI::Backend::OpenGL;
+}
+
 void OpenGLRendererAPI::PushViewport(glm::uvec2 pos, glm::uvec2 size)
 {
     std::array<GLint, 4> prevViewport{};

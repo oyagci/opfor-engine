@@ -8,6 +8,11 @@ namespace opfor
 // OpenGLVertexBuffer
 // ==================
 
+UniquePtr<VertexBuffer> VertexBuffer::Create(float *vertices, size_t size)
+{
+    return MakeUnique<OpenGLVertexBuffer>(vertices, size);
+}
+
 OpenGLVertexBuffer::OpenGLVertexBuffer(float *vertices, size_t size)
 {
     glCreateBuffers(1, &_RendererID);
@@ -43,6 +48,11 @@ BufferLayout const &OpenGLVertexBuffer::GetLayout() const
 
 // OpenGLIndexBuffer
 // =================
+
+UniquePtr<IndexBuffer> IndexBuffer::Create(uint32_t *indices, size_t count)
+{
+    return MakeUnique<OpenGLIndexBuffer>(indices, count);
+}
 
 OpenGLIndexBuffer::OpenGLIndexBuffer(uint32_t *indices, size_t count) : _Count(count)
 {

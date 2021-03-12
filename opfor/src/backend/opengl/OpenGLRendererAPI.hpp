@@ -71,6 +71,7 @@ class OpenGLRendererAPI : public RendererAPI
                     std::optional<size_t> size = std::nullopt) override;
     void SetUniform(std::string const &name, std::vector<glm::vec3> vectors,
                     std::optional<size_t> size = std::nullopt) override;
+
 };
 
 } // namespace opfor
