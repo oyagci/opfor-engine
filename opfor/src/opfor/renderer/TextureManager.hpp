@@ -28,5 +28,5 @@ class TextureManager
     std::unordered_map<std::string, opfor::SharedPtr<opfor::Texture>> _textures;
 
   private:
-    TextureManager(){};
+    TextureManager() = default;
 };
