@@ -78,4 +78,6 @@ template <typename... T> using Variant = std::variant<T...>;
 
 template <typename Key, typename T> using UnorderedMap = std::unordered_map<Key, T>;
 
+template <class T> using Ref = std::reference_wrapper<T>;
+
 } // namespace opfor
