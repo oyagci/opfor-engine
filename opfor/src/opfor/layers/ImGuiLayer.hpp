@@ -1,8 +1,8 @@
 #pragma once
 
 #include "Layer.hpp"
-#include "ecs/Entity.hpp"
-#include "editor/EditorWindow.hpp"
+#include <opfor/ecs/Entity.hpp>
+#include <opfor/editor/EditorWindow.hpp>
 #include "imgui.h"
 
 class ImGuiLayer : public opfor::Layer

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "ecs/ecs.hpp"
+#include <opfor/ecs/ecs.hpp>
 #include <memory>
 #include <vector>
 

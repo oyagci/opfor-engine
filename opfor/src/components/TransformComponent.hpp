@@ -1,8 +1,8 @@
 #pragma once
 
-#include "ecs/Component.hpp"
-#include "ecs/Entity.hpp"
-#include "opfor/core/base.hpp"
+#include <opfor/ecs/Component.hpp>
+#include <opfor/ecs/Entity.hpp>
+#include <opfor/core/base.hpp>
 #include <glm/gtc/quaternion.hpp>
 #include <glm/vec3.hpp>
 

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "ecs/Component.hpp"
+#include <opfor/ecs/Component.hpp>
 
 struct SkyboxComponent : ecs::IComponentBase
 {
