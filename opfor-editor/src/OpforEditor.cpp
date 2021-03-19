@@ -1,16 +1,17 @@
-#include "SpheresRotateSystem.hpp"
-#include "components/ModelComponent.hpp"
-#include "components/SkyboxComponent.hpp"
-#include "components/TransformComponent.hpp"
-#include "opfor.hpp"
-#include "opfor/renderer/Model.hpp"
-#include "opfor/renderer/ShaderManager.hpp"
+#include <opfor.hpp>
 
-#include "editor/EditorInspector.hpp"
-#include "editor/EditorLog.hpp"
-#include "editor/EditorMenuBar.hpp"
-#include "editor/EditorSceneHierarchy.hpp"
-#include "editor/EditorViewport.hpp"
+#include "SpheresRotateSystem.hpp"
+#include <components/ModelComponent.hpp>
+#include <components/SkyboxComponent.hpp>
+#include <components/TransformComponent.hpp>
+#include <opfor/renderer/Model.hpp>
+#include <opfor/renderer/ShaderManager.hpp>
+
+#include <opfor/editor/EditorInspector.hpp>
+#include <opfor/editor/EditorLog.hpp>
+#include <opfor/editor/EditorMenuBar.hpp>
+#include <opfor/editor/EditorSceneHierarchy.hpp>
+#include <opfor/editor/EditorViewport.hpp>
 
 struct Container : ecs::IComponent
 {

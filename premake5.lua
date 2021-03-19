@@ -129,26 +129,13 @@ project "opfor-editor"
         "%{IncludeDir.ImGui}",
         "%{IncludeDir.stduuid}",
         "%{IncludeDir.tinygltf}",
+        "opfor/include",
         "opfor/src",
-        "opfor/src/opfor",
-        "opfor/thirdparty",
-        "opfor/thirdparty/imgui",
-        "opfor/thirdparty/ImGuizmo",
-        "opfor/thirdparty/tinygltf",
-        "opfor/thirdparty/nativefiledialog/src/include",
     }
 
     links
     {
         "opfor",
-        "fmt",
-        "ImGui",
-        "uuid",
-        "GLFW",
-        "GLAD",
-        "ImGui",
-        "ImGuizmo",
-        "nativefiledialog",
     }
 
     filter "system:windows"
@@ -175,7 +162,7 @@ project "opfor-editor"
             "pthread",
             "GL"
         }
-        linkoptions { "-lgtk-3 -lgdk-3 -lpangocairo-1.0 -lpango-1.0 -lharfbuzz -latk-1.0 -lcairo-gobject -lcairo -lgdk_pixbuf-2.0 -lgio-2.0 -lgobject-2.0 -lglib-2.0" }
+        linkoptions {"`pkg-config --libs gtk+-3.0`"}
 
     filter "configurations:Release"
         defines "OP4_RELEASE"

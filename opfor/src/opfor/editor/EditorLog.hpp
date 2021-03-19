@@ -1,6 +1,6 @@
 #pragma once
 #include "EditorWindow.hpp"
-#include "core/Logger.hpp"
+#include <opfor/core/Logger.hpp>
 #include "imgui.h"
 
 class EditorLog : public IEditorWindow
