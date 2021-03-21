@@ -6,7 +6,7 @@
 namespace opfor
 {
 
-struct IWindow;
+class IWindow;
 
 class OpenGLContext : public IRendererContext
 {

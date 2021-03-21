@@ -1,10 +1,10 @@
 #pragma once
-
 #include "opfor/core/base.hpp"
 
 namespace opfor
 {
-struct IWindow;
+
+class IWindow;
 
 class IRendererContext
 {
