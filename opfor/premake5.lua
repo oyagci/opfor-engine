@@ -17,7 +17,6 @@ project "opfor"
     includedirs
     {
         "src",
-        "src/opfor",
         "%{IncludeDir.GLFW}",
         "%{IncludeDir.GLAD}",
         "%{IncludeDir.fmt}",

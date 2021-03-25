@@ -1,6 +1,6 @@
 #pragma once
 
-#include <ecs/Component.hpp>
+#include <opfor/ecs/Component.hpp>
 #include <glm/vec3.hpp>
 
 struct PointLightComponent : ecs::IComponentBase

@@ -1,8 +1,8 @@
 #include "EditorSceneHierarchy.hpp"
-#include "core/Application.hpp"
-#include "fmt/format.h"
-#include "imgui.h"
-#include "layers/ImGuiLayer.hpp"
+#include <fmt/format.h>
+#include <imgui.h>
+#include <opfor/core/Application.hpp>
+#include <opfor/layers/ImGuiLayer.hpp>
 
 void EditorSceneHierarchy::DrawHierarchy(opfor::UnorderedMap<uuids::uuid, EntityHierarchy> const &lookup,
                                          EntityHierarchy const &hierarchy, int idx = 0) const

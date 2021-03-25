@@ -1,14 +1,14 @@
 #include "EditorInspector.hpp"
-#include "components/ModelComponent.hpp"
-#include "components/PointLightComponent.hpp"
-#include "components/TransformComponent.hpp"
-#include "core/Application.hpp"
-#include "ecs/Entity.hpp"
-#include "imgui.h"
-#include "layers/ImGuiLayer.hpp"
-#include "misc/cpp/imgui_stdlib.h"
-#include "renderer/ShaderManager.hpp"
-#include "uuid.h"
+#include <components/ModelComponent.hpp>
+#include <components/PointLightComponent.hpp>
+#include <components/TransformComponent.hpp>
+#include <opfor/core/Application.hpp>
+#include <opfor/ecs/Entity.hpp>
+#include <imgui.h>
+#include <opfor/layers/ImGuiLayer.hpp>
+#include <misc/cpp/imgui_stdlib.h>
+#include <opfor/renderer/ShaderManager.hpp>
+#include <uuid.h>
 #include <nfd.h>
 
 opfor::UniquePtr<char[]> GetCwd();

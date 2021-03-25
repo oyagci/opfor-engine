@@ -1,9 +1,8 @@
 #include "LinuxInput.hpp"
 
-#include "opfor/core/Application.hpp"
-#include "opfor/core/base.hpp"
+#include <opfor/core/Application.hpp>
+#include <opfor/core/base.hpp>
 #include <GLFW/glfw3.h>
-#include <functional>
 #include <renderer.hpp>
 
 namespace opfor

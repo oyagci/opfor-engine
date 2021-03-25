@@ -1,6 +1,6 @@
 #pragma once
 
-#include "opfor/core/Window.hpp"
+#include <opfor/core/Window.hpp>
 
 struct GLFWwindow;
 

@@ -1,10 +1,9 @@
 #pragma once
 
-#include "opfor/core/Input.hpp"
+#include <opfor/core/Input.hpp>
 #include <renderer.hpp>
 #include <unordered_map>
 #include <unordered_set>
-#include <vector>
 
 struct GLFWwindow;
 

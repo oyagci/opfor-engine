@@ -1,5 +1,5 @@
 #include "LinuxWindow.hpp"
-#include "core/events/EngineEvents.hpp"
+#include <opfor/core/events/EngineEvents.hpp>
 
 #include <GLFW/glfw3.h>
 
