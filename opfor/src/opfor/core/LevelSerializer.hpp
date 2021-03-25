@@ -1,17 +1,17 @@
 #pragma once
 
-#include "ILevel.hpp"
-#include "json.hpp"
-#include "opfor/core/Application.hpp"
-#include "opfor/renderer/Model.hpp"
-#include "opfor/renderer/ShaderManager.hpp"
+#include <opfor/ILevel.hpp>
+#include <json.hpp>
+#include <opfor/core/Application.hpp>
+#include <opfor/renderer/Model.hpp>
+#include <opfor/renderer/ShaderManager.hpp>
 #include <fstream>
 #include <glm/vec3.hpp>
 
-#include "components/ModelComponent.hpp"
-#include "components/PointLightComponent.hpp"
-#include "components/SkyboxComponent.hpp"
-#include "components/TransformComponent.hpp"
+#include <components/ModelComponent.hpp>
+#include <components/PointLightComponent.hpp>
+#include <components/SkyboxComponent.hpp>
+#include <components/TransformComponent.hpp>
 
 #include "uuid.h"
 using json = nlohmann::json;

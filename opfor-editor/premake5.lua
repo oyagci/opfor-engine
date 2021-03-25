@@ -16,8 +16,8 @@ project "opfor-editor"
 
     includedirs
     {
-        "include",
-        "src",
+        "%{wks.location}/opfor/include",
+        "%{wks.location}/opfor/src",
         "%{IncludeDir.fmt}",
         "%{IncludeDir.GLFW}",
         "%{IncludeDir.GLAD}",

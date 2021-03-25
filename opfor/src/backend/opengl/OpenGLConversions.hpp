@@ -1,10 +1,10 @@
 #pragma once
 
 #include <opfor/core/base.hpp>
-#include <renderer/Framebuffer.hpp>
-#include <renderer/Renderbuffer.hpp>
-#include <renderer/Renderer.hpp>
-#include <renderer/Texture.hpp>
+#include <opfor/renderer/Framebuffer.hpp>
+#include <opfor/renderer/Renderbuffer.hpp>
+#include <opfor/renderer/Renderer.hpp>
+#include <opfor/renderer/Texture.hpp>
 
 namespace opfor
 {

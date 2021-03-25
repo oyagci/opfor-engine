@@ -1,14 +1,14 @@
 #include "Application.hpp"
-#include "Level.hpp"
-#include "components/ModelComponent.hpp"
-#include "components/SelectedComponent.hpp"
-#include "layers/ImGuiWrapperLayer.hpp"
-#include "opfor/renderer/Model.hpp"
-#include "opfor/renderer/Context.hpp"
-#include "opfor/utils/Time.hpp"
-#include "platform/linux/LinuxInput.hpp"
-#include "stb_image.h"
-#include "utils/Settings.hpp"
+#include <opfor/Level.hpp>
+#include <components/ModelComponent.hpp>
+#include <components/SelectedComponent.hpp>
+#include <opfor/layers/ImGuiWrapperLayer.hpp>
+#include <opfor/renderer/Model.hpp>
+#include <opfor/renderer/Context.hpp>
+#include <opfor/utils/Time.hpp>
+#include <platform/linux/LinuxInput.hpp>
+#include <stb_image.h>
+#include <opfor/utils/Settings.hpp>
 #ifdef OP4_PLATFORM_LINUX
 #include <unistd.h>
 #endif

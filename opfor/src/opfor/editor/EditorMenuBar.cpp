@@ -4,8 +4,8 @@
 
 #include "EditorInspector.hpp"
 #include "EditorSceneHierarchy.hpp"
-#include "core/Application.hpp"
-#include "core/LevelSerializer.hpp"
+#include <opfor/core/Application.hpp>
+#include <opfor/core/LevelSerializer.hpp>
 
 #ifdef OP4_PLATFORM_LINUX
 #include <unistd.h>

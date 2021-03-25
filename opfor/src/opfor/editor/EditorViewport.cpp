@@ -1,8 +1,8 @@
 #include "EditorViewport.hpp"
 #include "ImGuizmo.h"
-#include "components/SelectedComponent.hpp"
-#include "core/Application.hpp"
-#include "layers/ImGuiLayer.hpp"
+#include <components/SelectedComponent.hpp>
+#include <opfor/core/Application.hpp>
+#include <opfor/layers/ImGuiLayer.hpp>
 #include <cstdint>
 #include <glm/gtx/matrix_decompose.hpp>
 
