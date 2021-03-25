@@ -54,7 +54,15 @@ project "opfor-editor"
             "m",
             "X11",
             "pthread",
-            "GL"
+            "GL",
+            "fmt",
+            "ImGui",
+            "uuid",
+            "GLFW",
+            "GLAD",
+            "ImGui",
+            "ImGuizmo",
+            "nativefiledialog",
         }
 
         linkoptions {"`pkg-config --libs gtk+-3.0`"}
