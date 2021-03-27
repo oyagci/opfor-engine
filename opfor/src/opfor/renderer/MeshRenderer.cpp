@@ -175,43 +175,27 @@ Vector<DrawCommand> MeshRenderer::RenderShadowMeshes()
 
 glm::mat4 MeshRenderer::CalcModelMatrix(TransformComponent const &transform)
 {
-    glm::mat4 modelMatrix(1.0f);
+    glm::mat4 finalTransformation(1.0f);
 
-    glm::vec3 position(0.0f, 0.0f, 0.0f);
-    glm::quat rotation(1.0f, 0.0f, 0.0f, 0.0f);
-    glm::vec3 scale(1.0f, 1.0f, 1.0f);
+    TransformComponent const *cur = &transform;
 
-    if (transform.parent)
+    while (cur->parent)
     {
-        Vector<Ref<TransformComponent>> parents;
-        Ref<TransformComponent> curParent = transform.parent.value();
-        while (true)
-        {
-            parents.push_back(curParent);
+        TransformComponent const &parent = cur->parent.value().get();
 
-            if (curParent.get().parent)
-                curParent = curParent.get().parent.value();
-            else
-                break;
-        }
+        auto model = glm::translate(glm::mat4(1.0f), parent.position) *
+                                           glm::mat4_cast(parent.rotation) *
+                                           glm::scale(glm::mat4(1.0f), parent.scale);
 
-        for (auto p = parents.rbegin(); p != parents.rend(); ++p)
-        {
-            position += (*p).get().position;
-            rotation *= (*p).get().rotation;
-            scale *= (*p).get().scale;
-        }
+        finalTransformation = model * finalTransformation;
+
+        cur = &cur->parent.value().get();
     }
 
-    position += transform.position;
-    rotation *= transform.rotation;
-    scale *= transform.scale;
+    finalTransformation = finalTransformation * glm::translate(glm::mat4(1.0f), transform.position) *
+                          glm::mat4_cast(transform.rotation) * glm::scale(glm::mat4(1.0f), transform.scale);
 
-    modelMatrix = glm::translate(modelMatrix, position);
-    modelMatrix *= glm::mat4_cast(rotation);
-    modelMatrix = glm::scale(modelMatrix, scale);
-
-    return modelMatrix;
+    return finalTransformation;
 }
 
 Vector<DrawCommand> MeshRenderer::SubmitMeshes(PerspectiveCamera const &camera)
