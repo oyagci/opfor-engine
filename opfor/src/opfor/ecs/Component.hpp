@@ -1,13 +1,24 @@
 #pragma once
 
-namespace ecs
+#include <Refureku/Refureku.h>
+#include <generated/Component.rfk.h>
+
+namespace ecs OP4NAMESPACE()
 {
 
-struct IComponentBase
+struct OP4STRUCT() IComponentBase : rfk::Object
 {
     virtual ~IComponentBase()
     {
     }
+
+    // Explicitly deleted by `rfk::Object`
+    IComponentBase &operator=(IComponentBase const &)
+    {
+        return *this;
+    }
+
+    IComponentBase_GENERATED
 };
 
 struct IComponent : IComponentBase
@@ -18,3 +29,5 @@ struct IComponent : IComponentBase
 };
 
 } // namespace ecs
+
+File_GENERATED

@@ -1,0 +1,54 @@
+[FileGenerationSettings]
+# Generated files will use this extension
+generatedFilesExtension = ".rfk.h"
+
+# List of supported extensions
+supportedExtensions = [".h", ".hpp"]
+
+# Generated files will be located here
+outputDirectory = '''generated'''
+
+# Files contained in the directories of this list will be parsed
+toParseDirectories = [
+    '''.''',
+]
+
+# Files to parse which are not included in any directory of toParseDirectories
+toParseFiles = []
+
+# Files contained in the directories of this list will be ignored
+ignoredDirectories = [
+    '''generated''',
+    '''vendor''',
+]
+
+# Files not to parse which are not included in any directory of ignoredDirectories
+ignoredFiles = []
+
+
+[FileParsingSettings]
+# Abort parsing on first encountered error
+shouldAbortParsingOnFirstError = true
+
+# Should all entities be parsed whether they are tagged with the macro or not
+shouldParseAllEntities = false
+
+# Include directories of the project
+projectIncludeDirectories = [
+    '''.''',
+    '''src''',
+    '''include''',
+    '''./vendor/Refureku/Refureku/Library/Include''',
+]
+
+# Must be one of "msvc", "clang++", "g++"
+compilerExeName = "clang++"
+
+[FileParsingSettings.Properties]
+namespaceMacroName = "OP4NAMESPACE"
+classmacroName = "OP4CLASS"
+structMacroName = "OP4STRUCT"
+fieldMacroName = "OP4FIELD"
+methodMacroName = "OP4METHOD"
+enumMacroName = "OP4ENUM"
+enumValueMacroName = "OP4ENUMVAL"

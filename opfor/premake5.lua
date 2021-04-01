@@ -1,3 +1,25 @@
+project "GenerateHeaders"
+    kind "Utility"
+
+    targetdir ("%{wks.location}/bin/" .. outputdir .. "/%{prj.name}")
+    objdir ("%{wks.location}/bin-int/" .. outputdir .. "/%{prj.name}")
+
+    links {
+        "RefurekuGenerator"
+    }
+
+	filter "system:windows"
+        prebuildcommands
+        {
+            path.translate("%{wks.location}bin/" .. outputdir .. "/RefurekuGenerator/RefurekuGenerator.exe") .. " " .. path.translate("%{prj.location}config"),
+        }
+
+    filter "system:linux"
+        prebuildcommands
+        {
+            ("LD_LIBRARY_PATH=%{wks.location}/bin/" .. outputdir .. "/Kodgen/  %{wks.location}/bin/" .. outputdir .. "/RefurekuGenerator/RefurekuGenerator %{prj.location}/config")
+        }
+
 project "opfor"
     kind "StaticLib"
     language "C++"
@@ -16,6 +38,7 @@ project "opfor"
 
     includedirs
     {
+        ".",
         "src",
         "%{IncludeDir.GLFW}",
         "%{IncludeDir.GLAD}",
@@ -26,6 +49,7 @@ project "opfor"
         "%{IncludeDir.stduuid}",
         "%{IncludeDir.NFD}",
         "%{IncludeDir.ImGuizmo}",
+        "%{IncludeDir.RefurekuLib}",
     }
 
     links
@@ -36,7 +60,10 @@ project "opfor"
         "ImGui",
         "ImGuizmo",
         "nativefiledialog",
-        "opengl32.lib"
+        "opengl32.lib",
+        "Kodgen",
+        "RefurekuLibrary",
+        "GenerateHeaders",
     }
 
     filter "configurations:Release"

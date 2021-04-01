@@ -1,3 +1,25 @@
+project "GenerateHeadersEditor"
+    kind "Utility"
+
+    targetdir ("%{wks.location}/bin/" .. outputdir .. "/%{prj.name}")
+    objdir ("%{wks.location}/bin-int/" .. outputdir .. "/%{prj.name}")
+
+    links {
+        "RefurekuGenerator"
+    }
+
+    filter "system:windows"
+        prebuildcommands
+        {
+            path.translate("%{wks.location}/bin/" .. outputdir .. "/RefurekuGenerator/RefurekuGenerator.exe %{prj.location}/config")
+        }
+
+    filter "system:linux"
+        prebuildcommands
+        {
+            ("LD_LIBRARY_PATH=%{wks.location}/bin/" .. outputdir .. "/Kodgen/  %{wks.location}/bin/" .. outputdir .. "/RefurekuGenerator/RefurekuGenerator %{prj.location}/config")
+        }
+
 project "opfor-editor"
     kind "ConsoleApp"
     language "C++"
@@ -16,6 +38,8 @@ project "opfor-editor"
 
     includedirs
     {
+        ".",
+        "%{wks.location}/opfor",
         "%{wks.location}/opfor/include",
         "%{wks.location}/opfor/src",
         "%{IncludeDir.fmt}",
@@ -25,11 +49,13 @@ project "opfor-editor"
         "%{IncludeDir.ImGui}",
         "%{IncludeDir.stduuid}",
         "%{IncludeDir.tinygltf}",
+        "%{IncludeDir.RefurekuLib}",
     }
 
     links
     {
         "opfor",
+        "GenerateHeadersEditor",
     }
 
     filter "system:windows"
@@ -63,6 +89,8 @@ project "opfor-editor"
             "ImGui",
             "ImGuizmo",
             "nativefiledialog",
+            "Kodgen",
+            "RefurekuLibrary",
         }
 
         linkoptions {"`pkg-config --libs gtk+-3.0`"}
