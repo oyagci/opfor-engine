@@ -16,6 +16,8 @@ project "opfor-editor"
 
     includedirs
     {
+        ".",
+        "%{wks.location}/opfor",
         "%{wks.location}/opfor/include",
         "%{wks.location}/opfor/src",
         "%{IncludeDir.fmt}",
@@ -25,6 +27,7 @@ project "opfor-editor"
         "%{IncludeDir.ImGui}",
         "%{IncludeDir.stduuid}",
         "%{IncludeDir.tinygltf}",
+        "%{IncludeDir.RefurekuLib}",
     }
 
     links
@@ -39,6 +42,11 @@ project "opfor-editor"
         {
             "OP4_PLATFORM_WINDOWS",
             "OP4_BACKEND_OPENGL"
+        }
+
+        prebuildcommands
+        {
+            path.translate("%{wks.location}/bin/" .. outputdir .. "/RefurekuGenerator/RefurekuGenerator.exe %{prj.location}/config")
         }
 
     filter "system:linux"
@@ -63,9 +71,16 @@ project "opfor-editor"
             "ImGui",
             "ImGuizmo",
             "nativefiledialog",
+            "Kodgen",
+            "RefurekuGeneratorLib",
         }
 
         linkoptions {"`pkg-config --libs gtk+-3.0`"}
+
+        prebuildcommands
+        {
+            ("LD_LIBRARY_PATH=%{wks.location}/bin/" .. outputdir .. "/Kodgen/  %{wks.location}/bin/" .. outputdir .. "/RefurekuGenerator/RefurekuGenerator %{prj.location}/config")
+        }
 
     filter "configurations:Release"
         defines "OP4_RELEASE"

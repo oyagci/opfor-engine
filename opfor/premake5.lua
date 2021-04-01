@@ -16,6 +16,7 @@ project "opfor"
 
     includedirs
     {
+        ".",
         "src",
         "%{IncludeDir.GLFW}",
         "%{IncludeDir.GLAD}",
@@ -26,6 +27,7 @@ project "opfor"
         "%{IncludeDir.stduuid}",
         "%{IncludeDir.NFD}",
         "%{IncludeDir.ImGuizmo}",
+        "%{IncludeDir.RefurekuLib}",
     }
 
     links
@@ -36,7 +38,10 @@ project "opfor"
         "ImGui",
         "ImGuizmo",
         "nativefiledialog",
-        "opengl32.lib"
+        "opengl32.lib",
+        "Kodgen",
+        "RefurekuLibrary",
+        "RefurekuGenerator",
     }
 
     filter "configurations:Release"
@@ -60,9 +65,19 @@ project "opfor"
             "OP4_BACKEND_OPENGL"
         }
 
+        prebuildcommands
+        {
+            path.translate("%{wks.location}bin/" .. outputdir .. "/RefurekuGenerator/RefurekuGenerator.exe") .. " " .. path.translate("%{prj.location}config"),
+        }
+
     filter "system:linux"
         defines
         {
             "OP4_PLATFORM_LINUX",
             "OP4_BACKEND_OPENGL"
+        }
+
+        prebuildcommands
+        {
+            ("LD_LIBRARY_PATH=%{wks.location}/bin/" .. outputdir .. "/Kodgen/  %{wks.location}/bin/" .. outputdir .. "/RefurekuGenerator/RefurekuGenerator %{prj.location}/config")
         }
