@@ -3,6 +3,7 @@
 #include "opfor/core/base.hpp"
 #include "uuid.h"
 #include <optional>
+#include <opfor/ecs/ecs.hpp>
 
 class EditorSceneHierarchy : public IEditorWindow
 {
@@ -11,15 +12,14 @@ class EditorSceneHierarchy : public IEditorWindow
     {
         opfor::String name;
         uuids::uuid uuid;
-        opfor::Optional<uuids::uuid> parent = std::nullopt;
-        opfor::Vector<EntityHierarchy> children;
+        ecs::IEntityBase const *entity;
+        opfor::Vector<EntityHierarchy*> children;
     };
 
   private:
     int _selectedItem = 0;
 
-    void DrawHierarchy(opfor::UnorderedMap<uuids::uuid, EntityHierarchy> const &lookup,
-                       EntityHierarchy const &hierarchy, int idx) const;
+    void DrawHierarchy(EntityHierarchy const &hierarchy, size_t idx) const;
 
   public:
     void OnDrawGUI() override;

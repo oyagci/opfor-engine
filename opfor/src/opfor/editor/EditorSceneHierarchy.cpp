@@ -4,8 +4,7 @@
 #include <opfor/core/Application.hpp>
 #include <opfor/layers/ImGuiLayer.hpp>
 
-void EditorSceneHierarchy::DrawHierarchy(opfor::UnorderedMap<uuids::uuid, EntityHierarchy> const &lookup,
-                                         EntityHierarchy const &hierarchy, int idx = 0) const
+void EditorSceneHierarchy::DrawHierarchy(EntityHierarchy const &hierarchy, size_t idx = 0) const
 {
     size_t itemIndex = idx;
     const ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick;
@@ -15,7 +14,7 @@ void EditorSceneHierarchy::DrawHierarchy(opfor::UnorderedMap<uuids::uuid, Entity
     {
         for (auto const &child : hierarchy.children)
         {
-            DrawHierarchy(lookup, child, itemIndex);
+            DrawHierarchy(*child, itemIndex);
             itemIndex++;
         }
         ImGui::TreePop();
@@ -59,43 +58,52 @@ void EditorSceneHierarchy::OnDrawGUI()
 
     auto allEnts = opfor::Application::Get().GetAllEntities();
 
-    opfor::UnorderedMap<uuids::uuid, ecs::IEntityBase *> entitiesByUuid;
-    opfor::UnorderedMap<uuids::uuid, EntityHierarchy> lookup;
+    opfor::UnorderedMap<uuids::uuid, EntityHierarchy> entitiesByUuid;
+    opfor::Vector<EntityHierarchy*> roots;
 
     for (auto const *ent : allEnts)
     {
+        //opfor::Optional<uuids::uuid> parent;
+
+        //if (ent->HasComponents<TransformComponent>())
+        //{
+        //    auto const &t = ent->Get<TransformComponent>();
+        //    if (t.parent)
+        //    {
+        //        parent = ent->Get<TransformComponent>().parent->get().entity.GetUuid();
+        //    }
+        //}
         if (ent->HasComponents<TransformComponent>())
         {
-            auto &t = ent->Get<TransformComponent>();
-
-            lookup[ent->GetUuid()].name = ent->GetName();
-            lookup[ent->GetUuid()].uuid = ent->GetUuid();
-
-            if (t.parent)
-            {
-                lookup[ent->GetUuid()].parent = t.parent->get().entity.GetUuid();
-            }
+            entitiesByUuid[ent->GetUuid()] = EntityHierarchy{ent->GetName(), ent->GetUuid(), ent, {}};
         }
     }
 
-    for (auto const &[uuid, entityHierarchy] : lookup)
+    for (auto &[uuid, ent] : entitiesByUuid)
     {
-        if (entityHierarchy.parent)
+        if (!ent.entity->HasComponents<TransformComponent>())
         {
-            lookup[entityHierarchy.parent.value()].children.push_back(entityHierarchy);
+            continue;
+        }
+
+        auto const &t = ent.entity->Get<TransformComponent>();
+
+        if (!t.parent)
+        {
+            roots.emplace_back(&ent);
+        }
+        else if (entitiesByUuid.find(t.parent->get().entity.GetUuid()) != entitiesByUuid.end())
+        {
+            entitiesByUuid[t.parent->get().entity.GetUuid()].children.push_back(&ent);
         }
     }
 
     const ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick;
     size_t itemIndex = 0;
 
-    for (auto const &[uuid, ent] : lookup)
+    for (auto const &ent : roots)
     {
-        if (!ent.parent)
-        {
-            DrawHierarchy(lookup, ent);
-        }
-
+        DrawHierarchy(*ent);
         itemIndex++;
     }
 
