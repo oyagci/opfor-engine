@@ -1,10 +1,11 @@
 #include "EditorViewport.hpp"
+
+#include "Editor.hpp"
 #include "ImGuizmo.h"
-#include <components/SelectedComponent.hpp>
-#include <opfor/core/Application.hpp>
-#include <opfor/layers/ImGuiLayer.hpp>
 #include <cstdint>
 #include <glm/gtx/matrix_decompose.hpp>
+#include <opfor/core/Application.hpp>
+#include <opfor/layers/ImGuiLayer.hpp>
 
 void EditorViewport::OnDrawGUI()
 {
@@ -62,48 +63,55 @@ void EditorViewport::OnDrawGUI()
 
 void EditorViewport::DrawGuizmoSelectedEntity(ImVec2 viewportSize, ImVec2 viewportPosition)
 {
-    auto &camera = opfor::Application::Get().GetCameraController().GetCamera();
-    auto selectedEnt = opfor::Application::Get().GetEntities<TransformComponent, SelectedComponent>();
+    auto const &camera = opfor::Application::Get().GetCameraController().GetCamera();
 
-    if (!selectedEnt.empty())
+    if (opfor::Editor::Selection().empty())
     {
+        return;
+    }
 
-        auto &selected = selectedEnt[0]->Get<TransformComponent>();
+    auto const &selected = opfor::Editor::Selection()[0];
 
-        glm::mat4 model(1.0f);
-        model = glm::translate(model, selected.position);
-        model = glm::scale(model, selected.scale);
+    if (!selected->HasComponents<TransformComponent>())
+    {
+        return;
+    }
 
-        bool changed = false;
+    auto &transform = selected->Get<TransformComponent>();
 
-        ImGuizmo::BeginFrame();
-        ImGuizmo::SetRect(viewportPosition.x, viewportPosition.y, viewportSize.x, viewportSize.y);
-        {
-            std::array<float, 3> rotation{}, translation{}, scale{};
-            ImGuizmo::DecomposeMatrixToComponents(&model[0][0], translation.data(), rotation.data(), scale.data());
+    glm::mat4 model(1.0f);
+    model = glm::translate(model, transform.position);
+    model = glm::scale(model, transform.scale);
 
-            ImGuizmo::RecomposeMatrixFromComponents(translation.data(), rotation.data(), scale.data(), &model[0][0]);
-        }
+    bool changed = false;
 
-        glm::quat rotation;
-        glm::vec3 skew(0.0f);
-        glm::vec4 persp(0.0f);
-        ImGuizmo::DecomposeMatrixToComponents(&model[0][0], &selected.position[0], &rotation[0], &selected.scale[0]);
+    ImGuizmo::BeginFrame();
+    ImGuizmo::SetRect(viewportPosition.x, viewportPosition.y, viewportSize.x, viewportSize.y);
+    {
+        std::array<float, 3> rotation{}, translation{}, scale{};
+        ImGuizmo::DecomposeMatrixToComponents(&model[0][0], translation.data(), rotation.data(), scale.data());
 
-        glm::mat4 cpy = model;
+        ImGuizmo::RecomposeMatrixFromComponents(translation.data(), rotation.data(), scale.data(), &model[0][0]);
+    }
 
-        ImGuizmo::SetDrawlist();
-        ImGuizmo::Manipulate(&camera.GetViewMatrix()[0][0], &camera.GetProjection()[0][0], ImGuizmo::TRANSLATE,
-                             ImGuizmo::WORLD, &model[0][0], nullptr, nullptr);
+    glm::quat rotation;
+    glm::vec3 skew(0.0f);
+    glm::vec4 persp(0.0f);
+    ImGuizmo::DecomposeMatrixToComponents(&model[0][0], &transform.position[0], &rotation[0], &transform.scale[0]);
 
-        if (cpy != model)
-        {
-            changed = true;
-        }
+    glm::mat4 const cpy = model;
 
-        if (changed)
-        {
-            glm::decompose(model, selected.scale, rotation, selected.position, skew, persp);
-        }
+    ImGuizmo::SetDrawlist();
+    ImGuizmo::Manipulate(&camera.GetViewMatrix()[0][0], &camera.GetProjection()[0][0], ImGuizmo::TRANSLATE,
+                         ImGuizmo::WORLD, &model[0][0], nullptr, nullptr);
+
+    if (cpy != model)
+    {
+        changed = true;
+    }
+
+    if (changed)
+    {
+        glm::decompose(model, transform.scale, rotation, transform.position, skew, persp);
     }
 }

@@ -2,7 +2,6 @@
 #include "EditorWindow.hpp"
 #include "opfor/core/base.hpp"
 #include "uuid.h"
-#include <optional>
 #include <opfor/ecs/ecs.hpp>
 
 class EditorSceneHierarchy : public IEditorWindow
@@ -13,7 +12,8 @@ class EditorSceneHierarchy : public IEditorWindow
         opfor::String name;
         uuids::uuid uuid;
         ecs::IEntityBase const *entity = nullptr;
-        opfor::Vector<EntityHierarchy*> children;
+        bool selected = false;
+        opfor::Vector<EntityHierarchy *> children;
     };
 
   private:

@@ -139,7 +139,7 @@ class Level : public opfor::ILevel
 
         for (auto &entity : _entities)
         {
-            opfor::Application::Get().DeleteEntity(entity.second->GetId());
+            opfor::Application::Get().DeleteEntity(entity.second->GetUuid());
         }
         _entities.clear();
         _models.clear();

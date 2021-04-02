@@ -5,6 +5,7 @@
 #include <algorithm>
 #include <map>
 #include <memory>
+#include <opfor/core/base.hpp>
 #include <type_traits>
 #include <vector>
 
@@ -23,10 +24,10 @@ class EntityManager_Impl
 
   private:
     /* Container of managed components */
-    std::vector<std::shared_ptr<IComponentBase>> Components;
-    std::vector<std::shared_ptr<IEntityBase>> Entities;
+    opfor::Vector<opfor::SharedPtr<IComponentBase>> Components;
+    opfor::UnorderedMap<uuids::uuid, opfor::SharedPtr<IEntityBase>> Entities;
 
-    EntityManager_Impl(){};
+    EntityManager_Impl() = default;
 
     /* EntityManager should be unique */
     EntityManager_Impl(EntityManager_Impl const &) = delete;
@@ -36,9 +37,9 @@ class EntityManager_Impl
     {
         static_assert(std::is_base_of<IComponentBase, T>::value, "T must be derived from IComponentBase");
 
-        auto entity = std::make_shared<IEntity<T, Types...>>();
+        auto entity = opfor::MakeShared<IEntity<T, Types...>>();
 
-        Entities.push_back(entity);
+        Entities[entity->GetUuid()] = entity;
 
         return entity.get();
     }
@@ -47,12 +48,12 @@ class EntityManager_Impl
     /// Get a vector of non-owned pointers matching the specified list of components
     /// there should be in each element
     ///
-    template <typename... Types> std::vector<IEntity<Types...> *> GetEntities()
+    template <typename... Types> opfor::Vector<IEntity<Types...> *> GetEntities()
     {
-        std::vector<IEntity<Types...> *> entities;
+        opfor::Vector<IEntity<Types...> *> entities;
 
         // Extract matching entities and put them in the vector
-        for (auto &e : Entities)
+        for (auto &[uuid, e] : Entities)
         {
             if (e->HasComponents<Types...>())
             {
@@ -67,11 +68,11 @@ class EntityManager_Impl
         return entities;
     }
 
-    std::vector<IEntityBase *> GetAllEntities()
+    opfor::Vector<IEntityBase *> GetAllEntities()
     {
-        std::vector<IEntityBase *> entities;
+        opfor::Vector<IEntityBase *> entities;
 
-        for (auto &e : Entities)
+        for (auto &[uuid, e] : Entities)
         {
             entities.push_back(e.get());
         }
@@ -79,23 +80,21 @@ class EntityManager_Impl
         return entities;
     }
 
-    std::optional<IEntityBase *> GetEntity(size_t id)
+    opfor::Optional<IEntityBase *> GetEntity(uuids::uuid const &uuid)
     {
-        for (auto &ent : Entities)
+        auto const &entity = Entities.find(uuid);
+
+        if (entity != Entities.end())
         {
-            if (ent->GetId() == id)
-            {
-                return std::make_optional(ent.get());
-            }
+            return entity->second.get();
         }
 
         return std::nullopt;
     }
 
-    void DeleteEntity(unsigned int entityId)
+    void DeleteEntity(uuids::uuid const &uuid)
     {
-        auto entity = std::find_if(Entities.begin(), Entities.end(),
-                                   [entityId](auto const &ptr) { return ptr->GetId() == entityId; });
+        const auto entity = Entities.find(uuid);
 
         if (entity != Entities.end())
         {
@@ -129,24 +128,24 @@ class EntityManager
     ///
     /// Get a vector of entities that contains the list of components given in parameter
     ///
-    template <typename... Types> std::vector<IEntity<Types...> *> GetEntities()
+    template <typename... Types> opfor::Vector<IEntity<Types...> *> GetEntities()
     {
         return Manager.GetEntities<Types...>();
     }
 
-    std::vector<IEntityBase *> GetAllEntities()
+    opfor::Vector<IEntityBase *> GetAllEntities()
     {
         return Manager.GetAllEntities();
     }
 
-    std::optional<IEntityBase *> GetEntity(size_t id)
+    opfor::Optional<IEntityBase *> GetEntity(uuids::uuid const &uuid)
     {
-        return Manager.GetEntity(id);
+        return Manager.GetEntity(uuid);
     }
 
-    void DeleteEntity(unsigned int entityId)
+    void DeleteEntity(uuids::uuid const &uuid)
     {
-        Manager.DeleteEntity(entityId);
+        Manager.DeleteEntity(uuid);
     }
 };
 
