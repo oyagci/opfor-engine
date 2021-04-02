@@ -1,15 +1,11 @@
 #pragma once
 
-#include <fmt/format.h>
 #include <memory>
-#include <opfor/core/Action.hpp>
-#include <opfor/core/EngineObject.hpp>
 #include <opfor/core/Logger.hpp>
 #include <opfor/core/Window.hpp>
 #include <opfor/core/base.hpp>
 #include <opfor/core/events/EngineEvents.hpp>
 #include <opfor/ecs/ecs.hpp>
-#include <opfor/layers/ImGuiLayer.hpp>
 #include <opfor/layers/LayerStack.hpp>
 #include <opfor/renderer/Batch.hpp>
 #include <opfor/renderer/Context.hpp>
@@ -48,18 +44,16 @@ class Application
 
     UniquePtr<PerspectiveCameraController> _camera;
 
-    Vector<std::unique_ptr<EngineObject>> _engineObjects;
-
-    std::unordered_map<unsigned int, std::unique_ptr<opfor::Model>> _models;
-    std::unordered_map<unsigned int, std::unique_ptr<IDrawable>> _meshes;
-    std::unordered_map<unsigned int, std::unique_ptr<Batch>> _batches;
+    UnorderedMap<unsigned int, UniquePtr<Model>> _models;
+    UnorderedMap<unsigned int, UniquePtr<IDrawable>> _meshes;
+    UnorderedMap<unsigned int, UniquePtr<Batch>> _batches;
 
     using MaterialContainer = std::pair<unsigned int, Material>;
 
-    std::unordered_map<std::string, MaterialContainer> _materials;
-    std::unordered_map<std::string, PbrMaterial> _pbrMaterials;
+    UnorderedMap<String, MaterialContainer> _materials;
+    UnorderedMap<String, PbrMaterial> _pbrMaterials;
 
-    opfor::Viewport *_viewport;
+    Viewport *_viewport;
 
     static unsigned int _nextId;
     static unsigned int _nextMaterialId;
@@ -101,32 +95,16 @@ class Application
     }
 
     int Run();
-    void Update();
-    void UpdateObjects();
-    void UpdateSubobjects(Vector<EngineObject *> subobjects);
 
     IWindow *GetWindow() const
     {
         return _window.get();
     }
 
-    template <typename T, typename... ArgTypes>[[nodiscard]] T *CreateEngineObject(ArgTypes &&... args)
-    {
-        static_assert(std::is_base_of<EngineObject, T>::value && !std::is_same<EngineObject, T>::value,
-                      "T must be derived from EngineObject");
-
-        auto object = std::make_unique<T>(&_ecs, std::forward<ArgTypes>(args)...);
-        auto ret = object.get();
-
-        _engineObjects.push_back(std::move(object));
-
-        return ret;
-    }
-
     template <typename T, typename... ArgTypes> void CreateComponentSystem(ArgTypes... args)
     {
         static_assert(std::is_base_of<ecs::ComponentSystem, T>::value && !std::is_same<ecs::ComponentSystem, T>::value,
-                      "T must be derived from EngineObject");
+                      "T must be derived from ComponentSystem");
 
         _ecs.GetSystemManager()->InstantiateSystem<T>(std::forward(args)...);
     }
@@ -138,7 +116,7 @@ class Application
 
     unsigned int AddMesh(Mesh mesh)
     {
-        auto to_ptr = std::make_unique<Mesh>(std::move(mesh));
+        auto to_ptr = MakeUnique<Mesh>(std::move(mesh));
         _meshes[_nextId] = std::move(to_ptr);
 
         return _nextId++;
@@ -156,7 +134,7 @@ class Application
         return nullptr;
     }
 
-    unsigned int AddBatch(std::unique_ptr<Batch> batch)
+    unsigned int AddBatch(UniquePtr<Batch> batch)
     {
         _meshes[_nextId] = std::move(batch);
 
@@ -173,7 +151,7 @@ class Application
         _pbrMaterials[material.Name] = material;
     }
 
-    std::optional<PbrMaterial const *> GetPbrMaterial(std::string const &name)
+    Optional<PbrMaterial const *> GetPbrMaterial(String const &name)
     {
         if (_pbrMaterials.find(name) != _pbrMaterials.end())
         {
@@ -182,14 +160,14 @@ class Application
         return std::nullopt;
     }
 
-    unsigned int GetMaterialId(std::string const &name)
+    unsigned int GetMaterialId(String const &name)
     {
         return _materials[name].first;
     }
 
-    Vector<std::string> GetMaterialList() const
+    Vector<String> GetMaterialList() const
     {
-        Vector<std::string> materials;
+        Vector<String> materials;
 
         materials.resize(_materials.size());
         std::transform(_materials.begin(), _materials.end(), materials.begin(), [](auto mat) { return mat.first; });
@@ -201,8 +179,8 @@ class Application
         _window->Close();
     }
 
-    unsigned int RegisterModel(opfor::Model model);
-    Optional<opfor::Model const *> GetModel(unsigned int id) const;
+    unsigned int RegisterModel(Model model);
+    Optional<Model const *> GetModel(unsigned int id) const;
     void RemoveModel(unsigned int id);
 
     auto GetEntity(uuids::uuid const &uuid) const
@@ -249,14 +227,6 @@ class Application
     auto &GetCameraController() const
     {
         return *_camera;
-    }
-
-    Vector<EngineObject *> GetSubobjects()
-    {
-        Vector<EngineObject *> subobjects;
-        std::transform(_engineObjects.begin(), _engineObjects.end(), std::back_inserter(subobjects),
-                       [](auto &item) { return item.get(); });
-        return subobjects;
     }
 };
 
