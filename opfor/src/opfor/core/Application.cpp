@@ -1,14 +1,13 @@
 #include "Application.hpp"
-#include <opfor/Level.hpp>
 #include <components/ModelComponent.hpp>
-#include <components/SelectedComponent.hpp>
+#include <opfor/Level.hpp>
 #include <opfor/layers/ImGuiWrapperLayer.hpp>
-#include <opfor/renderer/Model.hpp>
 #include <opfor/renderer/Context.hpp>
+#include <opfor/renderer/Model.hpp>
+#include <opfor/utils/Settings.hpp>
 #include <opfor/utils/Time.hpp>
 #include <platform/linux/LinuxInput.hpp>
 #include <stb_image.h>
-#include <opfor/utils/Settings.hpp>
 #ifdef OP4_PLATFORM_LINUX
 #include <unistd.h>
 #endif
@@ -37,35 +36,6 @@ Application::Application()
     _entityManager = _ecs.GetEntityManager();
 
     _camera = MakeUnique<PerspectiveCameraController>();
-
-    _selectItem = Callback<size_t>([&](size_t id) {
-        auto ents = _ecs.GetEntityManager()->GetAllEntities();
-        std::vector<ecs::IEntityBase const *> matches;
-
-        for (auto const &ent : ents)
-        {
-            if (ent->GetId() == id)
-            {
-                matches.push_back(ent);
-            }
-        }
-
-        if (!matches.empty())
-        {
-            auto prev = _ecs.GetEntityManager()->GetEntities<SelectedComponent>();
-            for (auto &p : prev)
-            {
-                p->DeleteComponents<SelectedComponent>();
-            }
-
-            auto entity = _ecs.GetEntityManager()->GetEntity(matches[0]->GetId());
-            if (entity.has_value())
-            {
-                entity.value()->AddComponents<SelectedComponent>();
-            }
-        }
-    });
-    OnSelectItem += _selectItem;
 
     InitViewport();
 

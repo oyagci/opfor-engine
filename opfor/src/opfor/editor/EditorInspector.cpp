@@ -1,15 +1,18 @@
 #include "EditorInspector.hpp"
+
+#include "Editor.hpp"
+
 #include <components/ModelComponent.hpp>
 #include <components/PointLightComponent.hpp>
 #include <components/TransformComponent.hpp>
+#include <imgui.h>
+#include <misc/cpp/imgui_stdlib.h>
+#include <nfd.h>
 #include <opfor/core/Application.hpp>
 #include <opfor/ecs/Entity.hpp>
-#include <imgui.h>
 #include <opfor/layers/ImGuiLayer.hpp>
-#include <misc/cpp/imgui_stdlib.h>
 #include <opfor/renderer/ShaderManager.hpp>
 #include <uuid.h>
-#include <nfd.h>
 
 opfor::UniquePtr<char[]> GetCwd();
 
@@ -165,15 +168,15 @@ void EditorInspector::ObjectLight(ecs::IEntityBase *entity)
 
 void EditorInspector::OnDrawGUI()
 {
-    ecs::IEntityBase *currentEntity = ImGuiLayer::Get().GetSelectedEntity();
-
     if (ImGui::Begin("Inspector"))
     {
-        if (currentEntity == nullptr)
+        if (opfor::Editor::Selection().empty())
         {
             ImGui::End();
             return;
         }
+
+        ecs::IEntityBase *currentEntity = opfor::Editor::Selection()[0];
 
         std::string entityName = currentEntity->GetName();
         if (ImGui::InputText("##EntityName", &entityName))

@@ -1,12 +1,14 @@
 #pragma once
 
-#include <opfor/core/EngineObject.hpp>
-#include <opfor/ecs/ecs.hpp>
+#include <fmt/format.h>
+#include <memory>
 #include <opfor/core/Action.hpp>
+#include <opfor/core/EngineObject.hpp>
 #include <opfor/core/Logger.hpp>
 #include <opfor/core/Window.hpp>
 #include <opfor/core/base.hpp>
 #include <opfor/core/events/EngineEvents.hpp>
+#include <opfor/ecs/ecs.hpp>
 #include <opfor/layers/ImGuiLayer.hpp>
 #include <opfor/layers/LayerStack.hpp>
 #include <opfor/renderer/Batch.hpp>
@@ -15,8 +17,6 @@
 #include <opfor/renderer/PerspectiveCameraController.hpp>
 #include <opfor/renderer/SceneRenderer.hpp>
 #include <opfor/renderer/Viewport.hpp>
-#include <fmt/format.h>
-#include <memory>
 #include <unordered_map>
 
 namespace ecs
@@ -72,8 +72,6 @@ class Application
     };
     PlayState _isPlaying;
 
-    Callback<size_t> _selectItem;
-
     LayerStack _LayerStack;
 
     SceneRenderer *_SceneRenderer;
@@ -82,9 +80,6 @@ class Application
     void InitViewport();
 
   public:
-    /// Select an item in the editor
-    Action<size_t> OnSelectItem;
-
     // Editor
     void OnRebuildModel(ModelComponent &model);
 
@@ -115,7 +110,7 @@ class Application
         return _window.get();
     }
 
-    template <typename T, typename... ArgTypes> [[nodiscard]] T *CreateEngineObject(ArgTypes &&...args)
+    template <typename T, typename... ArgTypes>[[nodiscard]] T *CreateEngineObject(ArgTypes &&... args)
     {
         static_assert(std::is_base_of<EngineObject, T>::value && !std::is_same<EngineObject, T>::value,
                       "T must be derived from EngineObject");
@@ -136,7 +131,7 @@ class Application
         _ecs.GetSystemManager()->InstantiateSystem<T>(std::forward(args)...);
     }
 
-    template <typename... ArgTypes> [[nodiscard]] ecs::IEntity<ArgTypes...> *CreateEntity()
+    template <typename... ArgTypes>[[nodiscard]] ecs::IEntity<ArgTypes...> *CreateEntity()
     {
         return _ecs.GetEntityManager()->CreateEntity<ArgTypes...>();
     }
@@ -210,14 +205,14 @@ class Application
     Optional<opfor::Model const *> GetModel(unsigned int id) const;
     void RemoveModel(unsigned int id);
 
-    auto GetEntity(unsigned int id) const
+    auto GetEntity(uuids::uuid const &uuid) const
     {
-        return _entityManager->GetEntity(id);
+        return _entityManager->GetEntity(uuid);
     }
 
-    void DeleteEntity(unsigned int entityId) const
+    void DeleteEntity(uuids::uuid const &uuid) const
     {
-        _entityManager->DeleteEntity(entityId);
+        _entityManager->DeleteEntity(uuid);
     }
 
     auto GetViewport() const

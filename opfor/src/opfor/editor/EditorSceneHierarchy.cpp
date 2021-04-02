@@ -2,21 +2,31 @@
 #include <fmt/format.h>
 #include <imgui.h>
 #include <opfor/core/Application.hpp>
-#include <opfor/layers/ImGuiLayer.hpp>
+#include <opfor/editor/Editor.hpp>
 
 void EditorSceneHierarchy::DrawHierarchy(EntityHierarchy const &hierarchy, size_t idx = 0) const
 {
     size_t itemIndex = idx;
-    ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick;
+    ImGuiTreeNodeFlags flags =
+        ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_SpanFullWidth;
+
+    bool clicked = false;
 
     if (hierarchy.children.empty())
     {
         flags |= ImGuiTreeNodeFlags_Leaf;
     }
 
+    if (hierarchy.selected)
+    {
+        flags |= ImGuiTreeNodeFlags_Selected;
+    }
+
     if (ImGui::TreeNodeEx(reinterpret_cast<void *>(itemIndex++), flags, "%s",
                           fmt::format("{}", hierarchy.name).c_str()))
     {
+        clicked = ImGui::IsItemClicked();
+
         for (auto const &child : hierarchy.children)
         {
             DrawHierarchy(*child, itemIndex);
@@ -24,11 +34,14 @@ void EditorSceneHierarchy::DrawHierarchy(EntityHierarchy const &hierarchy, size_
         }
         ImGui::TreePop();
     }
-    if (ImGui::IsItemClicked())
+    else
     {
-        //_selectedItem = static_cast<int>(itemIndex);
-        // ImGuiLayer::Get().SetSelectedEntity(allEnts[itemIndex]);
-        // opfor::Application::Get().OnSelectItem(_selectedItem);
+        clicked = ImGui::IsItemClicked();
+    }
+
+    if (clicked)
+    {
+        opfor::Editor::SelectEntity(hierarchy.uuid);
     }
 }
 
@@ -64,13 +77,13 @@ void EditorSceneHierarchy::OnDrawGUI()
     auto allEnts = opfor::Application::Get().GetAllEntities();
 
     opfor::UnorderedMap<uuids::uuid, EntityHierarchy> entitiesByUuid;
-    opfor::Vector<EntityHierarchy*> roots;
+    opfor::Vector<EntityHierarchy *> roots;
 
     for (auto const *ent : allEnts)
     {
         if (ent->HasComponents<TransformComponent>())
         {
-            entitiesByUuid[ent->GetUuid()] = EntityHierarchy{ent->GetName(), ent->GetUuid(), ent, {}};
+            entitiesByUuid[ent->GetUuid()] = EntityHierarchy{ent->GetName(), ent->GetUuid(), ent, false, {}};
         }
     }
 
@@ -93,13 +106,14 @@ void EditorSceneHierarchy::OnDrawGUI()
         }
     }
 
-    const ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick;
-    size_t itemIndex = 0;
+    if (!opfor::Editor::Selection().empty())
+    {
+        entitiesByUuid[opfor::Editor::Selection()[0]->GetUuid()].selected = true;
+    }
 
     for (auto const &ent : roots)
     {
         DrawHierarchy(*ent);
-        itemIndex++;
     }
 
     ImGui::End();
