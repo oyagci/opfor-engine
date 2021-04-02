@@ -12,7 +12,7 @@ class EditorSceneHierarchy : public IEditorWindow
     {
         opfor::String name;
         uuids::uuid uuid;
-        ecs::IEntityBase const *entity;
+        ecs::IEntityBase const *entity = nullptr;
         opfor::Vector<EntityHierarchy*> children;
     };
 
