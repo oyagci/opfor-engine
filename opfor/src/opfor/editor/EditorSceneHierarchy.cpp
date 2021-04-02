@@ -7,7 +7,12 @@
 void EditorSceneHierarchy::DrawHierarchy(EntityHierarchy const &hierarchy, size_t idx = 0) const
 {
     size_t itemIndex = idx;
-    const ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick;
+    ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick;
+
+    if (hierarchy.children.empty())
+    {
+        flags |= ImGuiTreeNodeFlags_Leaf;
+    }
 
     if (ImGui::TreeNodeEx(reinterpret_cast<void *>(itemIndex++), flags, "%s",
                           fmt::format("{}", hierarchy.name).c_str()))
@@ -63,16 +68,6 @@ void EditorSceneHierarchy::OnDrawGUI()
 
     for (auto const *ent : allEnts)
     {
-        //opfor::Optional<uuids::uuid> parent;
-
-        //if (ent->HasComponents<TransformComponent>())
-        //{
-        //    auto const &t = ent->Get<TransformComponent>();
-        //    if (t.parent)
-        //    {
-        //        parent = ent->Get<TransformComponent>().parent->get().entity.GetUuid();
-        //    }
-        //}
         if (ent->HasComponents<TransformComponent>())
         {
             entitiesByUuid[ent->GetUuid()] = EntityHierarchy{ent->GetName(), ent->GetUuid(), ent, {}};
@@ -106,20 +101,6 @@ void EditorSceneHierarchy::OnDrawGUI()
         DrawHierarchy(*ent);
         itemIndex++;
     }
-
-    // size_t itemIndex = 0;
-    // for (auto const &ent : allEnts) {
-    //	auto name = ent->GetName();
-    //	if (ImGui::TreeNodeEx(reinterpret_cast<void*>(itemIndex), flags,fmt::format("{}", name).c_str())) {
-    //		ImGui::TreePop();
-    //	}
-    //	if (ImGui::IsItemClicked()) {
-    //		_selectedItem = itemIndex;
-    //		ImGuiLayer::Get().SetSelectedEntity(allEnts[itemIndex]);
-    //		opfor::Application::Get().OnSelectItem(_selectedItem);
-    //	}
-    //	itemIndex++;
-    //}
 
     ImGui::End();
 }
