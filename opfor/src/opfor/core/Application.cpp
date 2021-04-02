@@ -107,7 +107,6 @@ int Application::Run()
         {
             layer->OnUpdate(deltaTime);
         }
-        Update();
         _ecs.Update(deltaTime);
         _camera->Update(deltaTime);
 
@@ -132,29 +131,6 @@ int Application::Run()
     }
 
     return 0;
-}
-
-void Application::Update()
-{
-    UpdateObjects();
-}
-
-void Application::UpdateObjects()
-{
-    for (auto &o : _engineObjects)
-    {
-        o->Update();
-        UpdateSubobjects(o->GetSubobjects());
-    }
-}
-
-void Application::UpdateSubobjects(Vector<EngineObject *> subobjects)
-{
-    for (auto &o : subobjects)
-    {
-        o->Update();
-        UpdateSubobjects(o->GetSubobjects());
-    }
 }
 
 unsigned int Application::RegisterModel(Model model)
