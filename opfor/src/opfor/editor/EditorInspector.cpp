@@ -1,169 +1,92 @@
 #include "EditorInspector.hpp"
 
 #include "Editor.hpp"
+#include "EditorMinProperty.hpp"
+#include "EditorMaxProperty.hpp"
+#include "EditorVisibleProperty.hpp"
+#include "EditorUtils.hpp"
+#include "CustomEditorProperty.hpp"
 
 #include <components/ModelComponent.hpp>
 #include <components/PointLightComponent.hpp>
 #include <components/TransformComponent.hpp>
 #include <imgui.h>
 #include <misc/cpp/imgui_stdlib.h>
-#include <nfd.h>
 #include <opfor/core/Application.hpp>
 #include <opfor/ecs/Entity.hpp>
-#include <opfor/layers/ImGuiLayer.hpp>
 #include <opfor/renderer/ShaderManager.hpp>
 #include <uuid.h>
+#include <regex>
 
 opfor::UniquePtr<char[]> GetCwd();
 
-void EditorInspector::ObjectTransform(ecs::IEntityBase *entity)
+opfor::String EditorInspector::FormatName(opfor::String original)
 {
-    if (!entity->HasComponents<TransformComponent>())
+    const opfor::String::size_type componentIdx = original.rfind("Component");
+
+    // Remove last "Component" part of the string
+    if (componentIdx != opfor::String::npos && componentIdx != 0 && (original.length() - (componentIdx + 9)) == 0)
     {
-        return;
+        original = original.substr(0, componentIdx);
     }
 
-    if (!ImGui::CollapsingHeader("Transform"))
+    std::string splitCamelCase;
+    const std::regex rCamelCase("([a-z0-9])([A-Z])");
+    std::regex_replace(std::back_inserter(splitCamelCase), original.begin(), original.end(), rCamelCase, "$1 $2");
+
+    std::string splitSnakeCase;
+    const std::regex rSnakeCase("([a-z0-9])_([A-Za-z])");
+    std::regex_replace(std::back_inserter(splitSnakeCase), splitCamelCase.begin(), splitCamelCase.end(), rSnakeCase, "$1 $2");
+
+    // Capitalize
+    bool prevWasSpace = true;
+    for (auto &c : splitSnakeCase)
     {
-        return;
-    }
-
-    bool changed = false;
-
-    auto &transform = entity->Get<TransformComponent>();
-
-    std::array<float, 3> rotation{transform.rotation.x, transform.rotation.y, transform.rotation.z};
-    std::array<float, 3> translation{transform.position.x, transform.position.y, transform.position.z};
-    std::array<float, 3> scale{transform.scale.x, transform.scale.y, transform.scale.z};
-
-    if (ImGui::InputFloat3("Position", translation.data(), 3))
-    {
-        changed = true;
-    }
-    if (ImGui::InputFloat3("Rotation", rotation.data(), 3))
-    {
-        changed = true;
-    }
-    if (ImGui::InputFloat3("Scale", scale.data(), 3))
-    {
-        changed = true;
-    }
-
-    if (ImGui::Button("Reset"))
-    {
-        rotation.fill(0.0f);
-        translation.fill(0.0f);
-        scale.fill(1.0f);
-        changed = true;
-    }
-
-    if (changed)
-    {
-        transform.position = {translation[0], translation[1], translation[2]};
-        transform.scale = {scale[0], scale[1], scale[2]};
-    }
-}
-
-void EditorInspector::ObjectMesh(ecs::IEntityBase *entity)
-{
-    if (!entity->HasComponents<ModelComponent>())
-    {
-        return;
-    }
-
-    if (!ImGui::CollapsingHeader("Static Mesh"))
-    {
-        return;
-    }
-
-    auto &model = entity->Get<ModelComponent>();
-
-    ImGui::SetNextItemWidth(ImGui::GetFontSize() * 8);
-    ImGui::Columns(2, NULL, true);
-
-    ImGui::Text("File Path");
-    ImGui::NextColumn();
-
-    std::string inputFilePath = model.path;
-
-    if (ImGui::InputText("##FilePath", &inputFilePath))
-    {
-    }
-    ImGui::SameLine();
-    if (ImGui::Button("..."))
-    {
-        char *newPath = nullptr;
-        // Open File Dialog
-        if (NFD_OpenDialog(nullptr, GetCwd().get(), &newPath) == NFD_OKAY && newPath)
+        if (prevWasSpace && !std::isspace(c))
         {
-            model.path = std::string(newPath);
-            opfor::Application::Get().OnRebuildModel(model);
+            c = static_cast<char>(std::toupper(c));
+            prevWasSpace = false;
+        }
+        else if (std::isspace(c))
+        {
+            prevWasSpace = true;
         }
     }
 
-    ImGui::Columns(1);
+    return splitSnakeCase;
 }
 
-void EditorInspector::ObjectLight(ecs::IEntityBase *entity)
+void EditorInspector::DrawComponentControls(ecs::IComponentBase &component)
 {
-    if (!entity->HasComponents<PointLightComponent>())
+    auto const &archetype = component.getArchetype();
+
+    if (!ImGui::CollapsingHeader(fmt::format("{}##{}", FormatName(archetype.name), "").c_str()))
     {
         return;
     }
 
-    if (!ImGui::CollapsingHeader("Light"))
+    auto const *customEditor = archetype.getProperty<CustomEditor>();
+
+    if (customEditor)
     {
-        return;
+        customEditor->GUI()->target = &component;
+        (*customEditor)();
+        customEditor->GUI()->target = nullptr;
     }
-
-    auto &light = entity->Get<PointLightComponent>();
-
-    std::array<const char *, 1> lightTypes = {"Point"};
-    size_t currentTypeIdx = 0;
-    const char *comboLabel = lightTypes[currentTypeIdx];
-
-    ImGui::SetNextItemWidth(ImGui::GetFontSize() * 8);
-    ImGui::Columns(2, nullptr, true);
-
-    ImGui::Text("Type");
-    ImGui::NextColumn();
-    if (ImGui::BeginCombo("##LightTypeCombo", comboLabel, 0))
+    else
     {
-        for (size_t i = 0; i < lightTypes.size(); i++)
+        for (auto const &field : archetype.fields)
         {
-            const bool isSelected = currentTypeIdx == i;
-            if (ImGui::Selectable(lightTypes[i], isSelected))
-            {
-                currentTypeIdx = i;
-            }
+            auto const *editorVisible = field.getProperty<EditorVisible>();
 
-            if (isSelected)
+            if (editorVisible)
             {
-                ImGui::SetItemDefaultFocus();
+                opfor::String name = editorVisible->editorName.value_or(FormatName(field.name));
+
+                DrawDefaultControl(name, component, field);
             }
         }
-        ImGui::EndCombo();
     }
-    ImGui::NextColumn();
-
-    ImGui::Text("Color");
-    ImGui::NextColumn();
-    std::array<float, 3> color{light.Color[0], light.Color[1], light.Color[2]};
-    if (ImGui::ColorEdit3("##LightColor", color.data()))
-    {
-        light.Color = {color[0], color[1], color[2]};
-    }
-    ImGui::NextColumn();
-
-    ImGui::Text("Intensity");
-    ImGui::NextColumn();
-    float intensity = light.Intensity;
-    if (ImGui::InputFloat("##LightIntensity", &intensity))
-    {
-        light.Intensity = intensity;
-    }
-
-    ImGui::Columns(1);
 }
 
 void EditorInspector::OnDrawGUI()
@@ -189,9 +112,10 @@ void EditorInspector::OnDrawGUI()
         ImGui::LabelText("##UUID", "%s", uuids::to_string(uuid).data());
         ImGui::Separator();
 
-        ObjectTransform(currentEntity);
-        ObjectMesh(currentEntity);
-        ObjectLight(currentEntity);
+        for (auto const &[typeIdx, component] : *currentEntity)
+        {
+            DrawComponentControls(*component);
+        }
 
         ImGui::Separator();
         if (ImGui::Button("Add Component"))
@@ -225,3 +149,111 @@ void EditorInspector::OnDrawGUI()
         ImGui::End();
     }
 }
+
+void EditorInspector::DrawDefaultControl(opfor::String const &name, ecs::IComponentBase &component, rfk::Field const &field)
+{
+    auto const *min = field.getProperty<Min>();
+    auto const *max = field.getProperty<Max>();
+    bool const readonly = field.getProperty<ReadOnly>() == nullptr;
+
+    if (*field.type.archetype == opfor::Vec3::staticGetArchetype())
+    {
+        auto &&vec = field.getData<opfor::Vec3>(&component);
+        auto newValue = vec;
+
+        opfor::EditorUtils::DrawVec3Control(name, newValue);
+
+        if (newValue != vec)
+        {
+            field.setData<opfor::Vec3>(&component, std::move(newValue));
+        }
+    }
+    else if (*field.type.archetype == opfor::Quat::staticGetArchetype())
+    {
+        // TODO: Fix float stability 
+
+        const auto rotator = field.getData<opfor::Quat>(&component).AsRotator();
+        opfor::Vec3 euler{opfor::math::ClampAxis(rotator.Roll), opfor::math::ClampAxis(rotator.Yaw), opfor::math::ClampAxis(rotator.Pitch)};
+
+        if (opfor::EditorUtils::DrawVec3Control(name, euler))
+        {
+            const opfor::Vec3 normalized(opfor::math::ClampAxis(euler.x),
+                                         opfor::math::ClampAxis(euler.y),
+                                         opfor::math::ClampAxis(euler.z));
+
+            field.setData<opfor::Quat>(&component, opfor::Rotator(normalized).AsQuaternion());
+        }
+    }
+    else if (*field.type.archetype == *rfk::getArchetype<int>())
+    {
+        int &&value = field.getData<int>(&component);
+
+        int newValue = value;
+        const int original = value;
+        opfor::EditorUtils::DrawIntControl(name, newValue, readonly, 1, min ? min->Get() : 0, max ? max->Get() : 0);
+
+        if (min && value < min->Get())
+        {
+            value = min->Get();
+        }
+
+        if (max && value > max->Get())
+        {
+            value = max->Get();
+        }
+
+        if (value != original)
+        {
+            field.setData<int>(&component, std::move(value));
+        }
+    }
+    else if (*field.type.archetype == *rfk::getArchetype<unsigned int>())
+    {
+        unsigned int &&value = field.getData<unsigned int>(&component);
+
+        int newValue = value;
+        const int original = value;
+        opfor::EditorUtils::DrawIntControl(name, newValue, readonly, 1, min ? std::max(min->Get(), 0.0f) : 0.0f,
+                                           max ? max->Get() : 0.0f);
+
+        if (min && value < min->Get())
+        {
+            value = min->Get();
+        }
+
+        if (max && value > max->Get())
+        {
+            value = max->Get();
+        }
+
+        if (value != original)
+        {
+            field.setData<int>(&component, std::move(value));
+        }
+    }
+    else if (*field.type.archetype == *rfk::getArchetype<float>())
+    {
+        float &&value = field.getData<float>(&component);
+
+        float newValue = value;
+        const float original = value;
+        opfor::EditorUtils::DrawFloatControl(name, newValue, 0.1f, min ? min->Get() : 0.0f, max ? max->Get() : 0.0f);
+        constexpr float epsilon = std::numeric_limits<float>::epsilon();
+        if (abs(value - original) > epsilon)
+        {
+            field.setData<float>(&component, std::move(value));
+        }
+    }
+    else if (*field.type.archetype == opfor::String::staticGetArchetype())
+    {
+        auto &&value = field.getData<opfor::String>(&component);
+
+        auto newValue = value;
+        opfor::EditorUtils::DrawStringControl(name, newValue, readonly);
+        if (newValue != value)
+        {
+            field.setData<opfor::String>(&component, std::move(newValue));
+        }
+    }
+}
+

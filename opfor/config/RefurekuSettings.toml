@@ -46,7 +46,7 @@ compilerExeName = "clang++"
 
 [FileParsingSettings.Properties]
 namespaceMacroName = "OP4NAMESPACE"
-classmacroName = "OP4CLASS"
+classMacroName = "OP4CLASS"
 structMacroName = "OP4STRUCT"
 fieldMacroName = "OP4FIELD"
 methodMacroName = "OP4METHOD"

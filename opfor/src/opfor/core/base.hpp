@@ -5,8 +5,10 @@
 #include <optional>
 #include <unordered_map>
 #include <variant>
+#include <array>
 
 #include "opfor/core/log.hpp"
+#include "opfor/core/types/String.hpp"
 
 #ifdef OP4_PLATFORM_LINUX
 #define OP4_DEBUGBREAK() raise(SIGTRAP)
@@ -71,8 +73,6 @@ template <typename T> using Optional = std::optional<T>;
 template <typename T, typename Allocator = std::allocator<T>> using Vector = std::vector<T, Allocator>;
 
 template <typename T, std::size_t N> using Array = std::array<T, N>;
-
-using String = std::string;
 
 template <typename... T> using Variant = std::variant<T...>;
 

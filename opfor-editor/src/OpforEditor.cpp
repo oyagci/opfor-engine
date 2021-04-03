@@ -1,6 +1,8 @@
 #include <opfor.hpp>
 
 #include "SpheresRotateSystem.hpp"
+#include "opfor/layers/ImGuiLayer.hpp"
+
 #include <components/ModelComponent.hpp>
 #include <components/SkyboxComponent.hpp>
 #include <components/TransformComponent.hpp>
