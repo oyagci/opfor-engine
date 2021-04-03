@@ -1,5 +1,6 @@
 #pragma once
 
+#include <opfor/core/base.hpp>
 #include <fmt/format.h>
 #include <glm/vec4.hpp>
 #include <optional>
@@ -7,7 +8,7 @@
 
 struct PbrMaterial
 {
-    std::string Name;
+    opfor::String Name;
     glm::vec4 BaseColor{};
     std::optional<std::string> Albedo;
     std::optional<std::string> Normal;

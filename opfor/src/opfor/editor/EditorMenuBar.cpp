@@ -4,6 +4,8 @@
 
 #include "EditorInspector.hpp"
 #include "EditorSceneHierarchy.hpp"
+#include "opfor/layers/ImGuiLayer.hpp"
+
 #include <opfor/core/Application.hpp>
 #include <opfor/core/LevelSerializer.hpp>
 

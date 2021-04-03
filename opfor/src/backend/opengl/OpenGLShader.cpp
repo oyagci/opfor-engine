@@ -1,7 +1,6 @@
 #include "OpenGLShader.hpp"
 
 #include "opfor/core/base.hpp"
-#include <cstring>
 #include <fstream>
 #include <sstream>
 
@@ -13,11 +12,11 @@ UniquePtr<Shader> Shader::Create(String const &source)
     return MakeUnique<OpenGLShader>(source);
 }
 
-OpenGLShader::OpenGLShader(std::string shaderPath)
+OpenGLShader::OpenGLShader(String shaderPath)
 {
     _RendererID = glCreateProgram();
 
-    std::string source;
+    String source;
 
     auto opt = ReadShaderSource(shaderPath);
     if (opt)
@@ -55,7 +54,7 @@ OpenGLShader::~OpenGLShader()
     }
 }
 
-std::optional<uint32_t> OpenGLShader::AddShaderFromSource(std::string const &src, uint32_t shaderType)
+Optional<uint32_t> OpenGLShader::AddShaderFromSource(String const &src, uint32_t shaderType)
 {
     GLuint shader;
     if ((shader = glCreateShader(shaderType)) == GL_FALSE)
@@ -74,7 +73,7 @@ std::optional<uint32_t> OpenGLShader::AddShaderFromSource(std::string const &src
         glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &length);
         if (length > 0)
         {
-            std::vector<GLchar> msg(length);
+            Vector<GLchar> msg(length);
             glGetShaderInfoLog(shader, length, &length, msg.data());
             fmt::print(" Shader error: {}\n", msg.data());
             glDeleteShader(shader);
@@ -84,24 +83,24 @@ std::optional<uint32_t> OpenGLShader::AddShaderFromSource(std::string const &src
     return shader;
 }
 
-auto OpenGLShader::ParseShaderSource(std::string const &src) -> std::unordered_map<ShaderType, std::string>
+auto OpenGLShader::ParseShaderSource(String const &src) -> UnorderedMap<ShaderType, String>
 {
-    const std::array<std::string, 4> prepocessorKeywords = {
+    const Array<String, 4> prepocessorKeywords = {
         "vertex",
         "fragment",
         "geometry",
         "compute",
     };
-    const std::unordered_map<std::string, ShaderType> shaderTypeMatch = {
+    const UnorderedMap<String, ShaderType> shaderTypeMatch = {
         {"vertex", ShaderType::Vertex},     {"fragment", ShaderType::Fragment}, {"pixel", ShaderType::Fragment},
         {"geometry", ShaderType::Geometry}, {"compute", ShaderType::Compute},
     };
 
     ShaderType currentShaderType = ShaderType::Vertex;
 
-    std::unordered_map<ShaderType, std::string> shaders;
-    std::string currentShader = "";
-    std::string currentKeyword = "";
+    UnorderedMap<ShaderType, String> shaders;
+    String currentShader = "";
+    String currentKeyword = "";
 
     ShaderParserState state = ShaderParserState::Normal;
 
@@ -172,7 +171,7 @@ auto OpenGLShader::ParseShaderSource(std::string const &src) -> std::unordered_m
     return shaders;
 }
 
-std::optional<std::string> OpenGLShader::ReadShaderSource(std::string const &path)
+Optional<String> OpenGLShader::ReadShaderSource(String const &path)
 {
     std::stringstream result;
     std::ifstream in(path);
@@ -181,19 +180,19 @@ std::optional<std::string> OpenGLShader::ReadShaderSource(std::string const &pat
     {
         result << in.rdbuf();
         in.close();
-        return result.str();
+        return String(result.str());
     }
 
     return std::nullopt;
 }
 
-std::optional<uint32_t> OpenGLShader::AddShaderFromPath(std::string const &path, uint32_t shaderType)
+Optional<uint32_t> OpenGLShader::AddShaderFromPath(String const &path, uint32_t shaderType)
 {
     GLuint shader;
     if ((shader = glCreateShader(shaderType)) == GL_FALSE)
         throw std::runtime_error("Shader error: Unable to create shader !");
 
-    std::string src = ReadShaderSource(path).value();
+    String src = ReadShaderSource(path).value();
 
     char const *c_src = src.c_str();
 
@@ -208,7 +207,7 @@ std::optional<uint32_t> OpenGLShader::AddShaderFromPath(std::string const &path,
         glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &length);
         if (length > 0)
         {
-            std::vector<GLchar> msg(length);
+            Vector<GLchar> msg(length);
             glGetShaderInfoLog(shader, length, &length, msg.data());
             fmt::print(" Shader error:\n", msg.data());
             glDeleteShader(shader);
@@ -274,7 +273,7 @@ void OpenGLShader::Link()
     }
 }
 
-uint32_t OpenGLShader::FindUniformLocation(std::string name)
+uint32_t OpenGLShader::FindUniformLocation(String name)
 {
     auto loc = _UniformLocations.find(name);
 
@@ -291,49 +290,49 @@ uint32_t OpenGLShader::FindUniformLocation(std::string name)
     }
 }
 
-void OpenGLShader::SetUniform(std::string const &name, int32_t value)
+void OpenGLShader::SetUniform(String const &name, int32_t value)
 {
     auto loc = FindUniformLocation(name);
     glUniform1i(loc, value);
 }
 
-void OpenGLShader::SetUniform(std::string const &name, uint32_t value)
+void OpenGLShader::SetUniform(String const &name, uint32_t value)
 {
     auto loc = FindUniformLocation(name);
     glUniform1ui(loc, value);
 }
 
-void OpenGLShader::SetUniform(std::string const &name, float value)
+void OpenGLShader::SetUniform(String const &name, float value)
 {
     auto loc = FindUniformLocation(name);
     glUniform1f(loc, value);
 }
 
-void OpenGLShader::SetUniform(std::string const &name, glm::vec3 value)
+void OpenGLShader::SetUniform(String const &name, glm::vec3 value)
 {
     auto loc = FindUniformLocation(name);
     glUniform3f(loc, value.x, value.y, value.z);
 }
 
-void OpenGLShader::SetUniform(std::string const &name, glm::vec4 value)
+void OpenGLShader::SetUniform(String const &name, glm::vec4 value)
 {
     auto loc = FindUniformLocation(name);
     glUniform4f(loc, value.x, value.y, value.z, value.w);
 }
 
-void OpenGLShader::SetUniform(std::string const &name, glm::mat3 value)
+void OpenGLShader::SetUniform(String const &name, glm::mat3 value)
 {
     auto loc = FindUniformLocation(name);
     glUniformMatrix3fv(loc, 1, GL_FALSE, &value[0][0]);
 }
 
-void OpenGLShader::SetUniform(std::string const &name, glm::mat4 value)
+void OpenGLShader::SetUniform(String const &name, glm::mat4 value)
 {
     auto loc = FindUniformLocation(name);
     glUniformMatrix4fv(loc, 1, GL_FALSE, &value[0][0]);
 }
 
-void OpenGLShader::SetUniform(std::string const &name, std::vector<glm::mat4> matrices, std::optional<size_t> size)
+void OpenGLShader::SetUniform(String const &name, Vector<glm::mat4> matrices, Optional<size_t> size)
 {
     auto dataSize = matrices.size();
 
@@ -346,7 +345,7 @@ void OpenGLShader::SetUniform(std::string const &name, std::vector<glm::mat4> ma
     glUniformMatrix4fv(loc, static_cast<GLsizei>(dataSize), GL_FALSE, reinterpret_cast<float *>(matrices.data()));
 }
 
-void OpenGLShader::SetUniform(std::string const &name, std::vector<glm::vec3> vectors, std::optional<size_t> size)
+void OpenGLShader::SetUniform(String const &name, Vector<glm::vec3> vectors, Optional<size_t> size)
 {
     auto dataSize = vectors.size();
 

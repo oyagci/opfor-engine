@@ -200,6 +200,26 @@ class IEntityBase
             return "Component does not exists";
         }
     };
+
+    auto begin() const
+    {
+        return Components.begin();
+    }
+
+    auto begin()
+    {
+        return Components.begin();
+    }
+
+    auto end() const
+    {
+        return Components.end();
+    }
+
+    auto end()
+    {
+        return Components.end();
+    }
 };
 
 template <typename T, typename... Types> class IEntity : public IEntityBase
