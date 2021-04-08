@@ -1,16 +1,12 @@
 #pragma once
 
 #include <fmt/format.h>
-#include <string>
+#include <string_view>
+#include <unordered_map>
 
 class Logger
 {
-  private:
-    Logger()
-    {
-        _log.resize(100);
-    }
-
+  public:
     enum class LogLevel
     {
         Verbose = 0,
@@ -20,60 +16,38 @@ class Logger
         Error = 4
     };
 
-    LogLevel _logLevel = LogLevel::Verbose;
-
-    std::vector<size_t> _lineOffsets;
-    std::string _log;
+    using Callback = std::function<void(LogLevel, std::string_view)>;
 
   private:
-    template <typename... Args> void Log(LogLevel severity, std::string const &format, Args... args)
+    std::unordered_map<std::string, Callback> _callbacks;
+    LogLevel _logLevel = LogLevel::Verbose;
+
+    Logger()
     {
-        if (severity < _logLevel)
+        _callbacks["stdout"] = &StdoutLog;
+    }
+
+    template <auto Severity, typename... Args> void Log(std::string_view const format, Args... args)
+    {
+        if (Severity < _logLevel)
         {
             return;
         }
 
-        std::string finalString = "";
+        fmt::memory_buffer buff;
+        fmt::format_to(buff, "[{:s}] ", Severity);
+        fmt::format_to(buff, format, std::forward<Args>(args)...);
 
-        switch (severity)
+        for (const auto &[_, cb] : _callbacks)
         {
-        case LogLevel::Verbose:
-            finalString += "[Verbose] ";
-            break;
-        case LogLevel::Info:
-            finalString += "[Info] ";
-            break;
-        case LogLevel::Debug:
-            finalString += "[Debug] ";
-            break;
-        case LogLevel::Warning:
-            finalString += "[Warning] ";
-            break;
-        case LogLevel::Error:
-            finalString += "[Error] ";
-            break;
+            cb(Severity, {buff.data(), buff.size()});
         }
+    }
 
-        finalString += format;
-
-        size_t oldSize = _log.size();
-
-        // Format log entry
-        finalString = fmt::format(finalString, std::forward<Args>(args)...);
-
-        // Add new log entry to the log string
-        _log += finalString;
-
-        // For each line added to the log, save where the line starts in the log string
-        for (size_t newSize = _log.size(); oldSize < newSize; oldSize++)
-        {
-            if (_log[oldSize] == '\n')
-            {
-                _lineOffsets.push_back(oldSize + 1);
-            }
-        }
-
-        fmt::print("{}", finalString);
+    static void StdoutLog(LogLevel const severity, std::string_view const data)
+    {
+        auto *sout = severity >= LogLevel::Warning ? stderr : stdout;
+        fmt::print(sout, data);
     }
 
   public:
@@ -86,44 +60,77 @@ class Logger
         return logger;
     }
 
-    template <typename... Args> static void Verbose(std::string const &format, Args... args)
+    template <typename... Args> static void Verbose(std::string_view const format, Args... args)
     {
-        Instance().Log(LogLevel::Verbose, format, std::forward<Args>(args)...);
+        Instance().Log<LogLevel::Verbose>(format, std::forward<Args>(args)...);
     }
 
-    template <typename... Args> static void Info(std::string const &format, Args... args)
+    template <typename... Args> static void Info(std::string_view const format, Args... args)
     {
-        Instance().Log(LogLevel::Info, format, std::forward<Args>(args)...);
+        Instance().Log<LogLevel::Info>(format, std::forward<Args>(args)...);
     }
 
-    template <typename... Args> static void Debug(std::string const &format, Args... args)
+    template <typename... Args> static void Debug(std::string_view const format, Args... args)
     {
-        Instance().Log(LogLevel::Debug, format, std::forward<Args>(args)...);
+        Instance().Log<LogLevel::Debug>(format, std::forward<Args>(args)...);
     }
 
-    template <typename... Args> static void Warn(std::string const &format, Args... args)
+    template <typename... Args> static void Warn(std::string_view const format, Args... args)
     {
-        Instance().Log(LogLevel::Warning, format, std::forward<Args>(args)...);
+        Instance().Log<LogLevel::Warning>(format, std::forward<Args>(args)...);
     }
 
-    template <typename... Args> static void Error(std::string const &format, Args... args)
+    template <typename... Args> static void Error(std::string_view const format, Args... args)
     {
-        Instance().Log(LogLevel::Error, format, std::forward<Args>(args)...);
+        Instance().Log<LogLevel::Error>(format, std::forward<Args>(args)...);
     }
 
-    static std::string const &GetLog()
+    static void BindCallback(std::string const &name, Callback cb)
     {
-        return Instance()._log;
+        auto &cbs = Instance()._callbacks;
+        if (cbs.find(name) != std::end(cbs))
+        {
+            Warn("Logger {} already bound.\n", name);
+        }
+        cbs[name] = cb;
+        Info("Logger \"{:s}\" enabled.\n", name);
     }
 
-    static std::vector<size_t> const &GetLineOffsets()
+    static void UnBindCallback(std::string const &name)
     {
-        return Instance()._lineOffsets;
+        auto &cbs = Instance()._callbacks;
+        auto const pos = cbs.find(name);
+        if (pos != std::end(cbs))
+        {
+            cbs.erase(pos);
+            Info("Logger \"{:s}\" disabled.\n", name);
+        }
     }
+};
 
-    static void Clear()
+template <> struct fmt::formatter<Logger::LogLevel> : formatter<string_view>
+{
+    template <typename FormatContext> auto format(Logger::LogLevel c, FormatContext &ctx)
     {
-        Instance()._log = "";
-        Instance()._lineOffsets.clear();
+        string_view name = "unknown";
+        switch (c)
+        {
+        case Logger::LogLevel::Verbose:
+            name = "Verbose";
+            break;
+        case Logger::LogLevel::Info:
+            name = "Info";
+            break;
+        case Logger::LogLevel::Debug:
+            name = "Debug";
+            break;
+        case Logger::LogLevel::Warning:
+            name = "Warning";
+            break;
+        case Logger::LogLevel::Error:
+            name = "Error";
+            break;
+        }
+        return formatter<string_view>::format(name, ctx);
     }
 };
