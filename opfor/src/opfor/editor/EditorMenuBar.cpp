@@ -43,6 +43,9 @@ opfor::UniquePtr<char[]> GetCwd()
 #endif
 }
 
+namespace opfor
+{
+
 void EditorMenuBar::OnDrawGUI()
 {
     if (ImGui::BeginMainMenuBar())
@@ -98,3 +101,5 @@ void EditorMenuBar::OnDrawGUI()
         ImGui::EndMainMenuBar();
     }
 }
+
+} // namespace opfor

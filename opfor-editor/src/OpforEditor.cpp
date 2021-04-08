@@ -15,6 +15,8 @@
 #include <opfor/editor/EditorSceneHierarchy.hpp>
 #include <opfor/editor/EditorViewport.hpp>
 
+using namespace opfor;
+
 struct Container : ecs::IComponent
 {
 };

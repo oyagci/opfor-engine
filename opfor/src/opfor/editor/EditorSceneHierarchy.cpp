@@ -4,6 +4,9 @@
 #include <opfor/core/Application.hpp>
 #include <opfor/editor/Editor.hpp>
 
+namespace opfor
+{
+
 void EditorSceneHierarchy::DrawHierarchy(EntityHierarchy const &hierarchy, size_t idx = 0) const
 {
     size_t itemIndex = idx;
@@ -41,7 +44,7 @@ void EditorSceneHierarchy::DrawHierarchy(EntityHierarchy const &hierarchy, size_
 
     if (clicked)
     {
-        opfor::Editor::SelectEntity(hierarchy.uuid);
+        Editor::SelectEntity(hierarchy.uuid);
     }
 }
 
@@ -60,12 +63,12 @@ void EditorSceneHierarchy::OnDrawGUI()
         {
             if (ImGui::MenuItem("Entity"))
             {
-                // auto ent = opfor::Application::Get().GetCurrentLevel()->CreateEntity();
+                // auto ent = Application::Get().GetCurrentLevel()->CreateEntity();
                 //(void)ent;
             }
             if (ImGui::MenuItem("Point Light"))
             {
-                // auto ent = opfor::Application::Get().GetCurrentLevel()->CreateEntity();
+                // auto ent = Application::Get().GetCurrentLevel()->CreateEntity();
                 // ent->AddComponents<PointLightComponent>();
                 //(void)ent;
             }
@@ -74,10 +77,10 @@ void EditorSceneHierarchy::OnDrawGUI()
         ImGui::EndPopup();
     }
 
-    auto allEnts = opfor::Application::Get().GetAllEntities();
+    auto allEnts = Application::Get().GetAllEntities();
 
-    opfor::UnorderedMap<uuids::uuid, EntityHierarchy> entitiesByUuid;
-    opfor::Vector<EntityHierarchy *> roots;
+    UnorderedMap<uuids::uuid, EntityHierarchy> entitiesByUuid;
+    Vector<EntityHierarchy *> roots;
 
     for (auto const *ent : allEnts)
     {
@@ -106,9 +109,9 @@ void EditorSceneHierarchy::OnDrawGUI()
         }
     }
 
-    if (!opfor::Editor::Selection().empty())
+    if (!Editor::Selection().empty())
     {
-        entitiesByUuid[opfor::Editor::Selection()[0]->GetUuid()].selected = true;
+        entitiesByUuid[Editor::Selection()[0]->GetUuid()].selected = true;
     }
 
     for (auto const &ent : roots)
@@ -118,3 +121,5 @@ void EditorSceneHierarchy::OnDrawGUI()
 
     ImGui::End();
 }
+
+} // namespace opfor

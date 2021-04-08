@@ -5,7 +5,10 @@
 #include <opfor/editor/EditorWindow.hpp>
 #include "imgui.h"
 
-class ImGuiLayer : public opfor::Layer
+namespace opfor
+{
+
+class ImGuiLayer : public Layer
 {
   private:
     ImVec2 _ViewportPosition;
@@ -24,7 +27,7 @@ class ImGuiLayer : public opfor::Layer
 
     void SetupImGuiStyle();
 
-    opfor::Vector<opfor::UniquePtr<IEditorWindow>> _windows;
+    Vector<UniquePtr<IEditorWindow>> _windows;
 
   private:
     ImGuiLayer();
@@ -61,6 +64,8 @@ class ImGuiLayer : public opfor::Layer
     template <typename T> void OpenWindow()
     {
         static_assert(std::is_base_of<IEditorWindow, T>::value);
-        _windows.emplace_back(opfor::MakeUnique<T>());
+        _windows.emplace_back(MakeUnique<T>());
     }
 };
+
+} // namespace opfor

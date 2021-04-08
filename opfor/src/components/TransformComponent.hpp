@@ -9,6 +9,9 @@
 #include <opfor/editor/CustomEditorProperty.hpp>
 #include <generated/TransformComponent.rfk.h>
 
+namespace opfor OP4NAMESPACE()
+{
+
 /**
  * @brief Describe how an object should be positioned
  */
@@ -41,6 +44,8 @@ struct OP4STRUCT() TransformComponent : ecs::IComponentBase
 
     TransformComponent_GENERATED
 };
+
+} // namespace opfor
 
 File_GENERATED
 

@@ -7,6 +7,9 @@
 
 opfor::UniquePtr<char[]> GetCwd();
 
+namespace opfor
+{
+
 ImGuiLayer::ImGuiLayer() = default;
 
 void ImGuiLayer::BeginFrame()
@@ -201,3 +204,5 @@ void ImGuiLayer::OnImGuiRender()
         opfor::Application::Get().GetWindow()->HideCursor(false);
     }
 }
+
+} // namespace opfor

@@ -7,6 +7,9 @@
 #include <opfor/core/Application.hpp>
 #include <opfor/layers/ImGuiLayer.hpp>
 
+namespace opfor
+{
+
 void EditorViewport::OnDrawGUI()
 {
     ImVec2 viewportSize = ImGuiLayer::Get().GetViewportSize();
@@ -115,3 +118,5 @@ void EditorViewport::DrawGuizmoSelectedEntity(ImVec2 viewportSize, ImVec2 viewpo
         glm::decompose(model, transform.scale, rotation, transform.position, skew, persp);
     }
 }
+
+} // namespace opfor

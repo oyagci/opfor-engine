@@ -3,6 +3,9 @@
 #include "SystemManager.hpp"
 #include <memory>
 
+namespace opfor
+{
+
 namespace ecs
 {
 
@@ -18,3 +21,5 @@ void ECSEngine::Update(float deltaTime)
 }
 
 } // namespace ecs
+
+} // namespace opfor

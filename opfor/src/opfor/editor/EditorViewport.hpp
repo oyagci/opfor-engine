@@ -2,6 +2,9 @@
 #include "EditorWindow.hpp"
 #include "imgui.h"
 
+namespace opfor
+{
+
 class EditorViewport final : public IEditorWindow
 {
   private:
@@ -12,3 +15,5 @@ class EditorViewport final : public IEditorWindow
   public:
     void OnDrawGUI() override;
 };
+
+} // namespace opfor

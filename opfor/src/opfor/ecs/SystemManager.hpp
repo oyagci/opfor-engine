@@ -5,6 +5,9 @@
 #include <type_traits>
 #include <vector>
 
+namespace opfor
+{
+
 namespace ecs
 {
 
@@ -67,3 +70,5 @@ class SystemManager
 };
 
 } // namespace ecs
+
+} // namespace opfor

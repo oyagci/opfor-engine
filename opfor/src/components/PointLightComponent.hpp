@@ -6,6 +6,9 @@
 #include <opfor/editor/EditorMinProperty.hpp>
 #include <generated/PointLightComponent.rfk.h>
 
+namespace opfor OP4NAMESPACE()
+{
+
 struct OP4STRUCT() PointLightComponent : ecs::IComponentBase
 {
     OP4FIELD(EditorVisible)
@@ -19,5 +22,7 @@ struct OP4STRUCT() PointLightComponent : ecs::IComponentBase
 
     PointLightComponent_GENERATED
 };
+
+} // namespace opfor
 
 File_GENERATED

@@ -11,6 +11,9 @@
 #include <unordered_map>
 #include <vector>
 
+namespace opfor
+{
+
 struct TransformComponent;
 
 namespace ecs
@@ -245,3 +248,5 @@ template <typename T, typename... Types> class IEntity : public IEntityBase
 };
 
 } // namespace ecs
+
+} // namespace opfor

@@ -4,13 +4,15 @@
 #include "EditorGUI.hpp"
 #include <generated/CustomEditorProperty.rfk.h>
 
+namespace opfor OP4NAMESPACE()
+{
+
 /**
-* @brief A property to attach a custom in-editor layout to the component this property is added
-*/
+ * @brief A property to attach a custom in-editor layout to the component this property is added
+ */
 class OP4CLASS(PropertySettings(rfk::EEntityKind::Class | rfk::EEntityKind::Struct)) CustomEditor : public rfk::Property
 {
   public:
-
     /**
      * @param [in] editorGUI    The user-defined custom editor to use
      */
@@ -31,12 +33,17 @@ class OP4CLASS(PropertySettings(rfk::EEntityKind::Class | rfk::EEntityKind::Stru
         _editorGUI->OnToolGUI();
     }
 
-    [[nodiscard]] auto GUI() const { return _editorGUI.get(); }
+    [[nodiscard]] auto GUI() const
+    {
+        return _editorGUI.get();
+    }
 
   private:
     opfor::UniquePtr<EditorGUI> _editorGUI;
 
     CustomEditor_GENERATED
 };
+
+} // namespace opfor
 
 File_GENERATED

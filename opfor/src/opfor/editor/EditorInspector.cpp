@@ -20,12 +20,15 @@
 
 opfor::UniquePtr<char[]> GetCwd();
 
-opfor::String EditorInspector::FormatName(opfor::String original)
+namespace opfor
 {
-    const opfor::String::size_type componentIdx = original.rfind("Component");
+
+String EditorInspector::FormatName(String original)
+{
+    const String::size_type componentIdx = original.rfind("Component");
 
     // Remove last "Component" part of the string
-    if (componentIdx != opfor::String::npos && componentIdx != 0 && (original.length() - (componentIdx + 9)) == 0)
+    if (componentIdx != String::npos && componentIdx != 0 && (original.length() - (componentIdx + 9)) == 0)
     {
         original = original.substr(0, componentIdx);
     }
@@ -36,7 +39,8 @@ opfor::String EditorInspector::FormatName(opfor::String original)
 
     std::string splitSnakeCase;
     const std::regex rSnakeCase("([a-z0-9])_([A-Za-z])");
-    std::regex_replace(std::back_inserter(splitSnakeCase), splitCamelCase.begin(), splitCamelCase.end(), rSnakeCase, "$1 $2");
+    std::regex_replace(std::back_inserter(splitSnakeCase), splitCamelCase.begin(), splitCamelCase.end(), rSnakeCase,
+                       "$1 $2");
 
     // Capitalize
     bool prevWasSpace = true;
@@ -81,7 +85,7 @@ void EditorInspector::DrawComponentControls(ecs::IComponentBase &component)
 
             if (editorVisible)
             {
-                opfor::String name = editorVisible->editorName.value_or(FormatName(field.name));
+                String name = editorVisible->editorName.value_or(FormatName(field.name));
 
                 DrawDefaultControl(name, component, field);
             }
@@ -93,13 +97,13 @@ void EditorInspector::OnDrawGUI()
 {
     if (ImGui::Begin("Inspector"))
     {
-        if (opfor::Editor::Selection().empty())
+        if (Editor::Selection().empty())
         {
             ImGui::End();
             return;
         }
 
-        ecs::IEntityBase *currentEntity = opfor::Editor::Selection()[0];
+        ecs::IEntityBase *currentEntity = Editor::Selection()[0];
 
         std::string entityName = currentEntity->GetName();
         if (ImGui::InputText("##EntityName", &entityName))
@@ -150,38 +154,39 @@ void EditorInspector::OnDrawGUI()
     }
 }
 
-void EditorInspector::DrawDefaultControl(opfor::String const &name, ecs::IComponentBase &component, rfk::Field const &field)
+void EditorInspector::DrawDefaultControl(String const &name, ecs::IComponentBase &component,
+                                         rfk::Field const &field)
 {
     auto const *min = field.getProperty<Min>();
     auto const *max = field.getProperty<Max>();
     bool const readonly = field.getProperty<ReadOnly>() == nullptr;
 
-    if (*field.type.archetype == opfor::Vec3::staticGetArchetype())
+    if (*field.type.archetype == Vec3::staticGetArchetype())
     {
-        auto &&vec = field.getData<opfor::Vec3>(&component);
+        auto &&vec = field.getData<Vec3>(&component);
         auto newValue = vec;
 
-        opfor::EditorUtils::DrawVec3Control(name, newValue);
+        EditorUtils::DrawVec3Control(name, newValue);
 
         if (newValue != vec)
         {
-            field.setData<opfor::Vec3>(&component, std::move(newValue));
+            field.setData<Vec3>(&component, std::move(newValue));
         }
     }
-    else if (*field.type.archetype == opfor::Quat::staticGetArchetype())
+    else if (*field.type.archetype == Quat::staticGetArchetype())
     {
-        // TODO: Fix float stability 
+        // TODO: Fix float stability
 
-        const auto rotator = field.getData<opfor::Quat>(&component).AsRotator();
-        opfor::Vec3 euler{opfor::math::ClampAxis(rotator.Roll), opfor::math::ClampAxis(rotator.Yaw), opfor::math::ClampAxis(rotator.Pitch)};
+        const auto rotator = field.getData<Quat>(&component).AsRotator();
+        Vec3 euler{math::ClampAxis(rotator.Roll), math::ClampAxis(rotator.Yaw),
+                          math::ClampAxis(rotator.Pitch)};
 
-        if (opfor::EditorUtils::DrawVec3Control(name, euler))
+        if (EditorUtils::DrawVec3Control(name, euler))
         {
-            const opfor::Vec3 normalized(opfor::math::ClampAxis(euler.x),
-                                         opfor::math::ClampAxis(euler.y),
-                                         opfor::math::ClampAxis(euler.z));
+            const Vec3 normalized(math::ClampAxis(euler.x), math::ClampAxis(euler.y),
+                                         math::ClampAxis(euler.z));
 
-            field.setData<opfor::Quat>(&component, opfor::Rotator(normalized).AsQuaternion());
+            field.setData<Quat>(&component, Rotator(normalized).AsQuaternion());
         }
     }
     else if (*field.type.archetype == *rfk::getArchetype<int>())
@@ -190,7 +195,7 @@ void EditorInspector::DrawDefaultControl(opfor::String const &name, ecs::ICompon
 
         int newValue = value;
         const int original = value;
-        opfor::EditorUtils::DrawIntControl(name, newValue, readonly, 1, min ? min->Get() : 0, max ? max->Get() : 0);
+        EditorUtils::DrawIntControl(name, newValue, readonly, 1, min ? min->Get() : 0, max ? max->Get() : 0);
 
         if (min && value < min->Get())
         {
@@ -213,7 +218,7 @@ void EditorInspector::DrawDefaultControl(opfor::String const &name, ecs::ICompon
 
         int newValue = value;
         const int original = value;
-        opfor::EditorUtils::DrawIntControl(name, newValue, readonly, 1, min ? std::max(min->Get(), 0.0f) : 0.0f,
+        EditorUtils::DrawIntControl(name, newValue, readonly, 1, min ? std::max(min->Get(), 0.0f) : 0.0f,
                                            max ? max->Get() : 0.0f);
 
         if (min && value < min->Get())
@@ -237,23 +242,24 @@ void EditorInspector::DrawDefaultControl(opfor::String const &name, ecs::ICompon
 
         float newValue = value;
         const float original = value;
-        opfor::EditorUtils::DrawFloatControl(name, newValue, 0.1f, min ? min->Get() : 0.0f, max ? max->Get() : 0.0f);
+        EditorUtils::DrawFloatControl(name, newValue, 0.1f, min ? min->Get() : 0.0f, max ? max->Get() : 0.0f);
         constexpr float epsilon = std::numeric_limits<float>::epsilon();
         if (abs(value - original) > epsilon)
         {
             field.setData<float>(&component, std::move(value));
         }
     }
-    else if (*field.type.archetype == opfor::String::staticGetArchetype())
+    else if (*field.type.archetype == String::staticGetArchetype())
     {
-        auto &&value = field.getData<opfor::String>(&component);
+        auto &&value = field.getData<String>(&component);
 
         auto newValue = value;
-        opfor::EditorUtils::DrawStringControl(name, newValue, readonly);
+        EditorUtils::DrawStringControl(name, newValue, readonly);
         if (newValue != value)
         {
-            field.setData<opfor::String>(&component, std::move(newValue));
+            field.setData<String>(&component, std::move(newValue));
         }
     }
 }
 
+} // namespace opfor

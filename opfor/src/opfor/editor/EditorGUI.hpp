@@ -3,6 +3,9 @@
 #include <opfor/ecs/ecs.hpp>
 #include <generated/EditorGUI.rfk.h>
 
+namespace opfor OP4NAMESPACE()
+{
+
 /**
  * @brief An interface used to describe how to render an entity in the editor
  */
@@ -22,5 +25,7 @@ class OP4CLASS() EditorGUI : public rfk::Object
 
     EditorGUI_GENERATED
 };
+
+} // namespace opfor
 
 File_GENERATED
