@@ -50,6 +50,29 @@ class EditorLog : public IEditorWindow
         if (ImGui::BeginPopup("Options"))
         {
             ImGui::Checkbox("Auto-Scroll", &_autoScroll);
+
+            const auto current_severity = Logger::GetLogLevel();
+            const auto current_severity_str = fmt::format("{}", current_severity);
+            if (ImGui::BeginCombo("Severity", current_severity_str.c_str()))
+            {
+                for (auto i = 0u; i < 5; ++i)
+                {
+                    auto const severity = static_cast<Logger::LogLevel>(i);
+                    auto const severity_str = fmt::format("{}", severity);
+                    const bool is_selected = severity == current_severity;
+                    if (ImGui::Selectable(severity_str.c_str(), is_selected))
+                    {
+                        Logger::SetLogLevel(severity);
+                    }
+
+                    if (is_selected)
+                    {
+                        ImGui::SetItemDefaultFocus();
+                    }
+                }
+                ImGui::EndCombo();
+            }
+
             ImGui::EndPopup();
         }
 

@@ -107,6 +107,16 @@ class Logger
             Info("Logger \"{:s}\" disabled.", name);
         }
     }
+
+    static LogLevel GetLogLevel()
+    {
+      return Instance()._logLevel;
+    }
+
+    static void SetLogLevel(LogLevel lvl)
+    {
+        Instance()._logLevel = lvl;
+    }
 };
 
 template <> struct fmt::formatter<Logger::LogLevel> : formatter<string_view>
