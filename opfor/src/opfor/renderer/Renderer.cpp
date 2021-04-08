@@ -19,10 +19,10 @@ Vector<String> _CallsStrings;
 
 void Renderer::PrintTree(unsigned int offset)
 {
-    fmt::print("=====================================================\n");
+    OP4_CORE_DEBUG("=====================================================");
     for (auto const &s : _CallsStrings)
     {
-        fmt::print("{}\n", s);
+        OP4_CORE_DEBUG("{}", s);
     }
 }
 

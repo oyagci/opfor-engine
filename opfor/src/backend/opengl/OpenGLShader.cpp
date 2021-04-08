@@ -75,7 +75,7 @@ Optional<uint32_t> OpenGLShader::AddShaderFromSource(String const &src, uint32_t
         {
             Vector<GLchar> msg(length);
             glGetShaderInfoLog(shader, length, &length, msg.data());
-            fmt::print(" Shader error: {}", msg.data());
+            OP4_CORE_ERROR("Shader error: {}", msg.data());
             glDeleteShader(shader);
         }
         return std::nullopt;
@@ -209,7 +209,7 @@ Optional<uint32_t> OpenGLShader::AddShaderFromPath(String const &path, uint32_t 
         {
             Vector<GLchar> msg(length);
             glGetShaderInfoLog(shader, length, &length, msg.data());
-            fmt::print(" Shader error:\n", msg.data());
+            OP4_CORE_ERROR("Shader error: {}", msg.data());
             glDeleteShader(shader);
         }
         return std::nullopt;
