@@ -4,6 +4,9 @@
 #include "uuid.h"
 #include <opfor/ecs/ecs.hpp>
 
+namespace opfor
+{
+
 class EditorSceneHierarchy : public IEditorWindow
 {
   private:
@@ -24,3 +27,5 @@ class EditorSceneHierarchy : public IEditorWindow
   public:
     void OnDrawGUI() override;
 };
+
+} // namespace opfor

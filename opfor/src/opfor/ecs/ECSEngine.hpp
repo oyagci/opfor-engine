@@ -2,6 +2,9 @@
 
 #include "Entity.hpp"
 
+namespace opfor
+{
+
 namespace ecs
 {
 
@@ -36,3 +39,5 @@ class ECSEngine
 };
 
 } // namespace ecs
+
+} // namespace opfor

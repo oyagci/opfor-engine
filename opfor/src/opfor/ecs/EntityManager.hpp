@@ -9,6 +9,9 @@
 #include <type_traits>
 #include <vector>
 
+namespace opfor
+{
+
 namespace ecs
 {
 
@@ -150,3 +153,5 @@ class EntityManager
 };
 
 } // namespace ecs
+
+} // namespace opfor

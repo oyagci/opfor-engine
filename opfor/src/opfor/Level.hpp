@@ -14,6 +14,9 @@
 
 #include "uuid.h"
 
+namespace opfor
+{
+
 using json = nlohmann::json;
 
 class Level : public opfor::ILevel
@@ -160,3 +163,5 @@ class Level : public opfor::ILevel
         return entity;
     }
 };
+
+} // namespace opfor

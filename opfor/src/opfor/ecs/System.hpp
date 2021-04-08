@@ -10,6 +10,9 @@
 #define __unused __attribute__((unused))
 #endif
 
+namespace opfor
+{
+
 namespace ecs
 {
 
@@ -60,3 +63,5 @@ class ComponentSystem : public ISystemBase
 };
 
 } // namespace ecs
+
+} // namespace opfor

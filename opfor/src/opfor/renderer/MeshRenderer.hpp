@@ -8,11 +8,11 @@
 #include "opfor/renderer/PerspectiveCamera.hpp"
 #include "opfor/renderer/Shader.hpp"
 
-struct PlayerCameraComponent;
-struct TransformComponent;
-
 namespace opfor
 {
+
+struct PlayerCameraComponent;
+struct TransformComponent;
 
 class MeshRenderer
 {

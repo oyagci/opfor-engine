@@ -15,6 +15,9 @@
 #include <opfor/renderer/Viewport.hpp>
 #include <unordered_map>
 
+namespace opfor
+{
+
 namespace ecs
 {
 class SystemManager;
@@ -22,11 +25,7 @@ class EntityManager;
 } // namespace ecs
 
 struct ModelComponent;
-
-namespace opfor
-{
 class ImGuiWrapperLayer;
-
 class Model;
 
 class Application

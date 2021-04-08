@@ -6,6 +6,9 @@
 #include <opfor/editor/EditorVisibleProperty.hpp>
 #include <generated/ModelComponent.rfk.h>
 
+namespace opfor OP4NAMESPACE()
+{
+
 struct OP4STRUCT() ModelComponent : ecs::IComponentBase
 {
     OP4FIELD(EditorVisible, ReadOnly)
@@ -19,5 +22,7 @@ struct OP4STRUCT() ModelComponent : ecs::IComponentBase
 
     ModelComponent_GENERATED
 };
+
+} // namespace opfor
 
 File_GENERATED
