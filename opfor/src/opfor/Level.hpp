@@ -40,7 +40,7 @@ class Level : public opfor::ILevel
             return result.str();
         }
 
-        fmt::print(stderr, "Failed to read file: {}\n", path);
+        OP4_CORE_ERROR("Failed to read file: {}", path);
         return "";
     }
 

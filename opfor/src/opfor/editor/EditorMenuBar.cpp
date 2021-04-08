@@ -73,7 +73,7 @@ void EditorMenuBar::OnDrawGUI()
             }
             if (ImGui::MenuItem("Save Level"))
             {
-                fmt::print("{}\n", opfor::LevelSerializer::Serialize());
+                OP4_CORE_DEBUG("Serialized level: {}", opfor::LevelSerializer::Serialize());
             }
             if (ImGui::MenuItem("Save Level As..."))
             {
