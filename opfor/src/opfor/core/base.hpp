@@ -75,6 +75,8 @@ template <typename T, typename Allocator = std::allocator<T>> using Vector = std
 
 template <typename T, std::size_t N> using Array = std::array<T, N>;
 
+using StringView = std::string_view;
+
 template <typename... T> using Variant = std::variant<T...>;
 
 template <typename Key, typename T> using UnorderedMap = std::unordered_map<Key, T>;
