@@ -20,7 +20,7 @@ void OpenGLContext::Init()
     glfwMakeContextCurrent(static_cast<GLFWwindow *>(_WindowHandle.GetRawHandle()));
 
     int status = gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
-    OP4_CORE_ASSERT(status, "Failed to initialize GLAD\n");
+    OP4_CORE_ASSERT(status, "Failed to initialize GLAD");
 
    // const auto width = _WindowHandle.GetWidth();
    // const auto height = _WindowHandle.GetHeight();
@@ -33,10 +33,10 @@ void OpenGLContext::Init()
     glDepthFunc(GL_LEQUAL);
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 
-    OP4_CORE_INFO("OpenGL Info:\n");
-    OP4_CORE_INFO("  Vendor: {}\n", glGetString(GL_VENDOR));
-    OP4_CORE_INFO("  Renderer: {}\n", glGetString(GL_RENDERER));
-    OP4_CORE_INFO("  Version: {}\n", glGetString(GL_VERSION));
+    OP4_CORE_INFO("OpenGL Info:");
+    OP4_CORE_INFO("  Vendor: {}", glGetString(GL_VENDOR));
+    OP4_CORE_INFO("  Renderer: {}", glGetString(GL_RENDERER));
+    OP4_CORE_INFO("  Version: {}", glGetString(GL_VERSION));
 }
 
 void OpenGLContext::SwapBuffers()

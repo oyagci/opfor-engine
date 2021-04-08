@@ -8,7 +8,7 @@ SharedPtr<Texture2D> TextureManager::Create2D(String const &name)
 {
     if (_textures.find(name) != _textures.end())
     {
-        OP4_CORE_WARNING("Texture named \"{}\" already exists!\n", name);
+        OP4_CORE_WARNING("Texture named \"{}\" already exists!", name);
     }
 
     SharedPtr<Texture> texture = Texture2D::Create();
@@ -21,7 +21,7 @@ void TextureManager::Add(String const &name, SharedPtr<Texture> texture)
 {
     if (_textures.find(name) != _textures.end())
     {
-        OP4_CORE_WARNING("Texture named \"{}\" already exists!\n", name);
+        OP4_CORE_WARNING("Texture named \"{}\" already exists!", name);
     }
 
     _textures[name] = texture;

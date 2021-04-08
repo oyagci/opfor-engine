@@ -28,7 +28,7 @@
     {                                                                                                                  \
         if (!(x))                                                                                                      \
         {                                                                                                              \
-            OP4_CORE_ERROR("Assertion Failed: {0}\n", __VA_ARGS__);                                                    \
+            OP4_CORE_ERROR("Assertion Failed: {0}", __VA_ARGS__);                                                      \
             OP4_DEBUGBREAK();                                                                                          \
         }                                                                                                              \
     }
@@ -36,13 +36,13 @@
     {                                                                                                                  \
         if (!(x))                                                                                                      \
         {                                                                                                              \
-            OP4_CORE_ERROR("Assertion Failed: {0}\n", __VA_ARGS__);                                                    \
+            OP4_CORE_ERROR("Assertion Failed: {0}", __VA_ARGS__);                                                      \
             OP4_ABORT();                                                                                               \
         }                                                                                                              \
     }
 #define OP4_CORE_UNREACHABLE(...)                                                                                      \
     {                                                                                                                  \
-        OP4_CORE_ERROR("Unreachable: {0}\n");                                                                          \
+        OP4_CORE_ERROR("Unreachable: {0}");                                                                            \
         OP4_ABORT();                                                                                                   \
     }
 

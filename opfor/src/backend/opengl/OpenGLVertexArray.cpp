@@ -30,7 +30,7 @@ static GLenum ShaderDataTypeToOpenGLBase(ShaderDataType type)
     case ShaderDataType::Float4:
         return GL_FLOAT;
     default:
-        OP4_CORE_EXPECT(false, "Unknown ShaderDataType value!\n");
+        OP4_CORE_EXPECT(false, "Unknown ShaderDataType value!");
     };
 }
 
@@ -63,7 +63,7 @@ void OpenGLVertexArray::AddVertexBuffer(SharedPtr<VertexBuffer> vertexBuffer)
     auto const &layout = vertexBuffer->GetLayout();
     auto elements = vertexBuffer->GetLayout().GetElements();
 
-    OP4_CORE_ASSERT(elements.size() > 0, "No elements in buffer layout!\n");
+    OP4_CORE_ASSERT(elements.size() > 0, "No elements in buffer layout!");
 
     for (uint32_t i = 0; i < static_cast<uint32_t>(elements.size()); i++)
     {

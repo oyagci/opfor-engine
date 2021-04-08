@@ -75,7 +75,7 @@ Optional<uint32_t> OpenGLShader::AddShaderFromSource(String const &src, uint32_t
         {
             Vector<GLchar> msg(length);
             glGetShaderInfoLog(shader, length, &length, msg.data());
-            fmt::print(" Shader error: {}\n", msg.data());
+            fmt::print(" Shader error: {}", msg.data());
             glDeleteShader(shader);
         }
         return std::nullopt;
@@ -253,7 +253,7 @@ void OpenGLShader::Link()
     if (result == GL_FALSE)
     {
 
-        OP4_CORE_ERROR("Could not link shader!\n");
+        OP4_CORE_ERROR("Could not link shader!");
 
         GLint length = 0;
         glGetProgramiv(_RendererID, GL_INFO_LOG_LENGTH, &length);
@@ -263,9 +263,9 @@ void OpenGLShader::Link()
             GLchar *msg = new GLchar[length];
             glGetProgramInfoLog(_RendererID, length, &length, msg);
 
-            OP4_CORE_ERROR("Shader Error:\n");
-            OP4_CORE_ERROR("============\n");
-            OP4_CORE_ERROR("{}\n", msg);
+            OP4_CORE_ERROR("Shader Error:");
+            OP4_CORE_ERROR("============");
+            OP4_CORE_ERROR("{}", msg);
 
             glDeleteShader(_RendererID);
             delete[] msg;

@@ -30,7 +30,7 @@ void EditorViewport::OnDrawGUI()
             opfor::Application::Get().OnEvent(e);
             opfor::Application::Get().GetCameraController().GetCamera().SetAspect(viewportSize.x / viewportSize.y);
 
-            OP4_CORE_INFO("Resized viewport from ({}, {}) to ({}, {})\n", prevViewportSize.x, prevViewportSize.y,
+            OP4_CORE_INFO("Resized viewport from ({}, {}) to ({}, {})", prevViewportSize.x, prevViewportSize.y,
                           viewportSize.x, viewportSize.y);
 
             prevViewportSize = viewportSize;
