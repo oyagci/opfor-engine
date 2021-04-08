@@ -41,7 +41,7 @@ static uint32_t GetShaderDataTypeSize(ShaderDataType type)
     case ShaderDataType::Float4:
         return 4 * 4;
     default:
-        OP4_CORE_EXPECT(false, "Unknown ShaderDataType value!\n");
+        OP4_CORE_EXPECT(false, "Unknown ShaderDataType value!");
     };
 }
 
@@ -79,7 +79,7 @@ struct BufferElement
         case ShaderDataType::Float4:
             return 4;
         default:
-            OP4_CORE_EXPECT(false, "Unknown ShaderDataType value!\n");
+            OP4_CORE_EXPECT(false, "Unknown ShaderDataType value!");
         };
     }
 };

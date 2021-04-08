@@ -65,7 +65,7 @@ void GBuffer::Init()
     _gBuffer->AttachTexture(_gMetallicRoughness, FramebufferAttachment::ColorAttachment3);
     _gBuffer->AttachTexture(_gDepth, FramebufferAttachment::DepthAttachment);
 
-    OP4_CORE_ASSERT(_gBuffer->IsComplete(), "Incomplete Framebuffer!\n");
+    OP4_CORE_ASSERT(_gBuffer->IsComplete(), "Incomplete Framebuffer!");
 
     _gBuffer->Unbind();
 }

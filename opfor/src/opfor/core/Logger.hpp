@@ -37,6 +37,7 @@ class Logger
         fmt::memory_buffer buff;
         fmt::format_to(buff, "[{:s}] ", Severity);
         fmt::format_to(buff, format, std::forward<Args>(args)...);
+        fmt::format_to(buff, "\n");
 
         for (const auto &[_, cb] : _callbacks)
         {
@@ -90,10 +91,10 @@ class Logger
         auto &cbs = Instance()._callbacks;
         if (cbs.find(name) != std::end(cbs))
         {
-            Warn("Logger {} already bound.\n", name);
+            Warn("Logger {} already bound.", name);
         }
         cbs[name] = cb;
-        Info("Logger \"{:s}\" enabled.\n", name);
+        Info("Logger \"{:s}\" enabled.", name);
     }
 
     static void UnBindCallback(std::string const &name)
@@ -103,7 +104,7 @@ class Logger
         if (pos != std::end(cbs))
         {
             cbs.erase(pos);
-            Info("Logger \"{:s}\" disabled.\n", name);
+            Info("Logger \"{:s}\" disabled.", name);
         }
     }
 };

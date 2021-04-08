@@ -148,7 +148,7 @@ const std::unordered_map<int, MouseButton> LinuxInput::_GlfwMouseButtons = {
 
 LinuxInput::LinuxInput()
 {
-    OP4_CORE_ASSERT(_UniqueInstance == nullptr, "LinuxInput already exists. Only instanciate LinuxInput once!\n");
+    OP4_CORE_ASSERT(_UniqueInstance == nullptr, "LinuxInput already exists. Only instanciate LinuxInput once!");
 
     _UniqueInstance = this;
 

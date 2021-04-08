@@ -156,11 +156,11 @@ class Model
 
         if (!warn.empty())
         {
-            Logger::Warn("{}\n", warn);
+            Logger::Warn("{}", warn);
         }
         if (!err.empty())
         {
-            Logger::Error("{}\n", err);
+            Logger::Error("{}", err);
         }
         if (ret == false)
         {
@@ -239,7 +239,7 @@ class Model
                 }
                 else
                 {
-                    OP4_CORE_WARNING("img.nchannel = {} -- Not handled!\n", img.nchannel);
+                    OP4_CORE_WARNING("img.nchannel = {} -- Not handled!", img.nchannel);
                 }
                 texture->SetDataType(opfor::DataType::UnsignedByte);
                 texture->SetIsSRGB(true);
@@ -329,7 +329,7 @@ class Model
             }
             else
             {
-                OP4_CORE_WARNING("img.nchannel = {} -- Not handled!\n", img.nchannel);
+                OP4_CORE_WARNING("img.nchannel = {} -- Not handled!", img.nchannel);
             }
             texture->SetDataType(opfor::DataType::UnsignedByte);
             texture->SetData(img.data.get());

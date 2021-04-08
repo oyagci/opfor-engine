@@ -148,7 +148,7 @@ const std::unordered_map<int, MouseButton> WindowsInput::_GlfwMouseButtons = {
 
 WindowsInput::WindowsInput()
 {
-    OP4_CORE_ASSERT(_UniqueInstance == nullptr, "WindowsInput already exists. Only instanciate WindowsInput once!\n");
+    OP4_CORE_ASSERT(_UniqueInstance == nullptr, "WindowsInput already exists. Only instanciate WindowsInput once!");
 
     _UniqueInstance = this;
 

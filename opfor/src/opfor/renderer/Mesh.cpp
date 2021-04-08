@@ -111,7 +111,7 @@ Mesh &Mesh::build()
 
     OP4_CORE_ASSERT(vPositions.size() == vNormals.size() && vPositions.size() == vUvs.size() &&
                         vPositions.size() == vTangents.size(),
-                    "Vertex Data is incomplete\n");
+                    "Vertex Data is incomplete");
 
     Vector<MeshVertexData> vertices;
 
