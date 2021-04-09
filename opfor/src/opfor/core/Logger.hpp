@@ -9,9 +9,9 @@ class Logger
   public:
     enum class LogLevel
     {
-        Verbose = 0,
-        Info = 1,
-        Debug = 2,
+        Debug = 0,
+        Verbose = 1,
+        Info = 2,
         Warning = 3,
         Error = 4
     };
@@ -61,6 +61,11 @@ class Logger
         return logger;
     }
 
+    template <typename... Args> static void Debug(std::string_view const format, Args... args)
+    {
+        Instance().Log<LogLevel::Debug>(format, std::forward<Args>(args)...);
+    }
+
     template <typename... Args> static void Verbose(std::string_view const format, Args... args)
     {
         Instance().Log<LogLevel::Verbose>(format, std::forward<Args>(args)...);
@@ -69,11 +74,6 @@ class Logger
     template <typename... Args> static void Info(std::string_view const format, Args... args)
     {
         Instance().Log<LogLevel::Info>(format, std::forward<Args>(args)...);
-    }
-
-    template <typename... Args> static void Debug(std::string_view const format, Args... args)
-    {
-        Instance().Log<LogLevel::Debug>(format, std::forward<Args>(args)...);
     }
 
     template <typename... Args> static void Warn(std::string_view const format, Args... args)
@@ -126,14 +126,14 @@ template <> struct fmt::formatter<Logger::LogLevel> : formatter<string_view>
         string_view name = "unknown";
         switch (c)
         {
+        case Logger::LogLevel::Debug:
+            name = "Debug";
+            break;
         case Logger::LogLevel::Verbose:
             name = "Verbose";
             break;
         case Logger::LogLevel::Info:
             name = "Info";
-            break;
-        case Logger::LogLevel::Debug:
-            name = "Debug";
             break;
         case Logger::LogLevel::Warning:
             name = "Warning";
