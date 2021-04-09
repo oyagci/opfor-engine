@@ -107,7 +107,11 @@ static std::optional<std::vector<unsigned int>> TinyProcessNode(tinygltf::Node c
             }
 
             current.build();
-            current.SetPbrMaterial(materials[primitive.material]);
+
+            if (primitive.material != -1)
+            {
+                current.SetPbrMaterial(materials[primitive.material]);
+            }
 
             // Register this mesh to the engine and save its index
             allMeshes.push_back(opfor::Application::Get().AddMesh(std::move(current)));
