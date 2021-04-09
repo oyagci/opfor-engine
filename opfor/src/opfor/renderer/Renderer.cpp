@@ -14,8 +14,8 @@
 namespace opfor
 {
 
-std::list<std::function<void()>> Renderer::_Calls;
-std::vector<std::string> _CallsStrings;
+List<std::function<void()>> Renderer::_Calls;
+Vector<String> _CallsStrings;
 
 void Renderer::PrintTree(unsigned int offset)
 {
@@ -70,7 +70,7 @@ void Renderer::EndScene()
     }
 }
 
-void Renderer::PushViewport(glm::uvec2 pos, glm::uvec2 size)
+void Renderer::PushViewport(UVec2 pos, UVec2 size)
 {
     _CallsStrings.push_back(__OP4_FUNCNAME__);
     _Calls.push_back(BIND(RenderCommand::PushViewport, pos, size));
@@ -82,7 +82,7 @@ void Renderer::PopViewport()
     _Calls.push_back(BIND(RenderCommand::PopViewport));
 }
 
-void Renderer::SetClearColor(std::array<float, 4> const &color)
+void Renderer::SetClearColor(Array<float, 4> const &color)
 {
     _CallsStrings.push_back(__OP4_FUNCNAME__);
     _Calls.push_back(BIND(RenderCommand::SetClearColor, std::forward<decltype(color)>(color)));
@@ -132,25 +132,25 @@ void Renderer::SubmitDrawCommand(DrawCommand const &drawCommand)
         {
             Renderer::Shader::SetUniform(binding.name, std::get<float>(binding.value));
         }
-        else if (std::holds_alternative<glm::vec3>(binding.value))
+        else if (std::holds_alternative<Vec3>(binding.value))
         {
-            Renderer::Shader::SetUniform(binding.name, std::get<glm::vec3>(binding.value));
+            Renderer::Shader::SetUniform(binding.name, std::get<Vec3>(binding.value));
         }
-        else if (std::holds_alternative<glm::vec4>(binding.value))
+        else if (std::holds_alternative<Vec4>(binding.value))
         {
-            Renderer::Shader::SetUniform(binding.name, std::get<glm::vec4>(binding.value));
+            Renderer::Shader::SetUniform(binding.name, std::get<Vec4>(binding.value));
         }
-        //		else if (std::holds_alternative<glm::mat3>(binding.value)) {
-        //			//Renderer::Shader::SetUniform(binding.name, std::get<glm::mat3>(binding.value));
+        //		else if (std::holds_alternative<Mat3>(binding.value)) {
+        //			//Renderer::Shader::SetUniform(binding.name, std::get<Mat3>(binding.value));
         //			throw std::runtime_error("Unsupported uniform binding type");
         //		}
-        else if (std::holds_alternative<glm::mat4>(binding.value))
+        else if (std::holds_alternative<Mat4>(binding.value))
         {
-            Renderer::Shader::SetUniform(binding.name, std::get<glm::mat4>(binding.value));
+            Renderer::Shader::SetUniform(binding.name, std::get<Mat4>(binding.value));
         }
-        else if (std::holds_alternative<Vector<glm::mat4>>(binding.value))
+        else if (std::holds_alternative<Vector<Mat4>>(binding.value))
         {
-            Renderer::Shader::SetUniform(binding.name, std::get<Vector<glm::mat4>>(binding.value));
+            Renderer::Shader::SetUniform(binding.name, std::get<Vector<Mat4>>(binding.value));
         }
         else
         {
@@ -173,7 +173,7 @@ void Renderer::SubmitRenderCommandBuffer(RenderCommandBuffer const &renderComman
     //   - Sort the draw commands by their shader
     //   - Create a RenderCommandBufferOptimized using the sorted list of DrawCommands
 
-    std::unordered_map<SharedPtr<opfor::Shader>, Vector<DrawCommand>> drawCommandsByShader;
+    UnorderedMap<SharedPtr<opfor::Shader>, Vector<DrawCommand>> drawCommandsByShader;
     for (auto const &dc : renderCommand.drawCommands)
     {
         drawCommandsByShader[dc.shader].push_back(dc);
@@ -330,61 +330,61 @@ void Renderer::Shader::Pop()
     _Calls.push_back(BIND(RenderCommand::PopShader));
 }
 
-void Renderer::Shader::SetUniform(std::string const &name, size_t value)
+void Renderer::Shader::SetUniform(String const &name, size_t value)
 {
     _CallsStrings.push_back(__OP4_FUNCNAME__);
     _Calls.push_back([name, value]() { RenderCommand::SetUniform(name, static_cast<uint32_t>(value)); });
 }
 
-void Renderer::Shader::SetUniform(std::string const &name, int32_t value)
+void Renderer::Shader::SetUniform(String const &name, int32_t value)
 {
     _CallsStrings.push_back(__OP4_FUNCNAME__);
     _Calls.push_back([name, value]() { RenderCommand::SetUniform(name, value); });
 }
 
-void Renderer::Shader::SetUniform(std::string const &name, uint32_t value)
+void Renderer::Shader::SetUniform(String const &name, uint32_t value)
 {
     _CallsStrings.push_back(__OP4_FUNCNAME__);
     _Calls.push_back([name, value]() { RenderCommand::SetUniform(name, value); });
 }
 
-void Renderer::Shader::SetUniform(std::string const &name, float value)
+void Renderer::Shader::SetUniform(String const &name, float value)
 {
     _CallsStrings.push_back(__OP4_FUNCNAME__);
     _Calls.push_back([name, value]() { RenderCommand::SetUniform(name, value); });
 }
 
-void Renderer::Shader::SetUniform(std::string const &name, glm::vec3 value)
+void Renderer::Shader::SetUniform(String const &name, Vec3 value)
 {
     _CallsStrings.push_back(__OP4_FUNCNAME__);
     _Calls.push_back([name, value]() { RenderCommand::SetUniform(name, value); });
 }
 
-void Renderer::Shader::SetUniform(std::string const &name, glm::vec4 value)
+void Renderer::Shader::SetUniform(String const &name, Vec4 value)
 {
     _CallsStrings.push_back(__OP4_FUNCNAME__);
     _Calls.push_back([name, value]() { RenderCommand::SetUniform(name, value); });
 }
 
-void Renderer::Shader::SetUniform(std::string const &name, glm::mat3 value)
+void Renderer::Shader::SetUniform(String const &name, Mat3 value)
 {
     _CallsStrings.push_back(__OP4_FUNCNAME__);
     _Calls.push_back([name, value]() { RenderCommand::SetUniform(name, value); });
 }
 
-void Renderer::Shader::SetUniform(std::string const &name, glm::mat4 value)
+void Renderer::Shader::SetUniform(String const &name, Mat4 value)
 {
     _CallsStrings.push_back(__OP4_FUNCNAME__);
     _Calls.push_back([name, value]() { RenderCommand::SetUniform(name, value); });
 }
 
-void Renderer::Shader::SetUniform(std::string const &name, std::vector<glm::mat4> matrices, std::optional<size_t> size)
+void Renderer::Shader::SetUniform(String const &name, Vector<Mat4> matrices, Optional<size_t> size)
 {
     _CallsStrings.push_back(__OP4_FUNCNAME__);
     _Calls.push_back([name, matrices, size]() { RenderCommand::SetUniform(name, matrices, size); });
 }
 
-void Renderer::Shader::SetUniform(std::string const &name, std::vector<glm::vec3> vectors, std::optional<size_t> size)
+void Renderer::Shader::SetUniform(String const &name, Vector<Vec3> vectors, Optional<size_t> size)
 {
     _CallsStrings.push_back(__OP4_FUNCNAME__);
     _Calls.push_back([name, vectors, size]() { RenderCommand::SetUniform(name, vectors, size); });

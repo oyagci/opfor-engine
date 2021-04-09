@@ -49,13 +49,13 @@ class OpenGLShader : public Shader
     void SetUniform(String const &name, int32_t value) override;
     void SetUniform(String const &name, uint32_t value) override;
     void SetUniform(String const &name, float value) override;
-    void SetUniform(String const &name, glm::vec3 value) override;
-    void SetUniform(String const &name, glm::vec4 value) override;
-    void SetUniform(String const &name, glm::mat3 value) override;
-    void SetUniform(String const &name, glm::mat4 value) override;
-    void SetUniform(String const &name, std::vector<glm::mat4> matrices,
+    void SetUniform(String const &name, Vec3 value) override;
+    void SetUniform(String const &name, Vec4 value) override;
+    void SetUniform(String const &name, Mat3 value) override;
+    void SetUniform(String const &name, Mat4 value) override;
+    void SetUniform(String const &name, Vector<Mat4> matrices,
                     Optional<size_t> size = std::nullopt) override;
-    void SetUniform(String const &name, std::vector<glm::vec3> matrices,
+    void SetUniform(String const &name, Vector<Vec3> matrices,
                     Optional<size_t> size = std::nullopt) override;
 
     uint32_t GetRawHandle() const override

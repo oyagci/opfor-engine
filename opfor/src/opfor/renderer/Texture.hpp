@@ -1,10 +1,9 @@
 #pragma once
 
-#include "opfor/core/ImageLoader.hpp"
-#include "opfor/core/base.hpp"
+#include <opfor/core/ImageLoader.hpp>
+#include <opfor/core/base.hpp>
+#include <opfor/core/types/Vec3.hpp>
 #include "renderer.hpp"
-
-#include <glm/glm.hpp>
 
 namespace opfor
 {
@@ -89,7 +88,7 @@ enum class TextureUnit
 };
 
 using TextureParameter = std::pair<TextureParameterType, TextureParameterValue>;
-using TextureParameterList = std::vector<TextureParameter>;
+using TextureParameterList = Vector<TextureParameter>;
 
 class Texture
 {
@@ -98,7 +97,7 @@ class Texture
     DataFormat _OutputFormat = DataFormat::RGB;
     DataType _DataType = DataType::Int;
     TextureParameterList _Parameters;
-    glm::uvec3 _Size;
+    UVec3 _Size;
 
     bool _HasAlpha = false;
     bool _IsSRGB = false;

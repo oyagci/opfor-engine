@@ -2,10 +2,10 @@
 
 #include "IDrawable.hpp"
 #include "Material.hpp"
-#include "opfor/renderer/Buffer.hpp"
-#include "opfor/renderer/VertexArray.hpp"
-#include <glm/vec2.hpp>
-#include <glm/vec3.hpp>
+#include <opfor/renderer/Buffer.hpp>
+#include <opfor/renderer/VertexArray.hpp>
+#include <opfor/core/types/Vec3.hpp>
+#include <opfor/core/types/Vec2.hpp>
 #include <list>
 #include <renderer.hpp>
 #include <vector>
@@ -15,10 +15,10 @@ namespace opfor
 
 struct MeshVertexData
 {
-    std::array<float, 3> Position;
-    std::array<float, 3> Normal;
-    std::array<float, 2> Uv;
-    std::array<float, 4> Tangent;
+    Array<float, 3> Position;
+    Array<float, 3> Normal;
+    Array<float, 2> Uv;
+    Array<float, 4> Tangent;
 };
 
 class Mesh : public IDrawable
@@ -33,22 +33,22 @@ class Mesh : public IDrawable
 
     struct Texture
     {
-        std::string name;
+        String name;
         TextureType type;
     };
 
   private:
-    std::list<std::array<float, 3>> vPositions;
-    std::list<std::array<float, 3>> vNormals;
-    std::list<std::array<float, 2>> vUvs;
-    std::list<std::array<float, 4>> vTangents;
-    std::vector<uint32_t> indices;
-    std::vector<Texture> textures;
+    List<Array<float, 3>> vPositions;
+    List<Array<float, 3>> vNormals;
+    List<Array<float, 2>> vUvs;
+    List<Array<float, 4>> vTangents;
+    Vector<uint32_t> indices;
+    Vector<Texture> textures;
 
     SharedPtr<VertexArray> _vertexArray;
 
-    std::string _material;
-    std::optional<std::string> _pbrMaterial;
+    String _material;
+    std::optional<String> _pbrMaterial;
 
     void Move(Mesh &&other);
 
@@ -58,13 +58,13 @@ class Mesh : public IDrawable
     Mesh(Mesh &&);
     Mesh &operator=(Mesh &&);
 
-    Mesh &addPosition(const glm::vec3 &v);
-    Mesh &addNormal(const glm::vec3 &v);
-    Mesh &addUv(const glm::vec2 &v);
+    Mesh &addPosition(const Vec3 &v);
+    Mesh &addNormal(const Vec3 &v);
+    Mesh &addUv(const Vec2 &v);
     Mesh &addTangent(const glm::vec4 &v);
     Mesh &addIndex(const int index);
     Mesh &addTriangle(const glm::uvec3 &triangle);
-    Mesh &addTexture(std::string const &name, TextureType type);
+    Mesh &addTexture(String const &name, TextureType type);
 
     auto const &GetPositions() const
     {
@@ -92,20 +92,20 @@ class Mesh : public IDrawable
         return _vertexArray;
     }
 
-    void SetMaterial(std::string name)
+    void SetMaterial(String name)
     {
         _material = name;
     }
-    std::string GetMaterial() const
+    String GetMaterial() const
     {
         return _material;
     }
 
-    void SetPbrMaterial(std::string name)
+    void SetPbrMaterial(String name)
     {
         _pbrMaterial = name;
     }
-    std::optional<std::string> GetPbrMaterial()
+    std::optional<String> GetPbrMaterial()
     {
         return _pbrMaterial;
     }
@@ -113,7 +113,7 @@ class Mesh : public IDrawable
     Mesh &build();
 
     void Draw() const override;
-    std::vector<Texture> const &getTextures() const;
+    Vector<Texture> const &getTextures() const;
 };
 
 } // namespace opfor

@@ -6,6 +6,7 @@
 #include <unordered_map>
 #include <variant>
 #include <array>
+#include <list>
 
 #include "opfor/core/log.hpp"
 #include "opfor/core/types/String.hpp"
@@ -79,5 +80,11 @@ template <typename... T> using Variant = std::variant<T...>;
 template <typename Key, typename T> using UnorderedMap = std::unordered_map<Key, T>;
 
 template <class T> using Ref = std::reference_wrapper<T>;
+
+template <class T, class Allocator = std::allocator<T>> using List = std::list<T, Allocator>;
+
+template<class T1, class T2> using Pair = std::pair<T1, T2>;
+		
+
 
 } // namespace opfor

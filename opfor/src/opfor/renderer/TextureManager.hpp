@@ -1,10 +1,10 @@
 #pragma once
 
-#include "opfor/renderer/Texture.hpp"
-#include <memory>
-#include <string>
-#include <unordered_map>
-#include <vector>
+#include <opfor/core/base.hpp>
+#include <opfor/renderer/Texture.hpp>
+
+namespace opfor
+{
 
 class TextureManager
 {
@@ -17,16 +17,18 @@ class TextureManager
     TextureManager(TextureManager const &) = delete;
     void operator=(TextureManager const &) = delete;
 
-    opfor::SharedPtr<opfor::Texture2D> Create2D(std::string const &name);
-    void Add(std::string const &name, opfor::SharedPtr<opfor::Texture> texture);
-    auto Get(std::string const &name)
+    SharedPtr<Texture2D> Create2D(String const &name);
+    void Add(String const &name, SharedPtr<Texture> texture);
+    auto Get(String const &name)
     {
         return _textures[name];
     }
 
   private:
-    std::unordered_map<std::string, opfor::SharedPtr<opfor::Texture>> _textures;
+    UnorderedMap<String, SharedPtr<Texture>> _textures;
 
   private:
     TextureManager() = default;
 };
+
+} // namespace opfor

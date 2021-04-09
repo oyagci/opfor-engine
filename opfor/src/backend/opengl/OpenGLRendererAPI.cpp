@@ -20,7 +20,7 @@ RendererAPI::Backend RendererAPI::GetBackend() noexcept
     return RendererAPI::Backend::OpenGL;
 }
 
-void OpenGLRendererAPI::PushViewport(glm::uvec2 pos, glm::uvec2 size)
+void OpenGLRendererAPI::PushViewport(UVec2 pos, UVec2 size)
 {
     std::array<GLint, 4> prevViewport{};
 
@@ -207,7 +207,7 @@ void OpenGLRendererAPI::PopShader()
     _prevShaders.pop_back();
 }
 
-uint32_t OpenGLRendererAPI::FindUniformLocation(std::string name)
+uint32_t OpenGLRendererAPI::FindUniformLocation(String name)
 {
     auto currentProgram = 0;
     glGetIntegerv(GL_CURRENT_PROGRAM, &currentProgram);
@@ -237,49 +237,49 @@ void OpenGLRendererAPI::SetDepthMask(bool val)
     glDepthMask(val == true ? GL_TRUE : GL_FALSE);
 }
 
-void OpenGLRendererAPI::SetUniform(std::string const &name, int32_t value)
+void OpenGLRendererAPI::SetUniform(String const &name, int32_t value)
 {
     auto loc = FindUniformLocation(name);
     glUniform1i(loc, value);
 }
 
-void OpenGLRendererAPI::SetUniform(std::string const &name, uint32_t value)
+void OpenGLRendererAPI::SetUniform(String const &name, uint32_t value)
 {
     auto loc = FindUniformLocation(name);
     glUniform1ui(loc, value);
 }
 
-void OpenGLRendererAPI::SetUniform(std::string const &name, float value)
+void OpenGLRendererAPI::SetUniform(String const &name, float value)
 {
     auto loc = FindUniformLocation(name);
     glUniform1f(loc, value);
 }
 
-void OpenGLRendererAPI::SetUniform(std::string const &name, glm::vec3 value)
+void OpenGLRendererAPI::SetUniform(String const &name, Vec3 value)
 {
     auto loc = FindUniformLocation(name);
     glUniform3f(loc, value.x, value.y, value.z);
 }
 
-void OpenGLRendererAPI::SetUniform(std::string const &name, glm::vec4 value)
+void OpenGLRendererAPI::SetUniform(String const &name, Vec4 value)
 {
     auto loc = FindUniformLocation(name);
     glUniform4f(loc, value.x, value.y, value.z, value.w);
 }
 
-void OpenGLRendererAPI::SetUniform(std::string const &name, glm::mat3 value)
+void OpenGLRendererAPI::SetUniform(String const &name, Mat3 value)
 {
     auto loc = FindUniformLocation(name);
     glUniformMatrix3fv(loc, 1, GL_FALSE, &value[0][0]);
 }
 
-void OpenGLRendererAPI::SetUniform(std::string const &name, glm::mat4 value)
+void OpenGLRendererAPI::SetUniform(String const &name, Mat4 value)
 {
     auto loc = FindUniformLocation(name);
     glUniformMatrix4fv(loc, 1, GL_FALSE, &value[0][0]);
 }
 
-void OpenGLRendererAPI::SetUniform(std::string const &name, std::vector<glm::mat4> matrices, std::optional<size_t> size)
+void OpenGLRendererAPI::SetUniform(String const &name, Vector<Mat4> matrices, Optional<size_t> size)
 {
     auto dataSize = matrices.size();
 
@@ -292,7 +292,7 @@ void OpenGLRendererAPI::SetUniform(std::string const &name, std::vector<glm::mat
     glUniformMatrix4fv(loc, static_cast<GLsizei>(dataSize), GL_FALSE, reinterpret_cast<float *>(matrices.data()));
 }
 
-void OpenGLRendererAPI::SetUniform(std::string const &name, std::vector<glm::vec3> vectors, std::optional<size_t> size)
+void OpenGLRendererAPI::SetUniform(String const &name, Vector<Vec3> vectors, Optional<size_t> size)
 {
     auto dataSize = vectors.size();
 
