@@ -63,7 +63,9 @@ class Logger
 
     template <typename... Args> static void Debug(std::string_view const format, Args... args)
     {
+#if defined(OP4_DEBUG)
         Instance().Log<LogLevel::Debug>(format, std::forward<Args>(args)...);
+#endif
     }
 
     template <typename... Args> static void Verbose(std::string_view const format, Args... args)
@@ -110,11 +112,19 @@ class Logger
 
     static LogLevel GetLogLevel()
     {
-      return Instance()._logLevel;
+        return Instance()._logLevel;
     }
 
     static void SetLogLevel(LogLevel lvl)
     {
+#if !defined(OP4_DEBUG)
+        if (lvl == LogLevel::Debug)
+        {
+            Instance()._logLevel = LogLevel::Verbose;
+            Warn("Debug logging is disabled, please build with `-DOP4_DEBUG` to enable it.");
+            return;
+        }
+#endif
         Instance()._logLevel = lvl;
     }
 };
