@@ -4,6 +4,7 @@
 #include <opfor/layers/ImGuiWrapperLayer.hpp>
 #include <opfor/renderer/Context.hpp>
 #include <opfor/renderer/Model.hpp>
+#include <opfor/renderer/TextureManager.hpp>
 #include <opfor/utils/Settings.hpp>
 #include <opfor/utils/Time.hpp>
 #include <platform/linux/LinuxInput.hpp>
