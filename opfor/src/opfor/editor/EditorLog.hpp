@@ -9,6 +9,10 @@ class EditorLog : public IEditorWindow
 {
   private:
     bool _autoScroll = true;
+    bool _enabled = true;
+    bool _logger_bound = true;
+
+    static constexpr auto LOGGER_CALLBACK_NAME = "editor";
 
     // XXX: Using an std::deque to store line here might slow down rendering if the logger UI is refreshed too often
     std::deque<opfor::String> _history_lines;
@@ -30,13 +34,18 @@ class EditorLog : public IEditorWindow
         }
     }
 
+    void BindToLogger()
+    {
+        using namespace std::placeholders;
+        Logger::BindCallback(LOGGER_CALLBACK_NAME, std::bind(&EditorLog::OnLog, this, _1, _2));
+    }
+
   public:
     static constexpr auto MAX_HISTORY_LINES = 1000u;
 
     EditorLog()
     {
-        using namespace std::placeholders;
-        Logger::BindCallback("editor", std::bind(&EditorLog::OnLog, this, _1, _2));
+        BindToLogger();
     }
 
     void OnDrawGUI() override
@@ -49,6 +58,7 @@ class EditorLog : public IEditorWindow
 
         if (ImGui::BeginPopup("Options"))
         {
+            ImGui::Checkbox("Enabled", &_enabled);
             ImGui::Checkbox("Auto-Scroll", &_autoScroll);
 
             const auto current_severity = Logger::GetLogLevel();
@@ -74,6 +84,17 @@ class EditorLog : public IEditorWindow
             }
 
             ImGui::EndPopup();
+        }
+
+        if (_enabled == false && _logger_bound == true)
+        {
+            Logger::UnBindCallback(LOGGER_CALLBACK_NAME);
+            _logger_bound = false;
+        }
+        else if (_enabled == true && _logger_bound == false)
+        {
+            BindToLogger();
+            _logger_bound = true;
         }
 
         if (ImGui::Button("Options"))
