@@ -1,9 +1,11 @@
 #pragma once
 
 #include "opfor/core/base.hpp"
-#include <array>
-#include <glm/glm.hpp>
-#include <optional>
+#include <opfor/core/types/Vec2.hpp>
+#include <opfor/core/types/Vec3.hpp>
+#include <opfor/core/types/Vec4.hpp>
+#include <opfor/core/types/Mat3.hpp>
+#include <opfor/core/types/Mat4.hpp>
 
 namespace opfor
 {
@@ -32,7 +34,7 @@ class RendererAPI
   public:
     virtual ~RendererAPI() = default;
 
-    virtual void PushViewport(glm::uvec2 pos, glm::uvec2 size) = 0;
+    virtual void PushViewport(UVec2 pos, UVec2 size) = 0;
     virtual void PopViewport() = 0;
 
     virtual void Clear(ClearFlag) = 0;
@@ -57,17 +59,17 @@ class RendererAPI
     virtual void PushShader(SharedPtr<Shader> const &) = 0;
     virtual void PopShader() = 0;
 
-    virtual void SetUniform(std::string const &name, int32_t value) = 0;
-    virtual void SetUniform(std::string const &name, uint32_t value) = 0;
-    virtual void SetUniform(std::string const &name, float value) = 0;
-    virtual void SetUniform(std::string const &name, glm::vec3 value) = 0;
-    virtual void SetUniform(std::string const &name, glm::vec4 value) = 0;
-    virtual void SetUniform(std::string const &name, glm::mat3 value) = 0;
-    virtual void SetUniform(std::string const &name, glm::mat4 value) = 0;
-    virtual void SetUniform(std::string const &name, std::vector<glm::mat4> matrices,
-                            std::optional<size_t> size = std::nullopt) = 0;
-    virtual void SetUniform(std::string const &name, std::vector<glm::vec3> vectors,
-                            std::optional<size_t> size = std::nullopt) = 0;
+    virtual void SetUniform(String const &name, int32_t value) = 0;
+    virtual void SetUniform(String const &name, uint32_t value) = 0;
+    virtual void SetUniform(String const &name, float value) = 0;
+    virtual void SetUniform(String const &name, Vec3 value) = 0;
+    virtual void SetUniform(String const &name, Vec4 value) = 0;
+    virtual void SetUniform(String const &name, Mat3 value) = 0;
+    virtual void SetUniform(String const &name, Mat4 value) = 0;
+    virtual void SetUniform(String const &name, Vector<Mat4> matrices,
+                            Optional<size_t> size = std::nullopt) = 0;
+    virtual void SetUniform(String const &name, Vector<Vec3> vectors,
+                            Optional<size_t> size = std::nullopt) = 0;
 
     virtual void SetDepthMask(bool val) = 0;
 

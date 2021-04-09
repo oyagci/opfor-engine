@@ -10,30 +10,30 @@ enum class TextureType;
 class OpenGLRendererAPI : public RendererAPI
 {
   private:
-    std::vector<uint32_t> _prevReadBuffers;
-    std::vector<uint32_t> _prevDrawBuffers;
+    Vector<uint32_t> _prevReadBuffers;
+    Vector<uint32_t> _prevDrawBuffers;
 
-    using CapState = std::unordered_map<RendererCaps, std::vector<bool>>;
+    using CapState = std::unordered_map<RendererCaps, Vector<bool>>;
     CapState _capStates;
 
-    using TextureUnits = std::unordered_map<TextureUnit, std::vector<std::pair<TextureType, uint32_t>>>;
+    using TextureUnits = std::unordered_map<TextureUnit, Vector<std::pair<TextureType, uint32_t>>>;
     TextureUnits _prevTextureUnits;
 
-    std::vector<uint32_t> _prevShaders;
+    Vector<uint32_t> _prevShaders;
 
     using ProgramID = uint32_t;
-    using UniformName = std::string;
+    using UniformName = String;
     using UniformLocations = std::unordered_map<UniformName, uint32_t>;
     using ShaderUniformLocations = std::unordered_map<ProgramID, UniformLocations>;
 
     ShaderUniformLocations _UniformLocations;
 
-    std::vector<std::pair<glm::vec2, glm::vec2>> _prevViewports;
+    Vector<std::pair<Vec2, Vec2>> _prevViewports;
 
-    uint32_t FindUniformLocation(std::string name);
+    uint32_t FindUniformLocation(String name);
 
   public:
-    void PushViewport(glm::uvec2 pos, glm::uvec2 size) override;
+    void PushViewport(UVec2 pos, UVec2 size) override;
     void PopViewport() override;
 
     void Clear(ClearFlag) override;
@@ -60,17 +60,17 @@ class OpenGLRendererAPI : public RendererAPI
 
     void SetDepthMask(bool val) override;
 
-    void SetUniform(std::string const &name, int32_t value) override;
-    void SetUniform(std::string const &name, uint32_t value) override;
-    void SetUniform(std::string const &name, float value) override;
-    void SetUniform(std::string const &name, glm::vec3 value) override;
-    void SetUniform(std::string const &name, glm::vec4 value) override;
-    void SetUniform(std::string const &name, glm::mat3 value) override;
-    void SetUniform(std::string const &name, glm::mat4 value) override;
-    void SetUniform(std::string const &name, std::vector<glm::mat4> matrices,
-                    std::optional<size_t> size = std::nullopt) override;
-    void SetUniform(std::string const &name, std::vector<glm::vec3> vectors,
-                    std::optional<size_t> size = std::nullopt) override;
+    void SetUniform(String const &name, int32_t value) override;
+    void SetUniform(String const &name, uint32_t value) override;
+    void SetUniform(String const &name, float value) override;
+    void SetUniform(String const &name, Vec3 value) override;
+    void SetUniform(String const &name, Vec4 value) override;
+    void SetUniform(String const &name, Mat3 value) override;
+    void SetUniform(String const &name, Mat4 value) override;
+    void SetUniform(String const &name, Vector<Mat4> matrices,
+                    Optional<size_t> size = std::nullopt) override;
+    void SetUniform(String const &name, Vector<Vec3> vectors,
+                    Optional<size_t> size = std::nullopt) override;
 
 };
 

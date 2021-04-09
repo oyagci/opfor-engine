@@ -1,8 +1,6 @@
 #include "Mesh.hpp"
 #include "TextureManager.hpp"
-#include "opfor/renderer/Buffer.hpp"
-#include <glm/vec2.hpp>
-#include <glm/vec3.hpp>
+#include <opfor/renderer/Buffer.hpp>
 #include <renderer.hpp>
 
 namespace opfor
@@ -43,21 +41,21 @@ void Mesh::Move(Mesh &&other)
     other._pbrMaterial.reset();
 }
 
-Mesh &Mesh::addPosition(const glm::vec3 &v)
+Mesh &Mesh::addPosition(const Vec3 &v)
 {
     vPositions.push_back({v.x, v.y, v.z});
 
     return *this;
 }
 
-Mesh &Mesh::addNormal(const glm::vec3 &v)
+Mesh &Mesh::addNormal(const Vec3 &v)
 {
     vNormals.push_back({v.x, v.y, v.z});
 
     return *this;
 }
 
-Mesh &Mesh::addUv(const glm::vec2 &v)
+Mesh &Mesh::addUv(const Vec2 &v)
 {
     vUvs.push_back({v.x, v.y});
 
@@ -87,14 +85,14 @@ Mesh &Mesh::addTriangle(const glm::uvec3 &triangle)
     return *this;
 }
 
-Mesh &Mesh::addTexture(std::string const &name, TextureType type)
+Mesh &Mesh::addTexture(String const &name, TextureType type)
 {
     textures.push_back(Texture{name, type});
 
     return *this;
 }
 
-std::vector<Mesh::Texture> const &Mesh::getTextures() const
+Vector<Mesh::Texture> const &Mesh::getTextures() const
 {
     return textures;
 }
@@ -115,7 +113,7 @@ Mesh &Mesh::build()
                         vPositions.size() == vTangents.size(),
                     "Vertex Data is incomplete\n");
 
-    std::vector<MeshVertexData> vertices;
+    Vector<MeshVertexData> vertices;
 
     const size_t count = vPositions.size();
     vertices.reserve(count);
@@ -168,7 +166,7 @@ void Mesh::Draw() const
 
 auto Mesh::GetTextureIDs() const
 {
-    std::vector<GLuint> ids(textures.size());
+    Vector<GLuint> ids(textures.size());
 
     for (auto const &t : textures)
     {

@@ -7,6 +7,7 @@
 #include "opfor/renderer/Mesh.hpp"
 #include "opfor/renderer/PerspectiveCamera.hpp"
 #include "opfor/renderer/Shader.hpp"
+#include <opfor/core/types/Mat4.hpp>
 
 namespace opfor
 {
@@ -26,7 +27,7 @@ class MeshRenderer
 
     SharedPtr<Framebuffer> _depthmap;
     SharedPtr<TextureCubemap> _depthCubemap;
-    glm::mat4 _shadowProjection;
+    Mat4 _shadowProjection;
 
     static constexpr unsigned int ShadowWidth = 2048;
     static constexpr unsigned int ShadowHeight = 2048;
@@ -40,7 +41,7 @@ class MeshRenderer
     Vector<DrawCommand> RenderLightBillboard(PerspectiveCamera const &);
     Vector<DrawCommand> RenderLight(PerspectiveCamera const &);
     RenderCommandBuffer RenderShadowMap();
-    glm::mat4 CalcModelMatrix(TransformComponent const &);
+    Mat4 CalcModelMatrix(TransformComponent const &);
 
   public:
     MeshRenderer();

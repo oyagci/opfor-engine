@@ -1,15 +1,15 @@
 #pragma once
 
 #include <opfor/core/base.hpp>
+#include <opfor/core/types/Vec4.hpp>
 #include <fmt/format.h>
-#include <glm/vec4.hpp>
 #include <optional>
 #include <string>
 
 struct PbrMaterial
 {
     opfor::String Name;
-    glm::vec4 BaseColor{};
+    opfor::Vec4 BaseColor{};
     std::optional<std::string> Albedo;
     std::optional<std::string> Normal;
     std::optional<std::string> MetallicRoughness;

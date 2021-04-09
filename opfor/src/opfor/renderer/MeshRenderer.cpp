@@ -161,7 +161,7 @@ Vector<DrawCommand> MeshRenderer::RenderShadowMeshes()
 
             auto const *mesh = Application::Get().GetMesh(meshId);
 
-            glm::mat4 modelMatrix(CalcModelMatrix(transform));
+            Mat4 modelMatrix(CalcModelMatrix(transform));
 
             DrawCommand cmd;
             cmd.uniformBindings = {{"modelMatrix", modelMatrix}};
@@ -173,9 +173,9 @@ Vector<DrawCommand> MeshRenderer::RenderShadowMeshes()
     return drawCommands;
 }
 
-glm::mat4 MeshRenderer::CalcModelMatrix(TransformComponent const &transform)
+Mat4 MeshRenderer::CalcModelMatrix(TransformComponent const &transform)
 {
-    glm::mat4 finalTransformation(1.0f);
+    Mat4 finalTransformation(1.0f);
 
     TransformComponent const *cur = &transform;
 
@@ -183,17 +183,17 @@ glm::mat4 MeshRenderer::CalcModelMatrix(TransformComponent const &transform)
     {
         TransformComponent const &parent = cur->parent.value().get();
 
-        auto model = glm::translate(glm::mat4(1.0f), parent.position) *
+        auto model = glm::translate(Mat4(1.0f), parent.position) *
                                            glm::mat4_cast(parent.rotation) *
-                                           glm::scale(glm::mat4(1.0f), parent.scale);
+                                           glm::scale(Mat4(1.0f), parent.scale);
 
         finalTransformation = model * finalTransformation;
 
         cur = &cur->parent.value().get();
     }
 
-    finalTransformation = finalTransformation * glm::translate(glm::mat4(1.0f), transform.position) *
-                          glm::mat4_cast(transform.rotation) * glm::scale(glm::mat4(1.0f), transform.scale);
+    finalTransformation = finalTransformation * glm::translate(Mat4(1.0f), transform.position) *
+                          glm::mat4_cast(transform.rotation) * glm::scale(Mat4(1.0f), transform.scale);
 
     return finalTransformation;
 }
@@ -225,7 +225,7 @@ Vector<DrawCommand> MeshRenderer::SubmitMeshes(PerspectiveCamera const &camera)
 
             auto &shader = shaderOpt.value();
 
-            glm::mat4 modelMatrix(CalcModelMatrix(transform));
+            Mat4 modelMatrix(CalcModelMatrix(transform));
 
             DrawCommand drawCommand;
             drawCommand.shader = shader;
@@ -418,7 +418,7 @@ RenderCommandBuffer MeshRenderer::RenderShadowMap()
 
     auto lightPos = lights[0]->Get<TransformComponent>().position;
 
-    std::vector<glm::mat4> shadowTransforms = {
+    std::vector<Mat4> shadowTransforms = {
         _shadowProjection * glm::lookAt(lightPos, lightPos + glm::vec3(1.0, 0.0, 0.0), glm::vec3(0.0, -1.0, 0.0)),
         _shadowProjection * glm::lookAt(lightPos, lightPos + glm::vec3(-1.0, 0.0, 0.0), glm::vec3(0.0, -1.0, 0.0)),
         _shadowProjection * glm::lookAt(lightPos, lightPos + glm::vec3(0.0, 1.0, 0.0), glm::vec3(0.0, 0.0, 1.0)),
@@ -436,7 +436,7 @@ RenderCommandBuffer MeshRenderer::RenderShadowMap()
     for (auto &cmd : shadowDrawCommands)
     {
         cmd.shader = _shadow;
-        cmd.uniformBindings.push_back({"model", glm::mat4(1.0f)});
+        cmd.uniformBindings.push_back({"model", Mat4(1.0f)});
         cmd.uniformBindings.push_back({"shadowMatrices", shadowTransforms});
         cmd.uniformBindings.push_back({"far_plane", 10000.0f});
         cmd.uniformBindings.push_back({"lightPos", lightPos});

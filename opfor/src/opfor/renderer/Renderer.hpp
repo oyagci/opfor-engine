@@ -2,7 +2,11 @@
 
 #include "RenderCommand.hpp"
 #include "opfor/core/base.hpp"
-#include <list>
+#include <opfor/core/types/Vec2.hpp>
+#include <opfor/core/types/Vec3.hpp>
+#include <opfor/core/types/Vec4.hpp>
+#include <opfor/core/types/Mat3.hpp>
+#include <opfor/core/types/Mat4.hpp>
 
 namespace opfor
 {
@@ -32,7 +36,7 @@ struct DrawCommandTextureBinding
 
 struct UniformBinding
 {
-    using BindingValue = Variant<int, float, glm::vec3, glm::vec4, glm::mat4, Vector<glm::mat4>>;
+    using BindingValue = Variant<int, float, Vec3, Vec4, Mat4, Vector<Mat4>>;
 
     String name;
     BindingValue value;
@@ -40,13 +44,13 @@ struct UniformBinding
 
 struct ClearScreenParam
 {
-    std::array<float, 4> color;
+    Array<float, 4> color;
     ClearFlag flags;
 };
 
 struct DrawCommand
 {
-    SharedPtr<Shader> shader;
+    SharedPtr<opfor::Shader> shader;
     SharedPtr<VertexArray> vertexArray;
     Vector<DrawCommandTextureBinding> textureBindings;
     Vector<UniformBinding> uniformBindings;
@@ -55,9 +59,9 @@ struct DrawCommand
 struct RenderCommandBuffer
 {
     Optional<SharedPtr<Framebuffer>> framebuffer;
-    Optional<std::pair<glm::uvec2, glm::uvec2>> viewportExtent;
+    Optional<Pair<UVec2, UVec2>> viewportExtent;
     Optional<ClearScreenParam> clear;
-    Vector<std::pair<RendererCaps, bool>> capabilities;
+    Vector<Pair<RendererCaps, bool>> capabilities;
     Vector<DrawCommand> drawCommands;
     bool disableDepthMask;
 };
@@ -65,10 +69,10 @@ struct RenderCommandBuffer
 struct RenderCommandBufferOptimized
 {
     Optional<SharedPtr<Framebuffer>> framebuffer;
-    Optional<std::pair<glm::uvec2, glm::uvec2>> viewportExtent;
+    Optional<Pair<UVec2, UVec2>> viewportExtent;
     Optional<ClearScreenParam> clear;
-    Vector<std::pair<RendererCaps, bool>> capabilities;
-    std::unordered_map<SharedPtr<opfor::Shader>, Vector<DrawCommand>> drawCommandsByShader;
+    Vector<Pair<RendererCaps, bool>> capabilities;
+    UnorderedMap<SharedPtr<opfor::Shader>, Vector<DrawCommand>> drawCommandsByShader;
     bool disableDepthMask;
 };
 
@@ -77,9 +81,9 @@ enum class RendererCaps;
 class Renderer
 {
   private:
-    static std::list<std::function<void()>> _Calls;
+    static List<std::function<void()>> _Calls;
 
-    static inline std::list<RenderCommandBufferOptimized> _OptimizedRenderCommands;
+    static inline List<RenderCommandBufferOptimized> _OptimizedRenderCommands;
 
     static void PrintTree(unsigned int offset = 0);
 
@@ -89,10 +93,10 @@ class Renderer
 
     static void SetDepthMask(bool);
 
-    static void PushViewport(glm::uvec2 pos, glm::uvec2 size);
+    static void PushViewport(UVec2 pos, UVec2 size);
     static void PopViewport();
 
-    static void SetClearColor(std::array<float, 4> const &color);
+    static void SetClearColor(Array<float, 4> const &color);
     static void Clear(ClearFlag);
 
     static void Submit(SharedPtr<VertexArray> const &);
@@ -127,18 +131,18 @@ class Renderer
         static void Push(SharedPtr<opfor::Shader>);
         static void Pop();
 
-        static void SetUniform(std::string const &name, size_t value);
-        static void SetUniform(std::string const &name, int32_t value);
-        static void SetUniform(std::string const &name, uint32_t value);
-        static void SetUniform(std::string const &name, float value);
-        static void SetUniform(std::string const &name, glm::vec3 value);
-        static void SetUniform(std::string const &name, glm::vec4 value);
-        static void SetUniform(std::string const &name, glm::mat3 value);
-        static void SetUniform(std::string const &name, glm::mat4 value);
-        static void SetUniform(std::string const &name, std::vector<glm::mat4> matrices,
-                               std::optional<size_t> size = std::nullopt);
-        static void SetUniform(std::string const &name, std::vector<glm::vec3> vectors,
-                               std::optional<size_t> size = std::nullopt);
+        static void SetUniform(String const &name, size_t value);
+        static void SetUniform(String const &name, int32_t value);
+        static void SetUniform(String const &name, uint32_t value);
+        static void SetUniform(String const &name, float value);
+        static void SetUniform(String const &name, Vec3 value);
+        static void SetUniform(String const &name, Vec4 value);
+        static void SetUniform(String const &name, Mat3 value);
+        static void SetUniform(String const &name, Mat4 value);
+        static void SetUniform(String const &name, Vector<Mat4> matrices,
+                               Optional<size_t> size = std::nullopt);
+        static void SetUniform(String const &name, Vector<Vec3> vectors,
+                               Optional<size_t> size = std::nullopt);
     };
 };
 

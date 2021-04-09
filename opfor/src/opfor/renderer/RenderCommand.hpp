@@ -1,6 +1,11 @@
 #pragma once
 
 #include "RendererAPI.hpp"
+#include <opfor/core/types/Vec2.hpp>
+#include <opfor/core/types/Vec3.hpp>
+#include <opfor/core/types/Vec4.hpp>
+#include <opfor/core/types/Mat3.hpp>
+#include <opfor/core/types/Mat4.hpp>
 
 namespace opfor
 {
@@ -11,7 +16,7 @@ class RenderCommand
     static UniquePtr<RendererAPI> _API;
 
   public:
-    static inline void PushViewport(glm::uvec2 pos, glm::uvec2 size)
+    static inline void PushViewport(UVec2 pos, UVec2 size)
     {
         _API->PushViewport(pos, size);
     }
@@ -21,7 +26,7 @@ class RenderCommand
         _API->PopViewport();
     }
 
-    static inline void SetClearColor(std::array<float, 4> const color)
+    static inline void SetClearColor(Array<float, 4> const color)
     {
         _API->SetClearColor(std::forward<decltype(color)>(color));
     }
@@ -92,49 +97,49 @@ class RenderCommand
         _API->PopShader();
     }
 
-    static inline void SetUniform(std::string const &name, int32_t value)
+    static inline void SetUniform(String const &name, int32_t value)
     {
         _API->SetUniform(name, value);
     }
 
-    static inline void SetUniform(std::string const &name, uint32_t value)
+    static inline void SetUniform(String const &name, uint32_t value)
     {
         _API->SetUniform(name, value);
     }
 
-    static inline void SetUniform(std::string const &name, float value)
+    static inline void SetUniform(String const &name, float value)
     {
         _API->SetUniform(name, value);
     }
 
-    static inline void SetUniform(std::string const &name, glm::vec3 value)
+    static inline void SetUniform(String const &name, Vec3 value)
     {
         _API->SetUniform(name, value);
     }
 
-    static inline void SetUniform(std::string const &name, glm::vec4 value)
+    static inline void SetUniform(String const &name, Vec4 value)
     {
         _API->SetUniform(name, value);
     }
 
-    static inline void SetUniform(std::string const &name, glm::mat3 value)
+    static inline void SetUniform(String const &name, Mat3 value)
     {
         _API->SetUniform(name, value);
     }
 
-    static inline void SetUniform(std::string const &name, glm::mat4 value)
+    static inline void SetUniform(String const &name, Mat4 value)
     {
         _API->SetUniform(name, value);
     }
 
-    static inline void SetUniform(std::string const &name, std::vector<glm::mat4> matrices,
-                                  std::optional<size_t> size = std::nullopt)
+    static inline void SetUniform(String const &name, std::vector<Mat4> matrices,
+                                  Optional<size_t> size = std::nullopt)
     {
         _API->SetUniform(name, matrices, size);
     }
 
-    static inline void SetUniform(std::string const &name, std::vector<glm::vec3> vectors,
-                                  std::optional<size_t> size = std::nullopt)
+    static inline void SetUniform(String const &name, std::vector<Vec3> vectors,
+                                  Optional<size_t> size = std::nullopt)
     {
         _API->SetUniform(name, vectors, size);
     }

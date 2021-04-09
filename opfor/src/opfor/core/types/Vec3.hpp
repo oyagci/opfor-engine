@@ -16,6 +16,18 @@ namespace opfor OP4NAMESPACE()
 
         Vec3_GENERATED
     };
+
+    class OP4CLASS() UVec3 : public glm::uvec3
+    {
+      public:
+        using glm::uvec3::uvec3;
+
+        UVec3(glm::uvec3 const &v) : glm::uvec3(v)
+        {
+        }
+
+        UVec3_GENERATED
+    };
 } // namespace opfor
 
 File_GENERATED

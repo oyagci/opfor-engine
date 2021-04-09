@@ -1,12 +1,11 @@
 #pragma once
 
-#include "opfor/core/events/EngineEvents.hpp"
-#include "opfor/core/events/Event.h"
-#include "opfor/layers/Layer.hpp"
-#include "opfor/renderer/Framebuffer.hpp"
-#include "opfor/renderer/Texture.hpp"
-
-#include <glm/vec2.hpp>
+#include <opfor/core/events/EngineEvents.hpp>
+#include <opfor/core/events/Event.h>
+#include <opfor/layers/Layer.hpp>
+#include <opfor/renderer/Framebuffer.hpp>
+#include <opfor/renderer/Texture.hpp>
+#include <opfor/core/types/Vec2.hpp>
 
 namespace opfor
 {
@@ -17,7 +16,7 @@ class Viewport : public Layer
     SharedPtr<Framebuffer> _Framebuffer;
     SharedPtr<Texture2D> _Texture;
 
-    glm::uvec2 _Size;
+    UVec2 _Size;
 
   private:
     bool OnViewportResized(ViewportResizeEvent &e);

@@ -308,31 +308,31 @@ void OpenGLShader::SetUniform(String const &name, float value)
     glUniform1f(loc, value);
 }
 
-void OpenGLShader::SetUniform(String const &name, glm::vec3 value)
+void OpenGLShader::SetUniform(String const &name, Vec3 value)
 {
     auto loc = FindUniformLocation(name);
     glUniform3f(loc, value.x, value.y, value.z);
 }
 
-void OpenGLShader::SetUniform(String const &name, glm::vec4 value)
+void OpenGLShader::SetUniform(String const &name, Vec4 value)
 {
     auto loc = FindUniformLocation(name);
     glUniform4f(loc, value.x, value.y, value.z, value.w);
 }
 
-void OpenGLShader::SetUniform(String const &name, glm::mat3 value)
+void OpenGLShader::SetUniform(String const &name, Mat3 value)
 {
     auto loc = FindUniformLocation(name);
     glUniformMatrix3fv(loc, 1, GL_FALSE, &value[0][0]);
 }
 
-void OpenGLShader::SetUniform(String const &name, glm::mat4 value)
+void OpenGLShader::SetUniform(String const &name, Mat4 value)
 {
     auto loc = FindUniformLocation(name);
     glUniformMatrix4fv(loc, 1, GL_FALSE, &value[0][0]);
 }
 
-void OpenGLShader::SetUniform(String const &name, Vector<glm::mat4> matrices, Optional<size_t> size)
+void OpenGLShader::SetUniform(String const &name, Vector<Mat4> matrices, Optional<size_t> size)
 {
     auto dataSize = matrices.size();
 
@@ -345,7 +345,7 @@ void OpenGLShader::SetUniform(String const &name, Vector<glm::mat4> matrices, Op
     glUniformMatrix4fv(loc, static_cast<GLsizei>(dataSize), GL_FALSE, reinterpret_cast<float *>(matrices.data()));
 }
 
-void OpenGLShader::SetUniform(String const &name, Vector<glm::vec3> vectors, Optional<size_t> size)
+void OpenGLShader::SetUniform(String const &name, Vector<Vec3> vectors, Optional<size_t> size)
 {
     auto dataSize = vectors.size();
 
