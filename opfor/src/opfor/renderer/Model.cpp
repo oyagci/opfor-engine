@@ -160,20 +160,23 @@ std::optional<std::vector<unsigned int>> Model::TinyLoader(std::string const &pa
     }
 
     std::string modelName;
-    if (path.find_last_of("/") != std::string::npos)
+
+    auto const basename_idx = path.find_last_of("/");
+    auto const extension_idx = path.find_last_of(".");
+    if (basename_idx != std::string::npos)
     {
-        if (path.find_last_of(".") != std::string::npos)
+        if (extension_idx != std::string::npos)
         {
-            modelName = path.substr(path.find_last_of("/") + 1, path.find_last_of("."));
+            modelName = path.substr(basename_idx + 1, extension_idx - (basename_idx + 1));
         }
         else
         {
-            modelName = path.substr(path.find_last_of("/") + 1);
+            modelName = path.substr(basename_idx + 1);
         }
     }
-    else if (path.find_last_of(".") != std::string::npos)
+    else if (extension_idx != std::string::npos)
     {
-        modelName = path.substr(0, path.find_last_of("."));
+        modelName = path.substr(0, extension_idx);
     }
     else
     {
