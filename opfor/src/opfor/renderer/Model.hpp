@@ -1,9 +1,6 @@
 #pragma once
 
-#include <optional>
-#include <utility>
-#include <vector>
-#include <string>
+#include <opfor/core/base.hpp>
 
 namespace opfor
 {
@@ -12,14 +9,14 @@ class Model
 {
   private:
     unsigned int _id = 0;
-    std::vector<unsigned int> _meshes;
+    Vector<unsigned int> _meshes;
 
-    std::optional<std::vector<unsigned int>> TinyLoader(std::string const &path);
+    Optional<Vector<unsigned int>> TinyLoader(String const &path);
 
   public:
     Model() = default;
 
-    bool LoadFromGLTF(std::string const &path)
+    bool LoadFromGLTF(String const &path)
     {
         auto const meshes = TinyLoader(path);
 
