@@ -144,15 +144,16 @@ std::optional<std::vector<unsigned int>> Model::TinyLoader(std::string const &pa
     std::string err;
     std::string warn;
 
+    OP4_CORE_INFO("Parsing model \"{:s}\".", path);
     bool ret = loader.LoadASCIIFromFile(&model, &err, &warn, path);
 
     if (!warn.empty())
     {
-        Logger::Warn("{}", warn);
+        OP4_CORE_WARNING(warn);
     }
     if (!err.empty())
     {
-        Logger::Error("{}", err);
+        OP4_CORE_ERROR(err);
     }
     if (ret == false)
     {
@@ -182,8 +183,8 @@ std::optional<std::vector<unsigned int>> Model::TinyLoader(std::string const &pa
     {
         modelName = path;
     }
+    OP4_CORE_DEBUG("Model name: \"{:s}\".", modelName);
 
-    // fmt::print("Model name is \"{}\"\n", modelName);
 
     // Load Materials
     // --------------
@@ -351,6 +352,8 @@ std::optional<std::vector<unsigned int>> Model::TinyLoader(std::string const &pa
     {
         meshes_ret = meshes;
     }
+
+    OP4_CORE_INFO("Model \"{:s}\" successfully parsed.", path);
 
     return meshes_ret;
 }
