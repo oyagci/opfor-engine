@@ -6,13 +6,14 @@
 #include "opfor/core/ImageLoader.hpp"
 #include "tiny_gltf.h"
 #include <glm/vec3.hpp>
+
 namespace opfor
 {
-static std::optional<std::vector<unsigned int>> TinyProcessNode(tinygltf::Node const &node,
+static Optional<Vector<unsigned int>> TinyProcessNode(tinygltf::Node const &node,
                                                                 tinygltf::Model const &model,
-                                                                std::vector<std::string> const &materials)
+                                                                Vector<String> const &materials)
 {
-    std::vector<unsigned int> allMeshes;
+    Vector<unsigned int> allMeshes;
 
     if (node.mesh >= 0)
     {
@@ -26,8 +27,8 @@ static std::optional<std::vector<unsigned int>> TinyProcessNode(tinygltf::Node c
             // Helper Lambda
             // Returns the count and the attributes
             // TODO: Return the number of components per element (vec{2,3,4}, scalar, ...)
-            auto getVertex = [&](std::string const &attributeName) -> std::optional<std::pair<size_t, const float *>> {
-                std::optional<std::pair<size_t, const float *>> ret;
+            auto getVertex = [&](String const &attributeName) -> Optional<std::pair<size_t, const float *>> {
+                Optional<std::pair<size_t, const float *>> ret;
 
                 auto const &attribute = primitive.attributes.find(attributeName);
 
@@ -135,14 +136,14 @@ static std::optional<std::vector<unsigned int>> TinyProcessNode(tinygltf::Node c
     return std::nullopt;
 }
 
-std::optional<std::vector<unsigned int>> Model::TinyLoader(std::string const &path)
+Optional<Vector<unsigned int>> Model::TinyLoader(String const &path)
 {
-    std::optional<std::vector<unsigned int>> meshes_ret;
+    Optional<Vector<unsigned int>> meshes_ret;
 
     tinygltf::Model model;
     tinygltf::TinyGLTF loader;
-    std::string err;
-    std::string warn;
+    String err;
+    String warn;
 
     OP4_CORE_INFO("Parsing model \"{:s}\".", path);
     bool ret = loader.LoadASCIIFromFile(&model, &err, &warn, path);
@@ -160,13 +161,13 @@ std::optional<std::vector<unsigned int>> Model::TinyLoader(std::string const &pa
         return meshes_ret;
     }
 
-    std::string modelName;
+    String modelName;
 
     auto const basename_idx = path.find_last_of("/");
     auto const extension_idx = path.find_last_of(".");
-    if (basename_idx != std::string::npos)
+    if (basename_idx != String::npos)
     {
-        if (extension_idx != std::string::npos)
+        if (extension_idx != String::npos)
         {
             modelName = path.substr(basename_idx + 1, extension_idx - (basename_idx + 1));
         }
@@ -175,7 +176,7 @@ std::optional<std::vector<unsigned int>> Model::TinyLoader(std::string const &pa
             modelName = path.substr(basename_idx + 1);
         }
     }
-    else if (extension_idx != std::string::npos)
+    else if (extension_idx != String::npos)
     {
         modelName = path.substr(0, extension_idx);
     }
@@ -188,8 +189,8 @@ std::optional<std::vector<unsigned int>> Model::TinyLoader(std::string const &pa
 
     // Load Materials
     // --------------
-    std::vector<std::string> pbrMaterials; // Save the materials' index to be able to set the material of the mesh later
-    std::string directory = path.substr(0, path.find_last_of('/')) + "/";
+    Vector<String> pbrMaterials; // Save the materials' index to be able to set the material of the mesh later
+    String directory = path.substr(0, path.find_last_of('/')) + "/";
 
     size_t currentMaterialIndex = 0;
     for (auto const &material : model.materials)
@@ -281,8 +282,8 @@ std::optional<std::vector<unsigned int>> Model::TinyLoader(std::string const &pa
 
         auto const &image = model.images[t.source];
 
-        std::string name = image.uri;
-        std::string path = directory + image.uri;
+        String name = image.uri;
+        String path = directory + image.uri;
 
         opfor::TextureParameterList texParams{};
 
@@ -334,7 +335,7 @@ std::optional<std::vector<unsigned int>> Model::TinyLoader(std::string const &pa
         texture->Build();
     }
 
-    std::vector<unsigned int> meshes;
+    Vector<unsigned int> meshes;
 
     for (auto const &scene : model.scenes)
     {
