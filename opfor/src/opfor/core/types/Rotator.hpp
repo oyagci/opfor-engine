@@ -1,10 +1,8 @@
 #pragma once
+#include <opfor/core/types/fwd.hpp>
 
 namespace opfor
 {
-
-class Quat;
-class Vec3;
 
 struct Rotator
 {

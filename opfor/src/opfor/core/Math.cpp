@@ -74,11 +74,6 @@ float NormalizeAxis(float Angle)
     return Angle;
 }
 
-template <class T> constexpr T Abs(const T A)
-{
-    return (A >= (T)0) ? A : -A;
-}
-
 #define FASTASIN_HALF_PI (1.5707963050f)
 /**
  * Computes the ASin of a scalar value.

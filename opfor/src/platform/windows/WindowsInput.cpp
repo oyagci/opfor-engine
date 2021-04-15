@@ -269,12 +269,12 @@ KeyStatus WindowsInput::GetKey_Impl(KeyCode keyCode)
     }
 }
 
-glm::vec2 WindowsInput::GetMousePosition_Impl()
+Vec2 WindowsInput::GetMousePosition_Impl()
 {
     return _MousePosition;
 }
 
-glm::vec2 WindowsInput::GetMouseRelativePosition_Impl()
+Vec2 WindowsInput::GetMouseRelativePosition_Impl()
 {
     auto rel = _LastMousePosition - _MousePosition;
 

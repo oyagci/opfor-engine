@@ -34,7 +34,7 @@ bool Viewport::OnViewportResized(ViewportResizeEvent &e)
     _Texture->SetSize(e.GetWidth(), e.GetHeight());
     _Texture->Build();
 
-    _Size = {e.GetWidth(), e.GetHeight()};
+    _Size = UVec2(e.GetWidth(), e.GetHeight());
 
     return false;
 }

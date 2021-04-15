@@ -6,7 +6,6 @@
 #include "opfor/renderer/Model.hpp"
 #include "opfor/renderer/ShaderManager.hpp"
 #include <fstream>
-#include <glm/vec3.hpp>
 
 #include "components/ModelComponent.hpp"
 #include "components/PointLightComponent.hpp"

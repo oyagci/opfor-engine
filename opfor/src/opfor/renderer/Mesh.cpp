@@ -62,7 +62,7 @@ Mesh &Mesh::addUv(const Vec2 &v)
     return *this;
 }
 
-Mesh &Mesh::addTangent(const glm::vec4 &v)
+Mesh &Mesh::addTangent(const Vec4 &v)
 {
     vTangents.push_back({v.x, v.y, v.z, v.w});
 
@@ -76,7 +76,7 @@ Mesh &Mesh::addIndex(const int index)
     return *this;
 }
 
-Mesh &Mesh::addTriangle(const glm::uvec3 &triangle)
+Mesh &Mesh::addTriangle(const UVec3 &triangle)
 {
     indices.push_back(triangle.x);
     indices.push_back(triangle.y);

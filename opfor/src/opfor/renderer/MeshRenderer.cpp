@@ -1,7 +1,6 @@
 #include "MeshRenderer.hpp"
 
 #include <fmt/format.h>
-#include <glm/gtc/matrix_transform.hpp>
 #include <random>
 
 #include "opfor/core/Application.hpp"
@@ -14,8 +13,6 @@
 #include "components/ModelComponent.hpp"
 #include "components/PointLightComponent.hpp"
 #include "components/TransformComponent.hpp"
-
-#include <glm/gtc/quaternion.hpp>
 
 namespace opfor
 {
@@ -69,7 +66,7 @@ void MeshRenderer::InitDepthCubemap()
     float aspect = static_cast<float>(ShadowWidth) / static_cast<float>(ShadowHeight);
     float n = 1.0f;
     float f = 1000.0f;
-    _shadowProjection = glm::perspective(glm::radians(90.0f), aspect, n, f);
+    _shadowProjection = Mat4::Perspective(math::Radians(90.0f), aspect, n, f);
 
     _depthCubemap = TextureCubemap::Create();
 
@@ -114,17 +111,17 @@ void MeshRenderer::InitDepthCubemap()
 
 void MeshRenderer::InitQuad()
 {
-    std::array<glm::vec3, 4> pos = {
-        glm::vec3(-1.0f, -1.0f, 0.0f),
-        glm::vec3(1.0f, -1.0f, 0.0f),
-        glm::vec3(1.0f, 1.0f, 0.0f),
-        glm::vec3(-1.0f, 1.0f, 0.0f),
+    std::array<Vec3, 4> pos = {
+        Vec3(-1.0f, -1.0f, 0.0f),
+        Vec3(1.0f, -1.0f, 0.0f),
+        Vec3(1.0f, 1.0f, 0.0f),
+        Vec3(-1.0f, 1.0f, 0.0f),
     };
-    std::array<glm::vec2, 4> tex = {
-        glm::vec2(0.0f, 0.0f),
-        glm::vec2(1.0f, 0.0f),
-        glm::vec2(1.0f, 1.0f),
-        glm::vec2(0.0f, 1.0f),
+    std::array<Vec2, 4> tex = {
+        Vec2(0.0f, 0.0f),
+        Vec2(1.0f, 0.0f),
+        Vec2(1.0f, 1.0f),
+        Vec2(0.0f, 1.0f),
     };
 
     for (auto p : pos)
@@ -135,8 +132,8 @@ void MeshRenderer::InitQuad()
     {
         _quad.addUv(t);
     }
-    _quad.addTriangle(glm::uvec3(0, 1, 2));
-    _quad.addTriangle(glm::uvec3(0, 2, 3));
+    _quad.addTriangle(UVec3(0, 1, 2));
+    _quad.addTriangle(UVec3(0, 2, 3));
     _quad.build();
 }
 
@@ -183,17 +180,16 @@ Mat4 MeshRenderer::CalcModelMatrix(TransformComponent const &transform)
     {
         TransformComponent const &parent = cur->parent.value().get();
 
-        auto model = glm::translate(Mat4(1.0f), parent.position) *
-                                           glm::mat4_cast(parent.rotation) *
-                                           glm::scale(Mat4(1.0f), parent.scale);
+        auto model =
+            Mat4::Translate(parent.position) * parent.rotation.AsRotationMatrix() * Mat4::Scale(parent.scale);
 
         finalTransformation = model * finalTransformation;
 
         cur = &cur->parent.value().get();
     }
 
-    finalTransformation = finalTransformation * glm::translate(Mat4(1.0f), transform.position) *
-                          glm::mat4_cast(transform.rotation) * glm::scale(Mat4(1.0f), transform.scale);
+    finalTransformation = finalTransformation * Mat4::Translate(transform.position) *
+                          transform.rotation.AsRotationMatrix() * Mat4::Scale(transform.scale);
 
     return finalTransformation;
 }
@@ -419,12 +415,12 @@ RenderCommandBuffer MeshRenderer::RenderShadowMap()
     auto lightPos = lights[0]->Get<TransformComponent>().position;
 
     std::vector<Mat4> shadowTransforms = {
-        _shadowProjection * glm::lookAt(lightPos, lightPos + glm::vec3(1.0, 0.0, 0.0), glm::vec3(0.0, -1.0, 0.0)),
-        _shadowProjection * glm::lookAt(lightPos, lightPos + glm::vec3(-1.0, 0.0, 0.0), glm::vec3(0.0, -1.0, 0.0)),
-        _shadowProjection * glm::lookAt(lightPos, lightPos + glm::vec3(0.0, 1.0, 0.0), glm::vec3(0.0, 0.0, 1.0)),
-        _shadowProjection * glm::lookAt(lightPos, lightPos + glm::vec3(0.0, -1.0, 0.0), glm::vec3(0.0, 0.0, -1.0)),
-        _shadowProjection * glm::lookAt(lightPos, lightPos + glm::vec3(0.0, 0.0, 1.0), glm::vec3(0.0, -1.0, 0.0)),
-        _shadowProjection * glm::lookAt(lightPos, lightPos + glm::vec3(0.0, 0.0, -1.0), glm::vec3(0.0, -1.0, 0.0)),
+        _shadowProjection * Mat4::LookAt(lightPos, lightPos + Vec3(1.0, 0.0, 0.0), Vec3(0.0, -1.0, 0.0)),
+        _shadowProjection * Mat4::LookAt(lightPos, lightPos + Vec3(-1.0, 0.0, 0.0), Vec3(0.0, -1.0, 0.0)),
+        _shadowProjection * Mat4::LookAt(lightPos, lightPos + Vec3(0.0, 1.0, 0.0), Vec3(0.0, 0.0, 1.0)),
+        _shadowProjection * Mat4::LookAt(lightPos, lightPos + Vec3(0.0, -1.0, 0.0), Vec3(0.0, 0.0, -1.0)),
+        _shadowProjection * Mat4::LookAt(lightPos, lightPos + Vec3(0.0, 0.0, 1.0), Vec3(0.0, -1.0, 0.0)),
+        _shadowProjection * Mat4::LookAt(lightPos, lightPos + Vec3(0.0, 0.0, -1.0), Vec3(0.0, -1.0, 0.0)),
     };
 
     renderCommand.framebuffer = _depthmap;

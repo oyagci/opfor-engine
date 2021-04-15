@@ -22,8 +22,8 @@ class WindowsInput : public IInput
     std::unordered_set<KeyCode> _ReleasedKeys;
     std::unordered_set<MouseButton> _PressedMouseButtons;
     std::unordered_set<MouseButton> _ReleasedMouseButtons;
-    glm::vec2 _LastMousePosition = {0.0f, 0.0f};
-    glm::vec2 _MousePosition = {0.0f, 0.0f};
+    Vec2 _LastMousePosition = {0.0f, 0.0f};
+    Vec2 _MousePosition = {0.0f, 0.0f};
 
     static WindowsInput *_UniqueInstance;
 
@@ -51,8 +51,8 @@ class WindowsInput : public IInput
     bool GetKeyUp_Impl(KeyCode keyCode) override;
     KeyStatus GetKey_Impl(KeyCode keyCode) override;
 
-    glm::vec2 GetMousePosition_Impl() override;
-    glm::vec2 GetMouseRelativePosition_Impl() override;
+    Vec2 GetMousePosition_Impl() override;
+    Vec2 GetMouseRelativePosition_Impl() override;
 
     bool GetMouseButtonDown_Impl(MouseButton btn) override;
     bool GetMouseButtonUp_Impl(MouseButton btn) override;

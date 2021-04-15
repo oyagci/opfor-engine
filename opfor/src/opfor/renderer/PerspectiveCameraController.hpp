@@ -1,7 +1,9 @@
 #pragma once
 
 #include "PerspectiveCamera.hpp"
-#include "opfor/core/base.hpp"
+#include <opfor/core/base.hpp>
+#include <opfor/core/Input.hpp>
+#include <opfor/core/types/Vec3.hpp>
 
 namespace opfor
 {
@@ -20,7 +22,7 @@ class PerspectiveCameraController
   private:
     void UpdateLook(float dt)
     {
-        glm::vec2 vel = opfor::Input::GetMouseRelativePosition() * dt * 10.0f;
+        Vec2 vel = Input::GetMouseRelativePosition() * dt * 10.0f;
 
         float yaw = _Camera.GetYaw();
         float pitch = _Camera.GetPitch();
@@ -39,18 +41,18 @@ class PerspectiveCameraController
         if (_UseInput == false)
             return;
 
-        glm::vec3 front(glm::normalize(_Camera.GetDirection()));
-        glm::vec3 right(glm::normalize(glm::cross(front, glm::vec3(0.0f, 1.0f, 0.0f))));
-        glm::vec3 up(glm::cross(right, front));
+        Vec3 front(Vec3::Normalize(_Camera.GetDirection()));
+        Vec3 right(Vec3::Normalize(Vec3::Cross(front, Vec3(0.0f, 1.0f, 0.0f))));
+        Vec3 up(Vec3::Cross(right, front));
 
         // Fast Speed?
         _MoveSpeed =
-            opfor::Input::GetKey(opfor::KeyCode::LeftShift) == opfor::KeyStatus::Pressed ? _FastSpeed : _BaseSpeed;
+            Input::GetKey(KeyCode::LeftShift) == KeyStatus::Pressed ? _FastSpeed : _BaseSpeed;
 
-        bool fwd = opfor::Input::GetKey(opfor::KeyCode::W) == opfor::KeyStatus::Pressed;
-        bool lft = opfor::Input::GetKey(opfor::KeyCode::A) == opfor::KeyStatus::Pressed;
-        bool bck = opfor::Input::GetKey(opfor::KeyCode::S) == opfor::KeyStatus::Pressed;
-        bool rgt = opfor::Input::GetKey(opfor::KeyCode::D) == opfor::KeyStatus::Pressed;
+        bool fwd = Input::GetKey(KeyCode::W) == KeyStatus::Pressed;
+        bool lft = Input::GetKey(KeyCode::A) == KeyStatus::Pressed;
+        bool bck = Input::GetKey(KeyCode::S) == KeyStatus::Pressed;
+        bool rgt = Input::GetKey(KeyCode::D) == KeyStatus::Pressed;
 
         auto position = _Camera.GetPosition();
         position += fwd * dt * _MoveSpeed * front;
@@ -58,8 +60,8 @@ class PerspectiveCameraController
         position += rgt * dt * _MoveSpeed * right;
         position += lft * dt * _MoveSpeed * -right;
 
-        bool moveUp = opfor::Input::GetKey(opfor::KeyCode::E) == opfor::KeyStatus::Pressed;
-        bool moveDown = opfor::Input::GetKey(opfor::KeyCode::Q) == opfor::KeyStatus::Pressed;
+        bool moveUp = Input::GetKey(KeyCode::E) == KeyStatus::Pressed;
+        bool moveDown = Input::GetKey(KeyCode::Q) == KeyStatus::Pressed;
 
         position += moveUp * dt * _MoveSpeed * up;
         position += moveDown * dt * _MoveSpeed * -up;
@@ -77,7 +79,7 @@ class PerspectiveCameraController
 
     void Update(float deltaTime)
     {
-        auto mouse = opfor::Input::GetMouseButton(opfor::MouseButton::ButtonRight) == opfor::KeyStatus::Pressed;
+        auto mouse = Input::GetMouseButton(MouseButton::ButtonRight) == KeyStatus::Pressed;
         if (!mouse)
         {
             return;

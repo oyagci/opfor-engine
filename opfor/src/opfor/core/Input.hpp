@@ -1,7 +1,7 @@
 #pragma once
 
 #include "opfor/core/base.hpp"
-#include <glm/vec2.hpp>
+#include <opfor/core/types/Vec2.hpp>
 
 namespace opfor
 {
@@ -174,9 +174,9 @@ class IInput
 
     virtual KeyStatus GetKey_Impl(KeyCode keyCode) = 0;
 
-    virtual glm::vec2 GetMousePosition_Impl() = 0;
+    virtual Vec2 GetMousePosition_Impl() = 0;
 
-    virtual glm::vec2 GetMouseRelativePosition_Impl() = 0;
+    virtual Vec2 GetMouseRelativePosition_Impl() = 0;
 
     virtual bool GetMouseButtonDown_Impl(MouseButton btn) = 0;
 
@@ -230,12 +230,12 @@ class Input
     }
 
     /// Get the mouse position on the screen (x, y)
-    static glm::vec2 GetMousePosition()
+    static Vec2 GetMousePosition()
     {
         return Get()->GetMousePosition_Impl();
     }
 
-    static glm::vec2 GetMouseRelativePosition()
+    static Vec2 GetMouseRelativePosition()
     {
         return Get()->GetMouseRelativePosition_Impl();
     }
