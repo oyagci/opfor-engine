@@ -218,7 +218,7 @@ void EditorInspector::DrawDefaultControl(String const &name, ecs::IComponentBase
 
         int newValue = value;
         const int original = value;
-        EditorUtils::DrawIntControl(name, newValue, readonly, 1, min ? std::max(min->Get(), 0.0f) : 0.0f,
+        EditorUtils::DrawIntControl(name, newValue, readonly, 1, min ? (std::max)(min->Get(), 0.0f) : 0.0f,
                                            max ? max->Get() : 0.0f);
 
         if (min && value < min->Get())

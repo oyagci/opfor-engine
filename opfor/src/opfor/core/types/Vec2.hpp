@@ -1,28 +1,51 @@
 #pragma once
 
-#include <glm/vec2.hpp>
 #include <generated/Vec2.rfk.h>
 
 namespace opfor OP4NAMESPACE()
 {
-    class OP4CLASS() Vec2 : public glm::vec2
+    template <typename T>
+    class AVec2
     {
       public:
-        using glm::vec2::vec2;
+        AVec2() = default;
 
-        Vec2(glm::vec2 const &v) : glm::vec2(v)
+        AVec2<T> operator*(float v)
+        {
+            return {x * v, y * v};
+        }
+
+        AVec2(T const x, T const y) : x(x), y(y)
+        {
+        }
+
+        AVec2<T> operator-(AVec2<T> const &rhs) const
+        {
+            return {x - rhs.x, y - rhs.y};
+        }
+
+        T x = T(0);
+        T y = T(0);
+    };
+
+    class OP4CLASS() Vec2 : public AVec2<float>
+    {
+      public:
+        using AVec2<float>::AVec2;
+
+        Vec2(AVec2<float> const &v) : AVec2<float>(v)
         {
         }
 
         Vec2_GENERATED
     };
 
-    class OP4CLASS() UVec2 : public glm::uvec2
+    class OP4CLASS() UVec2 : public AVec2<unsigned int>
     {
       public:
-        using glm::uvec2::uvec2;
+        using AVec2<unsigned int>::AVec2;
 
-        UVec2(glm::uvec2 const &v) : glm::uvec2(v)
+        UVec2(AVec2<unsigned int> const &v) : AVec2<unsigned int>(v)
         {
         }
 

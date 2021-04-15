@@ -3,7 +3,6 @@
 #include "Editor.hpp"
 #include "ImGuizmo.h"
 #include <cstdint>
-#include <glm/gtx/matrix_decompose.hpp>
 #include <opfor/core/Application.hpp>
 #include <opfor/layers/ImGuiLayer.hpp>
 
@@ -82,31 +81,33 @@ void EditorViewport::DrawGuizmoSelectedEntity(ImVec2 viewportSize, ImVec2 viewpo
 
     auto &transform = selected->Get<TransformComponent>();
 
-    glm::mat4 model(1.0f);
-    model = glm::translate(model, transform.position);
-    model = glm::scale(model, transform.scale);
+    Mat4 model(1.0f);
+    model = Mat4::Translate(transform.position);
+    model = model * Mat4::Scale(transform.scale);
 
     bool changed = false;
 
     ImGuizmo::BeginFrame();
     ImGuizmo::SetRect(viewportPosition.x, viewportPosition.y, viewportSize.x, viewportSize.y);
     {
-        std::array<float, 3> rotation{}, translation{}, scale{};
+        Array<float, 3> rotation{}, translation{}, scale{};
         ImGuizmo::DecomposeMatrixToComponents(&model[0][0], translation.data(), rotation.data(), scale.data());
-
         ImGuizmo::RecomposeMatrixFromComponents(translation.data(), rotation.data(), scale.data(), &model[0][0]);
     }
 
-    glm::quat rotation;
-    glm::vec3 skew(0.0f);
-    glm::vec4 persp(0.0f);
+    Quat rotation;
+    Vec3 skew(0.0f);
+    Vec4 persp(0.0f);
     ImGuizmo::DecomposeMatrixToComponents(&model[0][0], &transform.position[0], &rotation[0], &transform.scale[0]);
 
-    glm::mat4 const cpy = model;
+    Mat4 const cpy = model;
 
     ImGuizmo::SetDrawlist();
     ImGuizmo::Manipulate(&camera.GetViewMatrix()[0][0], &camera.GetProjection()[0][0], ImGuizmo::TRANSLATE,
                          ImGuizmo::WORLD, &model[0][0], nullptr, nullptr);
+
+    Vec3 a;
+    Vec3 b;
 
     if (cpy != model)
     {
@@ -115,7 +116,7 @@ void EditorViewport::DrawGuizmoSelectedEntity(ImVec2 viewportSize, ImVec2 viewpo
 
     if (changed)
     {
-        glm::decompose(model, transform.scale, rotation, transform.position, skew, persp);
+        Mat4::Decompose(model, transform.scale, rotation, transform.position, skew, persp);
     }
 }
 

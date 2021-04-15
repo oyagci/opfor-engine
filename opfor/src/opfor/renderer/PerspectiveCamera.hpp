@@ -1,10 +1,8 @@
 #pragma once
 
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-
 #include "components/TransformComponent.hpp"
-#include "opfor/core/Input.hpp"
+#include <opfor/core/types/Vec3.hpp>
+#include <opfor/core/types/Mat4.hpp>
 
 namespace opfor
 {
@@ -12,12 +10,12 @@ namespace opfor
 class PerspectiveCamera
 {
   private:
-    glm::mat4 _Projection;
-    glm::mat4 _View;
-    glm::mat4 _ViewProjection;
+    Mat4 _Projection;
+    Mat4 _View;
+    Mat4 _ViewProjection;
 
-    glm::vec3 _Position;
-    glm::vec3 _Direction;
+    Vec3 _Position;
+    Vec3 _Direction;
 
     float _FOV;
     float _Near;
@@ -31,11 +29,11 @@ class PerspectiveCamera
 
     void RecalculateViewMatrix()
     {
-        _Direction.x = cos(glm::radians(_Yaw)) * cos(glm::radians(_Pitch));
-        _Direction.y = sin(glm::radians(_Pitch));
-        _Direction.z = sin(glm::radians(_Yaw)) * cos(glm::radians(_Pitch));
+        _Direction.x = cos(math::Radians(_Yaw)) * cos(math::Radians(_Pitch));
+        _Direction.y = sin(math::Radians(_Pitch));
+        _Direction.z = sin(math::Radians(_Yaw)) * cos(math::Radians(_Pitch));
 
-        _View = glm::lookAt(_Position, _Position + _Direction, glm::vec3(0.0f, 1.0f, 0.0f));
+        _View = Mat4::LookAt(_Position, _Position + _Direction, Vec3(0.0f, 1.0f, 0.0f));
         _ViewProjection = _Projection * _View;
     }
 
@@ -55,77 +53,86 @@ class PerspectiveCamera
         _Pitch = 0.0f;
         _Roll = 0.0f;
 
-        _Direction.x = cos(glm::radians(_Yaw)) * cos(glm::radians(_Pitch));
-        _Direction.y = sin(glm::radians(_Pitch));
-        _Direction.z = sin(glm::radians(_Yaw)) * cos(glm::radians(_Pitch));
+        _Direction.x = cos(math::Radians(_Yaw)) * cos(math::Radians(_Pitch));
+        _Direction.y = sin(math::Radians(_Pitch));
+        _Direction.z = sin(math::Radians(_Yaw)) * cos(math::Radians(_Pitch));
 
-        _Projection = glm::perspective(glm::radians(_FOV), _Aspect, _Near, _Far);
-        _View = glm::lookAt(_Position, _Position + _Direction, glm::vec3(0.0f, 1.0f, 0.0f));
+        _Projection = Mat4::Perspective(math::Radians(_FOV), _Aspect, _Near, _Far);
+        _View = Mat4::LookAt(_Position, _Position + _Direction, Vec3(0.0f, 1.0f, 0.0f));
         _ViewProjection = _Projection * _View;
     }
 
     PerspectiveCamera(float aspect, float fov, float nearr, float farr)
-        : _FOV(fov), _Near(nearr), _Far(farr), _Aspect(aspect), _Exposure(1.0f), _Yaw(0.0f), _Pitch(0.0f), _Roll(0.0f)
+        : _Position(0.0f, 0.0f, 0.0f), _FOV(fov), _Near(nearr), _Far(farr), _Aspect(aspect), _Exposure(1.0f),
+          _Yaw(0.0f), _Pitch(0.0f), _Roll(0.0f)
     {
-        _Direction.x = cos(glm::radians(_Yaw)) * cos(glm::radians(_Pitch));
-        _Direction.y = sin(glm::radians(_Pitch));
-        _Direction.z = sin(glm::radians(_Yaw)) * cos(glm::radians(_Pitch));
+        _Direction.x = cos(math::Radians(_Yaw)) * cos(math::Radians(_Pitch));
+        _Direction.y = sin(math::Radians(_Pitch));
+        _Direction.z = sin(math::Radians(_Yaw)) * cos(math::Radians(_Pitch));
 
-        _Projection = glm::perspective(glm::radians(fov), aspect, nearr, farr);
-        _View = glm::lookAt(_Position, _Position + _Direction, glm::vec3(0.0f, 1.0f, 0.0f));
+        _Projection = Mat4::Perspective(math::Radians(fov), aspect, nearr, farr);
+        _View = Mat4::LookAt(_Position, _Position + _Direction, Vec3(0.0f, 1.0f, 0.0f));
         _ViewProjection = _Projection * _View;
     }
 
-    auto GetExposure() const
+    [[nodiscard]] auto GetExposure() const
     {
         return _Exposure;
     }
-    auto const &GetPosition() const
+
+    [[nodiscard]] auto const &GetPosition() const
     {
         return _Position;
     }
-    auto const &GetDirection() const
+
+    [[nodiscard]] auto const &GetDirection() const
     {
         return _Direction;
     }
-    auto const &GetProjection() const
+
+    [[nodiscard]] auto const &GetProjection() const
     {
         return _Projection;
     }
-    auto const &GetViewMatrix() const
+
+    [[nodiscard]] auto const &GetViewMatrix() const
     {
         return _View;
     }
-    auto const &GetViewProjectionMatrix() const
+
+    [[nodiscard]] auto const &GetViewProjectionMatrix() const
     {
         return _ViewProjection;
     }
-    auto GetYaw() const
+
+    [[nodiscard]] auto GetYaw() const
     {
         return _Yaw;
     }
-    auto GetPitch() const
+
+    [[nodiscard]] auto GetPitch() const
     {
         return _Pitch;
     }
-    auto GetRoll() const
+
+    [[nodiscard]] auto GetRoll() const
     {
         return _Roll;
     }
 
     auto SetProjection(float aspect, float fov, float nearr, float farr)
     {
-        _Projection = glm::perspective(glm::radians(fov), aspect, nearr, farr);
+        _Projection = Mat4::Perspective(math::Radians(fov), aspect, nearr, farr);
         _ViewProjection = _Projection * _View;
     }
 
     auto SetAspect(float aspect)
     {
-        _Projection = glm::perspective(glm::radians(_FOV), aspect, _Near, _Far);
+        _Projection = Mat4::Perspective(math::Radians(_FOV), aspect, _Near, _Far);
         _ViewProjection = _Projection * _View;
     }
 
-    auto SetPosition(glm::vec3 position)
+    auto SetPosition(Vec3 position)
     {
         _Position = position;
         RecalculateViewMatrix();
@@ -149,4 +156,5 @@ class PerspectiveCamera
         RecalculateViewMatrix();
     }
 };
+
 } // namespace opfor

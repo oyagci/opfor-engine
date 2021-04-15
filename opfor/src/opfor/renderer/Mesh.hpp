@@ -61,9 +61,9 @@ class Mesh : public IDrawable
     Mesh &addPosition(const Vec3 &v);
     Mesh &addNormal(const Vec3 &v);
     Mesh &addUv(const Vec2 &v);
-    Mesh &addTangent(const glm::vec4 &v);
+    Mesh &addTangent(const Vec4 &v);
     Mesh &addIndex(const int index);
-    Mesh &addTriangle(const glm::uvec3 &triangle);
+    Mesh &addTriangle(const UVec3 &triangle);
     Mesh &addTexture(String const &name, TextureType type);
 
     auto const &GetPositions() const

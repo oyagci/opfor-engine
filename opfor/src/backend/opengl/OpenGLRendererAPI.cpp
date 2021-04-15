@@ -26,7 +26,7 @@ void OpenGLRendererAPI::PushViewport(UVec2 pos, UVec2 size)
 
     glGetIntegerv(GL_VIEWPORT, prevViewport.data());
 
-    _prevViewports.push_back({{prevViewport[0], prevViewport[1]}, {prevViewport[2], prevViewport[3]}});
+    _prevViewports.push_back({Vec2(prevViewport[0], prevViewport[1]), Vec2(prevViewport[2], prevViewport[3])});
 
     glViewport(pos.x, pos.y, size.x, size.y);
 }

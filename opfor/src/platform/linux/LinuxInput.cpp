@@ -269,12 +269,12 @@ KeyStatus LinuxInput::GetKey_Impl(KeyCode keyCode)
     }
 }
 
-glm::vec2 LinuxInput::GetMousePosition_Impl()
+Vec2 LinuxInput::GetMousePosition_Impl()
 {
     return _MousePosition;
 }
 
-glm::vec2 LinuxInput::GetMouseRelativePosition_Impl()
+Vec2 LinuxInput::GetMouseRelativePosition_Impl()
 {
     auto rel = _LastMousePosition - _MousePosition;
 
