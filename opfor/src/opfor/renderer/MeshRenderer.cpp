@@ -14,6 +14,8 @@
 #include "components/ModelComponent.hpp"
 #include "components/PointLightComponent.hpp"
 #include "components/TransformComponent.hpp"
+#include "components/AnimationComponent.hpp"
+#include "components/MeshComponent.hpp"
 
 #include <glm/gtc/quaternion.hpp>
 
@@ -198,9 +200,79 @@ Mat4 MeshRenderer::CalcModelMatrix(TransformComponent const &transform)
     return finalTransformation;
 }
 
+static DrawCommand MakeMeshDrawCommand(Mesh &mesh, PerspectiveCamera const &camera, SharedPtr<Shader> shader)
+{
+
+    DrawCommand drawCommand;
+    drawCommand.shader = shader;
+    drawCommand.uniformBindings = {
+        {"viewProjectionMatrix", camera.GetViewProjectionMatrix()},
+        {"viewMatrix", camera.GetViewMatrix()},
+        {"projectionMatrix", camera.GetProjection()},
+        {"viewPos", camera.GetPosition()},
+    };
+    if (mesh.GetPbrMaterial().has_value())
+    {
+
+        auto material = Application::Get().GetPbrMaterial(mesh.GetPbrMaterial().value());
+
+        if (material.has_value())
+        {
+            auto m = material.value();
+
+            drawCommand.uniformBindings.push_back({"material.baseColor", m->BaseColor});
+            drawCommand.uniformBindings.push_back({"material.metallicFactor", m->MetallicFactor});
+            drawCommand.uniformBindings.push_back({"material.roughnessFactor", m->RoughnessFactor});
+
+            if (m->Albedo.has_value())
+            {
+                auto albedo = m->Albedo.value();
+                auto texture = TextureManager::Get().Get(albedo);
+
+                drawCommand.uniformBindings.push_back({"material.hasAlbedo", 1});
+                drawCommand.textureBindings.push_back({texture, TextureUnit::Texture0});
+            }
+            else
+            {
+                drawCommand.uniformBindings.push_back({"material.hasAlbedo", 0});
+            }
+
+            if (m->MetallicRoughness.has_value())
+            {
+                auto metallicRoughness = m->MetallicRoughness.value();
+                auto texture = TextureManager::Get().Get(metallicRoughness);
+
+                drawCommand.uniformBindings.push_back({"material.hasMetallicRoughness", 1});
+                drawCommand.textureBindings.push_back({texture, TextureUnit::Texture1});
+            }
+            else
+            {
+                drawCommand.uniformBindings.push_back({"material.hasMetallicRoughness", 0});
+            }
+
+            if (m->Normal.has_value())
+            {
+                auto normal = m->Normal.value();
+                auto texture = TextureManager::Get().Get(normal);
+
+                drawCommand.textureBindings.push_back({texture, TextureUnit::Texture2});
+            }
+            else
+            {
+                auto const defaultNormal = TextureManager::Get().Get("default_normal");
+
+                drawCommand.textureBindings.push_back({defaultNormal, TextureUnit::Texture2});
+            }
+        }
+    }
+
+    drawCommand.vertexArray = mesh.GetVertexArray();
+    return drawCommand;
+}
+
 Vector<DrawCommand> MeshRenderer::SubmitMeshes(PerspectiveCamera const &camera)
 {
-    Vector<DrawCommand> drawCommands;
+    UnorderedMap<unsigned, DrawCommand> drawCommands;
 
     auto models = Application::Get().GetEntities<ModelComponent, TransformComponent>();
 
@@ -227,82 +299,33 @@ Vector<DrawCommand> MeshRenderer::SubmitMeshes(PerspectiveCamera const &camera)
 
             Mat4 modelMatrix(CalcModelMatrix(transform));
 
-            DrawCommand drawCommand;
-            drawCommand.shader = shader;
-            drawCommand.uniformBindings = {
-                {"viewProjectionMatrix", camera.GetViewProjectionMatrix()},
-                {"viewMatrix", camera.GetViewMatrix()},
-                {"projectionMatrix", camera.GetProjection()},
-                {"viewPos", camera.GetPosition()},
-                {"modelMatrix", modelMatrix},
-            };
-
-            // Bind each texture
             auto meshCast = dynamic_cast<Mesh *>(mesh);
             if (meshCast != nullptr)
             {
-                if (meshCast->GetPbrMaterial().has_value())
-                {
-
-                    auto material = Application::Get().GetPbrMaterial(meshCast->GetPbrMaterial().value());
-
-                    if (material.has_value())
-                    {
-                        auto m = material.value();
-
-                        drawCommand.uniformBindings.push_back({"material.baseColor", m->BaseColor});
-                        drawCommand.uniformBindings.push_back({"material.metallicFactor", m->MetallicFactor});
-                        drawCommand.uniformBindings.push_back({"material.roughnessFactor", m->RoughnessFactor});
-
-                        if (m->Albedo.has_value())
-                        {
-                            auto albedo = m->Albedo.value();
-                            auto texture = TextureManager::Get().Get(albedo);
-
-                            drawCommand.uniformBindings.push_back({"material.hasAlbedo", 1});
-                            drawCommand.textureBindings.push_back({texture, TextureUnit::Texture0});
-                        }
-                        else
-                        {
-                            drawCommand.uniformBindings.push_back({"material.hasAlbedo", 0});
-                        }
-
-                        if (m->MetallicRoughness.has_value())
-                        {
-                            auto metallicRoughness = m->MetallicRoughness.value();
-                            auto texture = TextureManager::Get().Get(metallicRoughness);
-
-                            drawCommand.uniformBindings.push_back({"material.hasMetallicRoughness", 1});
-                            drawCommand.textureBindings.push_back({texture, TextureUnit::Texture1});
-                        }
-                        else
-                        {
-                            drawCommand.uniformBindings.push_back({"material.hasMetallicRoughness", 0});
-                        }
-
-                        if (m->Normal.has_value())
-                        {
-                            auto normal = m->Normal.value();
-                            auto texture = TextureManager::Get().Get(normal);
-
-                            drawCommand.textureBindings.push_back({texture, TextureUnit::Texture2});
-                        }
-                        else
-                        {
-                            auto const defaultNormal = TextureManager::Get().Get("default_normal");
-
-                            drawCommand.textureBindings.push_back({defaultNormal, TextureUnit::Texture2});
-                        }
-                    }
-                }
-
-                drawCommand.vertexArray = reinterpret_cast<Mesh const *>(mesh)->GetVertexArray();
-                drawCommands.push_back(drawCommand);
+                drawCommands[meshId] = MakeMeshDrawCommand(*meshCast, camera, shader);
+                drawCommands[meshId].uniformBindings.push_back({"modelMatrix", modelMatrix});
             }
         }
     }
 
-    return drawCommands;
+    auto const meshes = Application::Get().GetEntities<MeshComponent, TransformComponent>();
+    for (auto const &entity : meshes) {
+      auto const [meshcomp, transform] = entity->GetAll();
+
+            auto const mesh = Application::Get().GetMesh(meshcomp.id);
+            auto meshCast = dynamic_cast<Mesh *>(mesh);
+            if (meshCast != nullptr)
+            {
+                OP4_CORE_ASSERT(drawCommands.find(meshcomp.id) != std::end(drawCommands), "Mesh isn't present in any model");
+                drawCommands[meshcomp.id].uniformBindings.push_back({"meshMatrix", CalcModelMatrix(transform)});
+            }
+    }
+
+    std::vector<DrawCommand> ret;
+    std::transform(std::begin(drawCommands), std::end(drawCommands), std::back_inserter(ret),
+                   [](auto pair) { return pair.second; });
+
+    return ret;
 }
 
 Vector<UniformBinding> MeshRenderer::UpdateLight()

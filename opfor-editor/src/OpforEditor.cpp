@@ -80,7 +80,7 @@ class OpforEditor : public opfor::Application
 
         auto *spheres = CreateEntity<SphereComponent, TransformComponent, ModelComponent>();
         auto &sphereModel = spheres->Get<ModelComponent>();
-        LoadModel("./assets/models/metal-sphere/metal-sphere.gltf", sphereModel);
+        LoadModel("./assets/models/animated-cube/animated-cube.gltf", sphereModel);
         sphereModel.shader = spheresShaderID;
         spheresShader.Bind();
         spheresShader.SetUniform("material.albedo", 0);

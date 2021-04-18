@@ -20,7 +20,7 @@ class Logger
 
   private:
     std::unordered_map<std::string, Callback> _callbacks;
-    LogLevel _logLevel = LogLevel::Verbose;
+    LogLevel _logLevel = LogLevel::Debug;
 
     Logger()
     {

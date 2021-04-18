@@ -159,7 +159,7 @@ class IEntityBase
     }
 
     ///
-    /// Get a const reference to the data of component U
+    /// Get a reference to the data of component U
     ///
     template <typename U> U &Get() const
     {

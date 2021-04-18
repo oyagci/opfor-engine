@@ -4,8 +4,6 @@
 #include "opfor/layers/Layer.hpp"
 #include "opfor/renderer/PerspectiveCamera.hpp"
 
-using namespace std::placeholders;
-
 namespace opfor
 {
 
@@ -19,6 +17,7 @@ class SceneRenderer : public Layer
     SceneRenderer() = default;
     ~SceneRenderer() = default;
 
+    void UpdateScene(float dt);
     void RenderScene(PerspectiveCamera const &);
 
     void OnEvent(Event &e);
