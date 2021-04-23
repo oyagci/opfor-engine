@@ -14,11 +14,6 @@ float TruncToFloat(float F)
     return truncf(F);
 }
 
-template <class T> T Clamp(const T X, const T Min, const T Max)
-{
-    return X < Min ? Min : X < Max ? X : Max;
-}
-
 float Fmod(float X, float Y)
 {
     const float AbsY = fabsf(Y);

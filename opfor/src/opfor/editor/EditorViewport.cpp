@@ -5,6 +5,7 @@
 #include <cstdint>
 #include <opfor/core/Application.hpp>
 #include <opfor/layers/ImGuiLayer.hpp>
+#include <components/TransformComponent.hpp>
 
 namespace opfor
 {

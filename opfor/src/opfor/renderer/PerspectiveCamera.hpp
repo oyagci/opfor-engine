@@ -1,8 +1,8 @@
 #pragma once
 
-#include "components/TransformComponent.hpp"
 #include <opfor/core/types/Vec3.hpp>
 #include <opfor/core/types/Mat4.hpp>
+#include <opfor/core/types/Quat.hpp>
 
 namespace opfor
 {
@@ -15,64 +15,41 @@ class PerspectiveCamera
     Mat4 _ViewProjection;
 
     Vec3 _Position;
-    Vec3 _Direction;
 
-    float _FOV;
-    float _Near;
-    float _Far;
-    float _Aspect;
-    float _Exposure;
+    Quat _Rotation;
 
-    float _Yaw;
-    float _Pitch;
-    float _Roll;
+    float _FOV = 90.f;
+    float _Near = 1.f;
+    float _Far = 1000000.f;
+    float _Aspect = 16.f / 9.f;
+    float _Exposure = 1.f;
 
     void RecalculateViewMatrix()
     {
-        _Direction.x = cos(math::Radians(_Yaw)) * cos(math::Radians(_Pitch));
-        _Direction.y = sin(math::Radians(_Pitch));
-        _Direction.z = sin(math::Radians(_Yaw)) * cos(math::Radians(_Pitch));
-
-        _View = Mat4::LookAt(_Position, _Position + _Direction, Vec3(0.0f, 1.0f, 0.0f));
+        _View = Mat4::LookAt(_Position, _Position + GetForward(), Vec3::Up());
         _ViewProjection = _Projection * _View;
     }
 
   public:
     PerspectiveCamera()
     {
-        _Position = {0.0f, 0.0f, 0.0f};
-        _Direction = {0.0f, 0.0f, 0.0f};
-
-        _FOV = 90.0f;
-        _Aspect = 16.0f / 9.0f;
-        _Near = 1.0f;
-        _Far = 1000000.0f;
-        _Exposure = 1.0f;
-
-        _Yaw = 0.0f;
-        _Pitch = 0.0f;
-        _Roll = 0.0f;
-
-        _Direction.x = cos(math::Radians(_Yaw)) * cos(math::Radians(_Pitch));
-        _Direction.y = sin(math::Radians(_Pitch));
-        _Direction.z = sin(math::Radians(_Yaw)) * cos(math::Radians(_Pitch));
-
         _Projection = Mat4::Perspective(math::Radians(_FOV), _Aspect, _Near, _Far);
-        _View = Mat4::LookAt(_Position, _Position + _Direction, Vec3(0.0f, 1.0f, 0.0f));
+        _View = Mat4::LookAt(_Position, _Position + GetForward(), Vec3::Up());
         _ViewProjection = _Projection * _View;
     }
 
     PerspectiveCamera(float aspect, float fov, float nearr, float farr)
-        : _Position(0.0f, 0.0f, 0.0f), _FOV(fov), _Near(nearr), _Far(farr), _Aspect(aspect), _Exposure(1.0f),
-          _Yaw(0.0f), _Pitch(0.0f), _Roll(0.0f)
+        : _Position(0.0f, 0.0f, 0.0f), _FOV(fov), _Near(nearr), _Far(farr), _Aspect(aspect)
     {
-        _Direction.x = cos(math::Radians(_Yaw)) * cos(math::Radians(_Pitch));
-        _Direction.y = sin(math::Radians(_Pitch));
-        _Direction.z = sin(math::Radians(_Yaw)) * cos(math::Radians(_Pitch));
-
         _Projection = Mat4::Perspective(math::Radians(fov), aspect, nearr, farr);
-        _View = Mat4::LookAt(_Position, _Position + _Direction, Vec3(0.0f, 1.0f, 0.0f));
+        _View = Mat4::LookAt(_Position, _Position + GetForward(), Vec3::Up());
         _ViewProjection = _Projection * _View;
+    }
+
+    auto LookAt(Vec3 const &pos)
+    {
+        _Rotation = Mat4::Inverse(Mat4::LookAt(_Position, pos, Vec3::Up())).AsQuaternion();
+        RecalculateViewMatrix();
     }
 
     [[nodiscard]] auto GetExposure() const
@@ -85,9 +62,9 @@ class PerspectiveCamera
         return _Position;
     }
 
-    [[nodiscard]] auto const &GetDirection() const
+    [[nodiscard]] Vec3 GetDirection() const
     {
-        return _Direction;
+        return GetForward();
     }
 
     [[nodiscard]] auto const &GetProjection() const
@@ -105,19 +82,30 @@ class PerspectiveCamera
         return _ViewProjection;
     }
 
-    [[nodiscard]] auto GetYaw() const
+    [[nodiscard]] auto &GetRotation() const
     {
-        return _Yaw;
+        return _Rotation;
     }
 
-    [[nodiscard]] auto GetPitch() const
+    [[nodiscard]] Vec3 GetForward() const
     {
-        return _Pitch;
+        const Mat4 rot = _Rotation.AsRotationMatrix();
+        const Vec4 v = rot * Vec4(Vec3::Forward().x, Vec3::Forward().y, Vec3::Forward().z, 1.f);
+
+        return Vec3(v.x, v.y, v.z);
     }
 
-    [[nodiscard]] auto GetRoll() const
+    [[nodiscard]] auto GetRight() const
     {
-        return _Roll;
+        return Vec3::Cross(GetForward(), Vec3(0.f, 1.f, 0.f));
+    }
+
+    [[nodiscard]] auto GetUp() const
+    {
+        const Vec3 fwd(GetForward());
+        const Vec3 up(Vec3::Up());
+        const Vec3 right = Vec3::Cross(GetForward(), up);
+        return Vec3::Cross(fwd, right);
     }
 
     auto SetProjection(float aspect, float fov, float nearr, float farr)
@@ -132,27 +120,15 @@ class PerspectiveCamera
         _ViewProjection = _Projection * _View;
     }
 
-    auto SetPosition(Vec3 position)
+    auto SetPosition(Vec3 const &position)
     {
         _Position = position;
         RecalculateViewMatrix();
     }
 
-    auto SetYaw(float yaw)
+    auto SetRotation(Quat const &rotation)
     {
-        _Yaw = yaw;
-        RecalculateViewMatrix();
-    }
-
-    auto SetPitch(float pitch)
-    {
-        _Pitch = pitch;
-        RecalculateViewMatrix();
-    }
-
-    auto SetRoll(float roll)
-    {
-        _Roll = roll;
+        _Rotation = rotation;
         RecalculateViewMatrix();
     }
 };

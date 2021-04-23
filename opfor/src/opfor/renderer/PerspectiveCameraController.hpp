@@ -19,74 +19,33 @@ class PerspectiveCameraController
     float _MoveSpeed = _BaseSpeed;
     bool _UseInput = true;
 
-  private:
-    void UpdateLook(float dt)
-    {
-        Vec2 vel = Input::GetMouseRelativePosition() * dt * 10.0f;
+    Vec3 _FocusPoint = { 0.f, 0.f, 0.f};
+    float _FocusDist = 1000.f;
 
-        float yaw = _Camera.GetYaw();
-        float pitch = _Camera.GetPitch();
+    float _Yaw = 0.f;
+    float _Pitch = 0.f;
+    float _Roll = 0.f;
 
-        yaw += -vel.x;
-
-        pitch += vel.y;
-        pitch = std::clamp(pitch, -89.0f, 89.0f);
-
-        _Camera.SetPitch(pitch);
-        _Camera.SetYaw(yaw);
-    }
-
-    void UpdateMovement(float dt)
-    {
-        if (_UseInput == false)
-            return;
-
-        Vec3 front(Vec3::Normalize(_Camera.GetDirection()));
-        Vec3 right(Vec3::Normalize(Vec3::Cross(front, Vec3(0.0f, 1.0f, 0.0f))));
-        Vec3 up(Vec3::Cross(right, front));
-
-        // Fast Speed?
-        _MoveSpeed =
-            Input::GetKey(KeyCode::LeftShift) == KeyStatus::Pressed ? _FastSpeed : _BaseSpeed;
-
-        bool fwd = Input::GetKey(KeyCode::W) == KeyStatus::Pressed;
-        bool lft = Input::GetKey(KeyCode::A) == KeyStatus::Pressed;
-        bool bck = Input::GetKey(KeyCode::S) == KeyStatus::Pressed;
-        bool rgt = Input::GetKey(KeyCode::D) == KeyStatus::Pressed;
-
-        auto position = _Camera.GetPosition();
-        position += fwd * dt * _MoveSpeed * front;
-        position += bck * dt * _MoveSpeed * -front;
-        position += rgt * dt * _MoveSpeed * right;
-        position += lft * dt * _MoveSpeed * -right;
-
-        bool moveUp = Input::GetKey(KeyCode::E) == KeyStatus::Pressed;
-        bool moveDown = Input::GetKey(KeyCode::Q) == KeyStatus::Pressed;
-
-        position += moveUp * dt * _MoveSpeed * up;
-        position += moveDown * dt * _MoveSpeed * -up;
-
-        _Camera.SetPosition(position);
-    }
+    void UpdateLook(float dt);
+    void UpdateOrbit(float dt);
+    void UpdateZoom(float dt);
+    void UpdateMovement(float dt);
+    void FocusCurrentSelection();
 
   public:
     PerspectiveCameraController() = default;
+
+    void Update(float deltaTime);
 
     auto &GetCamera()
     {
         return _Camera;
     }
 
-    void Update(float deltaTime)
+    void SetFocus(Vec3 const &f)
     {
-        auto mouse = Input::GetMouseButton(MouseButton::ButtonRight) == KeyStatus::Pressed;
-        if (!mouse)
-        {
-            return;
-        }
-
-        UpdateLook(deltaTime);
-        UpdateMovement(deltaTime);
+        _FocusPoint = f;
+        _FocusDist = Vec3::Magnitude(_Camera.GetPosition() - _FocusPoint);
     }
 };
 
