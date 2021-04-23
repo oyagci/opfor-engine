@@ -123,6 +123,8 @@ class OP4CLASS() Mat4
 
     [[nodiscard]] static Mat4 Transpose(Mat4 const &m);
 
+    [[nodiscard]] Quat AsQuaternion() const;
+
   private:
     Vec4 _values[4] = {};
 

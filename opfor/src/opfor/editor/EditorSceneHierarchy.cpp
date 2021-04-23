@@ -3,6 +3,7 @@
 #include <imgui.h>
 #include <opfor/core/Application.hpp>
 #include <opfor/editor/Editor.hpp>
+#include <components/TransformComponent.hpp>
 
 namespace opfor
 {

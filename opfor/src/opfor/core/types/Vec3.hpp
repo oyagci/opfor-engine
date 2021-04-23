@@ -130,6 +130,11 @@ class AVec3
         return std::sqrt(x * x + y * y + z * z);
     }
 
+    static T Magnitude(AVec3<T> const &v)
+    {
+        return std::sqrt(v.x * v.x + v.y * v.y + v.z * v.z);
+    }
+
     [[nodiscard]] static AVec3<T> Normalize(AVec3<T> const &a)
     {
         return a.Normalized();
@@ -147,6 +152,21 @@ class AVec3
     [[nodiscard]] static T Dot(AVec3<T> const &a , AVec3<T> const &b)
     {
         return a.x * b.x + a.y * b.y + a.z * b.z;
+    }
+
+    [[nodiscard]] static AVec3<T> Forward()
+    {
+        return AVec3(0.f, 0.f, -1.f);
+    }
+
+    [[nodiscard]] static AVec3<T> Up()
+    {
+        return AVec3(0.f, 1.f, 0.f);
+    }
+
+    [[nodiscard]] static AVec3<T> Right()
+    {
+        return AVec3(1.f, 0.f, 0.f);
     }
 
     T x = T(0);

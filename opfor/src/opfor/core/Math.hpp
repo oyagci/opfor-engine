@@ -22,7 +22,10 @@ float truncf(float x);
 
 float TruncToFloat(float F);
 
-template <class T>[[nodiscard]] T Clamp(const T X, const T Min, const T Max);
+template <class T> [[nodiscard]] T Clamp(const T X, const T Min, const T Max)
+{
+    return X < Min ? Min : X < Max ? X : Max;
+}
 
 float Fmod(float X, float Y);
 
