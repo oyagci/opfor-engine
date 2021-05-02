@@ -6,12 +6,12 @@
 #include "opfor/core/ImageLoader.hpp"
 #include "tiny_gltf.h"
 #include <glm/vec3.hpp>
+#include <src/components/AnimationComponent.hpp>
 
 namespace opfor
 {
-static Optional<Vector<unsigned int>> TinyProcessNode(tinygltf::Node const &node,
-                                                                tinygltf::Model const &model,
-                                                                Vector<String> const &materials)
+static Optional<Vector<unsigned int>> TinyProcessNode(tinygltf::Node const &node, tinygltf::Model const &model,
+                                                      Vector<String> const &materials)
 {
     Vector<unsigned int> allMeshes;
 
@@ -186,7 +186,6 @@ Optional<Vector<unsigned int>> Model::TinyLoader(String const &path)
     }
     OP4_CORE_DEBUG("Model name: \"{:s}\".", modelName);
 
-
     // Load Materials
     // --------------
     Vector<String> pbrMaterials; // Save the materials' index to be able to set the material of the mesh later
@@ -354,8 +353,102 @@ Optional<Vector<unsigned int>> Model::TinyLoader(String const &path)
         meshes_ret = meshes;
     }
 
+    const auto parse_animation = [&model](tinygltf::Animation const &animation) {
+        AnimationComponent ret{};
+
+        
+        Optional<unsigned> target;
+        OP4_CORE_DEBUG("tg");
+        for (auto const &channel : animation.channels)
+        {
+          OP4_CORE_DEBUG("channel: {}", channel.target_path);
+            if (!target.has_value())
+            {
+                target = channel.target_node;
+            }
+            auto const &sampler = animation.samplers[channel.sampler];
+            OP4_CORE_ASSERT(sampler.interpolation == "LINEAR", "Unsupported interpolation");
+
+            {
+                auto const &accessor = model.accessors[sampler.input];
+                auto const &buffer_view = model.bufferViews[accessor.bufferView];
+                auto const &buffer = model.buffers[buffer_view.buffer];
+                auto const byte_stride = accessor.ByteStride(buffer_view);
+                auto const data = buffer.data.data() + buffer_view.byteOffset + accessor.byteOffset;
+                OP4_CORE_ASSERT(accessor.componentType == TINYGLTF_COMPONENT_TYPE_FLOAT, "Corrupted gltf");
+                OP4_CORE_DEBUG("yep: {} {}", accessor.minValues[0], accessor.maxValues[0]);
+                for (auto i = 0u; i < accessor.count; ++i)
+                {
+                    OP4_CORE_DEBUG("input of {}: {}", buffer_view.name,
+                                   *reinterpret_cast<const float *>(data + i * byte_stride));
+                }
+            }
+
+            {
+                auto const &accessor = model.accessors[sampler.output];
+                auto const &buffer_view = model.bufferViews[accessor.bufferView];
+                auto const &buffer = model.buffers[buffer_view.buffer];
+                // OP4_CORE_ASSERT(accessor.type == TINYGLTF_TYPE_VEC3, "Only supports vec3");
+                OP4_CORE_ASSERT(accessor.componentType == TINYGLTF_COMPONENT_TYPE_FLOAT, "Corrupted gltf");
+                auto const byte_stride = accessor.ByteStride(buffer_view);
+                auto const data = buffer.data.data() + buffer_view.byteOffset + accessor.byteOffset;
+                switch (accessor.type)
+                {
+                case TINYGLTF_TYPE_VEC3:
+                    for (auto i = 0u; i < accessor.count; ++i)
+                    {
+                        auto const &buffer_view = model.bufferViews[accessor.bufferView];
+                        auto const &buffer = model.buffers[buffer_view.buffer];
+                        OP4_CORE_DEBUG(
+                            "output of {}: vec3({}, {}, {})", buffer.name,
+                            *reinterpret_cast<const float *>(buffer.data.data() + 0 * sizeof(float) + i * byte_stride),
+                            *reinterpret_cast<const float *>(buffer.data.data() + 1 * sizeof(float) + i * byte_stride),
+                            *reinterpret_cast<const float *>(buffer.data.data() + 2 * sizeof(float) + i * byte_stride));
+                    }
+                    break;
+                case TINYGLTF_TYPE_VEC4:
+                    for (auto i = 0u; i < accessor.count; ++i)
+                    {
+                        auto const &buffer_view = model.bufferViews[accessor.bufferView];
+                        auto const &buffer = model.buffers[buffer_view.buffer];
+                        OP4_CORE_DEBUG(
+                            "output of {}: vec4({}, {}, {}, {})", buffer.name,
+                            *reinterpret_cast<const float *>(buffer.data.data() + 0 * sizeof(float) + i * byte_stride),
+                            *reinterpret_cast<const float *>(buffer.data.data() + 1 * sizeof(float) + i * byte_stride),
+                            *reinterpret_cast<const float *>(buffer.data.data() + 2 * sizeof(float) + i * byte_stride),
+                            *reinterpret_cast<const float *>(buffer.data.data() + 3 * sizeof(float) + i * byte_stride));
+                    }
+                    break;
+                default:
+                    OP4_CORE_UNREACHABLE();
+                }
+            }
+        }
+        return ret;
+    };
+
+    Vector<AnimationComponent> animation_components;
+    std::transform(std::begin(model.animations), std::end(model.animations), std::back_inserter(animation_components),
+                   parse_animation);
+
     OP4_CORE_INFO("Model \"{:s}\" successfully parsed.", path);
 
     return meshes_ret;
 }
+//
+//template <typename T, size_t N>
+//static Array<T, N> gltf_access_data(tinygltf::Accessor const & accessor, tinygltf::Model const & model)
+//{
+//  Array<T, N> ret;
+//    auto const &buffer_view = model.bufferViews[accessor.bufferView];
+//    auto const &buffer = model.buffers[buffer_view.buffer];
+//    auto const byte_stride = accessor.ByteStride(buffer_view);
+//    auto const data = buffer.data.data() + buffer_view.byteOffset + accessor.byteOffset;
+//    for (auto i = 0u; i < accessor.count; ++i)
+//    {
+//
+//      for ()
+//    }
+//}
+
 } // namespace opfor

@@ -48,4 +48,3 @@ struct OP4STRUCT() TransformComponent : ecs::IComponentBase
 } // namespace opfor
 
 File_GENERATED
-
