@@ -47,6 +47,7 @@ class MeshRenderer
     MeshRenderer();
 
     void RenderMeshes(PerspectiveCamera const &);
+    void UpdateMeshesAnimations(float dt);
     void Resize(unsigned int width, unsigned int height);
 };
 
